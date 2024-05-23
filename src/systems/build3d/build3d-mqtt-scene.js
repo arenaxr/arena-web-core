@@ -6,13 +6,37 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENAAUTH */
+/* global AFRAME, ARENA, ARENAAUTH */
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  * @module build3d-mqtt-scene
  */
 let toolbarName = 'translate';
+
+// register component actions
+const arenaComponentActions = {
+    'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
+};
+// const fsUploadActions = {
+//     gaussian_splatting: 'src',
+//     'gltf-lod': 'src',
+//     'gltf-model': 'url',
+//     material: 'src',
+//     'obj-model': 'obj',
+//     'pcd-model': 'url',
+//     sound: 'url',
+//     'threejs-scene': 'url',
+//     'urdf-model': 'url',
+// };
+// Object.keys(fsUploadActions).forEach((property) => {
+//     arenaComponentActions[property] = {
+//         property: fsUploadActions[property],
+//         action: 'upload-to-filestore',
+//         label: 'Upload to Filestore',
+//         icon: 'fa-upload',
+//     };
+// });
 
 function updateMqttWidth() {
     const inspectorMqttLogWrap = document.getElementById('inspectorMqttLogWrap');
@@ -21,6 +45,46 @@ function updateMqttWidth() {
     const right = document.getElementById('rightPanel').clientWidth;
     const correct = entire - left - right;
     inspectorMqttLogWrap.style.width = `${correct}px`;
+}
+
+function addComponentAction(componentName, property, dataAction, title, iconName) {
+    const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
+    const thebutton = $(thetitle).siblings(`.componentHeaderActions`).find(`[data-action="${dataAction}"]`);
+
+    // does the graph have a new component?
+    // insert the upload link and and action listener
+    if (thetitle.length > 0 && thebutton.length === 0) {
+        const buttonId = `${componentName}-${dataAction}`;
+        const actionButton = document.createElement('a');
+        actionButton.id = buttonId;
+        actionButton.title = title;
+        actionButton.classList.add('button', 'fa', iconName);
+        actionButton.dataset.action = dataAction;
+        actionButton.dataset.component = componentName;
+        actionButton.addEventListener(
+            'click',
+            (e) => {
+                const { selectedEntity } = AFRAME.INSPECTOR;
+                switch (dataAction) {
+                    case 'edit-json':
+                        window.open(
+                            `/build/?scene=${ARENA.namespacedScene}&objectId=${selectedEntity.id}`,
+                            'ArenaJsonEditor'
+                        );
+                        break;
+                    case 'upload-to-filestore':
+                        selectedEntity.setAttribute(componentName, property, 'src/systems/ui/images/audio-off.png'); // TODO(mwfarb): remove hack
+                        AFRAME.INSPECTOR.selectEntity(selectedEntity);
+                        break;
+                    default:
+                        console.error(`Build3d data-action '${dataAction}' unsupported!`);
+                        break;
+                }
+            },
+            false
+        );
+        thetitle.siblings('.componentHeaderActions').prepend(actionButton);
+    }
 }
 
 AFRAME.registerComponent('build3d-mqtt-scene', {
@@ -40,6 +104,8 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             childList: true,
             subtree: true,
         });
+
+        // TODO (mwfarb): possible better selector? AFRAME.INSPECTOR.selectEntity(document.getElementById('env'));
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -155,7 +221,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 // container
                 const inspectorMqttLogWrap = document.createElement('div');
                 inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
-                inspectorMqttLogWrap.className = 'outliner';
                 inspectorMqttLogWrap.tabIndex = 2;
                 inspectorMqttLogWrap.style.width = '-webkit-fill-available';
                 inspectorMqttLogWrap.style.bottom = '0';
@@ -175,7 +240,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 // title
                 const inspectorMqttTitle = document.createElement('span');
                 inspectorMqttTitle.id = 'inspectorMqttTitle';
-                inspectorMqttTitle.className = 'outliner';
                 inspectorMqttTitle.style.backgroundColor = 'darkgreen';
                 inspectorMqttTitle.style.color = 'white';
                 inspectorMqttTitle.style.opacity = '.75';
@@ -187,7 +251,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 // log
                 const inspectorMqttLog = document.createElement('div');
                 inspectorMqttLog.id = 'inspectorMqttLog';
-                inspectorMqttLog.className = 'outliner';
                 inspectorMqttLog.style.overflowY = 'auto';
                 inspectorMqttLog.style.width = '100%';
                 inspectorMqttLog.style.height = '100%';
@@ -203,6 +266,40 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 line.innerHTML += `Watching for local changes...`;
                 inspectorMqttLog.appendChild(document.createElement('br'));
                 inspectorMqttLog.appendChild(line);
+            }
+        }
+        if (!this.components) {
+            if (document.getElementsByClassName('components').length > 0) {
+                console.log('componentsTest ok');
+                // eslint-disable-next-line prefer-destructuring
+                this.components = document.getElementsByClassName('components')[0];
+                if (this.components) {
+                    // TODO (mwfarb): listening for Inspector's own emitted events 'entityselect' or 'componentadd' would be ideal
+
+                    // handle selected entity
+                    const observer = new MutationObserver((mutationList) => {
+                        mutationList.forEach((mutation) => {
+                            // handle class change
+
+                            // query active components
+                            Object.keys(arenaComponentActions).forEach((key) => {
+                                addComponentAction(
+                                    key,
+                                    arenaComponentActions[key].property,
+                                    arenaComponentActions[key].action,
+                                    arenaComponentActions[key].label,
+                                    arenaComponentActions[key].icon
+                                );
+                            });
+                        });
+                    });
+                    const options = {
+                        attributeFilter: ['class'],
+                        childList: true,
+                        subtree: true,
+                    };
+                    observer.observe(this.components, options);
+                }
             }
         }
         if (!this.cursor) {

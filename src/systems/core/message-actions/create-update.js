@@ -42,6 +42,10 @@ export default class CreateUpdate {
         function enableBuildWatchObject(entityEl, msg, enable) {
             if (msg.persist) {
                 entityEl.setAttribute('build3d-mqtt-object', 'enabled', enable);
+                if (enable && AFRAME.INSPECTOR && AFRAME.INSPECTOR.inspectorActive) {
+                    // refresh inside-out view
+                    AFRAME.INSPECTOR.selectEntity(AFRAME.INSPECTOR.selectedEntity);
+                }
             }
         }
 

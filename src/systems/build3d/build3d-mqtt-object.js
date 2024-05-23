@@ -99,7 +99,7 @@ function extractDataUpdates(mutation, attribute, changes) {
     switch (mutation.attributeName) {
         case 'gaussian_splatting':
         case 'gltf-model':
-        case 'image':
+        case 'image': // TODO (mwfarb): add url update to material.src
         case 'light':
         case 'line':
         case 'obj-model':
@@ -181,10 +181,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             type: 'boolean',
             default: true,
         },
-        openJsonEditor: {
-            type: 'boolean',
-            default: false,
-        },
     },
     init() {
         this.observer = new MutationObserver(this.objectAttributesUpdate);
@@ -265,12 +261,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         } else {
             this.observer.disconnect();
             console.log(`build3d watching entity ${this.el.id} attributes stopped`);
-        }
-        // quick setting for user to edit in the build page
-        if (this.data.openJsonEditor) {
-            this.el.setAttribute('build3d-mqtt-object', 'openJsonEditor', false); // restore
-            this.update();
-            window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
         }
     },
     remove() {
