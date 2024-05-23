@@ -181,10 +181,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             type: 'boolean',
             default: true,
         },
-        openJsonEditor: {
-            type: 'boolean',
-            default: false,
-        },
     },
     init() {
         this.observer = new MutationObserver(this.objectAttributesUpdate);
@@ -265,14 +261,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         } else {
             this.observer.disconnect();
             console.log(`build3d watching entity ${this.el.id} attributes stopped`);
-        }
-        // TODO (mwfarb): move openJsonEditor to an action for the object using addComponentAction
-        // quick setting for user to edit in the build page
-        if (this.data.openJsonEditor) {
-            this.data.openJsonEditor = false;
-            this.el.setAttribute('build3d-mqtt-object', 'openJsonEditor', false); // restore
-            // this.update();
-            window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
         }
     },
     remove() {

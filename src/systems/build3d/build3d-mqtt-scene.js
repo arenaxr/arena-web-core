@@ -6,7 +6,7 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENAAUTH */
+/* global AFRAME, ARENA, ARENAAUTH */
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
@@ -15,6 +15,9 @@
 let toolbarName = 'translate';
 
 // register component actions
+const arenaComponentActions = {
+    'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
+};
 const fsUploadActions = {
     gaussian_splatting: 'src',
     'gltf-lod': 'src',
@@ -25,9 +28,6 @@ const fsUploadActions = {
     sound: 'url',
     'threejs-scene': 'url',
     'urdf-model': 'url',
-};
-const arenaComponentActions = {
-    'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
 };
 Object.keys(fsUploadActions).forEach((property) => {
     arenaComponentActions[property] = {
@@ -64,7 +64,21 @@ function addComponentAction(componentName, property, dataAction, title, iconName
         actionButton.addEventListener(
             'click',
             (e) => {
-                alert(buttonId);
+                const { selectedEntity } = AFRAME.INSPECTOR;
+                switch (dataAction) {
+                    case 'edit-json':
+                        window.open(
+                            `/build/?scene=${ARENA.namespacedScene}&objectId=${selectedEntity.id}`,
+                            'ArenaJsonEditor'
+                        );
+                        break;
+                    case 'upload-to-filestore':
+                        alert(`Still working on ${dataAction}...`);
+                        break;
+                    default:
+                        console.error(`Build3d data-action '${dataAction}' unsupported!`);
+                        break;
+                }
             },
             false
         );
