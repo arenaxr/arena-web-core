@@ -18,25 +18,25 @@ let toolbarName = 'translate';
 const arenaComponentActions = {
     'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
 };
-const fsUploadActions = {
-    gaussian_splatting: 'src',
-    'gltf-lod': 'src',
-    'gltf-model': 'url',
-    material: 'src',
-    'obj-model': 'obj',
-    'pcd-model': 'url',
-    sound: 'url',
-    'threejs-scene': 'url',
-    'urdf-model': 'url',
-};
-Object.keys(fsUploadActions).forEach((property) => {
-    arenaComponentActions[property] = {
-        property: fsUploadActions[property],
-        action: 'upload-to-filestore',
-        label: 'Upload to Filestore',
-        icon: 'fa-upload',
-    };
-});
+// const fsUploadActions = {
+//     gaussian_splatting: 'src',
+//     'gltf-lod': 'src',
+//     'gltf-model': 'url',
+//     material: 'src',
+//     'obj-model': 'obj',
+//     'pcd-model': 'url',
+//     sound: 'url',
+//     'threejs-scene': 'url',
+//     'urdf-model': 'url',
+// };
+// Object.keys(fsUploadActions).forEach((property) => {
+//     arenaComponentActions[property] = {
+//         property: fsUploadActions[property],
+//         action: 'upload-to-filestore',
+//         label: 'Upload to Filestore',
+//         icon: 'fa-upload',
+//     };
+// });
 
 function updateMqttWidth() {
     const inspectorMqttLogWrap = document.getElementById('inspectorMqttLogWrap');
