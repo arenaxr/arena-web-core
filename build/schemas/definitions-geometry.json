@@ -130,6 +130,7 @@
                         }
                     },
                     "required": ["x", "y"],
+                    "format": "grid",
                     "type": "object"
                 },
                 "opacity": {
@@ -169,6 +170,7 @@
                         }
                     },
                     "required": ["x", "y"],
+                    "format": "grid",
                     "type": "object"
                 },
                 "roughness": {
