@@ -670,15 +670,16 @@ AFRAME.registerSystem('arena-scene', {
 
             if (sceneOptions.physics) {
                 // physics system, build with cannon-js: https://github.com/c-frame/aframe-physics-system
-                import('../vendor/aframe-physics-system.min');
-                const physicsWait = setInterval(() => {
-                    // wait for physics system and static-body component to be registered, needs 15-30 ms
-                    if (AFRAME.components['static-body']) {
-                        clearInterval(physicsWait);
-                        document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
-                        this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
-                    }
-                }, 10);
+                import('../vendor/aframe-physics-system.min').then(() => {
+                    const physicsWait = setInterval(() => {
+                        // wait for physics system and static-body component to be registered, needs 15-30 ms
+                        if (AFRAME.components['static-body']) {
+                            clearInterval(physicsWait);
+                            document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
+                            this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
+                        }
+                    }, 10);
+                });
             }
 
             if (sceneOptions['ar-hit-test']?.enabled !== false) {
