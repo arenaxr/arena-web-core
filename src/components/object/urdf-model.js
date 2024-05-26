@@ -125,9 +125,9 @@ AFRAME.registerComponent('urdf-model', {
 
     modelLoaded() {
         const { el } = this;
+        this.updateJoints();
         el.setObject3D('mesh', this.model);
         el.emit('model-loaded', { format: 'urdf', src: this.data });
-        this.updateJoints();
     },
 
     updateJoints() {
@@ -137,9 +137,9 @@ AFRAME.registerComponent('urdf-model', {
         const joints = this.data.joints ? this.data.joints : {};
 
         // set joints, if given
-        for (const [key, value] of Object.entries(joints)) {
+        Object.entries(joints).forEach(([key, value]) => {
             if (this.model.joints[key]) this.model.joints[key].setJointValue(THREE.MathUtils.degToRad(value));
-        }
+        });
     },
 
     remove() {
