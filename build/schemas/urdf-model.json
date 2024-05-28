@@ -26,7 +26,7 @@
                                     "type": "string"
                                 },
                                 "urlBase": {
-                                    "description": "Use File Store base path for package includes. This must be an absolute path, e.g. '/store/users/...",
+                                  "description": "Base path for xacro/urdf package includes. This must be an absolute path with no trailing slash, e.g. '/store/users/username/robot'",
                                     "format": "uri",
                                     "title": "URL Base for Package Includes",
                                     "type": "string"

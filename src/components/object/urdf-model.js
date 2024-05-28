@@ -65,7 +65,12 @@ AFRAME.registerComponent('urdf-model', {
             this.urdfLoader = new URDFLoader();
             this.loader.rospackCommands = (command, ...args) => {
                 if (command === 'find') {
-                    return this.data.urlBase;
+                    const urlSegments = this.data.urlBase.split('/');
+                    const lastSegment = urlSegments.pop();
+                    if (args[0] === lastSegment) {
+                        return this.data.urlBase; // This package
+                    }
+                    return `${urlSegments.join('/')}/${args[0]}`; // Different package, use arg on parent path
                 }
                 return null;
             };
