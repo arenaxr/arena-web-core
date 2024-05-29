@@ -35,7 +35,8 @@
     "three-pathfinding": "^1.1.0",
     "three-shim": "file:src/shims/three-shim",
     "uuidjs": "^5.0.1",
-    "webxr-polyfill": "^2.0.3"
+    "webxr-polyfill": "^2.0.3",
+    "xacro-parser": "gkjohnson/xacro-parser#2c75369ef2f4e891bae75f3dc47ebb5275da55c9"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.17.0",

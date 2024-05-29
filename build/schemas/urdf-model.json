@@ -25,6 +25,12 @@
                                     "title": "Url",
                                     "type": "string"
                                 },
+                                "urlBase": {
+                                  "description": "Base path for xacro/urdf package includes. This must be an absolute path with no trailing slash, e.g. '/store/users/username/robot'",
+                                    "format": "uri",
+                                    "title": "URL Base for Package Includes",
+                                    "type": "string"
+                                },
                                 "joints": {
                                     "description": "Set joint values (in degrees) in the form 'JointName1: ValueInDegrees1, JointName2: ValueInDegrees2, ...'. ",
                                     "title": "joints",
@@ -46,7 +52,8 @@
                     },
                     "required": [
                         "object_type",
-                        "url"
+                        "url",
+                        "urlBase"
                     ]
                 }
             }
