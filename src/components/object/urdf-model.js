@@ -1,6 +1,7 @@
 /* global AFRAME, THREE */
 import { XacroLoader } from 'xacro-parser';
 import URDFLoader from '../vendor/urdf-loader/URDFLoader';
+import { ARENAUtils } from '../../utils';
 
 /**
  * @fileoverview Load URDF models
@@ -63,18 +64,19 @@ AFRAME.registerComponent('urdf-model', {
             */
             this.loader = new XacroLoader(this.manager);
             this.urdfLoader = new URDFLoader();
+            const urlBase = ARENAUtils.crossOriginDropboxSrc(this.data.urlBase);
             this.loader.rospackCommands = (command, ...args) => {
                 if (command === 'find') {
-                    const urlSegments = this.data.urlBase.split('/');
+                    const urlSegments = urlBase.split('/');
                     const lastSegment = urlSegments.pop();
                     if (args[0] === lastSegment) {
-                        return this.data.urlBase; // This package
+                        return urlBase; // This package
                     }
                     return `${urlSegments.join('/')}/${args[0]}`; // Different package, use arg on parent path
                 }
                 return null;
             };
-            this.urdfLoader.packages = this.data.urlBase;
+            this.urdfLoader.packages = urlBase;
         } else {
             this.loader = new URDFLoader(this.manager);
         }
@@ -85,7 +87,7 @@ AFRAME.registerComponent('urdf-model', {
     update(oldData) {
         const self = this;
         const { el } = this;
-        const { url } = this.data;
+        let { url } = this.data;
 
         if (!url) {
             return;
@@ -94,10 +96,12 @@ AFRAME.registerComponent('urdf-model', {
         if (oldData.url !== url) {
             self.remove();
 
+            url = ARENAUtils.crossOriginDropboxSrc(url);
+
             // register with model-progress system to handle model loading events
             this.modelProgressSystem.registerModel(el, url);
 
-            if (self.data.url.endsWith('.xacro')) {
+            if (url.endsWith('.xacro')) {
                 self.loader.load(
                     url,
                     (xml) => {
