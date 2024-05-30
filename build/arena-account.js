@@ -92,7 +92,7 @@ export default class ARENAUserAccount {
     }
 
     /**
-     * Request file tore auth token for this user
+     * Request file store auth token for this user
      * @return {} status, should have updated cookie: 'auth'
      */
     static async requestStoreLogin() {

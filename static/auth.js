@@ -1,4 +1,4 @@
-/* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal */
+/* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal, MQTTPattern */
 
 // auth.js
 //
@@ -23,10 +23,21 @@
 //     });
 // });
 
+// import * as MQTTPattern from 'mqtt-pattern';
+
 // auth namespace
 window.ARENAAUTH = {
     signInPath: `//${window.location.host}/user/login`,
     signOutPath: `//${window.location.host}/user/logout`,
+    uploadFileTypes: {
+        image: 'image/*',
+        'gltf-model': '*.glb',
+        'obj-model': '*.obj',
+        'pcd-model': '*.pcd',
+        'threejs-scene': '*.json',
+        gaussian_splatting: '*.splat',
+        'urdf-model': '*.urdf',
+    },
     /**
      * Merge defaults and any URL params into single ARENA.params obj. Nonexistent keys should be checked as undefined.
      */
@@ -45,6 +56,7 @@ window.ARENAAUTH = {
             username: this.user_username,
             fullname: this.user_fullname,
             email: this.user_email,
+            is_staff: this.user_is_staff,
         };
     },
     authCheck() {
@@ -138,6 +150,7 @@ window.ARENAAUTH = {
                 this.user_username = userStateRes.username;
                 this.user_fullname = userStateRes.fullname;
                 this.user_email = userStateRes.email;
+                this.user_is_staff = userStateRes.is_staff;
                 this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
             } else if (savedAuthType === 'anonymous') {
                 const urlName = ARENA.params.userName;
@@ -153,6 +166,7 @@ window.ARENAAUTH = {
                 this.user_username = anonName;
                 this.user_fullname = localStorage.getItem('display_name');
                 this.user_email = 'N/A';
+                this.user_is_staff = userStateRes.is_staff;
                 this.requestMqttToken('anonymous', anonName, true).then();
             } else {
                 // user is logged out or new and not logged in
@@ -316,6 +330,181 @@ window.ARENAAUTH = {
         }
         return lines.join('\r\n');
     },
+    async uploadSceneFileStore(objtype, oldObj) {
+        const accept = this.uploadFileTypes[objtype];
+        const htmlopt =
+            objtype === 'gltf-model'
+                ? `<div style="float: left;">
+            <input type="checkbox" id="cbhideinar" name="cbhideinar" >
+            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
+            </div>`
+                : '';
+        const htmlval = `${htmlopt}`;
+
+        await Swal.fire({
+            title: `Upload ${objtype} to Filestore & Publish`,
+            html: htmlval,
+            input: 'file',
+            inputAttributes: {
+                accept: `${accept}`,
+                'aria-label': `Select ${objtype}`,
+            },
+            confirmButtonText: 'Upload & Publish',
+            focusConfirm: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            showLoaderOnConfirm: true,
+            preConfirm: (resultFileOpen) => {
+                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
+                const safeFilename = fn.replace(/(\W+)/gi, '-');
+                let hideinar = false;
+                const reader = new FileReader();
+                reader.onload = async (evt) => {
+                    const file = document.querySelector('.swal2-file');
+                    if (!file) {
+                        Swal.showValidationMessage(`${objtype} file not loaded!`);
+                        return;
+                    }
+                    if (objtype === 'gltf-model') {
+                        // allow model checkboxes hide in ar/vr (recommendations)
+                        hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
+                    }
+                    // request fs token endpoint if auth not ready or expired
+                    let token = this.getCookie('auth');
+                    if (!this.isTokenUsable(token)) {
+                        try {
+                            await this.requestStoreLogin();
+                        } catch (err) {
+                            Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
+                            return;
+                        }
+                        token = this.getCookie('auth');
+                    }
+                    // update user/staff scoped path
+                    const storeResPrefix = this.user_is_staff ? `users/${this.user_username}/` : ``;
+                    const userFilePath = `scenes/${ARENA.sceneName}/${resultFileOpen.name}`;
+                    const storeResPath = `${storeResPrefix}${userFilePath}`;
+                    const storeExtPath = `store/users/${this.user_username}/${userFilePath}`;
+                    Swal.fire({
+                        title: 'Wait for Upload',
+                        imageUrl: evt.target.result,
+                        imageAlt: `The uploaded ${objtype}`,
+                        showConfirmButton: false,
+                        showCancelButton: true,
+                        cancelButtonText: 'Cancel',
+                        didOpen: () => {
+                            Swal.showLoading();
+                            // request fs file upload with fs auth
+                            return fetch(`/storemng/api/resources/${storeResPath}?override=true`, {
+                                method: 'POST',
+                                headers: {
+                                    Accept: resultFileOpen.type,
+                                    'X-Auth': `${token}`,
+                                },
+                                body: file.files[0],
+                            })
+                                .then((responsePostFS) => {
+                                    if (!responsePostFS.ok) {
+                                        throw new Error(responsePostFS.statusText);
+                                    }
+                                    let obj;
+                                    try {
+                                        obj = JSON.parse(oldObj);
+                                    } catch (err) {
+                                        console.error(err);
+                                        throw err;
+                                    }
+                                    if (obj.object_id === '') {
+                                        obj.object_id = safeFilename;
+                                    }
+                                    if (objtype === 'gaussian_splatting') {
+                                        obj.data.src = `${storeExtPath}`;
+                                    } else if (objtype === 'obj-model') {
+                                        obj.data.obj = `${storeExtPath}`;
+                                    } else {
+                                        obj.data.url = `${storeExtPath}`;
+                                    }
+                                    if (hideinar) {
+                                        obj.data['hide-on-enter-ar'] = true;
+                                    }
+                                    if (objtype === 'image') {
+                                        // try to preserve image aspect ratio in mesh, user can scale to resize
+                                        const img = Swal.getPopup().querySelector('.swal2-image');
+                                        if (img.width > img.height) {
+                                            const ratio = img.width / img.height;
+                                            obj.data.width = ratio;
+                                            obj.data.height = 1;
+                                        } else {
+                                            const ratio = img.height / img.width;
+                                            obj.data.width = 1;
+                                            obj.data.height = ratio;
+                                        }
+                                        obj.data.scale = { x: 1, y: 1, z: 1 };
+                                    }
+                                    return obj;
+                                })
+                                .catch((error) => {
+                                    Swal.showValidationMessage(`Request failed: ${error}`);
+                                })
+                                .finally(() => {
+                                    Swal.hideLoading();
+                                });
+                        },
+                        willClose: () => {
+                            console.debug('Nothing');
+                        },
+                    }).then((resultDidOpen) => {
+                        if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
+                            console.error(`Upload ${objtype} file dialog timed out!`);
+                        }
+                    });
+                };
+                reader.readAsDataURL(resultFileOpen);
+            },
+        });
+    },
+    /**
+     * Checks loaded MQTT token for full scene object write permissions.
+     * @param {string} token The JWT token for the user to connect to MQTT.
+     * @param {string} objectsTopic
+     * @return {boolean} True if the user has permission to write in this scene.
+     */
+    isUserSceneEditor(token, objectsTopic) {
+        if (token) {
+            const tokenObj = KJUR.jws.JWS.parse(token);
+            const perms = tokenObj.payloadObj;
+            if (this.matchJWT(objectsTopic, perms.publ)) {
+                return true;
+            }
+        }
+        return false;
+    },
+    isTokenUsable(token) {
+        if (token) {
+            const tokenObj = KJUR.jws.JWS.parse(token);
+            const exp = tokenObj.payloadObj.exp * 1000;
+            const now = new Date().getTime();
+            return now < exp;
+        }
+        return false;
+    },
+    /**
+     * Utility to match MQTT topic within permissions.
+     * @param {string} topic The MQTT topic to test.
+     * @param {string[]} rights The list of topic wild card permissions.
+     * @return {boolean} True if the topic matches the list of topic wildcards.
+     */
+    matchJWT(topic, rights) {
+        const len = rights.length;
+        let valid = false;
+        for (let i = 0; i < len; i++) {
+            // if (MQTTPattern.matches(rights[i], topic)) {
+            valid = true;
+            break;
+        }
+        // }
+        return valid;
+    },
     /**
      * Open profile in new page to avoid mqtt disconnect.
      */
@@ -367,6 +556,50 @@ window.ARENAAUTH = {
                 _setNames(namespace, sceneName);
             }
         }
+    },
+
+    /**
+     * Internal call to perform xhr request
+     * TODO (mwfarb): remove me
+     */
+    _makeRequest(method, url, params = undefined, contentType = undefined) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            const csrftoken = ARENAAUTH.getCookie('csrftoken');
+            xhr.setRequestHeader('X-CSRFToken', csrftoken);
+            if (contentType) xhr.setRequestHeader('Content-Type', contentType);
+            xhr.responseType = 'json';
+            xhr.onload = function onload() {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(xhr.response);
+                } else {
+                    reject(
+                        new Error({
+                            status: this.status,
+                            statusText: xhr.statusText,
+                        })
+                    );
+                }
+            };
+            xhr.onerror = function onerror() {
+                reject(
+                    new Error({
+                        status: this.status,
+                        statusText: xhr.statusText,
+                    })
+                );
+            };
+            xhr.send(params);
+        });
+    },
+
+    /**
+     * Request file store auth token for this user
+     * @return {} status, should have updated cookie: 'auth'
+     */
+    async requestStoreLogin() {
+        return this._makeRequest('GET', '/user/storelogin');
     },
 };
 

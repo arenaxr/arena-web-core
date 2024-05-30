@@ -223,10 +223,10 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                         if (msg.action === 'update') {
                             msg.data = extractDataUpdates(mutation, attribute, changes);
                         } else if (msg.action === 'create') {
-                            msg.data = extractDataFullDOM(mutation);
+                            msg.data = extractDataFullDOM(mutation); // TODO(mwfarb): careful here, this still may pull too much data
                         }
                         LogToUser(msg, mutation.attributeName, changes);
-                        console.log('pub:', msg);
+                        console.log('publishing:', msg.action, msg);
                         ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
 
                         // check rename case
@@ -241,7 +241,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                                 persist: true,
                             };
                             LogToUser(outMsg);
-                            console.log('pub:', outMsg);
+                            console.log('publishing:', outMsg.action, outMsg);
                             ARENA.Mqtt.publish(`${ARENA.outputTopic}${outMsg.object_id}`, outMsg);
                         }
                     }
@@ -273,7 +273,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                 persist: true,
             };
             LogToUser(msg);
-            console.log('pub:', msg);
+            console.log('publishing:', msg.action, msg);
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
         }
     },

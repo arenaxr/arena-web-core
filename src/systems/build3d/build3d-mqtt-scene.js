@@ -18,25 +18,25 @@ let toolbarName = 'translate';
 const arenaComponentActions = {
     'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
 };
-// const fsUploadActions = {
-//     gaussian_splatting: 'src',
-//     'gltf-lod': 'src',
-//     'gltf-model': 'url',
-//     material: 'src',
-//     'obj-model': 'obj',
-//     'pcd-model': 'url',
-//     sound: 'url',
-//     'threejs-scene': 'url',
-//     'urdf-model': 'url',
-// };
-// Object.keys(fsUploadActions).forEach((property) => {
-//     arenaComponentActions[property] = {
-//         property: fsUploadActions[property],
-//         action: 'upload-to-filestore',
-//         label: 'Upload to Filestore',
-//         icon: 'fa-upload',
-//     };
-// });
+const fsUploadActions = {
+    gaussian_splatting: 'src',
+    'gltf-lod': 'src',
+    'gltf-model': 'url',
+    material: 'src',
+    'obj-model': 'obj',
+    'pcd-model': 'url',
+    sound: 'url',
+    'threejs-scene': 'url',
+    'urdf-model': 'url',
+};
+Object.keys(fsUploadActions).forEach((property) => {
+    arenaComponentActions[property] = {
+        property: fsUploadActions[property],
+        action: 'upload-to-filestore',
+        label: 'Upload to Filestore',
+        icon: 'fa-upload',
+    };
+});
 
 function updateMqttWidth() {
     const inspectorMqttLogWrap = document.getElementById('inspectorMqttLogWrap');
@@ -63,7 +63,7 @@ function addComponentAction(componentName, property, dataAction, title, iconName
         actionButton.dataset.component = componentName;
         actionButton.addEventListener(
             'click',
-            (e) => {
+            async (e) => {
                 const { selectedEntity } = AFRAME.INSPECTOR;
                 switch (dataAction) {
                     case 'edit-json':
@@ -73,7 +73,19 @@ function addComponentAction(componentName, property, dataAction, title, iconName
                         );
                         break;
                     case 'upload-to-filestore':
-                        selectedEntity.setAttribute(componentName, property, 'src/systems/ui/images/audio-off.png'); // TODO(mwfarb): remove hack
+                        const oldObj = {
+                            object_id: selectedEntity.id,
+                            action: 'update',
+                            type: 'object',
+                            persist: true,
+                            data: {},
+                        };
+                        oldObj.data[componentName][property];
+
+                        const newObj = await ARENAAUTH.uploadSceneFileStore(componentName, oldObj);
+                        // selectedEntity.setAttribute(componentName, property, 'src/systems/ui/images/audio-off.png');
+                        console.log('publishing:', newObj.action, newObj);
+                        ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
                         AFRAME.INSPECTOR.selectEntity(selectedEntity);
                         break;
                     default:
@@ -216,8 +228,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             // this.scenegraphDiv = document.getElementById('inspectorContainer');
             this.scenegraphDiv = document.getElementById('viewportBar');
             if (this.scenegraphDiv) {
-                console.log('scenegraphTest ok');
-
                 // container
                 const inspectorMqttLogWrap = document.createElement('div');
                 inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
@@ -270,7 +280,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         }
         if (!this.components) {
             if (document.getElementsByClassName('components').length > 0) {
-                console.log('componentsTest ok');
                 // eslint-disable-next-line prefer-destructuring
                 this.components = document.getElementsByClassName('components')[0];
                 if (this.components) {
@@ -304,7 +313,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         }
         if (!this.cursor) {
             if (document.getElementsByClassName('a-grab-cursor').length > 0) {
-                console.log('cursorTest ok');
                 // eslint-disable-next-line prefer-destructuring
                 this.cursor = document.getElementsByClassName('a-grab-cursor')[0];
                 if (this.cursor) {
@@ -322,7 +330,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         // TODO: fix transformToolbar, is usually late and gets clipped from the global pause()
         if (!this.transformToolbar) {
             if (document.getElementsByClassName('toolbarButtons').length > 0) {
-                console.log('transformTest ok');
                 // eslint-disable-next-line prefer-destructuring
                 this.transformToolbar = document.getElementsByClassName('toolbarButtons')[0];
                 if (this.transformToolbar) {
@@ -340,7 +347,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         if (!this.env) {
             this.env = document.getElementById('env');
             if (this.env) {
-                console.log('envTest ok');
                 this.env.setAttribute('build3d-mqtt-object', 'enabled', true);
             }
         }
