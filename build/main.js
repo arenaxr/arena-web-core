@@ -380,7 +380,7 @@ window.addEventListener('onauth', async (e) => {
 
         // publish to mqtt
         const scene = `${namespaceinput.value}/${sceneinput.value}`;
-        PersistObjects.performActionArgObjList('create', scene, [newObj], false);
+        PersistObjects.performActionArgObjList('update', scene, [newObj], false);
         setTimeout(async () => {
             await PersistObjects.populateObjectList(
                 `${namespaceinput.value}/${sceneinput.value}`,

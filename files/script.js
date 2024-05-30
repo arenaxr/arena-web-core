@@ -2,7 +2,7 @@
  * Script to connect to filestore auth endpoint and then load filestore proxy when fs auth completes.
  */
 
-/* global ARENAAUTH, KJUR, $ */
+/* global ARENAAUTH $ */
 
 /**
  * Loads the html into the page iframe to completion.
@@ -23,27 +23,13 @@ async function loadHtmlToFrame(html) {
 }
 
 /**
- *
- * @param {*} jwt The JWT
- * @return {Object} the JSON payload
- */
-function parseJwt(jwt) {
-    const parts = jwt.split('.');
-    if (parts.length !== 3) {
-        throw new Error('filestore jwt invalid');
-    }
-    const tokenObj = KJUR.jws.JWS.parse(jwt);
-    return tokenObj.payloadObj;
-}
-
-/**
  * Connection to get the filestore proxy url served base html template into the iframe.
  * @param {*} authToken The auth token from filestore. 'None' when not authorized.
  */
 function loadStoreFront(authToken) {
     try {
         // determine the token is formatted well
-        parseJwt(authToken);
+        ARENAAUTH.parseJwt(authToken);
         localStorage.setItem('jwt', authToken);
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = true;

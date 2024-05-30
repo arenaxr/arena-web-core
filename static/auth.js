@@ -1,3 +1,4 @@
+/* eslint-disable import/no-absolute-path */
 /* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal, MQTTPattern */
 
 // auth.js
@@ -6,9 +7,8 @@
 // - MQTT broker
 //
 // Required:
-//  <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="../conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
-//  <script src="../static/auth.js"></script>  <!-- browser authorization flow -->
+//  <script src="../static/auth.js" type="module"></script>  <!-- browser authorization flow -->
 //
 // Implement the following 'onauth' event handler and use it to start code that would
 // automatically connects to the MQTT broker so that authentication and access tokens
@@ -23,7 +23,7 @@
 //     });
 // });
 
-// import * as MQTTPattern from 'mqtt-pattern';
+import * as MQTTPattern from '/static/vendor/mqtt-pattern.js';
 
 // auth namespace
 window.ARENAAUTH = {
@@ -251,9 +251,8 @@ window.ARENAAUTH = {
             this.user_type = authType;
             this.user_username = authData.username;
             // keep payload for later viewing
-            const tokenObj = KJUR.jws.JWS.parse(authData.token);
-            this.token_payload = tokenObj.payloadObj;
-            authData.token_payload = tokenObj.payloadObj;
+            this.token_payload = this.parseJwt(authData.token);
+            authData.token_payload = this.token_payload;
             if (!completeOnload || document.readyState === 'complete') {
                 // Also handle crazy case page already loaded
                 this.completeAuth(authData);
@@ -464,6 +463,18 @@ window.ARENAAUTH = {
         });
     },
     /**
+     *
+     * @param {*} jwt The JWT
+     * @return {Object} the JSON payload
+     */
+    parseJwt(jwt) {
+        const parts = jwt.split('.');
+        if (parts.length !== 3) {
+            throw new Error('JWT format invalid!');
+        }
+        return JSON.parse(atob(parts[1]));
+    },
+    /**
      * Checks loaded MQTT token for full scene object write permissions.
      * @param {string} token The JWT token for the user to connect to MQTT.
      * @param {string} objectsTopic
@@ -471,8 +482,7 @@ window.ARENAAUTH = {
      */
     isUserSceneEditor(token, objectsTopic) {
         if (token) {
-            const tokenObj = KJUR.jws.JWS.parse(token);
-            const perms = tokenObj.payloadObj;
+            const perms = this.parseJwt(token);
             if (this.matchJWT(objectsTopic, perms.publ)) {
                 return true;
             }
@@ -481,8 +491,8 @@ window.ARENAAUTH = {
     },
     isTokenUsable(token) {
         if (token) {
-            const tokenObj = KJUR.jws.JWS.parse(token);
-            const exp = tokenObj.payloadObj.exp * 1000;
+            const payloadObj = this.parseJwt(token);
+            const exp = payloadObj.exp * 1000;
             const now = new Date().getTime();
             return now < exp;
         }
@@ -498,11 +508,11 @@ window.ARENAAUTH = {
         const len = rights.length;
         let valid = false;
         for (let i = 0; i < len; i++) {
-            // if (MQTTPattern.matches(rights[i], topic)) {
-            valid = true;
-            break;
+            if (MQTTPattern.matches(rights[i], topic)) {
+                valid = true;
+                break;
+            }
         }
-        // }
         return valid;
     },
     /**
