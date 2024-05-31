@@ -376,7 +376,7 @@ window.addEventListener('onauth', async (e) => {
     // switch image/model
     uploadFilestoreButton.addEventListener('click', async () => {
         const oldObj = JSON.parse(output.value);
-        const newObj = await ARENAAUTH.uploadSceneFileStore(oldObj.data.object_type, oldObj);
+        const newObj = await ARENAAUTH.uploadFileStoreDialog(oldObj.data.object_type, oldObj);
 
         // publish to mqtt
         const scene = `${namespaceinput.value}/${sceneinput.value}`;

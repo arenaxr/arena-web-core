@@ -329,7 +329,7 @@ window.ARENAAUTH = {
         }
         return lines.join('\r\n');
     },
-    async uploadSceneFileStore(objtype, oldObj) {
+    async uploadFileStoreDialog(objtype, oldObj) {
         const accept = this.uploadFileTypes[objtype];
         const htmlopt =
             objtype === 'gltf-model'
@@ -406,13 +406,7 @@ window.ARENAAUTH = {
                                     if (!responsePostFS.ok) {
                                         throw new Error(responsePostFS.statusText);
                                     }
-                                    let obj;
-                                    try {
-                                        obj = JSON.parse(oldObj);
-                                    } catch (err) {
-                                        console.error(err);
-                                        throw err;
-                                    }
+                                    const obj = oldObj;
                                     if (obj.object_id === '') {
                                         obj.object_id = safeFilename;
                                     }
@@ -430,13 +424,11 @@ window.ARENAAUTH = {
                                         // try to preserve image aspect ratio in mesh, user can scale to resize
                                         const img = Swal.getPopup().querySelector('.swal2-image');
                                         if (img.width > img.height) {
-                                            const ratio = img.width / img.height;
-                                            obj.data.width = ratio;
+                                            obj.data.width = img.width / img.height;
                                             obj.data.height = 1;
                                         } else {
-                                            const ratio = img.height / img.width;
                                             obj.data.width = 1;
-                                            obj.data.height = ratio;
+                                            obj.data.height = img.height / img.width;
                                         }
                                         obj.data.scale = { x: 1, y: 1, z: 1 };
                                     }

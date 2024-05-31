@@ -82,7 +82,7 @@ function addComponentAction(componentName, property, dataAction, title, iconName
                         };
                         oldObj.data[componentName][property];
 
-                        const newObj = await ARENAAUTH.uploadSceneFileStore(componentName, oldObj);
+                        const newObj = await ARENAAUTH.uploadFileStoreDialog(componentName, oldObj);
                         // selectedEntity.setAttribute(componentName, property, 'src/systems/ui/images/audio-off.png');
                         console.log('publishing:', newObj.action, newObj);
                         ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
