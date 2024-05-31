@@ -30,7 +30,7 @@ window.ARENAAUTH = {
     signInPath: `//${window.location.host}/user/login`,
     signOutPath: `//${window.location.host}/user/logout`,
     filestoreUploadSchema: {
-        // top level data adds
+        // top level data adds, first
         gaussian_splatting: ['src'],
         'gltf-model': ['url'],
         image: ['url'],
@@ -39,7 +39,7 @@ window.ARENAAUTH = {
         'threejs-scene': ['url'],
         'urdf-model': ['url'],
         videosphere: ['src'],
-        // next level data.something adds
+        // next level data.something adds, second
         'gltf-model-lod': ['gltf-model-lod.detailedUrl'],
         material: ['material.src'],
         'material-extras': ['material-extras.overrideSrc'],
@@ -69,6 +69,7 @@ window.ARENAAUTH = {
         };
     },
     authCheck() {
+        console.log('ARENA is', ARENA);
         this.setArenaParams();
         ARENA.userName = ARENA.params.name ?? ARENA.defaults.userName;
         // For now, just an alias for legacy code.
@@ -353,7 +354,7 @@ window.ARENAAUTH = {
                 ARENAAUTH.filestoreUploadSchema[type].forEach((element) => {
                     const prop = `data.${element}`;
                     htmlopt.push(`<input type="radio" id="${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
-                    <label for="${prop}" style="display: inline-block;">Save URL in ${prop}</label><br>`);
+                    <label for="${prop}" style="display: inline-block;">Save URL to ${prop}</label><br>`);
                     first = false;
                 });
             }

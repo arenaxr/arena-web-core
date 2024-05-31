@@ -66,10 +66,17 @@ function addComponentAction(componentName, dataAction, title, iconName) {
                             action: 'update',
                             type: 'object',
                             persist: true,
-                            data: {},
+                            data: {}, // prelimiary
                         };
-                        const newObj = await ARENAAUTH.uploadFileStoreDialog(componentName, oldObj);
-                        // selectedEntity.setAttribute(componentName, property, 'src/systems/ui/images/audio-off.png');
+                        const srcs = ARENAAUTH.filestoreUploadSchema[componentName];
+                        if (srcs) {
+                            if (srcs[0].beginsWith(`${componentName}.`)) {
+                                oldObj.data[componentName] = {};
+                            } else {
+                                oldObj.data.object_type = componentName;
+                            }
+                        }
+                        const newObj = await ARENAAUTH.uploadFileStoreDialog(oldObj.data.object_type, oldObj);
                         console.log('publishing:', newObj.action, newObj);
                         ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
                         AFRAME.INSPECTOR.selectEntity(selectedEntity);
