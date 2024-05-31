@@ -1,4 +1,9 @@
-class TGALoader extends THREE.DataTextureLoader {
+import {
+	DataTextureLoader,
+	LinearMipmapLinearFilter
+} from 'three';
+
+class TGALoader extends DataTextureLoader {
 
 	constructor( manager ) {
 
@@ -501,7 +506,7 @@ class TGALoader extends THREE.DataTextureLoader {
 			height: header.height,
 			flipY: true,
 			generateMipmaps: true,
-			minFilter: THREE.LinearMipmapLinearFilter,
+			minFilter: LinearMipmapLinearFilter,
 
 		};
 

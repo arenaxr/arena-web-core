@@ -1,14 +1,54 @@
+import {
+	AmbientLight,
+	AnimationClip,
+	Bone,
+	BufferGeometry,
+	ClampToEdgeWrapping,
+	Color,
+	DirectionalLight,
+	DoubleSide,
+	FileLoader,
+	Float32BufferAttribute,
+	FrontSide,
+	Group,
+	Line,
+	LineBasicMaterial,
+	LineSegments,
+	Loader,
+	LoaderUtils,
+	MathUtils,
+	Matrix4,
+	Mesh,
+	MeshBasicMaterial,
+	MeshLambertMaterial,
+	MeshPhongMaterial,
+	OrthographicCamera,
+	PerspectiveCamera,
+	PointLight,
+	Quaternion,
+	QuaternionKeyframeTrack,
+	RepeatWrapping,
+	Scene,
+	Skeleton,
+	SkinnedMesh,
+	SpotLight,
+	TextureLoader,
+	Vector2,
+	Vector3,
+	VectorKeyframeTrack,
+	SRGBColorSpace
+} from 'three';
 import { TGALoader } from './TGALoader.js';
 
-class ColladaLoader extends THREE.Loader {
+class ColladaLoader extends Loader {
 
 	load( url, onLoad, onProgress, onError ) {
 
 		const scope = this;
 
-		const path = ( scope.path === '' ) ? THREE.LoaderUtils.extractUrlBase( url ) : scope.path;
+		const path = ( scope.path === '' ) ? LoaderUtils.extractUrlBase( url ) : scope.path;
 
-		const loader = new THREE.FileLoader( scope.manager );
+		const loader = new FileLoader( scope.manager );
 		loader.setPath( scope.path );
 		loader.setRequestHeader( scope.requestHeader );
 		loader.setWithCredentials( scope.withCredentials );
@@ -260,7 +300,7 @@ class ColladaLoader extends THREE.Loader {
 
 				// since 'id' attributes can be optional, it's necessary to generate a UUID for unqiue assignment
 
-				library.animations[ xml.getAttribute( 'id' ) || THREE.MathUtils.generateUUID() ] = data;
+				library.animations[ xml.getAttribute( 'id' ) || MathUtils.generateUUID() ] = data;
 
 			}
 
@@ -497,9 +537,9 @@ class ColladaLoader extends THREE.Loader {
 
 		}
 
-		const position = new THREE.Vector3();
-		const scale = new THREE.Vector3();
-		const quaternion = new THREE.Quaternion();
+		const position = new Vector3();
+		const scale = new Vector3();
+		const quaternion = new Quaternion();
 
 		function createKeyframeTracks( animation, tracks ) {
 
@@ -528,9 +568,9 @@ class ColladaLoader extends THREE.Loader {
 
 			}
 
-			if ( positionData.length > 0 ) tracks.push( new THREE.VectorKeyframeTrack( name + '.position', times, positionData ) );
-			if ( quaternionData.length > 0 ) tracks.push( new THREE.QuaternionKeyframeTrack( name + '.quaternion', times, quaternionData ) );
-			if ( scaleData.length > 0 ) tracks.push( new THREE.VectorKeyframeTrack( name + '.scale', times, scaleData ) );
+			if ( positionData.length > 0 ) tracks.push( new VectorKeyframeTrack( name + '.position', times, positionData ) );
+			if ( quaternionData.length > 0 ) tracks.push( new QuaternionKeyframeTrack( name + '.quaternion', times, quaternionData ) );
+			if ( scaleData.length > 0 ) tracks.push( new VectorKeyframeTrack( name + '.scale', times, scaleData ) );
 
 			return tracks;
 
@@ -714,13 +754,13 @@ class ColladaLoader extends THREE.Loader {
 
 			}
 
-			return new THREE.AnimationClip( name, duration, tracks );
+			return new AnimationClip( name, duration, tracks );
 
 		}
 
 		function getAnimationClip( id ) {
 
-			return getBuild( library.clips[ id ], buildTHREE.AnimationClip );
+			return getBuild( library.clips[ id ], buildAnimationClip );
 
 		}
 
@@ -967,22 +1007,22 @@ class ColladaLoader extends THREE.Loader {
 
 			if ( data.bindShapeMatrix ) {
 
-				build.bindMatrix = new THREE.Matrix4().fromArray( data.bindShapeMatrix ).transpose();
+				build.bindMatrix = new Matrix4().fromArray( data.bindShapeMatrix ).transpose();
 
 			} else {
 
-				build.bindMatrix = new THREE.Matrix4().identity();
+				build.bindMatrix = new Matrix4().identity();
 
 			}
 
-			// process Bones and inverse bind matrix data
+			// process bones and inverse bind matrix data
 
 			for ( i = 0, l = jointSource.array.length; i < l; i ++ ) {
 
 				const name = jointSource.array[ i ];
-				const BoneInverse = new THREE.Matrix4().fromArray( inverseSource.array, i * inverseSource.stride ).transpose();
+				const boneInverse = new Matrix4().fromArray( inverseSource.array, i * inverseSource.stride ).transpose();
 
-				build.joints.push( { name: name, BoneInverse: BoneInverse } );
+				build.joints.push( { name: name, boneInverse: boneInverse } );
 
 			}
 
@@ -1518,15 +1558,15 @@ class ColladaLoader extends THREE.Loader {
 
 				case 'phong':
 				case 'blinn':
-					material = new THREE.MeshPhongMaterial();
+					material = new MeshPhongMaterial();
 					break;
 
 				case 'lambert':
-					material = new THREE.MeshLambertMaterial();
+					material = new MeshLambertMaterial();
 					break;
 
 				default:
-					material = new THREE.MeshBasicMaterial();
+					material = new MeshBasicMaterial();
 					break;
 
 			}
@@ -1568,16 +1608,16 @@ class ColladaLoader extends THREE.Loader {
 
 							const technique = extra.technique;
 
-							texture.wrapS = technique.wrapU ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-							texture.wrapT = technique.wrapV ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+							texture.wrapS = technique.wrapU ? RepeatWrapping : ClampToEdgeWrapping;
+							texture.wrapT = technique.wrapV ? RepeatWrapping : ClampToEdgeWrapping;
 
 							texture.offset.set( technique.offsetU || 0, technique.offsetV || 0 );
 							texture.repeat.set( technique.repeatU || 1, technique.repeatV || 1 );
 
 						} else {
 
-							texture.wrapS = THREE.RepeatWrapping;
-							texture.wrapT = THREE.RepeatWrapping;
+							texture.wrapS = RepeatWrapping;
+							texture.wrapT = RepeatWrapping;
 
 						}
 
@@ -1591,7 +1631,7 @@ class ColladaLoader extends THREE.Loader {
 
 					} else {
 
-						console.warn( 'THREE.ColladaLoader: THREE.Loader for texture %s not found.', image );
+						console.warn( 'THREE.ColladaLoader: Loader for texture %s not found.', image );
 
 						return null;
 
@@ -1617,7 +1657,7 @@ class ColladaLoader extends THREE.Loader {
 
 					case 'diffuse':
 						if ( parameter.color ) material.color.fromArray( parameter.color );
-						if ( parameter.texture ) material.map = getTexture( parameter.texture, THREE.SRGBColorSpace );
+						if ( parameter.texture ) material.map = getTexture( parameter.texture, SRGBColorSpace );
 						break;
 					case 'specular':
 						if ( parameter.color && material.specular ) material.specular.fromArray( parameter.color );
@@ -1627,14 +1667,14 @@ class ColladaLoader extends THREE.Loader {
 						if ( parameter.texture ) material.normalMap = getTexture( parameter.texture );
 						break;
 					case 'ambient':
-						if ( parameter.texture ) material.lightMap = getTexture( parameter.texture, THREE.SRGBColorSpace );
+						if ( parameter.texture ) material.lightMap = getTexture( parameter.texture, SRGBColorSpace );
 						break;
 					case 'shininess':
 						if ( parameter.float && material.shininess ) material.shininess = parameter.float;
 						break;
 					case 'emission':
 						if ( parameter.color && material.emissive ) material.emissive.fromArray( parameter.color );
-						if ( parameter.texture ) material.emissiveMap = getTexture( parameter.texture, THREE.SRGBColorSpace );
+						if ( parameter.texture ) material.emissiveMap = getTexture( parameter.texture, SRGBColorSpace );
 						break;
 
 				}
@@ -1725,12 +1765,12 @@ class ColladaLoader extends THREE.Loader {
 					switch ( k ) {
 
 						case 'double_sided':
-							material.side = ( v === 1 ? THREE.DoubleSide : THREE.FrontSide );
+							material.side = ( v === 1 ? DoubleSide : FrontSide );
 							break;
 
 						case 'bump':
 							material.normalMap = getTexture( v.texture );
-							material.normalScale = new THREE.Vector2( 1, 1 );
+							material.normalScale = new Vector2( 1, 1 );
 							break;
 
 					}
@@ -1857,7 +1897,7 @@ class ColladaLoader extends THREE.Loader {
 			switch ( data.optics.technique ) {
 
 				case 'perspective':
-					camera = new THREE.PerspectiveCamera(
+					camera = new PerspectiveCamera(
 						data.optics.parameters.yfov,
 						data.optics.parameters.aspect_ratio,
 						data.optics.parameters.znear,
@@ -1876,7 +1916,7 @@ class ColladaLoader extends THREE.Loader {
 					xmag *= 0.5;
 					ymag *= 0.5;
 
-					camera = new THREE.OrthographicCamera(
+					camera = new OrthographicCamera(
 						- xmag, xmag, ymag, - ymag, // left, right, top, bottom
 						data.optics.parameters.znear,
 						data.optics.parameters.zfar
@@ -1884,7 +1924,7 @@ class ColladaLoader extends THREE.Loader {
 					break;
 
 				default:
-					camera = new THREE.PerspectiveCamera();
+					camera = new PerspectiveCamera();
 					break;
 
 			}
@@ -1979,7 +2019,7 @@ class ColladaLoader extends THREE.Loader {
 
 					case 'color':
 						const array = parseFloats( child.textContent );
-						data.color = new THREE.Color().fromArray( array ).convertSRGBToLinear();
+						data.color = new Color().fromArray( array ).convertSRGBToLinear();
 						break;
 
 					case 'falloff_angle':
@@ -2006,19 +2046,19 @@ class ColladaLoader extends THREE.Loader {
 			switch ( data.technique ) {
 
 				case 'directional':
-					light = new THREE.DirectionalLight();
+					light = new DirectionalLight();
 					break;
 
 				case 'point':
-					light = new THREE.PointLight();
+					light = new PointLight();
 					break;
 
 				case 'spot':
-					light = new THREE.SpotLight();
+					light = new SpotLight();
 					break;
 
 				case 'ambient':
-					light = new THREE.AmbientLight();
+					light = new AmbientLight();
 					break;
 
 			}
@@ -2297,7 +2337,7 @@ class ColladaLoader extends THREE.Loader {
 			const skinIndex = { array: [], stride: 4 };
 			const skinWeight = { array: [], stride: 4 };
 
-			const geometry = new THREE.BufferGeometry();
+			const geometry = new BufferGeometry();
 
 			const materialKeys = [];
 
@@ -2467,14 +2507,14 @@ class ColladaLoader extends THREE.Loader {
 
 			// build geometry
 
-			if ( position.array.length > 0 ) geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( position.array, position.stride ) );
-			if ( normal.array.length > 0 ) geometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( normal.array, normal.stride ) );
-			if ( color.array.length > 0 ) geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( color.array, color.stride ) );
-			if ( uv.array.length > 0 ) geometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( uv.array, uv.stride ) );
-			if ( uv1.array.length > 0 ) geometry.setAttribute( 'uv1', new THREE.Float32BufferAttribute( uv1.array, uv1.stride ) );
+			if ( position.array.length > 0 ) geometry.setAttribute( 'position', new Float32BufferAttribute( position.array, position.stride ) );
+			if ( normal.array.length > 0 ) geometry.setAttribute( 'normal', new Float32BufferAttribute( normal.array, normal.stride ) );
+			if ( color.array.length > 0 ) geometry.setAttribute( 'color', new Float32BufferAttribute( color.array, color.stride ) );
+			if ( uv.array.length > 0 ) geometry.setAttribute( 'uv', new Float32BufferAttribute( uv.array, uv.stride ) );
+			if ( uv1.array.length > 0 ) geometry.setAttribute( 'uv1', new Float32BufferAttribute( uv1.array, uv1.stride ) );
 
-			if ( skinIndex.array.length > 0 ) geometry.setAttribute( 'skinIndex', new THREE.Float32BufferAttribute( skinIndex.array, skinIndex.stride ) );
-			if ( skinWeight.array.length > 0 ) geometry.setAttribute( 'skinWeight', new THREE.Float32BufferAttribute( skinWeight.array, skinWeight.stride ) );
+			if ( skinIndex.array.length > 0 ) geometry.setAttribute( 'skinIndex', new Float32BufferAttribute( skinIndex.array, skinIndex.stride ) );
+			if ( skinWeight.array.length > 0 ) geometry.setAttribute( 'skinWeight', new Float32BufferAttribute( skinWeight.array, skinWeight.stride ) );
 
 			build.data = geometry;
 			build.type = primitives[ 0 ].type;
@@ -2682,7 +2722,7 @@ class ColladaLoader extends THREE.Loader {
 			const data = {
 				sid: xml.getAttribute( 'sid' ),
 				name: xml.getAttribute( 'name' ) || '',
-				axis: new THREE.Vector3(),
+				axis: new Vector3(),
 				limits: {
 					min: 0,
 					max: 0
@@ -2813,19 +2853,19 @@ class ColladaLoader extends THREE.Loader {
 			switch ( data.type ) {
 
 				case 'matrix':
-					data.obj = new THREE.Matrix4();
+					data.obj = new Matrix4();
 					data.obj.fromArray( array ).transpose();
 					break;
 
 				case 'translate':
-					data.obj = new THREE.Vector3();
+					data.obj = new Vector3();
 					data.obj.fromArray( array );
 					break;
 
 				case 'rotate':
-					data.obj = new THREE.Vector3();
+					data.obj = new Vector3();
 					data.obj.fromArray( array );
-					data.angle = THREE.MathUtils.degToRad( array[ 3 ] );
+					data.angle = MathUtils.degToRad( array[ 3 ] );
 					break;
 
 			}
@@ -3038,7 +3078,7 @@ class ColladaLoader extends THREE.Loader {
 
 			}
 
-			const m0 = new THREE.Matrix4();
+			const m0 = new Matrix4();
 
 			kinematics = {
 
@@ -3097,7 +3137,7 @@ class ColladaLoader extends THREE.Loader {
 									switch ( joint.type ) {
 
 										case 'revolute':
-											matrix.multiply( m0.makeRotationAxis( axis, THREE.MathUtils.degToRad( value ) ) );
+											matrix.multiply( m0.makeRotationAxis( axis, MathUtils.degToRad( value ) ) );
 											break;
 
 										case 'prismatic':
@@ -3173,7 +3213,7 @@ class ColladaLoader extends THREE.Loader {
 
 					case 'matrix':
 						array = parseFloats( child.textContent );
-						const matrix = new THREE.Matrix4().fromArray( array ).transpose();
+						const matrix = new Matrix4().fromArray( array ).transpose();
 						transforms.push( {
 							sid: child.getAttribute( 'sid' ),
 							type: child.nodeName,
@@ -3184,7 +3224,7 @@ class ColladaLoader extends THREE.Loader {
 					case 'translate':
 					case 'scale':
 						array = parseFloats( child.textContent );
-						vector = new THREE.Vector3().fromArray( array );
+						vector = new Vector3().fromArray( array );
 						transforms.push( {
 							sid: child.getAttribute( 'sid' ),
 							type: child.nodeName,
@@ -3194,8 +3234,8 @@ class ColladaLoader extends THREE.Loader {
 
 					case 'rotate':
 						array = parseFloats( child.textContent );
-						vector = new THREE.Vector3().fromArray( array );
-						const angle = THREE.MathUtils.degToRad( array[ 3 ] );
+						vector = new Vector3().fromArray( array );
+						const angle = MathUtils.degToRad( array[ 3 ] );
 						transforms.push( {
 							sid: child.getAttribute( 'sid' ),
 							type: child.nodeName,
@@ -3234,8 +3274,8 @@ class ColladaLoader extends THREE.Loader {
 
 		}
 
-		const matrix = new THREE.Matrix4();
-		const vector = new THREE.Vector3();
+		const matrix = new Matrix4();
+		const vector = new Vector3();
 
 		function parseNode( xml ) {
 
@@ -3244,7 +3284,7 @@ class ColladaLoader extends THREE.Loader {
 				type: xml.getAttribute( 'type' ),
 				id: xml.getAttribute( 'id' ),
 				sid: xml.getAttribute( 'sid' ),
-				matrix: new THREE.Matrix4(),
+				matrix: new Matrix4(),
 				nodes: [],
 				instanceCameras: [],
 				instanceControllers: [],
@@ -3304,7 +3344,7 @@ class ColladaLoader extends THREE.Loader {
 
 					case 'rotate':
 						array = parseFloats( child.textContent );
-						const angle = THREE.MathUtils.degToRad( array[ 3 ] );
+						const angle = MathUtils.degToRad( array[ 3 ] );
 						data.matrix.multiply( matrix.makeRotationAxis( vector.fromArray( array ), angle ) );
 						data.transforms[ child.getAttribute( 'sid' ) ] = child.nodeName;
 						break;
@@ -3385,12 +3425,12 @@ class ColladaLoader extends THREE.Loader {
 
 		function buildSkeleton( skeletons, joints ) {
 
-			const BoneData = [];
+			const boneData = [];
 			const sortedBoneData = [];
 
 			let i, j, data;
 
-			// a skeleton can have multiple root Bones. collada expresses this
+			// a skeleton can have multiple root bones. collada expresses this
 			// situtation with multiple "skeleton" tags per controller instance
 
 			for ( i = 0; i < skeletons.length; i ++ ) {
@@ -3402,7 +3442,7 @@ class ColladaLoader extends THREE.Loader {
 				if ( hasNode( skeleton ) ) {
 
 					root = getNode( skeleton );
-					buildBoneHierarchy( root, joints, BoneData );
+					buildBoneHierarchy( root, joints, boneData );
 
 				} else if ( hasVisualScene( skeleton ) ) {
 
@@ -3418,7 +3458,7 @@ class ColladaLoader extends THREE.Loader {
 						if ( child.type === 'JOINT' ) {
 
 							const root = getNode( child.id );
-							buildBoneHierarchy( root, joints, BoneData );
+							buildBoneHierarchy( root, joints, boneData );
 
 						}
 
@@ -3426,21 +3466,21 @@ class ColladaLoader extends THREE.Loader {
 
 				} else {
 
-					console.error( 'THREE.ColladaLoader: Unable to find root Bone of skeleton with ID:', skeleton );
+					console.error( 'THREE.ColladaLoader: Unable to find root bone of skeleton with ID:', skeleton );
 
 				}
 
 			}
 
-			// sort Bone data (the order is defined in the corresponding controller)
+			// sort bone data (the order is defined in the corresponding controller)
 
 			for ( i = 0; i < joints.length; i ++ ) {
 
-				for ( j = 0; j < BoneData.length; j ++ ) {
+				for ( j = 0; j < boneData.length; j ++ ) {
 
-					data = BoneData[ j ];
+					data = boneData[ j ];
 
-					if ( data.Bone.name === joints[ i ].name ) {
+					if ( data.bone.name === joints[ i ].name ) {
 
 						sortedBoneData[ i ] = data;
 						data.processed = true;
@@ -3452,11 +3492,11 @@ class ColladaLoader extends THREE.Loader {
 
 			}
 
-			// add unprocessed Bone data at the end of the list
+			// add unprocessed bone data at the end of the list
 
-			for ( i = 0; i < BoneData.length; i ++ ) {
+			for ( i = 0; i < boneData.length; i ++ ) {
 
-				data = BoneData[ i ];
+				data = boneData[ i ];
 
 				if ( data.processed === false ) {
 
@@ -3469,33 +3509,33 @@ class ColladaLoader extends THREE.Loader {
 
 			// setup arrays for skeleton creation
 
-			const Bones = [];
-			const BoneInverses = [];
+			const bones = [];
+			const boneInverses = [];
 
 			for ( i = 0; i < sortedBoneData.length; i ++ ) {
 
 				data = sortedBoneData[ i ];
 
-				Bones.push( data.Bone );
-				BoneInverses.push( data.BoneInverse );
+				bones.push( data.bone );
+				boneInverses.push( data.boneInverse );
 
 			}
 
-			return new THREE.Skeleton( Bones, BoneInverses );
+			return new Skeleton( bones, boneInverses );
 
 		}
 
-		function buildBoneHierarchy( root, joints, BoneData ) {
+		function buildBoneHierarchy( root, joints, boneData ) {
 
-			// setup Bone data from visual scene
+			// setup bone data from visual scene
 
 			root.traverse( function ( object ) {
 
 				if ( object.isBone === true ) {
 
-					let BoneInverse;
+					let boneInverse;
 
-					// retrieve the BoneInverse from the controller data
+					// retrieve the boneInverse from the controller data
 
 					for ( let i = 0; i < joints.length; i ++ ) {
 
@@ -3503,26 +3543,26 @@ class ColladaLoader extends THREE.Loader {
 
 						if ( joint.name === object.name ) {
 
-							BoneInverse = joint.BoneInverse;
+							boneInverse = joint.boneInverse;
 							break;
 
 						}
 
 					}
 
-					if ( BoneInverse === undefined ) {
+					if ( boneInverse === undefined ) {
 
 						// Unfortunately, there can be joints in the visual scene that are not part of the
-						// corresponding controller. In this case, we have to create a dummy BoneInverse matrix
-						// for the respective Bone. This Bone won't affect any vertices, because there are no skin indices
-						// and weights defined for it. But we still have to add the Bone to the sorted Bone list in order to
+						// corresponding controller. In this case, we have to create a dummy boneInverse matrix
+						// for the respective bone. This bone won't affect any vertices, because there are no skin indices
+						// and weights defined for it. But we still have to add the bone to the sorted bone list in order to
 						// ensure a correct animation of the model.
 
-						BoneInverse = new THREE.Matrix4();
+						boneInverse = new Matrix4();
 
 					}
 
-					BoneData.push( { Bone: object, BoneInverse: BoneInverse, processed: false } );
+					boneData.push( { bone: object, boneInverse: boneInverse, processed: false } );
 
 				}
 
@@ -3646,7 +3686,7 @@ class ColladaLoader extends THREE.Loader {
 
 			} else {
 
-				object = ( type === 'JOINT' ) ? new THREE.Bone() : new THREE.Group();
+				object = ( type === 'JOINT' ) ? new Bone() : new Group();
 
 				for ( let i = 0; i < objects.length; i ++ ) {
 
@@ -3664,8 +3704,8 @@ class ColladaLoader extends THREE.Loader {
 
 		}
 
-		const fallbackMaterial = new THREE.MeshBasicMaterial( {
-			name: THREE.Loader.DEFAULT_MATERIAL_NAME,
+		const fallbackMaterial = new MeshBasicMaterial( {
+			name: Loader.DEFAULT_MATERIAL_NAME,
 			color: 0xff00ff
 		} );
 
@@ -3710,17 +3750,17 @@ class ColladaLoader extends THREE.Loader {
 
 					if ( type === 'lines' || type === 'linestrips' ) {
 
-						materials.push( new THREE.LineBasicMaterial() );
+						materials.push( new LineBasicMaterial() );
 
 					} else {
 
-						materials.push( new THREE.MeshPhongMaterial() );
+						materials.push( new MeshPhongMaterial() );
 
 					}
 
 				}
 
-				// Collada allows to use phong and lambert materials with lines. Replacing these cases with THREE.LineBasicMaterial.
+				// Collada allows to use phong and lambert materials with lines. Replacing these cases with LineBasicMaterial.
 
 				if ( type === 'lines' || type === 'linestrips' ) {
 
@@ -3730,7 +3770,7 @@ class ColladaLoader extends THREE.Loader {
 
 						if ( material.isMeshPhongMaterial === true || material.isMeshLambertMaterial === true ) {
 
-							const lineMaterial = new THREE.LineBasicMaterial();
+							const lineMaterial = new LineBasicMaterial();
 
 							// copy compatible properties
 
@@ -3763,22 +3803,22 @@ class ColladaLoader extends THREE.Loader {
 				switch ( type ) {
 
 					case 'lines':
-						object = new THREE.LineSegments( geometry.data, material );
+						object = new LineSegments( geometry.data, material );
 						break;
 
 					case 'linestrips':
-						object = new THREE.Line( geometry.data, material );
+						object = new Line( geometry.data, material );
 						break;
 
 					case 'triangles':
 					case 'polylist':
 						if ( skinning ) {
 
-							object = new THREE.SkinnedMesh( geometry.data, material );
+							object = new SkinnedMesh( geometry.data, material );
 
 						} else {
 
-							object = new THREE.Mesh( geometry.data, material );
+							object = new Mesh( geometry.data, material );
 
 						}
 
@@ -3831,7 +3871,7 @@ class ColladaLoader extends THREE.Loader {
 
 		function buildVisualScene( data ) {
 
-			const group = new THREE.Group();
+			const group = new Group();
 			group.name = data.name;
 
 			const children = data.children;
@@ -3893,7 +3933,7 @@ class ColladaLoader extends THREE.Loader {
 
 					}
 
-					animations.push( new THREE.AnimationClip( 'default', - 1, tracks ) );
+					animations.push( new AnimationClip( 'default', - 1, tracks ) );
 
 				}
 
@@ -3901,7 +3941,7 @@ class ColladaLoader extends THREE.Loader {
 
 				for ( const id in clips ) {
 
-					animations.push( getTHREE.AnimationClip( id ) );
+					animations.push( getAnimationClip( id ) );
 
 				}
 
@@ -3940,7 +3980,7 @@ class ColladaLoader extends THREE.Loader {
 
 		if ( text.length === 0 ) {
 
-			return { scene: new THREE.Scene() };
+			return { scene: new Scene() };
 
 		}
 
@@ -3978,7 +4018,7 @@ class ColladaLoader extends THREE.Loader {
 		console.debug( 'THREE.ColladaLoader: File version', version );
 
 		const asset = parseAsset( getElementsByTagName( collada, 'asset' )[ 0 ] );
-		const textureLoader = new THREE.TextureLoader( this.manager );
+		const textureLoader = new TextureLoader( this.manager );
 		textureLoader.setPath( this.resourcePath || path ).setCrossOrigin( this.crossOrigin );
 
 		let tgaLoader;
@@ -3992,7 +4032,7 @@ class ColladaLoader extends THREE.Loader {
 
 		//
 
-		const tempColor = new THREE.Color();
+		const tempColor = new Color();
 		const animations = [];
 		let kinematics = {};
 		let count = 0;
@@ -4017,7 +4057,7 @@ class ColladaLoader extends THREE.Loader {
 		};
 
 		parseLibrary( collada, 'library_animations', 'animation', parseAnimation );
-		parseLibrary( collada, 'library_animation_clips', 'animation_clip', parseTHREE.AnimationClip );
+		parseLibrary( collada, 'library_animation_clips', 'animation_clip', parseAnimationClip );
 		parseLibrary( collada, 'library_controllers', 'controller', parseController );
 		parseLibrary( collada, 'library_images', 'image', parseImage );
 		parseLibrary( collada, 'library_effects', 'effect', parseEffect );
@@ -4032,7 +4072,7 @@ class ColladaLoader extends THREE.Loader {
 		parseLibrary( collada, 'scene', 'instance_kinematics_scene', parseKinematicsScene );
 
 		buildLibrary( library.animations, buildAnimation );
-		buildLibrary( library.clips, buildTHREE.AnimationClip );
+		buildLibrary( library.clips, buildAnimationClip );
 		buildLibrary( library.controllers, buildController );
 		buildLibrary( library.images, buildImage );
 		buildLibrary( library.effects, buildEffect );

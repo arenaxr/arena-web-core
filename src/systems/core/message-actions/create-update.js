@@ -3,7 +3,7 @@
 /* global AFRAME, ARENA, THREE */
 
 import { ARENAUtils } from '../../../utils';
-import { ACTIONS } from '../../../constants';
+import { ACTIONS, ARENA_EVENTS } from '../../../constants';
 
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
@@ -456,6 +456,18 @@ export default class CreateUpdate {
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
             switch (attribute) {
+                // Defer until physics is loaded. If it never loads...trigger load??
+                case 'static-body':
+                case 'dynamic-body':
+                    ARENA.events.addEventListener(ARENA_EVENTS.PHYSICS_LOADED, () => {
+                        if (value === null) {
+                            // if null, remove attribute
+                            entityEl.removeAttribute(attribute);
+                        } else {
+                            entityEl.setAttribute(attribute, value);
+                        }
+                    });
+                    break;
                 case 'rotation':
                     // rotation is set directly in the THREE.js object, for performance reasons
                     if (Object.hasOwn(value, 'w')) {
