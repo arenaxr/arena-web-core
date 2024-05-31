@@ -65,16 +65,6 @@ window.addEventListener('onauth', async (e) => {
     let saved_namespace;
     let saved_scene;
 
-    const uploadFileTypes = {
-        image: 'image/*',
-        'gltf-model': '*.glb',
-        'obj-model': '*.obj',
-        'pcd-model': '*.pcd',
-        'threejs-scene': '*.json',
-        gaussian_splatting: '*.splat',
-        'urdf-model': '*.urdf',
-    };
-
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector('#copy_json'), {
         text() {
@@ -165,7 +155,7 @@ window.addEventListener('onauth', async (e) => {
             }
             insertEulerRotationEditor();
             uploadFilestoreButton.style.display =
-                uploadFileTypes[json.data.object_type] === undefined ? 'none' : 'inline';
+                ARENAAUTH.filestoreUploadSchema[json.data.object_type] === undefined ? 'none' : 'inline';
         });
 
         const typeSel = document.getElementsByName('root[type]')[0];

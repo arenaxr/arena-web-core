@@ -1,5 +1,5 @@
 /* eslint-disable import/no-absolute-path */
-/* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal, MQTTPattern */
+/* global ARENA, ARENAAUTH, ARENADefaults, Swal, MQTTPattern */
 
 // auth.js
 //
@@ -29,14 +29,23 @@ import * as MQTTPattern from '/static/vendor/mqtt-pattern.js';
 window.ARENAAUTH = {
     signInPath: `//${window.location.host}/user/login`,
     signOutPath: `//${window.location.host}/user/logout`,
-    uploadFileTypes: {
-        image: 'image/*',
-        'gltf-model': '*.glb',
-        'obj-model': '*.obj',
-        'pcd-model': '*.pcd',
-        'threejs-scene': '*.json',
-        gaussian_splatting: '*.splat',
-        'urdf-model': '*.urdf',
+    filestoreUploadSchema: {
+        // top level data adds
+        gaussian_splatting: ['src'],
+        'gltf-model': ['url'],
+        image: ['url'],
+        'obj-model': ['obj', 'mtl'],
+        'pcd-model': ['url'],
+        'threejs-scene': ['url'],
+        'urdf-model': ['url'],
+        videosphere: ['src'],
+        // next level data.something adds
+        'gltf-model-lod': ['gltf-model-lod.detailedUrl'],
+        material: ['material.src'],
+        'material-extras': ['material-extras.overrideSrc'],
+        sound: ['sound.src'],
+        'spe-particles': ['spe-particles.texture'],
+        'video-control': ['video-control.frame_object', 'video-control.video_path'],
     },
     /**
      * Merge defaults and any URL params into single ARENA.params obj. Nonexistent keys should be checked as undefined.
@@ -330,22 +339,34 @@ window.ARENAAUTH = {
         return lines.join('\r\n');
     },
     async uploadFileStoreDialog(objtype, oldObj) {
-        const accept = this.uploadFileTypes[objtype];
-        const htmlopt =
-            objtype === 'gltf-model'
-                ? `<div style="float: left;">
-            <input type="checkbox" id="cbhideinar" name="cbhideinar" >
-            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
-            </div>`
-                : '';
-        const htmlval = `${htmlopt}`;
+        const htmlopt = [];
+        htmlopt.push(`<div style="float: left;">`);
+        if (objtype === 'gltf-model') {
+            htmlopt.push(`<input type="checkbox" id="cbhideinar" name="cbhideinar" >
+            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>`);
+        }
+        htmlopt.push(`<div style="float: left;">`);
+        let first = true;
+        Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((type) => {
+            // look for object types, look for components
+            if (type === objtype || type in oldObj) {
+                ARENAAUTH.filestoreUploadSchema[type].forEach((element) => {
+                    const prop = `data.${element}`;
+                    htmlopt.push(`<input type="radio" id="${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
+                    <label for="${prop}" style="display: inline-block;">Save URL in ${prop}</label><br>`);
+                    first = false;
+                });
+            }
+        });
+        htmlopt.push(`</div>`);
+        htmlopt.push(`</div>`);
+        const htmlval = `${htmlopt.join('')}`;
 
         await Swal.fire({
             title: `Upload ${objtype} to Filestore & Publish`,
             html: htmlval,
             input: 'file',
             inputAttributes: {
-                accept: `${accept}`,
                 'aria-label': `Select ${objtype}`,
             },
             confirmButtonText: 'Upload & Publish',
@@ -359,6 +380,7 @@ window.ARENAAUTH = {
                 let hideinar = false;
                 const reader = new FileReader();
                 reader.onload = async (evt) => {
+                    // TODO: resolve early resolution
                     const file = document.querySelector('.swal2-file');
                     if (!file) {
                         Swal.showValidationMessage(`${objtype} file not loaded!`);
@@ -381,7 +403,7 @@ window.ARENAAUTH = {
                     }
                     // update user/staff scoped path
                     const storeResPrefix = this.user_is_staff ? `users/${this.user_username}/` : ``;
-                    const userFilePath = `scenes/${ARENA.sceneName}/${resultFileOpen.name}`;
+                    const userFilePath = `scenes/${ARENA.sceneName}/${resultFileOpen.name}`; // TODO: resolve real scene name
                     const storeResPath = `${storeResPrefix}${userFilePath}`;
                     const storeExtPath = `store/users/${this.user_username}/${userFilePath}`;
                     Swal.fire({
@@ -423,6 +445,7 @@ window.ARENAAUTH = {
                                     if (objtype === 'image') {
                                         // try to preserve image aspect ratio in mesh, user can scale to resize
                                         const img = Swal.getPopup().querySelector('.swal2-image');
+                                        // TODO: query existing scale/dimensions first
                                         if (img.width > img.height) {
                                             obj.data.width = img.width / img.height;
                                             obj.data.height = 1;

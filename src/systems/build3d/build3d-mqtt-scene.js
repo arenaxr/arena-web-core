@@ -18,20 +18,8 @@ let toolbarName = 'translate';
 const arenaComponentActions = {
     'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
 };
-const fsUploadActions = {
-    gaussian_splatting: 'src',
-    'gltf-lod': 'src',
-    'gltf-model': 'url',
-    material: 'src',
-    'obj-model': 'obj',
-    'pcd-model': 'url',
-    sound: 'url',
-    'threejs-scene': 'url',
-    'urdf-model': 'url',
-};
-Object.keys(fsUploadActions).forEach((property) => {
-    arenaComponentActions[property] = {
-        property: fsUploadActions[property],
+Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((props) => {
+    arenaComponentActions[props] = {
         action: 'upload-to-filestore',
         label: 'Upload to Filestore',
         icon: 'fa-upload',
@@ -47,7 +35,7 @@ function updateMqttWidth() {
     inspectorMqttLogWrap.style.width = `${correct}px`;
 }
 
-function addComponentAction(componentName, property, dataAction, title, iconName) {
+function addComponentAction(componentName, dataAction, title, iconName) {
     const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
     const thebutton = $(thetitle).siblings(`.componentHeaderActions`).find(`[data-action="${dataAction}"]`);
 
@@ -72,7 +60,7 @@ function addComponentAction(componentName, property, dataAction, title, iconName
                             'ArenaJsonEditor'
                         );
                         break;
-                    case 'upload-to-filestore':
+                    case 'upload-to-filestore': {
                         const oldObj = {
                             object_id: selectedEntity.id,
                             action: 'update',
@@ -80,14 +68,13 @@ function addComponentAction(componentName, property, dataAction, title, iconName
                             persist: true,
                             data: {},
                         };
-                        oldObj.data[componentName][property];
-
                         const newObj = await ARENAAUTH.uploadFileStoreDialog(componentName, oldObj);
                         // selectedEntity.setAttribute(componentName, property, 'src/systems/ui/images/audio-off.png');
                         console.log('publishing:', newObj.action, newObj);
                         ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
                         AFRAME.INSPECTOR.selectEntity(selectedEntity);
                         break;
+                    }
                     default:
                         console.error(`Build3d data-action '${dataAction}' unsupported!`);
                         break;
@@ -294,7 +281,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                             Object.keys(arenaComponentActions).forEach((key) => {
                                 addComponentAction(
                                     key,
-                                    arenaComponentActions[key].property,
                                     arenaComponentActions[key].action,
                                     arenaComponentActions[key].label,
                                     arenaComponentActions[key].icon
