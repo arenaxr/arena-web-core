@@ -119,8 +119,7 @@ export default class ARENAUserAccount {
         ARENAAUTH.user_type = authType;
         ARENAAUTH.user_username = result.username;
         // keep payload for later viewing
-        const tokenObj = KJUR.jws.JWS.parse(result.token);
-        ARENAAUTH.token_payload = tokenObj.payloadObj;
+        ARENAAUTH.token_payload = ARENAAUTH.parseJwt(result.token);
         return { mqtt_username: result.username, mqtt_token: result.token };
     }
 }
