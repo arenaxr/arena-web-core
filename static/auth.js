@@ -341,16 +341,16 @@ window.ARENAAUTH = {
     },
     async uploadFileStoreDialog(objtype, oldObj) {
         const htmlopt = [];
-        htmlopt.push(`<div style="float: left;">`);
+        htmlopt.push(`<div style="text-align: left;">Object: ${objtype}<br>`);
         if (objtype === 'gltf-model') {
             htmlopt.push(`<input type="checkbox" id="cbhideinar" name="cbhideinar" >
             <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>`);
         }
-        htmlopt.push(`<div style="float: left;">`);
+        htmlopt.push(`<div style="text-align: left;">`);
         let first = true;
         Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((type) => {
             // look for object types, look for components
-            if (type === objtype || type in oldObj) {
+            if (type === objtype || type in oldObj.data) {
                 ARENAAUTH.filestoreUploadSchema[type].forEach((element) => {
                     const prop = `data.${element}`;
                     htmlopt.push(`<input type="radio" id="${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
@@ -364,11 +364,11 @@ window.ARENAAUTH = {
         const htmlval = `${htmlopt.join('')}`;
 
         await Swal.fire({
-            title: `Upload ${objtype} to Filestore & Publish`,
+            title: `Upload to Filestore & Publish`,
             html: htmlval,
             input: 'file',
             inputAttributes: {
-                'aria-label': `Select ${objtype}`,
+                'aria-label': `Select File`,
             },
             confirmButtonText: 'Upload & Publish',
             focusConfirm: false,
