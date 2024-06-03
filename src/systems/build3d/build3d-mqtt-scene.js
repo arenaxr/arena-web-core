@@ -76,7 +76,11 @@ function addComponentAction(componentName, dataAction, title, iconName) {
                                 oldObj.data.object_type = componentName;
                             }
                         }
-                        const newObj = await ARENAAUTH.uploadFileStoreDialog(oldObj.data.object_type, oldObj);
+                        const newObj = await ARENAAUTH.uploadFileStoreDialog(
+                            ARENA.sceneName,
+                            oldObj.data.object_type,
+                            oldObj
+                        );
                         console.log('publishing:', newObj.action, newObj);
                         ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
                         AFRAME.INSPECTOR.selectEntity(selectedEntity);

@@ -27,6 +27,7 @@ import * as MQTTPattern from '/static/vendor/mqtt-pattern.js';
 
 // auth namespace
 window.ARENAAUTH = {
+    nonScenePaths: ['/scenes/', '/build/', '/programs/', '/network/', '/files/'],
     signInPath: `//${window.location.host}/user/login`,
     signOutPath: `//${window.location.host}/user/logout`,
     filestoreUploadSchema: {
@@ -220,7 +221,6 @@ window.ARENAAUTH = {
      * @param {boolean} completeOnload wait for page load before firing callback
      */
     async requestMqttToken(authType, mqttUsername, completeOnload = false) {
-        const nonScenePaths = ['/scenes/', '/build/', '/programs/', '/network/', '/files/'];
         const authParams = {
             username: mqttUsername,
             id_auth: authType,
@@ -231,7 +231,7 @@ window.ARENAAUTH = {
 
         if (ARENA.params.scene) {
             authParams.scene = decodeURIComponent(ARENA.params.scene);
-        } else if (!nonScenePaths.includes(window.location.pathname)) {
+        } else if (!this.nonScenePaths.includes(window.location.pathname)) {
             // handle full ARENA scene
             if (ARENA.sceneName) {
                 authParams.scene = ARENA.namespacedScene;
@@ -339,7 +339,7 @@ window.ARENAAUTH = {
         }
         return lines.join('\r\n');
     },
-    async uploadFileStoreDialog(objtype, oldObj) {
+    async uploadFileStoreDialog(sceneName, objtype, oldObj) {
         const htmlopt = [];
         htmlopt.push(`<div style="text-align: left;">Object: ${objtype}<br>`);
         if (objtype === 'gltf-model') {
@@ -404,7 +404,7 @@ window.ARENAAUTH = {
                     }
                     // update user/staff scoped path
                     const storeResPrefix = this.user_is_staff ? `users/${this.user_username}/` : ``;
-                    const userFilePath = `scenes/${ARENA.sceneName}/${resultFileOpen.name}`; // TODO: resolve real scene name
+                    const userFilePath = `scenes/${sceneName}/${resultFileOpen.name}`;
                     const storeResPath = `${storeResPrefix}${userFilePath}`;
                     const storeExtPath = `store/users/${this.user_username}/${userFilePath}`;
                     Swal.fire({
@@ -547,8 +547,10 @@ window.ARENAAUTH = {
             html: `<pre style='text-align: left;'>${ARENAAUTH.formatPerms(ARENAAUTH.token_payload)}</pre>`,
         });
     },
+    /**
+     * Private function to set scenename, namespacedScene and namespace.
+     */
     setSceneName() {
-        // private function to set scenename, namespacedScene and namespace
         const _setNames = (ns, sn) => {
             ARENA.namespacedScene = `${ns}/${sn}`;
             ARENA.sceneName = sn;
