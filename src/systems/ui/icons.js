@@ -84,7 +84,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         screenshareButtonText: { type: 'string', default: 'Share your screen in a new window.' },
 
         logoutButtonEnabled: { type: 'boolean', default: true },
-        logoutButtonText: { type: 'string', default: 'Sign out of the this.arena.' },
+        logoutButtonText: { type: 'string', default: 'Sign out of the ARENA.' },
 
         additionalSettingsButtonEnabled: { type: 'boolean', default: true },
     },
