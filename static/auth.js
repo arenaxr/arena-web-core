@@ -1,5 +1,5 @@
 /* eslint-disable import/no-absolute-path */
-/* global ARENA, ARENAAUTH, ARENADefaults, Swal, MQTTPattern */
+/* global ARENA, ARENAAUTH, ARENADefaults, Swal */
 
 // auth.js
 //
@@ -586,9 +586,9 @@ window.ARENAAUTH = {
     },
     /**
      * MQTTPattern matches from: https://github.com/RangerMauve/mqtt-pattern/blob/master/index.js
-     * @param {*} pattern
-     * @param {*} topic
-     * @returns
+     * @param {string} pattern
+     * @param {string} topic
+     * @returns {boolean}
      */
     mqttPatternMatches(pattern, topic) {
         const SEPARATOR = '/';
