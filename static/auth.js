@@ -8,7 +8,7 @@
 //
 // Required:
 //  <script src="../conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
-//  <script src="../static/auth.js" type="module"></script>  <!-- browser authorization flow -->
+//  <script src="../static/auth.js"></script>  <!-- browser authorization flow -->
 //
 // Implement the following 'onauth' event handler and use it to start code that would
 // automatically connects to the MQTT broker so that authentication and access tokens
@@ -22,8 +22,6 @@
 //         password: e.detail.mqtt_token
 //     });
 // });
-
-import * as MQTTPattern from '/static/vendor/mqtt-pattern.js';
 
 // auth namespace
 window.ARENAAUTH = {
@@ -501,7 +499,7 @@ window.ARENAAUTH = {
         const len = rights.length;
         let valid = false;
         for (let i = 0; i < len; i++) {
-            if (MQTTPattern.matches(rights[i], topic)) {
+            if (this.mqttPatternMatches(rights[i], topic)) {
                 valid = true;
                 break;
             }
@@ -562,7 +560,6 @@ window.ARENAAUTH = {
             }
         }
     },
-
     /**
      * Internal call to perform fetch request
      */
@@ -586,6 +583,39 @@ window.ARENAAUTH = {
             .catch((error) => {
                 this.authError('Request Error', error.message);
             });
+    },
+    /**
+     * MQTTPattern matches from: https://github.com/RangerMauve/mqtt-pattern/blob/master/index.js
+     * @param {*} pattern
+     * @param {*} topic
+     * @returns
+     */
+    mqttPatternMatches(pattern, topic) {
+        const SEPARATOR = '/';
+        const SINGLE = '+';
+        const ALL = '#';
+        const patternSegments = pattern.split(SEPARATOR);
+        const topicSegments = topic.split(SEPARATOR);
+
+        const patternLength = patternSegments.length;
+        const topicLength = topicSegments.length;
+        const lastIndex = patternLength - 1;
+
+        for (let i = 0; i < patternLength; i++) {
+            const currentPattern = patternSegments[i];
+            const patternChar = currentPattern[0];
+            const currentTopic = topicSegments[i];
+
+            if (!currentTopic && !currentPattern) continue;
+
+            if (!currentTopic && currentPattern !== ALL) return false;
+
+            // Only allow # at end
+            if (patternChar === ALL) return i === lastIndex;
+            if (patternChar !== SINGLE && currentPattern !== currentTopic) return false;
+        }
+
+        return patternLength === topicLength;
     },
 };
 
