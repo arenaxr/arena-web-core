@@ -57,21 +57,6 @@ function loadStoreFront(authToken) {
 }
 
 /**
- * Connection to arena-account endpoint to request filestore auth token.
- */
-function updateStoreLogin() {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/user/storelogin');
-    const csrftoken = ARENAAUTH.getCookie('csrftoken');
-    xhr.setRequestHeader('X-CSRFToken', csrftoken);
-    xhr.send();
-    xhr.onload = () => {
-        const authToken = ARENAAUTH.getCookie('auth');
-        loadStoreFront(authToken);
-    };
-}
-
-/**
  * Get the path location of the iframe for filebrowser
  * @return {string} path
  */
@@ -81,5 +66,7 @@ function getStorePath() {
 }
 
 window.addEventListener('onauth', async (e) => {
-    updateStoreLogin();
+    await ARENAAUTH.makeRequest('GET', '/user/storelogin');
+    const authToken = ARENAAUTH.getCookie('auth');
+    loadStoreFront(authToken);
 });

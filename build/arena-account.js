@@ -92,14 +92,6 @@ export default class ARENAUserAccount {
     }
 
     /**
-     * Request file store auth token for this user
-     * @return {} status, should have updated cookie: 'auth'
-     */
-    static async requestStoreLogin() {
-        return ARENAUserAccount._makeRequest('GET', '/user/storelogin');
-    }
-
-    /**
      * Request to delete scene permissions from user db
      * @param authType
      * @param mqttUsername

@@ -70,7 +70,6 @@ window.ARENAAUTH = {
         };
     },
     authCheck() {
-        console.log('ARENA is', ARENA);
         this.setArenaParams();
         ARENA.userName = ARENA.params.name ?? ARENA.defaults.userName;
         // For now, just an alias for legacy code.
@@ -91,7 +90,10 @@ window.ARENAAUTH = {
             Swal.fire({
                 icon: 'error',
                 title,
-                html: text,
+                text,
+                allowEscapeKey: false,
+                allowOutsideClick: true,
+                showConfirmButton: false,
             });
         }
     },
@@ -124,65 +126,49 @@ window.ARENAAUTH = {
      * Request user state data for client-side state management.
      * This is a blocking request
      */
-    requestAuthState() {
+    async requestAuthState() {
         // 'remember' uri for post-login, just before login redirect
         localStorage.setItem('request_uri', window.location.href);
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', `/user/user_state`, false); // Blocking call
-        xhr.setRequestHeader('X-CSRFToken', this.getCookie('csrftoken'));
-        xhr.send();
-        // Block on this request
-        if (xhr.status !== 200) {
-            const title = 'Error loading user state';
-            const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
-            this.authError(title, text);
-        } else {
-            let userStateRes;
-            try {
-                userStateRes = JSON.parse(xhr.response);
-            } catch (e) {
-                const title = 'Error parsing user state';
-                const text = `${e}: ${xhr.response}`;
-                this.authError(title, text);
-            }
-            this.authenticated = userStateRes.authenticated;
-            this.user_type = userStateRes.type; // user database auth state
-            const urlAuthType = ARENA.params.auth;
-            if (urlAuthType !== undefined) {
-                localStorage.setItem('auth_choice', urlAuthType);
-            }
+        const res = await this.makeRequest('GET', '/user/user_state');
+        if (!res) return;
+        const userStateRes = await res.json();
+        this.authenticated = userStateRes.authenticated;
+        this.user_type = userStateRes.type; // user database auth state
+        const urlAuthType = ARENA.params.auth;
+        if (urlAuthType !== undefined) {
+            localStorage.setItem('auth_choice', urlAuthType);
+        }
 
-            const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
-            if (this.authenticated) {
-                // auth user login
-                localStorage.setItem('auth_choice', userStateRes.type);
-                this.processUserNames(userStateRes.fullname ? userStateRes.fullname : userStateRes.username);
-                this.user_username = userStateRes.username;
-                this.user_fullname = userStateRes.fullname;
-                this.user_email = userStateRes.email;
-                this.user_is_staff = userStateRes.is_staff;
-                this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
-            } else if (savedAuthType === 'anonymous') {
-                const urlName = ARENA.params.userName;
-                const savedName = localStorage.getItem('display_name');
-                if (savedName === null) {
-                    if (urlName !== null) {
-                        localStorage.setItem('display_name', urlName);
-                    } else {
-                        localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
-                    }
+        const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
+        if (this.authenticated) {
+            // auth user login
+            localStorage.setItem('auth_choice', userStateRes.type);
+            this.processUserNames(userStateRes.fullname ? userStateRes.fullname : userStateRes.username);
+            this.user_username = userStateRes.username;
+            this.user_fullname = userStateRes.fullname;
+            this.user_email = userStateRes.email;
+            this.user_is_staff = userStateRes.is_staff;
+            await this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
+        } else if (savedAuthType === 'anonymous') {
+            const urlName = ARENA.params.userName;
+            const savedName = localStorage.getItem('display_name');
+            if (savedName === null) {
+                if (urlName !== null) {
+                    localStorage.setItem('display_name', urlName);
+                } else {
+                    localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
                 }
-                const anonName = this.processUserNames(localStorage.getItem('display_name'), 'anonymous-');
-                this.user_username = anonName;
-                this.user_fullname = localStorage.getItem('display_name');
-                this.user_email = 'N/A';
-                this.user_is_staff = userStateRes.is_staff;
-                this.requestMqttToken('anonymous', anonName, true).then();
-            } else {
-                // user is logged out or new and not logged in
-                window.location.href = this.signInPath;
             }
+            const anonName = this.processUserNames(localStorage.getItem('display_name'), 'anonymous-');
+            this.user_username = anonName;
+            this.user_fullname = localStorage.getItem('display_name');
+            this.user_email = 'N/A';
+            this.user_is_staff = userStateRes.is_staff;
+            await this.requestMqttToken('anonymous', anonName, true).then();
+        } else {
+            // user is logged out or new and not logged in
+            window.location.href = this.signInPath;
         }
     },
     /**
@@ -242,22 +228,14 @@ window.ARENAAUTH = {
             authParams.handrightid = true;
         }
         try {
-            const authRes = await fetch('/user/mqtt_auth', {
-                headers: {
-                    'X-CSRFToken': this.getCookie('csrftoken'),
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                method: 'POST',
-                body: new URLSearchParams(authParams),
-            });
-            if (!authRes.ok) {
-                const title = 'Error loading MQTT token';
-                const text = `${authRes.status}: ${authRes.statusText} ${JSON.stringify(authRes.response)}`;
-                this.authError(title, text);
-                return;
-            }
-
-            const authData = await authRes.json();
+            const res = await this.makeRequest(
+                'POST',
+                '/user/mqtt_auth',
+                authParams,
+                'application/x-www-form-urlencoded'
+            );
+            if (!res) return;
+            const authData = await res.json();
             this.user_type = authType;
             this.user_username = authData.username;
             // keep payload for later viewing
@@ -394,12 +372,7 @@ window.ARENAAUTH = {
                     // request fs token endpoint if auth not ready or expired
                     let token = this.getCookie('auth');
                     if (!this.isTokenUsable(token)) {
-                        try {
-                            await this.requestStoreLogin();
-                        } catch (err) {
-                            Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
-                            return;
-                        }
+                        await this.makeRequest('GET', '/user/storelogin');
                         token = this.getCookie('auth');
                     }
                     // update user/staff scoped path
@@ -587,47 +560,28 @@ window.ARENAAUTH = {
     },
 
     /**
-     * Internal call to perform xhr request
-     * TODO (mwfarb): remove me
+     * Internal call to perform fetch request
      */
-    _makeRequest(method, url, params = undefined, contentType = undefined) {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open(method, url);
-            const csrftoken = ARENAAUTH.getCookie('csrftoken');
-            xhr.setRequestHeader('X-CSRFToken', csrftoken);
-            if (contentType) xhr.setRequestHeader('Content-Type', contentType);
-            xhr.responseType = 'json';
-            xhr.onload = function onload() {
-                if (this.status >= 200 && this.status < 300) {
-                    resolve(xhr.response);
-                } else {
-                    reject(
-                        new Error({
-                            status: this.status,
-                            statusText: xhr.statusText,
-                        })
-                    );
+    async makeRequest(method, url, params = undefined, contentType = undefined) {
+        return fetch(url, {
+            headers: {
+                'X-CSRFToken': this.getCookie('csrftoken'),
+                'Content-Type': contentType || null,
+            },
+            method,
+            body: params ? new URLSearchParams(params) : null,
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response;
                 }
-            };
-            xhr.onerror = function onerror() {
-                reject(
-                    new Error({
-                        status: this.status,
-                        statusText: xhr.statusText,
-                    })
+                throw new Error(
+                    `${response.status}: ${response.statusText} - ${url} - ${response.response ? response.response : ''}`
                 );
-            };
-            xhr.send(params);
-        });
-    },
-
-    /**
-     * Request file store auth token for this user
-     * @return {} status, should have updated cookie: 'auth'
-     */
-    async requestStoreLogin() {
-        return this._makeRequest('GET', '/user/storelogin');
+            })
+            .catch((error) => {
+                this.authError('Request Error', error.message);
+            });
     },
 };
 
