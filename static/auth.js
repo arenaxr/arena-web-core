@@ -130,7 +130,7 @@ window.ARENAAUTH = {
         // 'remember' uri for post-login, just before login redirect
         localStorage.setItem('request_uri', window.location.href);
 
-        const res = await this.makeRequest('GET', '/user/user_state');
+        const res = await this.makeUserRequest('GET', '/user/user_state');
         if (!res) return;
         const userStateRes = await res.json();
         this.authenticated = userStateRes.authenticated;
@@ -228,7 +228,7 @@ window.ARENAAUTH = {
             authParams.handrightid = true;
         }
         try {
-            const res = await this.makeRequest(
+            const res = await this.makeUserRequest(
                 'POST',
                 '/user/mqtt_auth',
                 authParams,
@@ -331,7 +331,7 @@ window.ARENAAUTH = {
             if (type === objtype || type in oldObj.data) {
                 ARENAAUTH.filestoreUploadSchema[type].forEach((element) => {
                     const prop = `data.${element}`;
-                    htmlopt.push(`<input type="radio" id="${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
+                    htmlopt.push(`<input type="radio" id="radioAttr-${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
                     <label for="${prop}" style="display: inline-block;">Save URL to ${prop}</label><br>`);
                     first = false;
                 });
@@ -372,7 +372,7 @@ window.ARENAAUTH = {
                     // request fs token endpoint if auth not ready or expired
                     let token = this.getCookie('auth');
                     if (!this.isTokenUsable(token)) {
-                        await this.makeRequest('GET', '/user/storelogin');
+                        await this.makeUserRequest('GET', '/user/storelogin');
                         token = this.getCookie('auth');
                     }
                     // update user/staff scoped path
@@ -406,12 +406,15 @@ window.ARENAAUTH = {
                                     if (obj.object_id === '') {
                                         obj.object_id = safeFilename;
                                     }
-                                    if (objtype === 'gaussian_splatting') {
-                                        obj.data.src = `${storeExtPath}`;
-                                    } else if (objtype === 'obj-model') {
-                                        obj.data.obj = `${storeExtPath}`;
-                                    } else {
-                                        obj.data.url = `${storeExtPath}`;
+                                    const fullDestUrlAttr = document.querySelector(
+                                        'input[name=radioAttr]:checked'
+                                    ).value;
+                                    // place url nested in wire format
+                                    const elems = fullDestUrlAttr.split('.');
+                                    if (elems.length === 3) {
+                                        obj.data[elems[1]][elems[2]] = `${storeExtPath}`;
+                                    } else if (elems.length === 2) {
+                                        obj.data[elems[1]] = `${storeExtPath}`;
                                     }
                                     if (hideinar) {
                                         obj.data['hide-on-enter-ar'] = true;
@@ -429,6 +432,7 @@ window.ARENAAUTH = {
                                         }
                                         obj.data.scale = { x: 1, y: 1, z: 1 };
                                     }
+                                    console.log(obj);
                                     return obj;
                                 })
                                 .catch((error) => {
@@ -562,7 +566,7 @@ window.ARENAAUTH = {
     /**
      * Internal call to perform fetch request
      */
-    async makeRequest(method, url, params = undefined, contentType = undefined) {
+    async makeUserRequest(method, url, params = undefined, contentType = undefined) {
         return fetch(url, {
             headers: {
                 'X-CSRFToken': this.getCookie('csrftoken'),
