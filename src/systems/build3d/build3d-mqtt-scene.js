@@ -15,12 +15,16 @@
 let toolbarName = 'translate';
 
 // register component actions
+const B3DACTIONS = {
+    JSON_EDIT: 'edit-json',
+    FS_UPLOAD: 'upload-to-filestore',
+};
 const arenaComponentActions = {
-    'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
+    'build3d-mqtt-object': { action: B3DACTIONS.JSON_EDIT, label: 'Edit Json', icon: 'fa-code' },
 };
 Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((props) => {
     arenaComponentActions[props] = {
-        action: 'upload-to-filestore',
+        action: B3DACTIONS.FS_UPLOAD,
         label: 'Upload to Filestore',
         icon: 'fa-upload',
     };
@@ -54,13 +58,13 @@ function addComponentAction(componentName, dataAction, title, iconName) {
             async (e) => {
                 const { selectedEntity } = AFRAME.INSPECTOR;
                 switch (dataAction) {
-                    case 'edit-json':
+                    case B3DACTIONS.JSON_EDIT:
                         window.open(
                             `/build/?scene=${ARENA.namespacedScene}&objectId=${selectedEntity.id}`,
                             'ArenaJsonEditor'
                         );
                         break;
-                    case 'upload-to-filestore': {
+                    case B3DACTIONS.FS_UPLOAD: {
                         const oldObj = {
                             object_id: selectedEntity.id,
                             action: 'update',
@@ -70,7 +74,7 @@ function addComponentAction(componentName, dataAction, title, iconName) {
                         };
                         const srcs = ARENAAUTH.filestoreUploadSchema[componentName];
                         if (srcs) {
-                            if (srcs[0].beginsWith(`${componentName}.`)) {
+                            if (srcs[0].startsWith(`${componentName}.`)) {
                                 oldObj.data[componentName] = {};
                             } else {
                                 oldObj.data.object_type = componentName;
