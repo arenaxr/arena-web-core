@@ -259,6 +259,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttTitle.style.paddingLeft = '10px';
                 inspectorMqttTitle.textContent = `ARENA's Build3D MQTT Publish Log (user: ${ARENAAUTH.user_username})`;
                 inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
+                // TODO (mwfarb): add open close chevrons for log window in title fa-chevron-up fa-chevron-down
 
                 // log
                 const inspectorMqttLog = document.createElement('div');
@@ -294,6 +295,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
 
                             // query active components
                             Object.keys(arenaComponentActions).forEach((key) => {
+                                // TODO (mwfarb): allow only build3d-mqtt-object enabled for actions
                                 addComponentAction(
                                     key,
                                     arenaComponentActions[key].action,
