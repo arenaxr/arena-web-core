@@ -1,4 +1,3 @@
-/* eslint-disable import/no-absolute-path */
 /* global ARENA, ARENAAUTH, ARENADefaults, Swal */
 
 // auth.js
@@ -316,8 +315,9 @@ window.ARENAAUTH = {
         return lines.join('\r\n');
     },
     async uploadFileStoreDialog(sceneName, objtype, oldObj) {
+        let newObj;
         const htmlopt = [];
-        htmlopt.push(`<div style="text-align: left;">Object: ${objtype}<br>`);
+        htmlopt.push(`<div style="text-align: left;"><b>Object:</b> ${objtype}<br>`);
         if (objtype === 'gltf-model') {
             htmlopt.push(`<input type="checkbox" id="cbhideinar" name="cbhideinar" >
             <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>`);
@@ -355,101 +355,102 @@ window.ARENAAUTH = {
                 const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
                 const safeFilename = fn.replace(/(\W+)/gi, '-');
                 let hideinar = false;
-                const reader = new FileReader();
-                reader.onload = async (evt) => {
-                    // TODO: resolve early resolution
-                    const file = document.querySelector('.swal2-file');
-                    if (!file) {
-                        Swal.showValidationMessage(`${objtype} file not loaded!`);
-                        return;
-                    }
-                    if (objtype === 'gltf-model') {
-                        // allow model checkboxes hide in ar/vr (recommendations)
-                        hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
-                    }
-                    // request fs token endpoint if auth not ready or expired
-                    let token = this.getCookie('auth');
-                    if (!this.isTokenUsable(token)) {
-                        await this.makeUserRequest('GET', '/user/storelogin');
-                        token = this.getCookie('auth');
-                    }
-                    // update user/staff scoped path
-                    const storeResPrefix = this.user_is_staff ? `users/${this.user_username}/` : ``;
-                    const userFilePath = `scenes/${sceneName}/${resultFileOpen.name}`;
-                    const storeResPath = `${storeResPrefix}${userFilePath}`;
-                    const storeExtPath = `store/users/${this.user_username}/${userFilePath}`;
-                    Swal.fire({
-                        title: 'Wait for Upload',
-                        imageUrl: evt.target.result,
-                        imageAlt: `The uploaded ${objtype}`,
-                        showConfirmButton: false,
-                        showCancelButton: true,
-                        cancelButtonText: 'Cancel',
-                        didOpen: () => {
-                            Swal.showLoading();
-                            // request fs file upload with fs auth
-                            return fetch(`/storemng/api/resources/${storeResPath}?override=true`, {
-                                method: 'POST',
-                                headers: {
-                                    Accept: resultFileOpen.type,
-                                    'X-Auth': `${token}`,
-                                },
-                                body: file.files[0],
-                            })
-                                .then((responsePostFS) => {
-                                    if (!responsePostFS.ok) {
-                                        throw new Error(responsePostFS.statusText);
-                                    }
-                                    const obj = oldObj;
-                                    if (obj.object_id === '') {
-                                        obj.object_id = safeFilename;
-                                    }
-                                    const fullDestUrlAttr = document.querySelector(
-                                        'input[name=radioAttr]:checked'
-                                    ).value;
-                                    // place url nested in wire format
-                                    const elems = fullDestUrlAttr.split('.');
-                                    if (elems.length === 3) {
-                                        obj.data[elems[1]][elems[2]] = `${storeExtPath}`;
-                                    } else if (elems.length === 2) {
-                                        obj.data[elems[1]] = `${storeExtPath}`;
-                                    }
-                                    if (hideinar) {
-                                        obj.data['hide-on-enter-ar'] = true;
-                                    }
-                                    if (objtype === 'image') {
-                                        // try to preserve image aspect ratio in mesh, user can scale to resize
-                                        const img = Swal.getPopup().querySelector('.swal2-image');
-                                        // TODO: query existing scale/dimensions first
-                                        if (img.width > img.height) {
-                                            obj.data.width = img.width / img.height;
-                                            obj.data.height = 1;
-                                        } else {
-                                            obj.data.width = 1;
-                                            obj.data.height = img.height / img.width;
-                                        }
-                                        obj.data.scale = { x: 1, y: 1, z: 1 };
-                                    }
-                                    console.log(obj);
-                                    return obj;
-                                })
-                                .catch((error) => {
-                                    Swal.showValidationMessage(`Request failed: ${error}`);
-                                })
-                                .finally(() => {
-                                    Swal.hideLoading();
-                                });
-                        },
-                        willClose: () => {
-                            console.debug('Nothing');
-                        },
-                    }).then((resultDidOpen) => {
-                        if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
-                            console.error(`Upload ${objtype} file dialog timed out!`);
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = async (evt) => {
+                        // TODO: resolve early resolution
+                        const file = document.querySelector('.swal2-file');
+                        if (!file) {
+                            Swal.showValidationMessage(`${objtype} file not loaded!`);
+                            return;
                         }
-                    });
-                };
-                reader.readAsDataURL(resultFileOpen);
+                        if (objtype === 'gltf-model') {
+                            // allow model checkboxes hide in ar/vr (recommendations)
+                            hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
+                        }
+                        // request fs token endpoint if auth not ready or expired
+                        let token = this.getCookie('auth');
+                        if (!this.isTokenUsable(token)) {
+                            await this.makeUserRequest('GET', '/user/storelogin');
+                            token = this.getCookie('auth');
+                        }
+                        const fullDestUrlAttr = document.querySelector('input[name=radioAttr]:checked').value;
+                        // update user/staff scoped path
+                        const storeResPrefix = this.user_is_staff ? `users/${this.user_username}/` : ``;
+                        const userFilePath = `scenes/${sceneName}/${resultFileOpen.name}`;
+                        const storeResPath = `${storeResPrefix}${userFilePath}`;
+                        const storeExtPath = `store/users/${this.user_username}/${userFilePath}`;
+                        Swal.fire({
+                            title: 'Wait for Upload',
+                            imageUrl: evt.target.result,
+                            imageAlt: `The uploaded ${objtype}`,
+                            showConfirmButton: false,
+                            showCancelButton: true,
+                            cancelButtonText: 'Cancel',
+                            didOpen: () => {
+                                Swal.showLoading();
+                                // request fs file upload with fs auth
+                                return fetch(`/storemng/api/resources/${storeResPath}?override=true`, {
+                                    method: 'POST',
+                                    headers: {
+                                        Accept: resultFileOpen.type,
+                                        'X-Auth': `${token}`,
+                                    },
+                                    body: file.files[0],
+                                })
+                                    .then((responsePostFS) => {
+                                        if (!responsePostFS.ok) {
+                                            throw new Error(responsePostFS.statusText);
+                                        }
+                                        newObj = oldObj;
+                                        if (newObj.object_id === '') {
+                                            newObj.object_id = safeFilename;
+                                        }
+                                        // place url nested in wire format
+                                        const elems = fullDestUrlAttr.split('.');
+                                        if (elems.length === 3) {
+                                            newObj.data[elems[1]][elems[2]] = `${storeExtPath}`;
+                                        } else if (elems.length === 2) {
+                                            newObj.data[elems[1]] = `${storeExtPath}`;
+                                        }
+                                        if (hideinar) {
+                                            newObj.data['hide-on-enter-ar'] = true;
+                                        }
+                                        if (objtype === 'image') {
+                                            // try to preserve image aspect ratio in mesh, user can scale to resize
+                                            const img = Swal.getPopup().querySelector('.swal2-image');
+                                            // TODO: query existing scale/dimensions first
+                                            if (img.width > img.height) {
+                                                newObj.data.width = img.width / img.height;
+                                                newObj.data.height = 1;
+                                            } else {
+                                                newObj.data.width = 1;
+                                                newObj.data.height = img.height / img.width;
+                                            }
+                                            newObj.data.scale = { x: 1, y: 1, z: 1 };
+                                        }
+                                        resolve(newObj);
+                                    })
+                                    .catch((error) => {
+                                        Swal.showValidationMessage(`Request failed: ${error}`);
+                                    })
+                                    .finally(() => {
+                                        Swal.hideLoading();
+                                    });
+                            },
+                        }).then((resultDidOpen) => {
+                            if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
+                                console.error(`Upload ${objtype} file dialog timed out!`);
+                            }
+                        });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(resultFileOpen);
+                }).then((obj) => {
+                    console.log('returning', obj);
+                    Swal.close();
+                    return obj;
+                });
             },
         });
     },

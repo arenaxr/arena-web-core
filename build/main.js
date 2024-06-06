@@ -367,23 +367,25 @@ window.addEventListener('onauth', async (e) => {
     uploadFilestoreButton.addEventListener('click', async () => {
         const oldObj = JSON.parse(output.value);
         const newObj = await ARENAAUTH.uploadFileStoreDialog(sceneinput.value, oldObj.data.object_type, oldObj);
+        console.log('uploadFileStoreDialog exit', newObj);
+        if (newObj) {
+            // publish to mqtt
+            const scene = `${namespaceinput.value}/${sceneinput.value}`;
+            PersistObjects.performActionArgObjList('update', scene, [newObj], false);
+            setTimeout(async () => {
+                await PersistObjects.populateObjectList(
+                    `${namespaceinput.value}/${sceneinput.value}`,
+                    objFilter.value,
+                    objTypeFilter,
+                    newObj.object_id
+                );
 
-        // publish to mqtt
-        const scene = `${namespaceinput.value}/${sceneinput.value}`;
-        PersistObjects.performActionArgObjList('update', scene, [newObj], false);
-        setTimeout(async () => {
-            await PersistObjects.populateObjectList(
-                `${namespaceinput.value}/${sceneinput.value}`,
-                objFilter.value,
-                objTypeFilter,
-                newObj.object_id
-            );
-
-            $(`label[innerHTML='${newObj.object_id} (${oldObj.data.object_type})']`).focus();
-        }, 500);
-        // push updated data to forms
-        output.value = JSON.stringify(newObj, null, 2);
-        jsoneditor.setValue(newObj);
+                $(`label[innerHTML='${newObj.object_id} (${oldObj.data.object_type})']`).focus();
+            }, 500);
+            // push updated data to forms
+            output.value = JSON.stringify(newObj, null, 2);
+            jsoneditor.setValue(newObj);
+        }
     });
 
     openAddSceneButton.addEventListener('click', async () => {

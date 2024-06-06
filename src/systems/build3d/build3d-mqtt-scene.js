@@ -6,7 +6,7 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, ARENAAUTH */
+/* global AFRAME, ARENA, ARENAAUTH, $ */
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
@@ -70,7 +70,7 @@ function addComponentAction(componentName, dataAction, title, iconName) {
                             action: 'update',
                             type: 'object',
                             persist: true,
-                            data: {}, // prelimiary
+                            data: {}, // preliminary
                         };
                         const srcs = ARENAAUTH.filestoreUploadSchema[componentName];
                         if (srcs) {
@@ -82,12 +82,15 @@ function addComponentAction(componentName, dataAction, title, iconName) {
                         }
                         const newObj = await ARENAAUTH.uploadFileStoreDialog(
                             ARENA.sceneName,
-                            oldObj.data.object_type,
+                            oldObj.data.object_type, // TODO: resolve actual type from obj/primitive graph
                             oldObj
                         );
-                        console.log('publishing:', newObj.action, newObj);
-                        ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
-                        AFRAME.INSPECTOR.selectEntity(selectedEntity);
+                        console.log('uploadFileStoreDialog exit', newObj);
+                        if (newObj) {
+                            console.log('publishing:', newObj.action, newObj);
+                            ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
+                            AFRAME.INSPECTOR.selectEntity(selectedEntity);
+                        }
                         break;
                     }
                     default:
