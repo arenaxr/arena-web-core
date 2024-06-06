@@ -314,34 +314,74 @@ window.ARENAAUTH = {
         }
         return lines.join('\r\n');
     },
+    /**
+     * Long chain of upload dialogs and fetch calls to select and upload a file for the object, returning the updated wire format.
+     * @param {string} sceneName
+     * @param {string} objtype
+     * @param {Object} oldObj
+     */
     async uploadFileStoreDialog(sceneName, objtype, oldObj) {
         let newObj;
-        const htmlopt = [];
-        htmlopt.push(`<div style="text-align: left;"><b>Object:</b> ${objtype}<br>`);
-        if (objtype === 'gltf-model') {
-            htmlopt.push(`<input type="checkbox" id="cbhideinar" name="cbhideinar" >
+
+        function formatUploadHtmlOptions() {
+            const htmlopt = [];
+            htmlopt.push(`<div style="text-align: left;"><b>Object:</b> ${objtype}<br>`);
+            if (objtype === 'gltf-model') {
+                htmlopt.push(`<input type="checkbox" id="cbhideinar" name="cbhideinar" >
             <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>`);
-        }
-        htmlopt.push(`<div style="text-align: left;">`);
-        let first = true;
-        Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((type) => {
-            // look for object types, look for components
-            if (type === objtype || type in oldObj.data) {
-                ARENAAUTH.filestoreUploadSchema[type].forEach((element) => {
-                    const prop = `data.${element}`;
-                    htmlopt.push(`<input type="radio" id="radioAttr-${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
-                    <label for="${prop}" style="display: inline-block;">Save URL to ${prop}</label><br>`);
-                    first = false;
-                });
             }
-        });
-        htmlopt.push(`</div>`);
-        htmlopt.push(`</div>`);
-        const htmlval = `${htmlopt.join('')}`;
+            htmlopt.push(`<div style="text-align: left;">`);
+            let first = true;
+            Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((type) => {
+                // look for object types, look for components
+                if (type === objtype || type in oldObj.data) {
+                    ARENAAUTH.filestoreUploadSchema[type].forEach((element) => {
+                        const prop = `data.${element}`;
+                        htmlopt.push(`<input type="radio" id="radioAttr-${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
+                    <label for="${prop}" style="display: inline-block;">Save URL to ${prop}</label><br>`);
+                        first = false;
+                    });
+                }
+            });
+            htmlopt.push(`</div>`);
+            htmlopt.push(`</div>`);
+            return `${htmlopt.join('')}`;
+        }
+
+        function updateWireFormat(safeFilename, fullDestUrlAttr, storeExtPath, hideinar) {
+            const obj = oldObj;
+            if (obj.object_id === '') {
+                obj.object_id = safeFilename;
+            }
+            // place url nested in wire format
+            const elems = fullDestUrlAttr.split('.');
+            if (elems.length === 3) {
+                obj.data[elems[1]][elems[2]] = `${storeExtPath}`;
+            } else if (elems.length === 2) {
+                obj.data[elems[1]] = `${storeExtPath}`;
+            }
+            if (hideinar) {
+                obj.data['hide-on-enter-ar'] = true;
+            }
+            if (objtype === 'image') {
+                // try to preserve image aspect ratio in mesh, user can scale to resize
+                const img = Swal.getPopup().querySelector('.swal2-image');
+                // TODO: query existing scale/dimensions first
+                if (img.width > img.height) {
+                    obj.data.width = img.width / img.height;
+                    obj.data.height = 1;
+                } else {
+                    obj.data.width = 1;
+                    obj.data.height = img.height / img.width;
+                }
+                obj.data.scale = { x: 1, y: 1, z: 1 };
+            }
+            return obj;
+        }
 
         await Swal.fire({
             title: `Upload to Filestore & Publish`,
-            html: htmlval,
+            html: formatUploadHtmlOptions(),
             input: 'file',
             inputAttributes: {
                 'aria-label': `Select File`,
@@ -358,7 +398,6 @@ window.ARENAAUTH = {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = async (evt) => {
-                        // TODO: resolve early resolution
                         const file = document.querySelector('.swal2-file');
                         if (!file) {
                             Swal.showValidationMessage(`${objtype} file not loaded!`);
@@ -402,33 +441,12 @@ window.ARENAAUTH = {
                                         if (!responsePostFS.ok) {
                                             throw new Error(responsePostFS.statusText);
                                         }
-                                        newObj = oldObj;
-                                        if (newObj.object_id === '') {
-                                            newObj.object_id = safeFilename;
-                                        }
-                                        // place url nested in wire format
-                                        const elems = fullDestUrlAttr.split('.');
-                                        if (elems.length === 3) {
-                                            newObj.data[elems[1]][elems[2]] = `${storeExtPath}`;
-                                        } else if (elems.length === 2) {
-                                            newObj.data[elems[1]] = `${storeExtPath}`;
-                                        }
-                                        if (hideinar) {
-                                            newObj.data['hide-on-enter-ar'] = true;
-                                        }
-                                        if (objtype === 'image') {
-                                            // try to preserve image aspect ratio in mesh, user can scale to resize
-                                            const img = Swal.getPopup().querySelector('.swal2-image');
-                                            // TODO: query existing scale/dimensions first
-                                            if (img.width > img.height) {
-                                                newObj.data.width = img.width / img.height;
-                                                newObj.data.height = 1;
-                                            } else {
-                                                newObj.data.width = 1;
-                                                newObj.data.height = img.height / img.width;
-                                            }
-                                            newObj.data.scale = { x: 1, y: 1, z: 1 };
-                                        }
+                                        newObj = updateWireFormat(
+                                            safeFilename,
+                                            fullDestUrlAttr,
+                                            storeExtPath,
+                                            hideinar
+                                        );
                                         resolve(newObj);
                                     })
                                     .catch((error) => {
@@ -447,7 +465,7 @@ window.ARENAAUTH = {
                     reader.onerror = reject;
                     reader.readAsDataURL(resultFileOpen);
                 }).then((obj) => {
-                    console.log('returning', obj);
+                    console.log('uploadFileStoreDialog returning object:', obj);
                     Swal.close();
                     return obj;
                 });
@@ -455,7 +473,7 @@ window.ARENAAUTH = {
         });
     },
     /**
-     *
+     * Parse the JWT payload into a JSON object.
      * @param {*} jwt The JWT
      * @return {Object} the JSON payload
      */
