@@ -389,9 +389,8 @@ window.ARENAAUTH = {
             confirmButtonText: 'Upload & Publish',
             focusConfirm: false,
             showCancelButton: true,
-            cancelButtonText: 'Cancel',
             showLoaderOnConfirm: true,
-            preConfirm: (resultFileOpen) => {
+            preConfirm: async (resultFileOpen) => {
                 const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
                 const safeFilename = fn.replace(/(\W+)/gi, '-');
                 let hideinar = false;
@@ -425,7 +424,6 @@ window.ARENAAUTH = {
                             imageAlt: `The uploaded ${objtype}`,
                             showConfirmButton: false,
                             showCancelButton: true,
-                            cancelButtonText: 'Cancel',
                             didOpen: () => {
                                 Swal.showLoading();
                                 // request fs file upload with fs auth
