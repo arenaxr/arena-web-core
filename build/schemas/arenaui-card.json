@@ -113,7 +113,7 @@
                     "default": {
                         "object_type": "arenaui-card"
                     },
-                    "required": ["object_type", "title", "body", "img", "position", "rotation"]
+                    "required": ["object_type", "title", "body", "position", "rotation"]
                 }
             }
         }
