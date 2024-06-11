@@ -234,6 +234,14 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             }
         });
     },
+    toggleMqttChevron(elTog, elLog, open) {
+        // open? close it
+        elTog.classList.remove(`fa-chevron-${open ? 'down' : 'up'}`);
+        elTog.classList.add(`fa-chevron-${open ? 'up' : 'down'}`);
+        elTog.title = `${open ? 'Close' : 'Open'} Log`;
+        elLog.style.display = open ? 'none' : 'flex';
+        elLog.style.height = open ? '0%' : '25%';
+    },
     tick() {
         if (!this.scenegraphDiv) {
             // this.scenegraphDiv = document.getElementById('scenegraph');
@@ -269,7 +277,16 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttTitle.style.paddingLeft = '10px';
                 inspectorMqttTitle.textContent = `ARENA's Build3D MQTT Publish Log (user: ${ARENAAUTH.user_username})`;
                 inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
-                // TODO (mwfarb): add open close chevrons for log window in title fa-chevron-up fa-chevron-down
+                // add open close chevrons for log window in title fa-chevron-up fa-chevron-down
+                const inspectorMqttToggle = document.createElement('a');
+                inspectorMqttToggle.id = 'inspectorMqttToggle';
+                inspectorMqttToggle.title = 'Close Log';
+                inspectorMqttTitle.style.backgroundColor = 'darkgreen';
+                inspectorMqttTitle.style.color = 'white';
+                inspectorMqttTitle.style.opacity = '.75';
+                inspectorMqttTitle.style.paddingLeft = '10px';
+                inspectorMqttToggle.classList.add('button', 'fa', 'fa-chevron-down');
+                inspectorMqttTitle.appendChild(inspectorMqttToggle);
 
                 // log
                 const inspectorMqttLog = document.createElement('div');
@@ -289,6 +306,14 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 line.innerHTML += `Watching for local changes...`;
                 inspectorMqttLog.appendChild(document.createElement('br'));
                 inspectorMqttLog.appendChild(line);
+
+                inspectorMqttToggle.addEventListener('click', async (e) => {
+                    this.toggleMqttChevron(
+                        inspectorMqttToggle,
+                        inspectorMqttLog,
+                        inspectorMqttToggle.classList.contains('fa-chevron-down')
+                    );
+                });
             }
         }
         if (!this.components) {
@@ -305,7 +330,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
 
                             // query active components
                             Object.keys(arenaComponentActions).forEach((key) => {
-                                // TODO (mwfarb): allow only build3d-mqtt-object enabled for actions
                                 addComponentAction(
                                     key,
                                     arenaComponentActions[key].action,
