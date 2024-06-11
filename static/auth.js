@@ -366,7 +366,6 @@ window.ARENAAUTH = {
             if (objtype === 'image') {
                 // try to preserve image aspect ratio in mesh, user can scale to resize
                 const img = Swal.getPopup().querySelector('.swal2-image');
-                // TODO: query existing scale/dimensions first
                 if (img.width > img.height) {
                     obj.data.width = img.width / img.height;
                     obj.data.height = 1;

@@ -181,9 +181,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                         mutation.target.id,
                         mutation.oldValue
                     );
-                    // TODO: we are writing to DOM to frequently, try diffing a change graph...
-                    // eslint-disable-next-line no-case-declarations
-                    let values;
+                    // TODO (mwfarb): we are writing to DOM too frequently, try diffing a change graph...
                     if (mutation.attributeName === 'class') {
                         if (mutation.target.className.includes('a-mouse-cursor-hover')) {
                             // flush selected attr to dom from grab cursor update
@@ -192,18 +190,15 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                                 console.log('toolbar flush', el.id, toolbarName);
                                 switch (toolbarName) {
                                     case 'translate':
-                                        values = el.getAttribute('position');
-                                        el.setAttribute('position', values);
+                                        el.setAttribute('position', el.getAttribute('position'));
                                         AFRAME.INSPECTOR.selectedEntity.components.position.flushToDOM();
                                         break;
                                     case 'rotate':
-                                        values = el.getAttribute('rotation');
-                                        el.setAttribute('rotation', values);
+                                        el.setAttribute('rotation', el.getAttribute('rotation'));
                                         AFRAME.INSPECTOR.selectedEntity.components.rotation.flushToDOM();
                                         break;
                                     case 'scale':
-                                        values = el.getAttribute('scale');
-                                        el.setAttribute('scale', values);
+                                        el.setAttribute('scale', el.getAttribute('scale'));
                                         AFRAME.INSPECTOR.selectedEntity.components.scale.flushToDOM();
                                         break;
                                     default:
@@ -240,7 +235,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         });
     },
     tick() {
-        // TODO: move these detectors out to a more reliable timing condition
         if (!this.scenegraphDiv) {
             // this.scenegraphDiv = document.getElementById('scenegraph');
             // this.scenegraphDiv = document.getElementById('inspectorContainer');
@@ -346,7 +340,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 }
             }
         }
-        // TODO: fix transformToolbar, is usually late and gets clipped from the global pause()
+        // TODO (mwfarb): fix transformToolbar, is usually late and gets clipped from the global pause()
         if (!this.transformToolbar) {
             if (document.getElementsByClassName('toolbarButtons').length > 0) {
                 // eslint-disable-next-line prefer-destructuring
