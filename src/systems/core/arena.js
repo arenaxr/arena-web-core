@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, Swal, THREE, $ */
+/* global AFRAME, ARENA, ARENAAUTH, Swal, THREE, $ */
 
 import { ARENAMqttConsole, ARENAUtils } from '../../utils';
 import ARENAWebARUtils from '../webar';
@@ -304,7 +304,7 @@ AFRAME.registerSystem('arena-scene', {
      */
     isUsersPermitted() {
         if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
-        return ARENAUtils.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
+        return ARENAAUTH.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
     },
 
     /**
@@ -313,7 +313,7 @@ AFRAME.registerSystem('arena-scene', {
      // * @return {boolean} True if the user has permission to write in this scene.
      */
     isUserSceneWriter() {
-        return ARENAUtils.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
+        return ARENAAUTH.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
     },
 
     /**

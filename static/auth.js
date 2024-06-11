@@ -1,4 +1,4 @@
-/* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal */
+/* global ARENA, ARENAAUTH, ARENADefaults, Swal */
 
 // auth.js
 //
@@ -6,7 +6,6 @@
 // - MQTT broker
 //
 // Required:
-//  <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="../conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
 //  <script src="../static/auth.js"></script>  <!-- browser authorization flow -->
 //
@@ -25,8 +24,27 @@
 
 // auth namespace
 window.ARENAAUTH = {
+    nonScenePaths: ['/scenes/', '/build/', '/programs/', '/network/', '/files/'],
     signInPath: `//${window.location.host}/user/login`,
     signOutPath: `//${window.location.host}/user/logout`,
+    filestoreUploadSchema: {
+        // top level data adds, first
+        gaussian_splatting: ['src'],
+        'gltf-model': ['url'],
+        image: ['url'],
+        'obj-model': ['obj', 'mtl'],
+        'pcd-model': ['url'],
+        'threejs-scene': ['url'],
+        'urdf-model': ['url'],
+        videosphere: ['src'],
+        // next level data.something adds, second
+        'gltf-model-lod': ['gltf-model-lod.detailedUrl'],
+        material: ['material.src'],
+        'material-extras': ['material-extras.overrideSrc'],
+        sound: ['sound.src'],
+        'spe-particles': ['spe-particles.texture'],
+        'video-control': ['video-control.frame_object', 'video-control.video_path'],
+    },
     /**
      * Merge defaults and any URL params into single ARENA.params obj. Nonexistent keys should be checked as undefined.
      */
@@ -45,6 +63,7 @@ window.ARENAAUTH = {
             username: this.user_username,
             fullname: this.user_fullname,
             email: this.user_email,
+            is_staff: this.user_is_staff,
         };
     },
     authCheck() {
@@ -68,7 +87,10 @@ window.ARENAAUTH = {
             Swal.fire({
                 icon: 'error',
                 title,
-                html: text,
+                text,
+                allowEscapeKey: false,
+                allowOutsideClick: true,
+                showConfirmButton: false,
             });
         }
     },
@@ -101,63 +123,49 @@ window.ARENAAUTH = {
      * Request user state data for client-side state management.
      * This is a blocking request
      */
-    requestAuthState() {
+    async requestAuthState() {
         // 'remember' uri for post-login, just before login redirect
         localStorage.setItem('request_uri', window.location.href);
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', `/user/user_state`, false); // Blocking call
-        xhr.setRequestHeader('X-CSRFToken', this.getCookie('csrftoken'));
-        xhr.send();
-        // Block on this request
-        if (xhr.status !== 200) {
-            const title = 'Error loading user state';
-            const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
-            this.authError(title, text);
-        } else {
-            let userStateRes;
-            try {
-                userStateRes = JSON.parse(xhr.response);
-            } catch (e) {
-                const title = 'Error parsing user state';
-                const text = `${e}: ${xhr.response}`;
-                this.authError(title, text);
-            }
-            this.authenticated = userStateRes.authenticated;
-            this.user_type = userStateRes.type; // user database auth state
-            const urlAuthType = ARENA.params.auth;
-            if (urlAuthType !== undefined) {
-                localStorage.setItem('auth_choice', urlAuthType);
-            }
+        const res = await this.makeUserRequest('GET', '/user/user_state');
+        if (!res) return;
+        const userStateRes = await res.json();
+        this.authenticated = userStateRes.authenticated;
+        this.user_type = userStateRes.type; // user database auth state
+        const urlAuthType = ARENA.params.auth;
+        if (urlAuthType !== undefined) {
+            localStorage.setItem('auth_choice', urlAuthType);
+        }
 
-            const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
-            if (this.authenticated) {
-                // auth user login
-                localStorage.setItem('auth_choice', userStateRes.type);
-                this.processUserNames(userStateRes.fullname ? userStateRes.fullname : userStateRes.username);
-                this.user_username = userStateRes.username;
-                this.user_fullname = userStateRes.fullname;
-                this.user_email = userStateRes.email;
-                this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
-            } else if (savedAuthType === 'anonymous') {
-                const urlName = ARENA.params.userName;
-                const savedName = localStorage.getItem('display_name');
-                if (savedName === null) {
-                    if (urlName !== null) {
-                        localStorage.setItem('display_name', urlName);
-                    } else {
-                        localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
-                    }
+        const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
+        if (this.authenticated) {
+            // auth user login
+            localStorage.setItem('auth_choice', userStateRes.type);
+            this.processUserNames(userStateRes.fullname ? userStateRes.fullname : userStateRes.username);
+            this.user_username = userStateRes.username;
+            this.user_fullname = userStateRes.fullname;
+            this.user_email = userStateRes.email;
+            this.user_is_staff = userStateRes.is_staff;
+            await this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
+        } else if (savedAuthType === 'anonymous') {
+            const urlName = ARENA.params.userName;
+            const savedName = localStorage.getItem('display_name');
+            if (savedName === null) {
+                if (urlName !== null) {
+                    localStorage.setItem('display_name', urlName);
+                } else {
+                    localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
                 }
-                const anonName = this.processUserNames(localStorage.getItem('display_name'), 'anonymous-');
-                this.user_username = anonName;
-                this.user_fullname = localStorage.getItem('display_name');
-                this.user_email = 'N/A';
-                this.requestMqttToken('anonymous', anonName, true).then();
-            } else {
-                // user is logged out or new and not logged in
-                window.location.href = this.signInPath;
             }
+            const anonName = this.processUserNames(localStorage.getItem('display_name'), 'anonymous-');
+            this.user_username = anonName;
+            this.user_fullname = localStorage.getItem('display_name');
+            this.user_email = 'N/A';
+            this.user_is_staff = userStateRes.is_staff;
+            await this.requestMqttToken('anonymous', anonName, true).then();
+        } else {
+            // user is logged out or new and not logged in
+            window.location.href = this.signInPath;
         }
     },
     /**
@@ -196,7 +204,6 @@ window.ARENAAUTH = {
      * @param {boolean} completeOnload wait for page load before firing callback
      */
     async requestMqttToken(authType, mqttUsername, completeOnload = false) {
-        const nonScenePaths = ['/scenes/', '/build/', '/programs/', '/network/', '/files/'];
         const authParams = {
             username: mqttUsername,
             id_auth: authType,
@@ -207,7 +214,7 @@ window.ARENAAUTH = {
 
         if (ARENA.params.scene) {
             authParams.scene = decodeURIComponent(ARENA.params.scene);
-        } else if (!nonScenePaths.includes(window.location.pathname)) {
+        } else if (!this.nonScenePaths.includes(window.location.pathname)) {
             // handle full ARENA scene
             if (ARENA.sceneName) {
                 authParams.scene = ARENA.namespacedScene;
@@ -218,28 +225,19 @@ window.ARENAAUTH = {
             authParams.handrightid = true;
         }
         try {
-            const authRes = await fetch('/user/mqtt_auth', {
-                headers: {
-                    'X-CSRFToken': this.getCookie('csrftoken'),
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                method: 'POST',
-                body: new URLSearchParams(authParams),
-            });
-            if (!authRes.ok) {
-                const title = 'Error loading MQTT token';
-                const text = `${authRes.status}: ${authRes.statusText} ${JSON.stringify(authRes.response)}`;
-                this.authError(title, text);
-                return;
-            }
-
-            const authData = await authRes.json();
+            const res = await this.makeUserRequest(
+                'POST',
+                '/user/mqtt_auth',
+                authParams,
+                'application/x-www-form-urlencoded'
+            );
+            if (!res) return;
+            const authData = await res.json();
             this.user_type = authType;
             this.user_username = authData.username;
             // keep payload for later viewing
-            const tokenObj = KJUR.jws.JWS.parse(authData.token);
-            this.token_payload = tokenObj.payloadObj;
-            authData.token_payload = tokenObj.payloadObj;
+            this.token_payload = this.parseJwt(authData.token);
+            authData.token_payload = this.token_payload;
             if (!completeOnload || document.readyState === 'complete') {
                 // Also handle crazy case page already loaded
                 this.completeAuth(authData);
@@ -317,6 +315,213 @@ window.ARENAAUTH = {
         return lines.join('\r\n');
     },
     /**
+     * Long chain of upload dialogs and fetch calls to select and upload a file for the object, returning the updated wire format.
+     * @param {string} sceneName
+     * @param {string} objtype
+     * @param {Object} oldObj
+     */
+    async uploadFileStoreDialog(sceneName, objtype, oldObj, onFileUpload) {
+        let newObj;
+
+        function formatUploadHtmlOptions() {
+            const htmlopt = [];
+            htmlopt.push(`<div style="text-align: left;"><b>Object:</b> ${objtype}<br>`);
+            if (objtype === 'gltf-model') {
+                htmlopt.push(`<input type="checkbox" id="cbhideinar" name="cbhideinar" >
+            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>`);
+            }
+            htmlopt.push(`<div style="text-align: left;">`);
+            let first = true;
+            Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((type) => {
+                // look for object types, look for components
+                if (type === objtype || type in oldObj.data) {
+                    ARENAAUTH.filestoreUploadSchema[type].forEach((element) => {
+                        const prop = `data.${element}`;
+                        htmlopt.push(`<input type="radio" id="radioAttr-${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
+                    <label for="${prop}" style="display: inline-block;">Save URL to ${prop}</label><br>`);
+                        first = false;
+                    });
+                }
+            });
+            htmlopt.push(`</div>`);
+            htmlopt.push(`</div>`);
+            return `${htmlopt.join('')}`;
+        }
+
+        function updateWireFormat(safeFilename, fullDestUrlAttr, storeExtPath, hideinar) {
+            const obj = oldObj;
+            if (obj.object_id === '') {
+                obj.object_id = safeFilename;
+            }
+            // place url nested in wire format
+            const elems = fullDestUrlAttr.split('.');
+            if (elems.length === 3) {
+                obj.data[elems[1]][elems[2]] = `${storeExtPath}`;
+            } else if (elems.length === 2) {
+                obj.data[elems[1]] = `${storeExtPath}`;
+            }
+            if (hideinar) {
+                obj.data['hide-on-enter-ar'] = true;
+            }
+            if (objtype === 'image') {
+                // try to preserve image aspect ratio in mesh, user can scale to resize
+                const img = Swal.getPopup().querySelector('.swal2-image');
+                if (img.width > img.height) {
+                    obj.data.width = img.width / img.height;
+                    obj.data.height = 1;
+                } else {
+                    obj.data.width = 1;
+                    obj.data.height = img.height / img.width;
+                }
+                obj.data.scale = { x: 1, y: 1, z: 1 };
+            }
+            return obj;
+        }
+
+        await Swal.fire({
+            title: `Upload to Filestore & Publish`,
+            html: formatUploadHtmlOptions(),
+            input: 'file',
+            inputAttributes: {
+                'aria-label': `Select File`,
+            },
+            confirmButtonText: 'Upload & Publish',
+            focusConfirm: false,
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            preConfirm: async (resultFileOpen) => {
+                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
+                const safeFilename = fn.replace(/(\W+)/gi, '-');
+                let hideinar = false;
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = async (evt) => {
+                        const file = document.querySelector('.swal2-file');
+                        if (!file) {
+                            Swal.showValidationMessage(`${objtype} file not loaded!`);
+                            return;
+                        }
+                        if (objtype === 'gltf-model') {
+                            // allow model checkboxes hide in ar/vr (recommendations)
+                            hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
+                        }
+                        // request fs token endpoint if auth not ready or expired
+                        let token = this.getCookie('auth');
+                        if (!this.isTokenUsable(token)) {
+                            await this.makeUserRequest('GET', '/user/storelogin');
+                            token = this.getCookie('auth');
+                        }
+                        const fullDestUrlAttr = document.querySelector('input[name=radioAttr]:checked').value;
+                        // update user/staff scoped path
+                        const storeResPrefix = this.user_is_staff ? `users/${this.user_username}/` : ``;
+                        const userFilePath = `scenes/${sceneName}/${resultFileOpen.name}`;
+                        const storeResPath = `${storeResPrefix}${userFilePath}`;
+                        const storeExtPath = `store/users/${this.user_username}/${userFilePath}`;
+                        Swal.fire({
+                            title: 'Wait for Upload',
+                            imageUrl: evt.target.result,
+                            imageAlt: `The uploaded ${objtype}`,
+                            showConfirmButton: false,
+                            showCancelButton: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                // request fs file upload with fs auth
+                                return fetch(`/storemng/api/resources/${storeResPath}?override=true`, {
+                                    method: 'POST',
+                                    headers: {
+                                        Accept: resultFileOpen.type,
+                                        'X-Auth': `${token}`,
+                                    },
+                                    body: file.files[0],
+                                })
+                                    .then((responsePostFS) => {
+                                        if (!responsePostFS.ok) {
+                                            throw new Error(responsePostFS.statusText);
+                                        }
+                                        newObj = updateWireFormat(
+                                            safeFilename,
+                                            fullDestUrlAttr,
+                                            storeExtPath,
+                                            hideinar
+                                        );
+                                        resolve(newObj);
+                                    })
+                                    .catch((error) => {
+                                        Swal.showValidationMessage(`Request failed: ${error}`);
+                                    })
+                                    .finally(() => {
+                                        Swal.hideLoading();
+                                    });
+                            },
+                        }).then((resultDidOpen) => {
+                            if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
+                                console.error(`Upload ${objtype} file dialog timed out!`);
+                            }
+                        });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(resultFileOpen);
+                }).then((obj) => {
+                    Swal.close();
+                    onFileUpload(obj);
+                });
+            },
+        });
+    },
+    /**
+     * Parse the JWT payload into a JSON object.
+     * @param {*} jwt The JWT
+     * @return {Object} the JSON payload
+     */
+    parseJwt(jwt) {
+        const parts = jwt.split('.');
+        if (parts.length !== 3) {
+            throw new Error('JWT format invalid!');
+        }
+        return JSON.parse(atob(parts[1]));
+    },
+    /**
+     * Checks loaded MQTT token for full scene object write permissions.
+     * @param {string} token The JWT token for the user to connect to MQTT.
+     * @param {string} objectsTopic
+     * @return {boolean} True if the user has permission to write in this scene.
+     */
+    isUserSceneEditor(token, objectsTopic) {
+        if (token) {
+            const perms = this.parseJwt(token);
+            if (this.matchJWT(objectsTopic, perms.publ)) {
+                return true;
+            }
+        }
+        return false;
+    },
+    isTokenUsable(token) {
+        if (token) {
+            const payloadObj = this.parseJwt(token);
+            const exp = payloadObj.exp * 1000;
+            const now = new Date().getTime();
+            return now < exp;
+        }
+        return false;
+    },
+    /**
+     * Utility to match MQTT topic within permissions.
+     * @param {string} topic The MQTT topic to test.
+     * @param {string[]} rights The list of topic wild card permissions.
+     * @return {boolean} True if the topic matches the list of topic wildcards.
+     */
+    matchJWT(topic, rights) {
+        const len = rights.length;
+        let valid = false;
+        for (let i = 0; i < len; i++) {
+            if (this.mqttPatternMatches(rights[i], topic)) {
+                valid = true;
+                break;
+            }
+        }
+        return valid;
+    },
+    /**
      * Open profile in new page to avoid mqtt disconnect.
      */
     showProfile() {
@@ -332,8 +537,10 @@ window.ARENAAUTH = {
             html: `<pre style='text-align: left;'>${ARENAAUTH.formatPerms(ARENAAUTH.token_payload)}</pre>`,
         });
     },
+    /**
+     * Private function to set scenename, namespacedScene and namespace.
+     */
     setSceneName() {
-        // private function to set scenename, namespacedScene and namespace
         const _setNames = (ns, sn) => {
             ARENA.namespacedScene = `${ns}/${sn}`;
             ARENA.sceneName = sn;
@@ -367,6 +574,63 @@ window.ARENAAUTH = {
                 _setNames(namespace, sceneName);
             }
         }
+    },
+    /**
+     * Internal call to perform fetch request
+     */
+    async makeUserRequest(method, url, params = undefined, contentType = undefined) {
+        return fetch(url, {
+            headers: {
+                'X-CSRFToken': this.getCookie('csrftoken'),
+                'Content-Type': contentType || null,
+            },
+            method,
+            body: params ? new URLSearchParams(params) : null,
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response;
+                }
+                throw new Error(
+                    `${response.status}: ${response.statusText} - ${url} - ${response.response ? response.response : ''}`
+                );
+            })
+            .catch((error) => {
+                this.authError('Request Error', error.message);
+            });
+    },
+    /**
+     * MQTTPattern matches from: https://github.com/RangerMauve/mqtt-pattern/blob/master/index.js
+     * @param {string} pattern
+     * @param {string} topic
+     * @returns {boolean}
+     */
+    mqttPatternMatches(pattern, topic) {
+        const SEPARATOR = '/';
+        const SINGLE = '+';
+        const ALL = '#';
+        const patternSegments = pattern.split(SEPARATOR);
+        const topicSegments = topic.split(SEPARATOR);
+
+        const patternLength = patternSegments.length;
+        const topicLength = topicSegments.length;
+        const lastIndex = patternLength - 1;
+
+        for (let i = 0; i < patternLength; i++) {
+            const currentPattern = patternSegments[i];
+            const patternChar = currentPattern[0];
+            const currentTopic = topicSegments[i];
+
+            if (!currentTopic && !currentPattern) continue;
+
+            if (!currentTopic && currentPattern !== ALL) return false;
+
+            // Only allow # at end
+            if (patternChar === ALL) return i === lastIndex;
+            if (patternChar !== SINGLE && currentPattern !== currentTopic) return false;
+        }
+
+        return patternLength === topicLength;
     },
 };
 

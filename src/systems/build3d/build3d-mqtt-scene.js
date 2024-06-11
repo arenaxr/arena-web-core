@@ -6,7 +6,7 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, ARENAAUTH */
+/* global AFRAME, ARENA, ARENAAUTH, $ */
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
@@ -15,28 +15,20 @@
 let toolbarName = 'translate';
 
 // register component actions
-const arenaComponentActions = {
-    'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
+const B3DACTIONS = {
+    JSON_EDIT: 'edit-json',
+    FS_UPLOAD: 'upload-to-filestore',
 };
-// const fsUploadActions = {
-//     gaussian_splatting: 'src',
-//     'gltf-lod': 'src',
-//     'gltf-model': 'url',
-//     material: 'src',
-//     'obj-model': 'obj',
-//     'pcd-model': 'url',
-//     sound: 'url',
-//     'threejs-scene': 'url',
-//     'urdf-model': 'url',
-// };
-// Object.keys(fsUploadActions).forEach((property) => {
-//     arenaComponentActions[property] = {
-//         property: fsUploadActions[property],
-//         action: 'upload-to-filestore',
-//         label: 'Upload to Filestore',
-//         icon: 'fa-upload',
-//     };
-// });
+const arenaComponentActions = {
+    'build3d-mqtt-object': { action: B3DACTIONS.JSON_EDIT, label: 'Edit Json', icon: 'fa-code' },
+};
+Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((props) => {
+    arenaComponentActions[props] = {
+        action: B3DACTIONS.FS_UPLOAD,
+        label: 'Upload to Filestore',
+        icon: 'fa-upload',
+    };
+});
 
 function updateMqttWidth() {
     const inspectorMqttLogWrap = document.getElementById('inspectorMqttLogWrap');
@@ -47,7 +39,45 @@ function updateMqttWidth() {
     inspectorMqttLogWrap.style.width = `${correct}px`;
 }
 
-function addComponentAction(componentName, property, dataAction, title, iconName) {
+function publishUploadedFile(newObj) {
+    if (newObj) {
+        console.log('publishing:', newObj.action, newObj);
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
+        AFRAME.INSPECTOR.selectEntity(AFRAME.INSPECTOR.selectedEntity);
+    }
+}
+
+async function handleComponentUploadAction(selectedEntity, componentName) {
+    const oldObj = {
+        object_id: selectedEntity.id,
+        action: 'update',
+        type: 'object',
+        persist: true,
+        data: {}, // preliminary
+    };
+    // merge only, leave as much of original wire format as possible, including object_type
+    const srcs = ARENAAUTH.filestoreUploadSchema[componentName];
+    if (srcs[0]) {
+        if (srcs[0].startsWith(`${componentName}.`)) {
+            // sub-component, test for geometry, if needed
+            oldObj.data[componentName] = {};
+            if ('geometry' in selectedEntity.components) {
+                oldObj.data.object_type = selectedEntity.components.geometry.primitive;
+            }
+        } else {
+            // high-level wire object component
+            oldObj.data.object_type = componentName;
+        }
+    }
+    const newObj = await ARENAAUTH.uploadFileStoreDialog(
+        ARENA.sceneName,
+        oldObj.data.object_type,
+        oldObj,
+        publishUploadedFile
+    );
+}
+
+function addComponentAction(componentName, dataAction, title, iconName) {
     const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
     const thebutton = $(thetitle).siblings(`.componentHeaderActions`).find(`[data-action="${dataAction}"]`);
 
@@ -63,19 +93,19 @@ function addComponentAction(componentName, property, dataAction, title, iconName
         actionButton.dataset.component = componentName;
         actionButton.addEventListener(
             'click',
-            (e) => {
+            async (e) => {
                 const { selectedEntity } = AFRAME.INSPECTOR;
                 switch (dataAction) {
-                    case 'edit-json':
+                    case B3DACTIONS.JSON_EDIT:
                         window.open(
                             `/build/?scene=${ARENA.namespacedScene}&objectId=${selectedEntity.id}`,
                             'ArenaJsonEditor'
                         );
                         break;
-                    case 'upload-to-filestore':
-                        selectedEntity.setAttribute(componentName, property, 'src/systems/ui/images/audio-off.png'); // TODO(mwfarb): remove hack
-                        AFRAME.INSPECTOR.selectEntity(selectedEntity);
+                    case B3DACTIONS.FS_UPLOAD: {
+                        await handleComponentUploadAction(selectedEntity, componentName);
                         break;
+                    }
                     default:
                         console.error(`Build3d data-action '${dataAction}' unsupported!`);
                         break;
@@ -151,9 +181,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                         mutation.target.id,
                         mutation.oldValue
                     );
-                    // TODO: we are writing to DOM to frequently, try diffing a change graph...
-                    // eslint-disable-next-line no-case-declarations
-                    let values;
+                    // TODO (mwfarb): we are writing to DOM too frequently, try diffing a change graph...
                     if (mutation.attributeName === 'class') {
                         if (mutation.target.className.includes('a-mouse-cursor-hover')) {
                             // flush selected attr to dom from grab cursor update
@@ -162,18 +190,15 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                                 console.log('toolbar flush', el.id, toolbarName);
                                 switch (toolbarName) {
                                     case 'translate':
-                                        values = el.getAttribute('position');
-                                        el.setAttribute('position', values);
+                                        el.setAttribute('position', el.getAttribute('position'));
                                         AFRAME.INSPECTOR.selectedEntity.components.position.flushToDOM();
                                         break;
                                     case 'rotate':
-                                        values = el.getAttribute('rotation');
-                                        el.setAttribute('rotation', values);
+                                        el.setAttribute('rotation', el.getAttribute('rotation'));
                                         AFRAME.INSPECTOR.selectedEntity.components.rotation.flushToDOM();
                                         break;
                                     case 'scale':
-                                        values = el.getAttribute('scale');
-                                        el.setAttribute('scale', values);
+                                        el.setAttribute('scale', el.getAttribute('scale'));
                                         AFRAME.INSPECTOR.selectedEntity.components.scale.flushToDOM();
                                         break;
                                     default:
@@ -210,14 +235,11 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         });
     },
     tick() {
-        // TODO: move these detectors out to a more reliable timing condition
         if (!this.scenegraphDiv) {
             // this.scenegraphDiv = document.getElementById('scenegraph');
             // this.scenegraphDiv = document.getElementById('inspectorContainer');
             this.scenegraphDiv = document.getElementById('viewportBar');
             if (this.scenegraphDiv) {
-                console.log('scenegraphTest ok');
-
                 // container
                 const inspectorMqttLogWrap = document.createElement('div');
                 inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
@@ -247,6 +269,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttTitle.style.paddingLeft = '10px';
                 inspectorMqttTitle.textContent = `ARENA's Build3D MQTT Publish Log (user: ${ARENAAUTH.user_username})`;
                 inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
+                // TODO (mwfarb): add open close chevrons for log window in title fa-chevron-up fa-chevron-down
 
                 // log
                 const inspectorMqttLog = document.createElement('div');
@@ -270,7 +293,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         }
         if (!this.components) {
             if (document.getElementsByClassName('components').length > 0) {
-                console.log('componentsTest ok');
                 // eslint-disable-next-line prefer-destructuring
                 this.components = document.getElementsByClassName('components')[0];
                 if (this.components) {
@@ -285,7 +307,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                             Object.keys(arenaComponentActions).forEach((key) => {
                                 addComponentAction(
                                     key,
-                                    arenaComponentActions[key].property,
                                     arenaComponentActions[key].action,
                                     arenaComponentActions[key].label,
                                     arenaComponentActions[key].icon
@@ -304,7 +325,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         }
         if (!this.cursor) {
             if (document.getElementsByClassName('a-grab-cursor').length > 0) {
-                console.log('cursorTest ok');
                 // eslint-disable-next-line prefer-destructuring
                 this.cursor = document.getElementsByClassName('a-grab-cursor')[0];
                 if (this.cursor) {
@@ -319,10 +339,9 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 }
             }
         }
-        // TODO: fix transformToolbar, is usually late and gets clipped from the global pause()
+        // TODO (mwfarb): fix transformToolbar, is usually late and gets clipped from the global pause()
         if (!this.transformToolbar) {
             if (document.getElementsByClassName('toolbarButtons').length > 0) {
-                console.log('transformTest ok');
                 // eslint-disable-next-line prefer-destructuring
                 this.transformToolbar = document.getElementsByClassName('toolbarButtons')[0];
                 if (this.transformToolbar) {
@@ -340,7 +359,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         if (!this.env) {
             this.env = document.getElementById('env');
             if (this.env) {
-                console.log('envTest ok');
                 this.env.setAttribute('build3d-mqtt-object', 'enabled', true);
             }
         }

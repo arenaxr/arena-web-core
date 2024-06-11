@@ -6,7 +6,7 @@
  * @date 2020
  */
 
-/* global ARENAAUTH, ARENADefaults, KJUR */
+/* global ARENAAUTH, ARENADefaults */
 
 /**
  * Wrapper class to perform requests to arena account
@@ -92,14 +92,6 @@ export default class ARENAUserAccount {
     }
 
     /**
-     * Request file tore auth token for this user
-     * @return {} status, should have updated cookie: 'auth'
-     */
-    static async requestStoreLogin() {
-        return ARENAUserAccount._makeRequest('GET', '/user/storelogin');
-    }
-
-    /**
      * Request to delete scene permissions from user db
      * @param authType
      * @param mqttUsername
@@ -119,8 +111,7 @@ export default class ARENAUserAccount {
         ARENAAUTH.user_type = authType;
         ARENAAUTH.user_username = result.username;
         // keep payload for later viewing
-        const tokenObj = KJUR.jws.JWS.parse(result.token);
-        ARENAAUTH.token_payload = tokenObj.payloadObj;
+        ARENAAUTH.token_payload = ARENAAUTH.parseJwt(result.token);
         return { mqtt_username: result.username, mqtt_token: result.token };
     }
 }

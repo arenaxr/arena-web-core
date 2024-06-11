@@ -3,7 +3,6 @@
 /* eslint-disable import/extensions */
 import * as PersistObjects from './persist-objects.js';
 import ARENAUserAccount from './arena-account.js';
-import * as MQTTPattern from './third-party/mqtt-pattern.js';
 
 const Alert = Swal.mixin({
     toast: true,
@@ -65,16 +64,6 @@ window.addEventListener('onauth', async (e) => {
     let newScene = true;
     let saved_namespace;
     let saved_scene;
-
-    const uploadFileTypes = {
-        image: 'image/*',
-        'gltf-model': '*.glb',
-        'obj-model': '*.obj',
-        'pcd-model': '*.pcd',
-        'threejs-scene': '*.json',
-        gaussian_splatting: '*.splat',
-        'urdf-model': '*.urdf',
-    };
 
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector('#copy_json'), {
@@ -166,7 +155,7 @@ window.addEventListener('onauth', async (e) => {
             }
             insertEulerRotationEditor();
             uploadFilestoreButton.style.display =
-                uploadFileTypes[json.data.object_type] === undefined ? 'none' : 'inline';
+                ARENAAUTH.filestoreUploadSchema[json.data.object_type] === undefined ? 'none' : 'inline';
         });
 
         const typeSel = document.getElementsByName('root[type]')[0];
@@ -374,179 +363,30 @@ window.addEventListener('onauth', async (e) => {
         });
     }
 
-    /**
-     * Utility function to get cookie value
-     * @param {string} name cookie name
-     * @return {string} cookie value
-     */
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === `${name}=`) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    function publishUploadedFile(newObj) {
+        if (newObj) {
+            // publish to mqtt
+            const scene = `${namespaceinput.value}/${sceneinput.value}`;
+            PersistObjects.performActionArgObjList('update', scene, [newObj], false);
+            setTimeout(async () => {
+                await PersistObjects.populateObjectList(
+                    `${namespaceinput.value}/${sceneinput.value}`,
+                    objFilter.value,
+                    objTypeFilter,
+                    newObj.object_id
+                );
+                $(`label[innerHTML='${newObj.object_id} (${newObj.data.object_type})']`).focus();
+            }, 500);
+            // push updated data to forms
+            output.value = JSON.stringify(newObj, null, 2);
+            jsoneditor.setValue(newObj);
         }
-        return cookieValue;
     }
 
-    async function uploadSceneFileStore(objtype) {
-        const accept = uploadFileTypes[objtype];
-        const htmlopt =
-            objtype === 'gltf-model'
-                ? `<div style="float: left;">
-            <input type="checkbox" id="cbhideinar" name="cbhideinar" >
-            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
-            </div>`
-                : '';
-        const htmlval = `${htmlopt}`;
-
-        await Swal.fire({
-            title: `Upload ${objtype} to Filestore & Publish`,
-            html: htmlval,
-            input: 'file',
-            inputAttributes: {
-                accept: `${accept}`,
-                'aria-label': `Select ${objtype}`,
-            },
-            confirmButtonText: 'Upload & Publish',
-            focusConfirm: false,
-            showCancelButton: true,
-            cancelButtonText: 'Cancel',
-            showLoaderOnConfirm: true,
-            preConfirm: (resultFileOpen) => {
-                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
-                const safeFilename = fn.replace(/(\W+)/gi, '-');
-                let hideinar = false;
-                const reader = new FileReader();
-                reader.onload = async (evt) => {
-                    const file = document.querySelector('.swal2-file');
-                    if (!file) {
-                        Swal.showValidationMessage(`${objtype} file not loaded!`);
-                        return;
-                    }
-                    if (objtype === 'gltf-model') {
-                        // allow model checkboxes hide in ar/vr (recommendations)
-                        hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
-                    }
-                    // request fs token endpoint if auth not ready or expired
-                    let token = getCookie('auth');
-                    if (!isTokenUsable(token)) {
-                        try {
-                            await ARENAUserAccount.requestStoreLogin();
-                        } catch (err) {
-                            Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
-                            return;
-                        }
-                        token = getCookie('auth');
-                    }
-                    // update user/staff scoped path
-                    const storeResPrefix = authState.is_staff ? `users/${username}/` : ``;
-                    const userFilePath = `scenes/${sceneinput.value}/${resultFileOpen.name}`;
-                    const storeResPath = `${storeResPrefix}${userFilePath}`;
-                    const storeExtPath = `store/users/${username}/${userFilePath}`;
-                    Swal.fire({
-                        title: 'Wait for Upload',
-                        imageUrl: evt.target.result,
-                        imageAlt: `The uploaded ${objtype}`,
-                        showConfirmButton: false,
-                        showCancelButton: true,
-                        cancelButtonText: 'Cancel',
-                        didOpen: () => {
-                            Swal.showLoading();
-                            // request fs file upload with fs auth
-                            return fetch(`/storemng/api/resources/${storeResPath}?override=true`, {
-                                method: 'POST',
-                                headers: {
-                                    Accept: resultFileOpen.type,
-                                    'X-Auth': `${token}`,
-                                },
-                                body: file.files[0],
-                            })
-                                .then((responsePostFS) => {
-                                    if (!responsePostFS.ok) {
-                                        throw new Error(responsePostFS.statusText);
-                                    }
-                                    let obj;
-                                    try {
-                                        obj = JSON.parse(output.value);
-                                    } catch (err) {
-                                        console.error(err);
-                                        throw err;
-                                    }
-                                    if (obj.object_id === '') {
-                                        obj.object_id = safeFilename;
-                                    }
-                                    if (objtype === 'gaussian_splatting') {
-                                        obj.data.src = `${storeExtPath}`;
-                                    } else if (objtype === 'obj-model') {
-                                        obj.data.obj = `${storeExtPath}`;
-                                    } else {
-                                        obj.data.url = `${storeExtPath}`;
-                                    }
-                                    if (hideinar) {
-                                        obj.data['hide-on-enter-ar'] = true;
-                                    }
-                                    if (objtype === 'image') {
-                                        // try to preserve image aspect ratio in mesh, user can scale to resize
-                                        const img = Swal.getPopup().querySelector('.swal2-image');
-                                        if (img.width > img.height) {
-                                            const ratio = img.width / img.height;
-                                            obj.data.width = ratio;
-                                            obj.data.height = 1;
-                                        } else {
-                                            const ratio = img.height / img.width;
-                                            obj.data.width = 1;
-                                            obj.data.height = ratio;
-                                        }
-                                        obj.data.scale = { x: 1, y: 1, z: 1 };
-                                    }
-                                    // publish to mqtt
-                                    const scene = `${namespaceinput.value}/${sceneinput.value}`;
-                                    PersistObjects.performActionArgObjList('create', scene, [obj], false);
-                                    setTimeout(async () => {
-                                        await PersistObjects.populateObjectList(
-                                            `${namespaceinput.value}/${sceneinput.value}`,
-                                            objFilter.value,
-                                            objTypeFilter,
-                                            obj.object_id
-                                        );
-
-                                        $(`label[innerHTML='${obj.object_id} (${objtype})']`).focus();
-                                    }, 500);
-                                    // push updated data to forms
-                                    output.value = JSON.stringify(obj, null, 2);
-                                    jsoneditor.setValue(obj);
-                                })
-                                .catch((error) => {
-                                    Swal.showValidationMessage(`Request failed: ${error}`);
-                                })
-                                .finally(() => {
-                                    Swal.hideLoading();
-                                });
-                        },
-                        willClose: () => {
-                            console.debug('Nothing');
-                        },
-                    }).then((resultDidOpen) => {
-                        if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
-                            console.error(`Upload ${objtype} file dialog timed out!`);
-                        }
-                    });
-                };
-                reader.readAsDataURL(resultFileOpen);
-            },
-        });
-    }
     // switch image/model
     uploadFilestoreButton.addEventListener('click', async () => {
-        const obj = JSON.parse(output.value);
-        await uploadSceneFileStore(obj.data.object_type);
+        const oldObj = JSON.parse(output.value);
+        await ARENAAUTH.uploadFileStoreDialog(sceneinput.value, oldObj.data.object_type, oldObj, publishUploadedFile);
     });
 
     openAddSceneButton.addEventListener('click', async () => {
@@ -1122,7 +962,7 @@ Swal.fire({
  */
 function updatePublishControlsByToken(namespace, scenename, mqttToken) {
     const objectsTopic = `realm/s/${namespace}/${scenename}`;
-    const editor = isUserSceneEditor(mqttToken, objectsTopic);
+    const editor = ARENAAUTH.isUserSceneEditor(mqttToken, objectsTopic);
     const delButton = document.getElementById('delobj');
     const deleteSceneButton = document.getElementById('deletescene');
     if (editor) {
@@ -1135,49 +975,4 @@ function updatePublishControlsByToken(namespace, scenename, mqttToken) {
     document.querySelectorAll('.addobj').forEach((item) => {
         item.disabled = !editor;
     });
-}
-
-/**
- * Utility to match MQTT topic within permissions.
- * @param {string} topic The MQTT topic to test.
- * @param {string[]} rights The list of topic wild card permissions.
- * @return {boolean} True if the topic matches the list of topic wildcards.
- */
-function matchJWT(topic, rights) {
-    const len = rights.length;
-    let valid = false;
-    for (let i = 0; i < len; i++) {
-        if (MQTTPattern.matches(rights[i], topic)) {
-            valid = true;
-            break;
-        }
-    }
-    return valid;
-}
-
-/**
- * Checks loaded MQTT token for full scene object write permissions.
- * @param {string} mqtt_token The JWT token for the user to connect to MQTT.
- * @param {string} objectsTopic
- * @return {boolean} True if the user has permission to write in this scene.
- */
-function isUserSceneEditor(mqtt_token, objectsTopic) {
-    if (mqtt_token) {
-        const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
-        const perms = tokenObj.payloadObj;
-        if (matchJWT(objectsTopic, perms.publ)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isTokenUsable(token) {
-    if (token) {
-        const tokenObj = KJUR.jws.JWS.parse(token);
-        const exp = tokenObj.payloadObj.exp * 1000;
-        const now = new Date().getTime();
-        return now < exp;
-    }
-    return false;
 }

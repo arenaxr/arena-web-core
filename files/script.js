@@ -2,28 +2,7 @@
  * Script to connect to filestore auth endpoint and then load filestore proxy when fs auth completes.
  */
 
-/* global KJUR, $ */
-
-/**
- * Utility function to get cookie value
- * @param {string} name cookie name
- * @return {string} cookie value
- */
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === `${name}=`) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
+/* global ARENAAUTH $ */
 
 /**
  * Loads the html into the page iframe to completion.
@@ -44,27 +23,13 @@ async function loadHtmlToFrame(html) {
 }
 
 /**
- *
- * @param {*} jwt The JWT
- * @return {Object} the JSON payload
- */
-function parseJwt(jwt) {
-    const parts = jwt.split('.');
-    if (parts.length !== 3) {
-        throw new Error('filestore jwt invalid');
-    }
-    const tokenObj = KJUR.jws.JWS.parse(jwt);
-    return tokenObj.payloadObj;
-}
-
-/**
  * Connection to get the filestore proxy url served base html template into the iframe.
  * @param {*} authToken The auth token from filestore. 'None' when not authorized.
  */
 function loadStoreFront(authToken) {
     try {
         // determine the token is formatted well
-        parseJwt(authToken);
+        ARENAAUTH.parseJwt(authToken);
         localStorage.setItem('jwt', authToken);
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = true;
@@ -92,21 +57,6 @@ function loadStoreFront(authToken) {
 }
 
 /**
- * Connection to arena-account endpoint to request filestore auth token.
- */
-function updateStoreLogin() {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/user/storelogin');
-    const csrftoken = getCookie('csrftoken');
-    xhr.setRequestHeader('X-CSRFToken', csrftoken);
-    xhr.send();
-    xhr.onload = () => {
-        const authToken = getCookie('auth');
-        loadStoreFront(authToken);
-    };
-}
-
-/**
  * Get the path location of the iframe for filebrowser
  * @return {string} path
  */
@@ -115,6 +65,8 @@ function getStorePath() {
     return loc;
 }
 
-$(document).ready(() => {
-    updateStoreLogin();
+window.addEventListener('onauth', async (e) => {
+    await ARENAAUTH.makeUserRequest('GET', '/user/storelogin');
+    const authToken = ARENAAUTH.getCookie('auth');
+    loadStoreFront(authToken);
 });
