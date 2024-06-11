@@ -47,6 +47,36 @@ function publishUploadedFile(newObj) {
     }
 }
 
+async function handleComponentUploadAction(selectedEntity, componentName) {
+    const oldObj = {
+        object_id: selectedEntity.id,
+        action: 'update',
+        type: 'object',
+        persist: true,
+        data: {}, // preliminary
+    };
+    // merge only, leave as much of original wire format as possible, including object_type
+    const srcs = ARENAAUTH.filestoreUploadSchema[componentName];
+    if (srcs[0]) {
+        if (srcs[0].startsWith(`${componentName}.`)) {
+            // sub-component, test for geometry, if needed
+            oldObj.data[componentName] = {};
+            if ('geometry' in selectedEntity.components) {
+                oldObj.data.object_type = selectedEntity.components.geometry.primitive;
+            }
+        } else {
+            // high-level wire object component
+            oldObj.data.object_type = componentName;
+        }
+    }
+    const newObj = await ARENAAUTH.uploadFileStoreDialog(
+        ARENA.sceneName,
+        oldObj.data.object_type,
+        oldObj,
+        publishUploadedFile
+    );
+}
+
 function addComponentAction(componentName, dataAction, title, iconName) {
     const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
     const thebutton = $(thetitle).siblings(`.componentHeaderActions`).find(`[data-action="${dataAction}"]`);
@@ -73,27 +103,7 @@ function addComponentAction(componentName, dataAction, title, iconName) {
                         );
                         break;
                     case B3DACTIONS.FS_UPLOAD: {
-                        const oldObj = {
-                            object_id: selectedEntity.id,
-                            action: 'update',
-                            type: 'object',
-                            persist: true,
-                            data: {}, // preliminary
-                        };
-                        const srcs = ARENAAUTH.filestoreUploadSchema[componentName];
-                        if (srcs) {
-                            if (srcs[0].startsWith(`${componentName}.`)) {
-                                oldObj.data[componentName] = {};
-                            } else {
-                                oldObj.data.object_type = componentName;
-                            }
-                        }
-                        const newObj = await ARENAAUTH.uploadFileStoreDialog(
-                            ARENA.sceneName,
-                            oldObj.data.object_type, // TODO: resolve actual type from obj/primitive graph
-                            oldObj,
-                            publishUploadedFile
-                        );
+                        await handleComponentUploadAction(selectedEntity, componentName);
                         break;
                     }
                     default:
