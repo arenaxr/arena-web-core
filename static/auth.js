@@ -320,7 +320,7 @@ window.ARENAAUTH = {
      * @param {string} objtype
      * @param {Object} oldObj
      */
-    async uploadFileStoreDialog(sceneName, objtype, oldObj) {
+    async uploadFileStoreDialog(sceneName, objtype, oldObj, onFileUpload) {
         let newObj;
 
         function formatUploadHtmlOptions() {
@@ -463,9 +463,8 @@ window.ARENAAUTH = {
                     reader.onerror = reject;
                     reader.readAsDataURL(resultFileOpen);
                 }).then((obj) => {
-                    console.log('uploadFileStoreDialog returning object:', obj);
                     Swal.close();
-                    return obj;
+                    onFileUpload(obj);
                 });
             },
         });

@@ -363,11 +363,7 @@ window.addEventListener('onauth', async (e) => {
         });
     }
 
-    // switch image/model
-    uploadFilestoreButton.addEventListener('click', async () => {
-        const oldObj = JSON.parse(output.value);
-        const newObj = await ARENAAUTH.uploadFileStoreDialog(sceneinput.value, oldObj.data.object_type, oldObj);
-        console.log('uploadFileStoreDialog exit', newObj);
+    function publishUploadedFile(newObj) {
         if (newObj) {
             // publish to mqtt
             const scene = `${namespaceinput.value}/${sceneinput.value}`;
@@ -379,13 +375,18 @@ window.addEventListener('onauth', async (e) => {
                     objTypeFilter,
                     newObj.object_id
                 );
-
-                $(`label[innerHTML='${newObj.object_id} (${oldObj.data.object_type})']`).focus();
+                $(`label[innerHTML='${newObj.object_id} (${newObj.data.object_type})']`).focus();
             }, 500);
             // push updated data to forms
             output.value = JSON.stringify(newObj, null, 2);
             jsoneditor.setValue(newObj);
         }
+    }
+
+    // switch image/model
+    uploadFilestoreButton.addEventListener('click', async () => {
+        const oldObj = JSON.parse(output.value);
+        await ARENAAUTH.uploadFileStoreDialog(sceneinput.value, oldObj.data.object_type, oldObj, publishUploadedFile);
     });
 
     openAddSceneButton.addEventListener('click', async () => {

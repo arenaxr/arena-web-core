@@ -39,6 +39,14 @@ function updateMqttWidth() {
     inspectorMqttLogWrap.style.width = `${correct}px`;
 }
 
+function publishUploadedFile(newObj) {
+    if (newObj) {
+        console.log('publishing:', newObj.action, newObj);
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
+        AFRAME.INSPECTOR.selectEntity(AFRAME.INSPECTOR.selectedEntity);
+    }
+}
+
 function addComponentAction(componentName, dataAction, title, iconName) {
     const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
     const thebutton = $(thetitle).siblings(`.componentHeaderActions`).find(`[data-action="${dataAction}"]`);
@@ -83,14 +91,9 @@ function addComponentAction(componentName, dataAction, title, iconName) {
                         const newObj = await ARENAAUTH.uploadFileStoreDialog(
                             ARENA.sceneName,
                             oldObj.data.object_type, // TODO: resolve actual type from obj/primitive graph
-                            oldObj
+                            oldObj,
+                            publishUploadedFile
                         );
-                        console.log('uploadFileStoreDialog exit', newObj);
-                        if (newObj) {
-                            console.log('publishing:', newObj.action, newObj);
-                            ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
-                            AFRAME.INSPECTOR.selectEntity(selectedEntity);
-                        }
                         break;
                     }
                     default:
