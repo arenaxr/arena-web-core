@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.28.0](https://github.com/arenaxr/arena-web-core/compare/v1.27.0...v1.28.0) (2024-06-11)
+
+
+### Features
+
+* **build3d:** add build3d action framework and inside-out object updates ([#643](https://github.com/arenaxr/arena-web-core/issues/643)) ([03f0d5d](https://github.com/arenaxr/arena-web-core/commit/03f0d5de3c716a7ffc27f6076a561ffab62e3bfb))
+* **build3d:** allow build3d upload filestore files through auth refactor ([#646](https://github.com/arenaxr/arena-web-core/issues/646)) ([d18bbda](https://github.com/arenaxr/arena-web-core/commit/d18bbda55d5c3294ffd7037c7907da0eaaa0ff48))
+* **obj-model:** Add obj-model component schema, load progress, upload ([#642](https://github.com/arenaxr/arena-web-core/issues/642)) ([27aa4c0](https://github.com/arenaxr/arena-web-core/commit/27aa4c0ae7b04ff23ff246476ba222449c9e9d30))
+
+
+### Bug Fixes
+
+* add model to scene; fix timing issue ([b3c5291](https://github.com/arenaxr/arena-web-core/commit/b3c5291efd98542a214838009d0ad48d5e0f308a))
+* **build3d:** fix build3d auto-play scene, add green nav bar ([7aeeeca](https://github.com/arenaxr/arena-web-core/commit/7aeeecae1a37e97a774b901e7d8f72407853ded7))
+* **build3d:** make build3d viewport bar opacity consistent ([e06b29f](https://github.com/arenaxr/arena-web-core/commit/e06b29fe8755c584d144313f079380d3e43a839f))
+* **build3d:** make mqtt log panel responsive ([d062203](https://github.com/arenaxr/arena-web-core/commit/d0622036745fb14e86c162944b0b1291a95ddf7d))
+* **build:** avoid grid layout on all but TRS and arena-object defs ([91fa9f7](https://github.com/arenaxr/arena-web-core/commit/91fa9f79316919d186ed317732bd3e928e1d6d1f))
+* defer static/dynamic-body component set ([00538cc](https://github.com/arenaxr/arena-web-core/commit/00538cc485df629827e4884180099eb709088cd9))
+* draco path ([533654a](https://github.com/arenaxr/arena-web-core/commit/533654a85d7e50125ce7b590135e9a25f6de3d36))
+* import path ([cad37e3](https://github.com/arenaxr/arena-web-core/commit/cad37e342a712cfe874e9e17704d6c89b7c886d3))
+* remove xacro-parser folder ([32fcff2](https://github.com/arenaxr/arena-web-core/commit/32fcff28c62ccb42ac366ccd598e513ebff6cc3b))
+* use repo as dependency ([934e032](https://github.com/arenaxr/arena-web-core/commit/934e032231820428946a0dd616e122e583e875b5))
+
 ## [1.27.0](https://github.com/arenaxr/arena-web-core/compare/v1.26.6...v1.27.0) (2024-05-03)
 
 
