@@ -461,3 +461,9 @@ export default class ARENAUtils {
         }
     }
 }
+
+// eslint-disable-next-line no-extend-native
+String.prototype.formatStr = function formatStr(...args) {
+    const params = arguments.length === 1 && typeof args[0] === 'object' ? args[0] : args;
+    return this.replace(/\{([^}]+)\}/g, (match, key) => (typeof params[key] !== 'undefined' ? params[key] : match));
+};
