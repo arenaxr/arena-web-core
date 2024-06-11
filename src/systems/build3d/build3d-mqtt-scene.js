@@ -305,7 +305,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
 
                             // query active components
                             Object.keys(arenaComponentActions).forEach((key) => {
-                                // TODO (mwfarb): allow only build3d-mqtt-object enabled for actions
                                 addComponentAction(
                                     key,
                                     arenaComponentActions[key].action,
