@@ -62,11 +62,10 @@ AFRAME.registerSystem('arena-scene', {
         this.nameSpace = ARENA.nameSpace;
         this.namespacedScene = ARENA.namespacedScene;
 
-        // Sets persistenceUrl, outputTopic, renderTopic, vioTopic
+        // Sets persistenceUrl, outputTopic, renderTopic
         this.persistenceUrl = `//${this.params.persistHost}${this.params.persistPath}${this.namespacedScene}`;
         this.outputTopic = `${this.params.realm}/s/${this.namespacedScene}/`;
         this.renderTopic = `${this.outputTopic}#`;
-        this.vioTopic = `${this.params.realm}/vio/${this.namespacedScene}/`;
 
         this.events = sceneEl.systems['arena-event-manager'];
         this.health = sceneEl.systems['arena-health-ui'];
@@ -269,10 +268,6 @@ AFRAME.registerSystem('arena-scene', {
 
         // set camName
         this.camName = `camera_${this.idTag}`; // e.g. camera_1234_eric
-        // if fixedCamera is given, then camName must be set accordingly
-        if (this.params.fixedCamera) {
-            this.camName = this.params.fixedCamera;
-        }
 
         // set faceName, avatarName, handLName, handRName which depend on user name
         this.faceName = `face_${this.idTag}`; // e.g. face_9240_X
@@ -409,11 +404,6 @@ AFRAME.registerSystem('arena-scene', {
                 }
                 cameraEl.object3D.position.copy(startPos);
                 cameraEl.object3D.position.y += data.camHeight;
-            }
-
-            // enable vio if fixedCamera is given
-            if (this.params.fixedCamera) {
-                cameraEl.setAttribute('arena-camera', 'vioEnabled', true);
             }
 
             // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now

@@ -13,20 +13,16 @@ import { ARENAUtils } from '../../utils';
  * Tracking camera movement in real time. Emits camera pose change and VIO change events.
  * @module arena-camera
  * @property {boolean} enabled - Indicates whether camera tracking is enabled.
- * @property {boolean} vioEnabled - Indicates whether to publish VIO on every tick (if true).
  * @property {string} displayName - User display name (used to publish camera data).
  * @property {string} color - Head text color.
  * @property {number[]} rotation - Last camera rotation value.
  * @property {number[]} position - Last camera position value.
- * @property {number[]} vioRotation - Last VIO rotation value.
- * @property {number[]} vioPosition - Last VIO position value.
  * @property {boolean} showStats - Display camera position on the screen.
  *
  */
 AFRAME.registerComponent('arena-camera', {
     schema: {
         enabled: { type: 'boolean', default: false },
-        vioEnabled: { type: 'boolean', default: false },
         displayName: { type: 'string', default: 'No Name' },
         color: { type: 'string', default: `#${ARENAUtils.numToPaddedHex(Math.floor(Math.random() * 16777215), 6)}` },
         showStats: { type: 'boolean', default: false },
@@ -41,8 +37,6 @@ AFRAME.registerComponent('arena-camera', {
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
-        this.vioRotation = new THREE.Quaternion();
-        this.vioPosition = new THREE.Vector3();
     },
 
     ready() {
@@ -55,7 +49,6 @@ AFRAME.registerComponent('arena-camera', {
         this.jitsi = sceneEl.systems['arena-jitsi'];
 
         this.lastPos = new THREE.Vector3();
-        this.vioMatrix = new THREE.Matrix4();
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
@@ -73,7 +66,6 @@ AFRAME.registerComponent('arena-camera', {
 
         // send initial create
         this.publishPose('create');
-        this.publishVio('create');
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
@@ -159,38 +151,6 @@ AFRAME.registerComponent('arena-camera', {
     },
 
     /**
-     * Publish user VIO
-     * @param {string} action One of 'update' or 'create' actions sent in the publish message
-     * @ignore
-     */
-    publishVio(action = 'update') {
-        const { data, vioPosition, vioRotation } = this;
-
-        const msg = {
-            object_id: this.arena.camName,
-            action,
-            type: 'object',
-            data: {
-                object_type: 'camera',
-                position: {
-                    x: parseFloat(vioPosition.x.toFixed(3)),
-                    y: parseFloat(vioPosition.y.toFixed(3)),
-                    z: parseFloat(vioPosition.z.toFixed(3)),
-                },
-                rotation: {
-                    // always send quaternions over the wire
-                    x: parseFloat(vioRotation._x.toFixed(3)),
-                    y: parseFloat(vioRotation._y.toFixed(3)),
-                    z: parseFloat(vioRotation._z.toFixed(3)),
-                    w: parseFloat(vioRotation._w.toFixed(3)),
-                },
-                color: data.color,
-            },
-        };
-        this.mqtt.publish(`${this.arena.vioTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
-    },
-
-    /**
      * Update component data
      * @ignore
      */
@@ -216,7 +176,7 @@ AFRAME.registerComponent('arena-camera', {
      */
     tick() {
         if (!this.initialized) return;
-        const { data, el, position, rotation, vioPosition, vioRotation } = this;
+        const { el, position, rotation } = this;
 
         this.heartBeatCounter++;
 
@@ -229,13 +189,6 @@ AFRAME.registerComponent('arena-camera', {
         this.cpi.copy(this.camParent).invert();
         // this.cpi.getInverse(this.camParent);
         this.cpi.multiply(this.cam);
-
-        if (data.vioEnabled) {
-            this.vioMatrix.copy(this.cpi);
-            vioRotation.setFromRotationMatrix(this.cpi);
-            vioPosition.setFromMatrixPosition(this.cpi);
-            this.publishVio(); // publish vio on every tick (if enabled)
-        }
 
         const rotationCoords = ARENAUtils.rotToText(rotation);
         const positionCoords = ARENAUtils.coordsToText(position);
