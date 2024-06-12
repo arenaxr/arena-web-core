@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-import { ARENA_EVENTS } from '../../constants';
+import { ARENA_EVENTS, TOPICS } from '../../constants';
 
 // path to controller models
 const handControllerPath = {
@@ -63,12 +63,15 @@ AFRAME.registerComponent('arena-hand', {
 
         this.mqtt = sceneEl.systems['arena-mqtt'];
 
-        this.arena = sceneEl.systems['arena-scene'];
-
         // capitalize hand type
         data.hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
 
-        this.name = data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;
+        this.name = data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+
+        this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr({
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+        });
 
         el.addEventListener('controllerconnected', () => {
             el.setAttribute('visible', true);
@@ -81,13 +84,13 @@ AFRAME.registerComponent('arena-hand', {
                     object_type: `hand${data.hand}`,
                     position: { x: 0, y: -1, z: 0 },
                     url: this.getControllerURL(),
-                    dep: this.arena.camName,
+                    dep: ARENA.camName,
                 },
             };
             if (msg.data.url.includes('magicleap')) {
                 msg.data.scale = { x: 0.01, y: 0.01, z: 0.01 };
             }
-            this.mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
+            this.mqtt.publish(this.topicBase.formatStr({ userObj: this.name }), msg);
             data.enabled = true;
         });
 
@@ -95,7 +98,7 @@ AFRAME.registerComponent('arena-hand', {
             el.setAttribute('visible', false);
             el.setAttribute('collision-publisher', 'enabled', false);
             // when disconnected, try to cleanup hands
-            this.mqtt.publish(`${this.arena.outputTopic}${this.name}`, {
+            this.mqtt.publish(this.topicBase.formatStr({ userObj: this.name }), {
                 object_id: this.name,
                 action: 'delete',
             });
@@ -114,7 +117,7 @@ AFRAME.registerComponent('arena-hand', {
             });
         });
 
-        this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.params.camUpdateIntervalMs, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.params.camUpdateIntervalMs, this);
 
         this.initialized = true;
     },
@@ -152,13 +155,13 @@ AFRAME.registerComponent('arena-hand', {
                     w: parseFloat(this.rotation._w.toFixed(3)),
                 },
                 url: this.getControllerURL(),
-                dep: this.arena.camName,
+                dep: ARENA.camName,
             },
         };
         if (msg.data.url.includes('magicleap')) {
             msg.data.scale = { x: 0.01, y: 0.01, z: 0.01 };
         }
-        this.mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
+        this.mqtt.publish(this.topicBase.formatStr({ userObj: this.name }), msg);
     },
 
     eventAction(evt, eventName) {
@@ -174,26 +177,23 @@ AFRAME.registerComponent('arena-hand', {
         };
 
         // publish to MQTT
-        const handName = this.name;
-        if (handName) {
-            // publishing events attached to user id objects allows sculpting security
-            this.mqtt.publish(`${this.arena.outputTopic}${handName}`, {
-                object_id: handName,
-                action: 'clientEvent',
-                type: eventName,
-                data: {
-                    position: coordsData,
-                    source: handName,
-                },
-            });
-        }
+        // publishing events attached to user id objects allows sculpting security
+        this.mqtt.publish(this.topicBase.formatStr({ userObj: this.name }), {
+            object_id: this.name,
+            action: 'clientEvent',
+            type: eventName,
+            data: {
+                position: coordsData,
+                source: this.name,
+            },
+        });
     },
 
     tick() {
         if (!this.initialized) return;
 
         if (!this.name) {
-            this.name = this.data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;
+            this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
         }
 
         // TODO:(mwfarb): resolve oculus-touch controls publishing +43 x-axis rotation orientationOffset from arena-web
