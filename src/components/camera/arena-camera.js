@@ -66,7 +66,7 @@ AFRAME.registerComponent('arena-camera', {
         this.heartBeatCounter = 0;
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.params.camUpdateIntervalMs, this);
 
-        this.topicBase = TOPICS.PUBLISH.SCENE_CAMERA.formatStr({
+        this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr({
             nameSpace: ARENA.nameSpace,
             sceneName: ARENA.sceneName,
         });
@@ -156,7 +156,7 @@ AFRAME.registerComponent('arena-camera', {
         }
 
         // extra timestamp info at end for debugging
-        this.mqtt.publish(this.topicBase.formatStr({ camName: ARENA.camName }), msg);
+        this.mqtt.publish(this.topicBase.formatStr({ userObj: ARENA.camName }), msg);
     },
 
     /**

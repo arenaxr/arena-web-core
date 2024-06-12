@@ -10,7 +10,6 @@
 
 /** *
  outputTopic
- vioTopic
  defaults.realm
 
  FACE_TOPIC
@@ -50,10 +49,8 @@ const TOPICS = Object.freeze({
         CHAT_PRIVATE:          'realm/c/{nameSpace}/p/{toUid}/{idTag}',
         DEVICE:                'realm/d/{nameSpace}/{sceneName}/{idTag}',
         SCENE_PRESENCE:        'realm/s/{nameSpace}/{sceneName}/x/{idTag}',
-        SCENE_CAMERA:          'realm/s/{nameSpace}/{sceneName}/u/{camName}',
-        SCENE_CAMERA_PRIVATE:  'realm/s/{nameSpace}/{sceneName}/u/{toUid}/{camName}',
-        SCENE_HAND:            'realm/s/{nameSpace}/{sceneName}/u/{handName}',
-        SCENE_HAND_PRIVATE:    'realm/s/{nameSpace}/{sceneName}/u/{toUid}/{camName}',
+        SCENE_USER:            'realm/s/{nameSpace}/{sceneName}/u/{userObj}',
+        SCENE_USER_PRIVATE:    'realm/s/{nameSpace}/{sceneName}/u/{toUid}/{userObj}',
         SCENE_OBJECTS:         'realm/s/{nameSpace}/{sceneName}/o/{objectId}', // All client placeholder
         SCENE_OBJECTS_PRIVATE: 'realm/s/{nameSpace}/{sceneName}/o/{toUid}/{camName}',
         SCENE_RENDER:          'realm/s/{nameSpace}/{sceneName}/r/{camName}',
