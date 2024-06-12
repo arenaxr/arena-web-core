@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-import { ARENA_EVENTS } from '../../constants';
+import { ARENA_EVENTS, TOPICS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
 /**
@@ -44,7 +44,6 @@ AFRAME.registerComponent('arena-camera', {
 
         const { sceneEl } = el;
 
-        this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
 
@@ -61,8 +60,16 @@ AFRAME.registerComponent('arena-camera', {
         this.lastPose = '';
         this.videoDefaultResolutionSet = false;
 
+        this.presenceEl = document.getElementById('presenceSelect');
+        this.headModelPathEl = document.getElementById('headModelPathSelect');
+
         this.heartBeatCounter = 0;
-        this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.params.camUpdateIntervalMs, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.params.camUpdateIntervalMs, this);
+
+        this.topicBase = TOPICS.PUBLISH.SCENE_CAMERA.formatStr({
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+        });
 
         // send initial create
         this.publishPose('create');
@@ -104,7 +111,7 @@ AFRAME.registerComponent('arena-camera', {
 
         const arenaUser = { displayName: data.displayName, color: data.color };
         const msg = {
-            object_id: this.arena.camName,
+            object_id: ARENA.camName,
             action,
             type: 'object',
             data: {
@@ -124,9 +131,10 @@ AFRAME.registerComponent('arena-camera', {
                 'arena-user': arenaUser,
             },
         };
-        const presence = document.getElementById('presenceSelect');
-        if (presence) {
-            arenaUser.presence = presence.value;
+        if (this.presenceEl) {
+            arenaUser.presence = this.presenceEl.value;
+        } else {
+            this.presenceEl = document.getElementById('presenceSelect');
         }
 
         if (this.jitsi.initialized) {
@@ -135,19 +143,20 @@ AFRAME.registerComponent('arena-camera', {
             arenaUser.hasVideo = this.jitsi.hasVideo;
         }
 
-        const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
+        const faceTracker = this.el.sceneEl.systems['face-tracking'];
         if (faceTracker && faceTracker.isEnabled()) {
             arenaUser.hasAvatar = faceTracker.isRunning();
         }
 
-        const headModelPathSelect = document.getElementById('headModelPathSelect');
-        if (headModelPathSelect) {
-            arenaUser.headModelPath = headModelPathSelect.value;
+        if (this.headModelPathEl) {
+            arenaUser.headModelPath = this.headModelPathEl.value;
         } else {
-            arenaUser.headModelPath = this.arena.defaults.headModelPath;
+            arenaUser.headModelPath = ARENA.defaults.headModelPath;
+            this.headModelPathEl = document.getElementById('headModelPathSelect');
         }
 
-        this.mqtt.publish(`${this.arena.outputTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
+        // extra timestamp info at end for debugging
+        this.mqtt.publish(this.topicBase.formatStr({ camName: ARENA.camName }), msg);
     },
 
     /**
@@ -195,14 +204,14 @@ AFRAME.registerComponent('arena-camera', {
         const newPose = `${rotationCoords} ${positionCoords}`;
 
         // update position if pose changed, or every 1 sec heartbeat
-        if (this.heartBeatCounter % (1000 / this.arena.params.camUpdateIntervalMs) === 0) {
+        if (this.heartBeatCounter % (1000 / ARENA.params.camUpdateIntervalMs) === 0) {
             // heartbeats are sent as create; TMP: sending as updates
             this.publishPose();
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
             this.lastPos.copy(this.el.object3D.position);
-            this.lastPos.y -= this.arena.defaults.camHeight;
-            sceneHist[this.arena.namespacedScene] = {
-                ...sceneHist[this.arena.namespacedScene],
+            this.lastPos.y -= ARENA.defaults.camHeight;
+            sceneHist[ARENA.namespacedScene] = {
+                ...sceneHist[ARENA.namespacedScene],
                 lastPos: this.lastPos,
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
@@ -225,24 +234,19 @@ AFRAME.registerComponent('arena-camera', {
         }
         this.lastPose = newPose;
 
-        if (
-            !this.videoDefaultResolutionSet &&
-            ARENA &&
-            this.jitsi.initialized &&
-            this.arena.videoDefaultResolutionConstraint
-        ) {
+        if (!this.videoDefaultResolutionSet && this.jitsi.initialized && ARENA?.videoDefaultResolutionConstraint) {
             // set scene-options, videoDefaultResolutionConstraint, only once
-            this.jitsi.setDefaultResolutionRemotes(this.arena.videoDefaultResolutionConstraint);
+            this.jitsi.setDefaultResolutionRemotes(ARENA.videoDefaultResolutionConstraint);
             this.videoDefaultResolutionSet = true;
         }
     },
 
     isVideoFrustumCullingEnabled() {
-        return ARENA && this.arena.videoFrustumCulling;
+        return ARENA?.videoFrustumCulling;
     },
 
     isVideoDistanceConstraintsEnabled() {
-        return ARENA && this.arena.videoDistanceConstraints;
+        return ARENA?.videoDistanceConstraints;
     },
 
     viewIntersectsObject3D(obj3D) {
