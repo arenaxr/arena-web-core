@@ -6,6 +6,9 @@
  * @date 2020
  */
 
+import { ARENAUtils } from '../../utils';
+import { TOPICS } from '../../constants';
+
 /**
  * Listen for collisions, callback on event.
  * Requires [Physics for A-Frame VR]{@link https://github.com/c-frame/aframe-physics-system}
@@ -15,6 +18,15 @@
 AFRAME.registerComponent('collision-listener', {
     // listen for collisions, call defined function on event evt
     init() {
+        const topicParams = {
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+            userObj: ARENA.camName,
+        };
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+
         // console.log("collision-listener Component init");
         this.el.addEventListener('collide', function onCollide(evt) {
             // colliding object, only act if is clients' own
@@ -41,7 +53,7 @@ AFRAME.registerComponent('collision-listener', {
                 },
             };
             // publishing events attached to user id objects allows sculpting security
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+            ARENAUtils.publishClientEvent(this.el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
         });
     },
 });
