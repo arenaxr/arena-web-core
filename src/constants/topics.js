@@ -10,7 +10,6 @@
 
 /** *
  outputTopic
- renderTopic
  defaults.realm
  FACE_TOPIC
  CLIENT_DISCONNECT_TOPIC_PREFIX

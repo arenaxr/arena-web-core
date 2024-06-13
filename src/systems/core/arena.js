@@ -10,7 +10,7 @@
 
 import { ARENAMqttConsole, ARENAUtils } from '../../utils';
 import ARENAWebARUtils from '../webar';
-import { ARENA_EVENTS, JITSI_EVENTS } from '../../constants';
+import { ARENA_EVENTS, JITSI_EVENTS, TOPICS } from '../../constants';
 import RuntimeMngr from './runtime-mngr';
 
 AFRAME.registerSystem('arena-scene', {
@@ -62,10 +62,9 @@ AFRAME.registerSystem('arena-scene', {
         this.nameSpace = ARENA.nameSpace;
         this.namespacedScene = ARENA.namespacedScene;
 
-        // Sets persistenceUrl, outputTopic, renderTopic
+        // Sets persistenceUrl, outputTopic
         this.persistenceUrl = `//${this.params.persistHost}${this.params.persistPath}${this.namespacedScene}`;
         this.outputTopic = `${this.params.realm}/s/${this.namespacedScene}/`;
-        this.renderTopic = `${this.outputTopic}#`;
 
         this.events = sceneEl.systems['arena-event-manager'];
         this.health = sceneEl.systems['arena-health-ui'];
@@ -306,11 +305,18 @@ AFRAME.registerSystem('arena-scene', {
 
     /**
      * Checks token for full scene object write permissions.
-     // * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      // * @return {boolean} True if the user has permission to write in this scene.
      */
     isUserSceneWriter() {
-        return ARENAAUTH.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
+        const writeTopic = TOPICS.SCENE_PUBLIC.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+        });
+        return ARENAAUTH.matchJWT(writeTopic, this.mqttToken.token_payload.publ);
     },
 
     /**
