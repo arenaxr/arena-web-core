@@ -1,5 +1,6 @@
 /* global AFRAME, ARENA */
 
+import { TOPICS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
 /**
@@ -23,6 +24,14 @@ AFRAME.registerComponent('click-listener', {
 
     init() {
         this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
+        const topicParams = {
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+            userObj: ARENA.camName,
+        };
+        this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        this.topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        this.topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
         this.mousedownHandler = (evt) => {
             this.mouseEvtHandler(evt, 'mousedown');
@@ -61,6 +70,7 @@ AFRAME.registerComponent('click-listener', {
         this.el.removeEventListener('mouseleave', this.mouseleaveHandler);
     },
     mouseEvtHandler(evt, evtType) {
+        const { el, topicBase, topicBasePrivate, topicBasePrivateProg } = this;
         if (this.data.bubble === false) {
             evt.stopPropagation();
         }
@@ -86,7 +96,7 @@ AFRAME.registerComponent('click-listener', {
             };
             if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
                 // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+                ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
             }
         }
     },
