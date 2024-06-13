@@ -10,11 +10,9 @@
 
 /** *
  outputTopic
+ renderTopic
  defaults.realm
-
  FACE_TOPIC
-
-
  CLIENT_DISCONNECT_TOPIC_PREFIX
 
  # chat
@@ -31,6 +29,15 @@ const objectId = ''; // Template in object
 const { nameSpace, idTag, camName, sceneName, userName } = ARENA;
 
  ** */
+
+/**
+ * ARENA pubsub topic variables
+ * - nameSpace - namespace of the scene
+ * - sceneName - name of the scene
+ * - userName - name of the user per arena-auth (e.g. jdoe)
+ * - idTag - username prefixed with a uuid (e.g. 1448081341_jdoe)
+ * - camName - idTag prefixed with camera_ (e.g. camera_1448081341_jdoe)
+ */
 
 // prettier-ignore
 const TOPICS = Object.freeze({

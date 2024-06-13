@@ -35,7 +35,7 @@ class MQTTWorker {
         this.config = ARENAConfig;
         this.healthCheck = healthCheck;
 
-        this.subscriptions = [this.config.renderTopic]; // Add main scene renderTopic by default to subs
+        this.subscriptions = this.config.subscriptions;
         this.connectionLostHandlers = [
             (responseObject) => {
                 if (responseObject.errorCode !== 0) {
