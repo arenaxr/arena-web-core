@@ -460,6 +460,30 @@ export default class ARENAUtils {
             }
         }
     }
+
+    /**
+     * Publishes clientEvent when interacting with objects. This can be directed to several possible topics
+     * depending on the object being a private object.
+     * @param {HTMLElement} objectEl - object element
+     * @param {object} msg - message to publish
+     * @param {string} scenePublic - public scene topic to publish to
+     * @param {string} scenePrivate - private scene topic to publish to
+     * @param {string} programPrivate - private program topic to publish to
+     */
+    static publishClientEvent(objectEl, msg, scenePublic, scenePrivate, programPrivate) {
+        let pubTopic;
+        const privateAttr = objectEl.getAttribute('private');
+        if (privateAttr) {
+            if (privateAttr === true) {
+                pubTopic = scenePrivate.formatStr({ toUid: privateAttr }); // Send to the specified program
+            } else {
+                pubTopic = programPrivate.formatStr({ toUid: objectEl.id }); // Send to the target object itself
+            }
+        } else {
+            pubTopic = scenePublic; // Public client event
+        }
+        ARENA.Mqtt.publish(pubTopic, msg);
+    }
 }
 
 // eslint-disable-next-line no-extend-native
