@@ -24,16 +24,16 @@ AFRAME.registerComponent('click-listener', {
     init() {
         this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
 
-        this.mouseleaveHandler = (evt) => {
+        this.mousedownHandler = (evt) => {
             this.mouseEvtHandler(evt, 'mousedown');
         };
-        this.mouseenterHandler = (evt) => {
+        this.mouseupHandler = (evt) => {
             this.mouseEvtHandler(evt, 'mouseup');
         };
-        this.mousedownHandler = (evt) => {
+        this.mouseenterHandler = (evt) => {
             this.mouseEvtHandler(evt, 'mouseenter');
         };
-        this.mouseupHandler = (evt) => {
+        this.mouseleaveHandler = (evt) => {
             this.mouseEvtHandler(evt, 'mouseleave');
         };
     },
@@ -77,7 +77,7 @@ AFRAME.registerComponent('click-listener', {
             const thisMsg = {
                 object_id: this.el.id,
                 action: 'clientEvent',
-                evtType,
+                type: evtType,
                 data: {
                     clickPos,
                     position: coordsData,
