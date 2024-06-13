@@ -9,7 +9,7 @@
 // 'use strict';
 import { proxy, wrap } from 'comlink';
 import { ClientEvent, CreateUpdate, Delete } from './message-actions/index';
-import { ARENA_EVENTS, ACTIONS } from '../../constants';
+import { ARENA_EVENTS, ACTIONS, TOPICS } from '../../constants';
 
 const warn = AFRAME.utils.debug('ARENA:MQTT:warn');
 // const error = AFRAME.utils.debug('ARENA:MQTT:error');
@@ -29,19 +29,17 @@ AFRAME.registerSystem('arena-mqtt', {
 
         const { sceneEl } = el;
 
-        this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
 
         // set up MQTT params for worker
-        this.userName = this.arena.mqttToken.mqtt_username;
+        this.userName = ARENA.mqttToken.mqtt_username;
         this.mqttHost = ARENA.params.mqttHost ?? data.mqttHost;
         this.mqttHostURI = `wss://${this.mqttHost}${data.mqttPath[Math.floor(Math.random() * data.mqttPath.length)]}`;
 
         this.MQTTWorker = await this.initWorker();
 
-        const mqttToken = this.arena.mqttToken.mqtt_token;
-        const { camName } = this.arena;
-        const { outputTopic } = this.arena;
+        const mqttToken = ARENA.mqttToken.mqtt_token;
+        const { nameSpace, sceneName, idTag } = ARENA;
         // Do not pass functions in mqttClientOptions
         ARENA.Mqtt = this; // Restore old alias
         this.connect(
@@ -55,20 +53,27 @@ AFRAME.registerSystem('arena-mqtt', {
                 ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
             }),
             // last will message
-            JSON.stringify({ object_id: camName, action: 'delete' }),
+            JSON.stringify({ object_id: idTag, action: 'delete' }),
             // last will topic
-            outputTopic + camName
+            // TODO: handle /x/ presence messages for user camera/hands objs and chat
+            TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
+                nameSpace,
+                sceneName,
+                idTag,
+            })
         );
     },
 
     async initWorker() {
-        const { renderTopic } = this.arena;
-        const { idTag } = this.arena;
+        const { nameSpace, sceneName, camName, idTag } = ARENA;
 
         const MQTTWorker = wrap(new Worker(new URL('./workers/mqtt-worker.js', import.meta.url), { type: 'module' }));
         const worker = await new MQTTWorker(
             {
-                renderTopic,
+                subscriptions: [
+                    TOPICS.SUBSCRIBE.SCENE_PUBLIC.formatStr({ nameSpace, sceneName }),
+                    TOPICS.SUBSCRIBE.SCENE_PRIVATE.formatStr({ nameSpace, sceneName, camName }),
+                ],
                 mqttHostURI: this.mqttHostURI,
                 idTag,
             },
