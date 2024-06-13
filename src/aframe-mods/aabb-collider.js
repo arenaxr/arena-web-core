@@ -9,6 +9,7 @@
 /* global AFRAME, ARENA, THREE */
 
 import { ARENAUtils } from '../utils';
+import { TOPICS } from '../constants';
 
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');
@@ -358,9 +359,18 @@ AFRAME.registerComponent('box-collision-publisher', {
     },
     init() {
         const thisEl = this.el;
+        const sourceName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
+        const topicParams = {
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+            userObj: sourceName,
+        };
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+
         thisEl.addEventListener('box-collide-start', (e) => {
             e.detail.intersectedEls.forEach((inEl) => {
-                const sourceName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
                 const thisMsg = {
                     object_id: inEl.id,
                     action: 'clientEvent',
@@ -371,13 +381,11 @@ AFRAME.registerComponent('box-collision-publisher', {
                         position: ARENAUtils.getWorldPos(thisEl),
                     },
                 };
-                // This is either the camera or a hand
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${sourceName}`, thisMsg);
+                ARENAUtils.publishClientEvent(inEl, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
             });
         });
         thisEl.addEventListener('box-collide-end', (e) => {
             e.detail.endIntersectedEls.forEach((inEl) => {
-                const sourceName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
                 const thisMsg = {
                     object_id: inEl.id,
                     action: 'clientEvent',
@@ -388,8 +396,7 @@ AFRAME.registerComponent('box-collision-publisher', {
                         position: ARENAUtils.getWorldPos(thisEl),
                     },
                 };
-                // This is either the camera or a hand
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${sourceName}`, thisMsg);
+                ARENAUtils.publishClientEvent(inEl, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
             });
         });
     },
