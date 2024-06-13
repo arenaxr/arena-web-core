@@ -140,6 +140,12 @@ export default class CreateUpdate {
                     entityEl.setAttribute('ttl', { seconds: message.ttl });
                 }
 
+                if (message.private) {
+                    entityEl.setAttribute('private', message.private);
+                } else if (message.private === false) {
+                    entityEl.removeAttribute('private');
+                }
+
                 // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
                 if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
 
