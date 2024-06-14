@@ -13,7 +13,7 @@ import 'linkifyjs/string';
 import { proxy } from 'comlink';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { ARENAUtils } from '../../utils';
-import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../../constants';
+import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES, TOPICS } from '../../constants';
 
 const UserType = Object.freeze({
     EXTERNAL: 'external',
@@ -123,19 +123,30 @@ AFRAME.registerSystem('arena-chat-ui', {
             <realm>/c/<scene-namespace>/p/[regex-matching-any-userid]/userhandle - private messages to user
         */
 
+        const idTag = `${this.userId}${btoa(this.userId)}`;
+
         // receive private messages  (subscribe only)
-        this.subscribePrivateTopic = `${this.realm}/c/${this.nameSpace}/p/${this.userId}/#`;
+        this.subscribePrivateTopic = TOPICS.SUBSCRIBE.CHAT_PRIVATE.formatStr({
+            nameSpace: this.nameSpace,
+            idTag: this.userId,
+        });
 
         // receive open messages to everyone and/or scene (subscribe only)
-        this.subscribePublicTopic = `${this.realm}/c/${this.nameSpace}/o/#`;
+        this.subscribePublicTopic = TOPICS.SUBSCRIBE.CHAT_PUBLIC.formatStr({
+            nameSpace: this.nameSpace,
+        });
 
         // send private messages to a user (publish only)
-        this.publishPrivateTopic = `${this.realm}/c/${this.nameSpace}/p/{to_uid}/${`${this.userId}${btoa(
-            this.userId
-        )}`}`;
+        this.publishPrivateTopic = TOPICS.PUBLISH.CHAT_PRIVATE.formatStr({
+            nameSpace: this.nameSpace,
+            idTag,
+        });
 
         // send open messages (chat keepalive, messages to all/scene) (publish only)
-        this.publishPublicTopic = `${this.realm}/c/${this.nameSpace}/o/${`${this.userId}${btoa(this.userId)}`}`;
+        this.publishPublicTopic = TOPICS.PUBLISH.CHAT_PUBLIC.formatStr({
+            nameSpace: this.nameSpace,
+            idTag,
+        });
 
         // counter for unread msgs
         this.unreadMsgs = 0;
@@ -687,7 +698,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const dstTopic =
             this.toSel.value === 'scene' || this.toSel.value === 'all'
                 ? this.publishPublicTopic
-                : this.publishPrivateTopic.replace('{to_uid}', this.toSel.value);
+                : this.publishPrivateTopic.formatStr({ toUid: this.toSel.value });
         // console.log('sending', msg, 'to', dstTopic);
         try {
             this.mqttc.publish(dstTopic, JSON.stringify(msg), 0, false);
@@ -1099,7 +1110,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             dstTopic = this.publishPublicTopic; // public messages
         } else {
             // replace '{to_uid}' for the 'to' value
-            dstTopic = this.publishPrivateTopic.replace('{to_uid}', to);
+            dstTopic = this.publishPrivateTopic.formatStr({ toUid: to });
         }
         const msg = {
             object_id: ARENAUtils.uuidv4(),

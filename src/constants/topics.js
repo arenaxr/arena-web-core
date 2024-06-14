@@ -10,9 +10,6 @@
 
 /**
  # remote rendering
-
- # chat
- dstTopic
  */
 
 /**
