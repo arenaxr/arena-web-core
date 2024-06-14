@@ -296,7 +296,13 @@ AFRAME.registerComponent('arenaui-card', {
                     source: ARENA.camName,
                 },
             };
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+            ARENAUtils.publishClientEvent(
+                this.el,
+                thisMsg,
+                this.topicBase,
+                this.topicBasePrivate,
+                this.topicBasePrivateProg
+            );
             this.el.remove();
         });
         closeButton.set({ fontSize: ARENATypography.buttonSmall });

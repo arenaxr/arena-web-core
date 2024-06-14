@@ -6,6 +6,9 @@
  * @date 2020
  */
 
+import { ARENAUtils } from '../../utils';
+import { TOPICS } from '../../constants';
+
 /**
  * Opens an HTML prompt when clicked. Sends text input as an event on MQTT
  * @module textinput
@@ -32,10 +35,17 @@ AFRAME.registerComponent('textinput', {
 
     multiple: true,
 
-    init() {},
-
     update() {
         const { data, el } = this;
+
+        const topicParams = {
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+            userObj: ARENA.camName,
+        };
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
         el.addEventListener(data.on, function onEvtCallback() {
             Swal.fire({
@@ -60,9 +70,8 @@ AFRAME.registerComponent('textinput', {
                         text,
                     },
                 };
-
                 // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+                ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
             });
         });
     },
