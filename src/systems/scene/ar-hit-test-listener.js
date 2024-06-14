@@ -1,5 +1,6 @@
 /* global AFRAME, ARENA */
 
+import { TOPICS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
 AFRAME.registerComponent('ar-hit-test-listener', {
@@ -8,6 +9,13 @@ AFRAME.registerComponent('ar-hit-test-listener', {
     },
 
     init() {
+        this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr({
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+            userObj: ARENA.camName,
+        });
+        this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
+
         this.enterARHandler = this.enterARHandler.bind(this);
         this.exitARHandler = this.exitARHandler.bind(this);
         this.hitStartHandler = this.hitStartHandler.bind(this);
@@ -35,16 +43,17 @@ AFRAME.registerComponent('ar-hit-test-listener', {
 
     hitStartHandler(evt) {
         if (this.data.enabled === false) return;
-        const camera = document.getElementById('my-camera');
-        const camPosition = camera.components['arena-camera'].position;
 
-        const clickPos = ARENAUtils.vec3ToObject(camPosition);
+        if (!this.cameraPos) {
+            this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
+        }
+        const clickPos = ARENAUtils.vec3ToObject(this.cameraPos);
         const { position, rotation } = ARENAUtils.setClickData(evt);
 
         if ('inputSource' in evt.detail) {
             // original hit-test event; simply publish to MQTT
             const thisMsg = {
-                object_id: this.el.id,
+                object_id: 'scene',
                 action: 'clientEvent',
                 type: 'hitstart',
                 data: {
@@ -54,16 +63,17 @@ AFRAME.registerComponent('ar-hit-test-listener', {
                     source: ARENA.camName,
                 },
             };
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+            ARENA.Mqtt.publish(this.pubTopic, thisMsg);
         }
     },
 
     hitEndHandler(evt) {
         if (this.data.enabled === false) return;
-        const camera = document.getElementById('my-camera');
-        const camPosition = camera.components['arena-camera'].position;
 
-        const clickPos = ARENAUtils.vec3ToObject(camPosition);
+        if (!this.cameraPos) {
+            this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
+        }
+        const clickPos = ARENAUtils.vec3ToObject(this.cameraPos);
         const { position, rotation } = ARENAUtils.setClickData(evt);
 
         if ('inputSource' in evt.detail) {
@@ -79,7 +89,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
                     source: ARENA.camName,
                 },
             };
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+            ARENA.Mqtt.publish(this.pubTopic, thisMsg);
         }
     },
 });
