@@ -68,7 +68,6 @@ AFRAME.registerSystem('arena-scene', {
 
         // Sets persistenceUrl, outputTopic
         this.persistenceUrl = `//${this.params.persistHost}${this.params.persistPath}${this.namespacedScene}`;
-        this.outputTopic = `${this.params.realm}/s/${this.namespacedScene}/`;
 
         this.events = sceneEl.systems['arena-event-manager'];
         this.health = sceneEl.systems['arena-health-ui'];
