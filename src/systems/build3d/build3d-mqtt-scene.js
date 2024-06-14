@@ -8,6 +8,8 @@
 
 /* global ARENAAUTH, $ */
 
+import { TOPICS } from '../../constants';
+
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  * @module build3d-mqtt-scene
@@ -42,7 +44,15 @@ function updateMqttWidth() {
 function publishUploadedFile(newObj) {
     if (newObj) {
         console.log('publishing:', newObj.action, newObj);
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${newObj.object_id}`, newObj);
+        ARENA.Mqtt.publish(
+            TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+                nameSpace: ARENA.nameSpace,
+                sceneName: ARENA.sceneName,
+                object_id: newObj.object_id,
+            }),
+            newObj
+        );
+
         AFRAME.INSPECTOR.selectEntity(AFRAME.INSPECTOR.selectedEntity);
     }
 }
