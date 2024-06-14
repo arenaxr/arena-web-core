@@ -9,9 +9,7 @@
 /* global ARENA */
 
 /**
- outputTopic
- FACE_TOPIC
- CLIENT_DISCONNECT_TOPIC_PREFIX
+ # remote rendering
 
  # chat
  dstTopic
