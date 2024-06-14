@@ -9,6 +9,7 @@
 /* global AFRAME, ARENA, THREE */
 
 const { isIOS, isTablet, isR7, isMobileVR } = AFRAME.utils.device;
+const { TOPICS } = '../constants';
 
 /**
  * Wrapper class for various utility functions
@@ -77,7 +78,14 @@ export default class ARENAUtils {
             action: 'update',
             data: msg,
         };
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}/debug`, message);
+        ARENA.Mqtt.publish(
+            TOPICS.PUBLISH.SCENE_DEBUG.formatStr({
+                namespace: ARENA.nameSpace,
+                sceneName: ARENA.sceneName,
+                camName: ARENA.camName,
+            }),
+            message
+        );
     }
 
     /**

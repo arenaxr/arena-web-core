@@ -15,8 +15,6 @@
 
  # chat
  dstTopic
-
- _dbgTopic
  */
 
 /**
