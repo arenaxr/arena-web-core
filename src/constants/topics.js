@@ -46,7 +46,7 @@ const TOPICS = Object.freeze({
         DEVICE:                `${REALM}/d/{nameSpace}/{sceneName}/{idTag}`,
         SCENE_PRESENCE:        `${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}`,
         SCENE_USER:            `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}`,
-        SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{toUid}/{userObj}`,
+        SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{toUid}/{userObj}`, // Need to add face_ privs
         SCENE_OBJECTS:         `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}`, // All client placeholder
         SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{toUid}/{camName}`,
         SCENE_RENDER:          `${REALM}/s/{nameSpace}/{sceneName}/r/{camName}`,
