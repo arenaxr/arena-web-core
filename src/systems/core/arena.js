@@ -36,7 +36,11 @@ AFRAME.registerSystem('arena-scene', {
             // replace console with our logging
             if (!ARENA.defaults.devInstance || ARENA.params.debug) {
                 ARENAMqttConsole.init({
-                    dbgTopic: `${ARENA.params.realm}/proc/debug/stdout/${ARENA.camName}`,
+                    dbgTopic: TOPICS.PUBLISH.SCENE_DEBUG.formatStr({
+                        nameSpace: ARENA.nameSpace,
+                        sceneName: ARENA.sceneName,
+                        camName: ARENA.camName,
+                    }),
                     publish: ARENA.Mqtt.publish.bind(ARENA.Mqtt),
                 });
             }
