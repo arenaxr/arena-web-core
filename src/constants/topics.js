@@ -52,11 +52,12 @@ const TOPICS = Object.freeze({
         SCENE_OBJECTS:         `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}`, // All client placeholder
         SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{toUid}/{camName}`,
         SCENE_RENDER:          `${REALM}/s/{nameSpace}/{sceneName}/r/{camName}`,
-        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/{toUid}/{camName}`,
+        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/-/{camName}`, // To avoid unpriv sub
         SCENE_ENV:             `${REALM}/s/{nameSpace}/{sceneName}/e/{camName}`,
         SCENE_ENV_PRIVATE:     `${REALM}/s/{nameSpace}/{sceneName}/e/{toUid}/{camName}`,
         SCENE_PROGRAM:         `${REALM}/s/{nameSpace}/{sceneName}/p/{camName}`,
         SCENE_PROGRAM_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/p/{toUid}/{camName}`,
+        SCENE_DEBUG:           `${REALM}/s/{nameSpace}/{sceneName}/d/-/{camName}`, // To avoid unpriv sub
     },
 });
 
