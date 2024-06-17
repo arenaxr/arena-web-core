@@ -38,11 +38,7 @@ AFRAME.registerComponent('textinput', {
     update() {
         const { data, el } = this;
 
-        const topicParams = {
-            nameSpace: ARENA.nameSpace,
-            sceneName: ARENA.sceneName,
-            userObj: ARENA.camName,
-        };
+        const { topicParams } = ARENA;
         const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);

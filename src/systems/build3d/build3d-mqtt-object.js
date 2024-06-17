@@ -184,10 +184,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     },
     init() {
         this.observer = new MutationObserver(this.objectAttributesUpdate);
-        this.topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
-            nameSpace: ARENA.nameSpace,
-            sceneName: ARENA.sceneName,
-        });
+        this.topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
     },
     objectAttributesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {

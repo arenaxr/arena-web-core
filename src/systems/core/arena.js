@@ -36,11 +36,7 @@ AFRAME.registerSystem('arena-scene', {
             // replace console with our logging
             if (!ARENA.defaults.devInstance || ARENA.params.debug) {
                 ARENAMqttConsole.init({
-                    dbgTopic: TOPICS.PUBLISH.SCENE_DEBUG.formatStr({
-                        nameSpace: ARENA.nameSpace,
-                        sceneName: ARENA.sceneName,
-                        camName: ARENA.camName,
-                    }),
+                    dbgTopic: TOPICS.PUBLISH.SCENE_DEBUG.formatStr(ARENA.topicParams),
                     publish: ARENA.Mqtt.publish.bind(ARENA.Mqtt),
                 });
             }
@@ -94,6 +90,15 @@ AFRAME.registerSystem('arena-scene', {
 
         // id tag including name is set from authentication service
         this.setIdTag(this.mqttToken.ids.userid);
+
+        // Reuse object for topic parameters
+        this.topicParams = {
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            camName: this.camName,
+            idTag: this.idTag,
+            userObj: this.camName,
+        };
 
         if (this.isUsersPermitted()) {
             this.showEchoDisplayName();

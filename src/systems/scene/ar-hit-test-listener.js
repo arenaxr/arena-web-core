@@ -7,11 +7,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
     },
 
     init() {
-        this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr({
-            nameSpace: ARENA.nameSpace,
-            sceneName: ARENA.sceneName,
-            userObj: ARENA.camName,
-        });
+        this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
         this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
 
         this.enterARHandler = this.enterARHandler.bind(this);
