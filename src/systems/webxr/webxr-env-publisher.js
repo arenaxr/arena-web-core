@@ -1,14 +1,11 @@
 import { Packr } from 'msgpackr';
+import { TOPICS } from '../../constants';
 
 AFRAME.registerSystem('xr-env-publisher', {
     schema: {
         publishMeshes: { type: 'boolean', default: true },
         onlyGlobalMesh: { type: 'boolean', default: true },
         publishPlanes: { type: 'boolean', default: false },
-        publishTopicBase: {
-            type: 'string',
-            default: `${ARENA.defaults.realm}/env/`,
-        },
     },
     init() {
         const { sceneEl } = this;
@@ -27,6 +24,8 @@ AFRAME.registerSystem('xr-env-publisher', {
             useRecords: false,
             useFloat32: true,
         });
+
+        this.pubTopic = TOPICS.PUBLISH.SCENE_ENV_PRIVATE.formatStr(ARENA.topicParams);
     },
     async webXRSessionStarted(xrSession) {
         if (xrSession === undefined) return;
@@ -54,37 +53,27 @@ AFRAME.registerSystem('xr-env-publisher', {
                         return;
                     }
                     const msg = this.packr.pack({
+                        type: 'mesh',
                         vertices: Object.values(mesh.vertices),
                         indices: Object.values(mesh.indices),
                         semanticLabel: mesh.semanticLabel,
                         meshPose: Object.values(frame.getPose(mesh.meshSpace, xrRefSpace).transform.matrix),
                     });
                     ARENA.debugXR(`Packing and publishing ${mesh.semanticLabel}`);
-                    ARENA.Mqtt.publish(
-                        `${publishTopicBase}${ARENA.namespacedScene}/${ARENA.camName}/meshes`,
-                        msg,
-                        undefined,
-                        undefined,
-                        true
-                    );
+                    ARENA.Mqtt.publish(this.pubTopic, msg, undefined, undefined, true);
                 });
             }
             if (publishPlanes) {
                 frame.detectedPlanes.forEach((plane) => {
                     const msg = this.packr.pack({
+                        type: 'plane',
                         polygon: plane.polygon,
                         orientation: plane.orientation,
                         semanticLabel: plane.semanticLabel,
                         planePose: frame.getPose(plane.planeSpace, xrRefSpace).transform.matrix,
                     });
                     ARENA.debugXR(`Packing and publishing ${plane.semanticLabel}`);
-                    ARENA.Mqtt.publish(
-                        `${publishTopicBase}${ARENA.namespacedScene}/${ARENA.camName}/planes`,
-                        msg,
-                        undefined,
-                        undefined,
-                        true
-                    );
+                    ARENA.Mqtt.publish(this.pubTopic, msg, undefined, undefined, true);
                 });
             }
         }
