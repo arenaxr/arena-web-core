@@ -28,11 +28,7 @@ AFRAME.registerComponent('gesture-detector', {
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
         this.sendGesture = this.sendGesture.bind(this);
         this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
-        this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr({
-            nameSpace: ARENA.nameSpace,
-            sceneName: ARENA.sceneName,
-            userObj: ARENA.camName,
-        });
+        this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
 
         window.addEventListener('touchstart', this.emitGestureEvent);
         window.addEventListener('touchend', this.emitGestureEvent);

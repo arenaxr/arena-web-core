@@ -34,11 +34,7 @@ const buttonBase = {
         this.buttonOptions = { ...buttonOptions, backgroundOpacity: this.ARENAColors.buttonBgOpacity };
         this.createButtonStates();
 
-        const topicParams = {
-            nameSpace: ARENA.nameSpace,
-            sceneName: ARENA.sceneName,
-            userObj: ARENA.camName,
-        };
+        const { topicParams } = ARENA;
         this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
         this.topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         this.topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);

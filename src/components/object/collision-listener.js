@@ -18,11 +18,7 @@ import { TOPICS } from '../../constants';
 AFRAME.registerComponent('collision-listener', {
     // listen for collisions, call defined function on event evt
     init() {
-        const topicParams = {
-            nameSpace: ARENA.nameSpace,
-            sceneName: ARENA.sceneName,
-            userObj: ARENA.camName,
-        };
+        const { topicParams } = ARENA;
         const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);

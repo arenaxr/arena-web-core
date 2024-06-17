@@ -76,14 +76,7 @@ export default class ARENAUtils {
             action: 'update',
             data: msg,
         };
-        ARENA.Mqtt.publish(
-            TOPICS.PUBLISH.SCENE_DEBUG.formatStr({
-                namespace: ARENA.nameSpace,
-                sceneName: ARENA.sceneName,
-                camName: ARENA.camName,
-            }),
-            message
-        );
+        ARENA.Mqtt.publish(TOPICS.PUBLISH.SCENE_DEBUG.formatStr(ARENA.topicParams), message);
     }
 
     /**

@@ -22,11 +22,7 @@ AFRAME.registerComponent('click-listener', {
 
     init() {
         this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
-        const topicParams = {
-            nameSpace: ARENA.nameSpace,
-            sceneName: ARENA.sceneName,
-            userObj: ARENA.camName,
-        };
+        const { topicParams } = ARENA;
         this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
         this.topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         this.topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
