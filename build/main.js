@@ -855,7 +855,7 @@ window.addEventListener('onauth', async (e) => {
         // add scene if it does not exist
         if (newScene) await PersistObjects.addNewScene(namespaceinput.value, sceneinput.value, undefined);
 
-        await PersistObjects.addObject(obj, `${namespaceinput.value}/${sceneinput.value}`);
+        await PersistObjects.addObject(obj, namespaceinput.value, sceneinput.value);
         setTimeout(async () => {
             PersistObjects.populateObjectList(
                 `${namespaceinput.value}/${sceneinput.value}`,
