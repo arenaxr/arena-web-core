@@ -8,7 +8,7 @@
 import { UUID } from 'uuidjs';
 import MQTTClient from './mqtt-client';
 import RuntimeMsgs from './runtime-msgs';
-import { ARENA_EVENTS } from '../../../constants';
+import { ARENA_EVENTS, TOPICS } from '../../../constants';
 
 /**
  * Send requests to orchestrator: register as a runtime, create modules from persist objects.
@@ -87,9 +87,11 @@ export default class RuntimeMngr {
         name = `rt-${(Math.random() + 1).toString(36).substring(2)}`,
         maxNmodules = 0, // TMP: cannot run any modules
         apis = [],
-        regTopic = `${realm}/proc/reg`,
-        ctlTopic = `${realm}/proc/control`,
-        dbgTopic = `${realm}/proc/debug`,
+        regTopic = TOPICS.SUBSCRIBE.PROC_REG,
+        regTopicPub = TOPICS.PUBLISH.PROC_REG,
+        ctlTopic = TOPICS.SUBSCRIBE.PROC_CTL,
+        ctlTopicPub = TOPICS.PUBLISH.PROC_CTL,
+        dbgTopic = TOPICS.PUBLISH.PROC_DBG,
         regTimeoutSeconds = 5,
         onInitCallback = null,
         fsLocation = '/store/users/',
@@ -110,7 +112,9 @@ export default class RuntimeMngr {
         this.maxNmodules = maxNmodules;
         this.apis = apis;
         this.regTopic = regTopic;
+        this.regTopicPub = regTopicPub;
         this.ctlTopic = ctlTopic;
+        this.ctlTopicPub = ctlTopicPub;
         this.dbgTopic = dbgTopic;
         this.regTimeoutSeconds = regTimeoutSeconds;
         this.onInitCallback = onInitCallback;
@@ -139,7 +143,9 @@ export default class RuntimeMngr {
         maxNmodules = this.maxNmodules,
         apis = this.apis,
         regTopic = this.regTopic,
+        regTopicPub = this.regTopicPub,
         ctlTopic = this.ctlTopic,
+        ctlTopicPub = this.ctlTopicPub,
         dbgTopic = this.dbgTopic,
         regTimeoutSeconds = this.regTimeoutSeconds,
         onInitCallback = this.onInitCallback,
@@ -152,7 +158,9 @@ export default class RuntimeMngr {
         this.maxNmodules = maxNmodules;
         this.apis = apis;
         this.regTopic = regTopic;
+        this.regTopicPub = regTopicPub;
         this.ctlTopic = ctlTopic;
+        this.ctlTopicPub = ctlTopicPub;
         this.dbgTopic = dbgTopic;
         this.regTimeoutSeconds = regTimeoutSeconds;
         this.onInitCallback = onInitCallback;
@@ -169,7 +177,7 @@ export default class RuntimeMngr {
             mqtt_token: rtMngr.mqttToken,
             onMessageCallback: rtMngr.onMqttMessage.bind(rtMngr),
             willMessage: rtMngr.lastWillStringMsg,
-            willMessageTopic: rtMngr.regTopic,
+            willMessageTopic: rtMngr.regTopicPub,
             userid: rtMngr.name,
         });
 
@@ -194,7 +202,7 @@ export default class RuntimeMngr {
         const regMsg = this.rtMsgs.registerRuntime();
         this.regRequestUuid = regMsg.object_id; // save message uuid for confirmation
 
-        this.mc.publish(this.regTopic, JSON.stringify(regMsg));
+        this.mc.publish(this.regTopicPub, JSON.stringify(regMsg));
 
         setTimeout(this.register.bind(this), this.regTimeoutSeconds * 1000); // try register again
     }
@@ -247,7 +255,7 @@ export default class RuntimeMngr {
 
         this.mc.unsubscribe(this.regTopic);
         // subscribe to ctl/runtime_uuid
-        this.mc.subscribe(`${this.getRtCtlTopic()}/#`);
+        this.mc.subscribe(this.ctlTopic.formatStr({ uuid: this.uuid }));
 
         // check if we have modules to start
         if (this.pendingModulesArgs.length > 0) {
@@ -315,7 +323,7 @@ export default class RuntimeMngr {
         // this.pendingReq.push(modCreateMsg.object_id); // pending_req is a list with object_id of requests waiting arts response
 
         console.info('Sending create module request:', modCreateMsg);
-        this.mc.publish(this.ctlTopic, JSON.stringify(modCreateMsg));
+        this.mc.publish(this.ctlTopicPub, JSON.stringify(modCreateMsg));
     }
 
     /**
@@ -324,11 +332,11 @@ export default class RuntimeMngr {
     cleanup() {
         this.clientModules.forEach((mod) => {
             const modDelMsg = this.rtMsgs.deleteModule(mod);
-            this.mc.publish(this.ctlTopic, JSON.stringify(modDelMsg));
+            this.mc.publish(this.ctlTopicPub, JSON.stringify(modDelMsg));
         });
 
         // sent in case last will fails (this will be a duplicate of last will)
-        this.mc.publish(this.regTopic, this.lastWillStringMsg);
+        this.mc.publish(this.regTopicPub, this.lastWillStringMsg);
     }
 
     /* public getters */
@@ -354,11 +362,6 @@ export default class RuntimeMngr {
     }
 
     getRtDbgTopic() {
-        return `${this.dbgTopic}/${this.uuid}`;
-    }
-
-    /* pubsub topic where the runtime sends unregister messages (ctl_topic+module uuid) */
-    getRtCtlTopic() {
-        return `${this.ctlTopic}/${this.uuid}`;
+        return this.dbgTopic.formatStr({ uuid: this.uuid });
     }
 }
