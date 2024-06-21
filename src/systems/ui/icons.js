@@ -331,24 +331,22 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         edit.href = `/build/?scene=${this.arena.namespacedScene}`;
         edit.target = 'ArenaJsonEditor';
         edit.rel = 'noopener noreferrer';
-        edit.innerHTML = 'Json Editor';
-        edit.title = 'Open the JSON Scene Editor for this scene in a new page';
+        edit.innerHTML = 'Build JSON';
+        edit.title = 'Open the Build JSON Scene Editor for this scene in a new page';
         pagesDiv.appendChild(edit);
 
         pagesDiv.append(' | ');
 
-        if (sceneWriter) {
-            // add permissions link
-            const edit3d = document.createElement('a');
-            edit3d.href = `/${this.arena.namespacedScene}?build3d=1`;
-            edit3d.target = 'Arena3dEditor';
-            edit3d.rel = 'noopener noreferrer';
-            edit3d.innerHTML = '3D Editor';
-            edit3d.title = 'Open the 3D Scene Editor for this scene in a new page (editors only)';
-            pagesDiv.appendChild(edit3d);
+        // add permissions link
+        const edit3d = document.createElement('a');
+        edit3d.href = `/${this.arena.namespacedScene}?build3d=1`;
+        edit3d.target = 'Arena3dEditor';
+        edit3d.rel = 'noopener noreferrer';
+        edit3d.innerHTML = 'Build 3D';
+        edit3d.title = 'Open the Build 3D Scene Editor for this scene in a new page';
+        pagesDiv.appendChild(edit3d);
 
-            pagesDiv.append(' | ');
-        }
+        pagesDiv.append(' | ');
 
         const profile = document.createElement('a');
         profile.href = `/user/profile`;
