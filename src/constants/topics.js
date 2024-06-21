@@ -46,16 +46,16 @@ const TOPICS = Object.freeze({
         PROC_DBG:              `${REALM}/proc/debug/{uuid}`,
         SCENE_PRESENCE:        `${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}`,
         SCENE_USER:            `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}`,
-        SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{toUid}/{userObj}`, // Need to add face_ privs
+        SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}/{toUid}`, // Need to add face_ privs
         SCENE_OBJECTS:         `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}`, // All client placeholder
-        SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{toUid}/{camName}`,
+        SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{camName}/{toUid}`,
         SCENE_RENDER:          `${REALM}/s/{nameSpace}/{sceneName}/r/{camName}`,
-        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/-/{camName}`, // To avoid unpriv sub
+        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/{camName}/-`, // To avoid unpriv sub
         SCENE_ENV:             `${REALM}/s/{nameSpace}/{sceneName}/e/{camName}`,
-        SCENE_ENV_PRIVATE:     `${REALM}/s/{nameSpace}/{sceneName}/e/-/{camName}`, // To avoid unpriv sub
+        SCENE_ENV_PRIVATE:     `${REALM}/s/{nameSpace}/{sceneName}/e/{camName}/-`, // To avoid unpriv sub
         SCENE_PROGRAM:         `${REALM}/s/{nameSpace}/{sceneName}/p/{camName}`,
-        SCENE_PROGRAM_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/p/{toUid}/{camName}`,
-        SCENE_DEBUG:           `${REALM}/s/{nameSpace}/{sceneName}/d/-/{camName}`, // To avoid unpriv sub
+        SCENE_PROGRAM_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/p/{camName}/{toUid}`,
+        SCENE_DEBUG:           `${REALM}/s/{nameSpace}/{sceneName}/d/{camName}/-`, // To avoid unpriv sub
     },
 });
 
