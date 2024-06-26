@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.28.1](https://github.com/arenaxr/arena-web-core/compare/v1.28.0...v1.28.1) (2024-06-26)
+
+
+### Bug Fixes
+
+* **arenaui-card:** build page default blank img causes title not to render ([#647](https://github.com/arenaxr/arena-web-core/issues/647)) ([41a05d2](https://github.com/arenaxr/arena-web-core/commit/41a05d257f8b965708dd2d96b3bd700b00d0d547))
+* **auth:** allow filestore upload for arena ui card image ([fca5a37](https://github.com/arenaxr/arena-web-core/commit/fca5a378a258ac033340db05b93e174bb0fab9ba))
+* **settings:** update settings build links to use proper names ([170638d](https://github.com/arenaxr/arena-web-core/commit/170638dce152e2f047fb586f948637fedff9b442))
+* typos ([7d9367b](https://github.com/arenaxr/arena-web-core/commit/7d9367b0f777e3c021d6d4edcd8a3d7c85e46846))
+
 ## [1.28.0](https://github.com/arenaxr/arena-web-core/compare/v1.27.0...v1.28.0) (2024-06-11)
 
 
