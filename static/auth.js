@@ -29,6 +29,7 @@ window.ARENAAUTH = {
     signOutPath: `//${window.location.host}/user/logout`,
     filestoreUploadSchema: {
         // top level data adds, first
+        'arenaui-card': ['img'],
         gaussian_splatting: ['src'],
         'gltf-model': ['url'],
         image: ['url'],
