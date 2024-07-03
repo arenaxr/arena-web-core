@@ -62,24 +62,27 @@ ul li.checked::before {
 }
 
 /* Style the edit button */
-.edit {
+.edit,
+.edit3d,
+.visible {
     position: absolute;
-    right: 0px;
     top: 0;
     padding: 3px 10px 3px 10px;
     /*background-color: #D6EAF8 ;*/
     color: black;
+}
+.edit {
+    right: 0px;
 }
 .edit3d {
-    position: absolute;
-    right: 36px;
-    top: 0;
-    padding: 3px 10px 3px 10px;
-    /*background-color: #D6EAF8 ;*/
-    color: black;
+    right: 24px;
+}
+.visible {
+    right: 48px;
 }
 .edit:hover,
-.edit3d:hover {
+.edit3d:hover,
+.visible:hover {
     background-color: #aed6f1;
     color: black;
 }

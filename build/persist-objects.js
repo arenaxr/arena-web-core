@@ -341,6 +341,21 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             };
         }
 
+        // add visibility convenience "button"
+        let visible = sceneObjs[i].attributes.visible ? sceneObjs[i].attributes.visible : true;
+        const visspan = document.createElement('span');
+        const ielemvis = document.createElement('i');
+        ielemvis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
+        visspan.className = 'visible';
+        visspan.title = 'Toggle Visible';
+        visspan.appendChild(ielemvis);
+        li.appendChild(visspan);
+
+        visspan.onclick = function onVisClick() {
+            visible = !visible;
+            ielemvis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
+        };
+
         persist.objList.appendChild(li);
     }
     persist.addEditSection.style = 'display:block';
