@@ -210,6 +210,20 @@ window.addEventListener('onauth', async (e) => {
         });
     };
 
+    // we indicate this function as the visibility edit handler to persist
+    const visObject = async function (obj) {
+        // obj is already updated with minor updates for visibility
+        const scene = `${namespaceinput.value}/${sceneinput.value}`;
+        PersistObjects.performActionArgObjList('update', scene, [obj], false);
+        setTimeout(async () => {
+            await PersistObjects.populateObjectList(
+                `${namespaceinput.value}/${sceneinput.value}`,
+                objFilter.value,
+                objTypeFilter
+            );
+        }, 500);
+    };
+
     /**
      * Seeks the Rotation block (if any) and inserts a user-friendly Euler degree editor.
      * @param {*} json The object returned from editor.getValue().
@@ -870,6 +884,7 @@ window.addEventListener('onauth', async (e) => {
         objList: document.getElementById('objlist'),
         addEditSection: document.getElementById('addeditsection'),
         editObjHandler: editObject,
+        visObjHandler: visObject,
         authState,
         mqttUsername: username,
         mqttToken,

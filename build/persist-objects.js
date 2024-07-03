@@ -44,6 +44,7 @@ export async function init(settings) {
         objList: settings.objList,
         addEditSection: settings.addEditSection,
         editObjHandler: settings.editObjHandler,
+        visObjHandler: settings.visObjHandler,
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
@@ -332,7 +333,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             editspan3d.appendChild(ielem3d);
             li.appendChild(editspan3d);
 
-            editspan3d.onclick = function onEditClick() {
+            editspan3d.onclick = function () {
                 if (sceneObjs[i].type === 'scene-options') {
                     window.open(`/${scene}?build3d=1&objectId=env`, 'Arena3dEditor');
                 } else {
@@ -342,7 +343,8 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         }
 
         // add visibility convenience "button"
-        let visible = sceneObjs[i].attributes.visible ? sceneObjs[i].attributes.visible : true;
+        let visible = Object.hasOwn(sceneObjs[i].attributes, 'visible') ? sceneObjs[i].attributes.visible : true;
+        // console.log(sceneObjs[i].object_id, sceneObjs[i].attributes.visible);
         const visspan = document.createElement('span');
         const ielemvis = document.createElement('i');
         ielemvis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
@@ -351,9 +353,18 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         visspan.appendChild(ielemvis);
         li.appendChild(visspan);
 
-        visspan.onclick = function onVisClick() {
+        visspan.onclick = function () {
             visible = !visible;
             ielemvis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
+            const obj = {
+                object_id: sceneObjs[i].object_id,
+                action: 'update',
+                persist: true,
+                type: sceneObjs[i].type,
+                data: { visible },
+            };
+
+            persist.visObjHandler(obj);
         };
 
         persist.objList.appendChild(li);
