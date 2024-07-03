@@ -210,9 +210,19 @@ window.addEventListener('onauth', async (e) => {
         });
     };
 
-    // we indicate this function as the visibility edit handler to persist
-    const visObject = async function (obj) {
-        // obj is already updated with minor updates for visibility
+    /**
+     * The visibility edit handler to persist. Update visible property, publish, refresh list.
+     * @param {Object} refObj The object referenced in the list, used for 1 param update.
+     * @param {boolean} visible If the object should be visible.
+     */
+    const visObject = async function (refObj, visible) {
+        const obj = {
+            object_id: refObj.object_id,
+            action: 'update',
+            persist: true,
+            type: refObj.type,
+            data: { visible },
+        };
         const scene = `${namespaceinput.value}/${sceneinput.value}`;
         PersistObjects.performActionArgObjList('update', scene, [obj], false);
         setTimeout(async () => {

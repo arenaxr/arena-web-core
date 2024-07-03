@@ -170,6 +170,11 @@ export async function fetchSceneObjects(scene) {
     return sceneObjs;
 }
 
+export function updateListItemVisibility(visible, li, iconVis) {
+    iconVis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
+    li.style.color = visible ? 'black' : 'gray';
+}
+
 export async function populateObjectList(scene, filter, objTypeFilter, focusObjectId = undefined) {
     clearObjectList();
 
@@ -344,29 +349,18 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
 
         // add visibility convenience "button"
         let visible = Object.hasOwn(sceneObjs[i].attributes, 'visible') ? sceneObjs[i].attributes.visible : true;
-        // console.log(sceneObjs[i].object_id, sceneObjs[i].attributes.visible);
         const visspan = document.createElement('span');
-        const ielemvis = document.createElement('i');
-        ielemvis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
-        li.style.color = visible ? 'black' : 'gray';
+        const iconVis = document.createElement('i');
+        updateListItemVisibility(visible, li, iconVis);
         visspan.className = 'visible';
         visspan.title = 'Toggle Visible';
-        visspan.appendChild(ielemvis);
+        visspan.appendChild(iconVis);
         li.appendChild(visspan);
 
         visspan.onclick = function () {
             visible = !visible;
-            ielemvis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
-            li.style.color = visible ? 'black' : 'gray';
-            const obj = {
-                object_id: sceneObjs[i].object_id,
-                action: 'update',
-                persist: true,
-                type: sceneObjs[i].type,
-                data: { visible },
-            };
-
-            persist.visObjHandler(obj);
+            updateListItemVisibility(visible, li, iconVis);
+            persist.visObjHandler(sceneObjs[i], visible);
         };
 
         persist.objList.appendChild(li);
