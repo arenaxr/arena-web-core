@@ -348,6 +348,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         const visspan = document.createElement('span');
         const ielemvis = document.createElement('i');
         ielemvis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
+        li.style.color = visible ? 'black' : 'gray';
         visspan.className = 'visible';
         visspan.title = 'Toggle Visible';
         visspan.appendChild(ielemvis);
@@ -356,6 +357,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         visspan.onclick = function () {
             visible = !visible;
             ielemvis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
+            li.style.color = visible ? 'black' : 'gray';
             const obj = {
                 object_id: sceneObjs[i].object_id,
                 action: 'update',
