@@ -326,7 +326,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         if (sceneObjs[i].type !== 'program') {
             const editspan3d = document.createElement('span');
             const ielem3d = document.createElement('i');
-            ielem3d.className = 'icon-fullscreen';
+            ielem3d.className = 'icon-globe';
             editspan3d.className = 'edit3d';
             editspan3d.title = 'Edit 3D';
             editspan3d.appendChild(ielem3d);
