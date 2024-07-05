@@ -18,7 +18,7 @@ AFRAME.registerSystem('xr-env-publisher', {
         this.onRAF = this.onRAF.bind(this);
         this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
 
-        sceneEl.renderer.xr.addEventListener('sessionstart', () => {
+        sceneEl.addEventListener('enter-vr', () => {
             if (sceneEl.is('ar-mode')) {
                 const { xrSession } = sceneEl;
                 this.webXRSessionStarted(xrSession).then(() => {});
