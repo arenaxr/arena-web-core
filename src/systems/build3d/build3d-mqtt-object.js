@@ -76,7 +76,6 @@ function extractDataFullDOM(mutation) {
                     data.object_type = 'videosphere';
                 } else if (attribute.primitive === 'plane') {
                     // plane shouldn't overwrite image
-                    console.log(mutation.target.attributes);
                     data.object_type = mutation.target.hasAttribute('src') ? 'image' : attribute.primitive;
                 } else {
                     data.object_type = attribute.primitive;
@@ -147,7 +146,6 @@ function extractDataUpdates(mutation, attribute, changes) {
                 data.object_type = 'videosphere';
             } else if (attribute.primitive === 'plane') {
                 // plane shouldn't overwrite image
-                console.log(mutation.target.attributes);
                 data.object_type = mutation.target.hasAttribute('src') ? 'image' : attribute.primitive;
             } else {
                 data.object_type = attribute.primitive;
