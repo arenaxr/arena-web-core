@@ -157,7 +157,9 @@ function extractDataUpdates(mutation, attribute, changes) {
             data['env-presets'] = changes || {};
             break;
         default:
-            data[mutation.attributeName] = changes || {};
+            // handle special cases of boolean as string first
+            if (changes === 'true' || changes === 'false') data[mutation.attributeName] = JSON.parse(changes);
+            else data[mutation.attributeName] = changes || {};
             break;
     }
     // if (!data.object_type) {
