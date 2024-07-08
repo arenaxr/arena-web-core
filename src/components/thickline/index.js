@@ -1,4 +1,8 @@
 // Modified from: https://github.com/andreasplesch/aframe-meshline-component
+// - Added near/far params (ivan).
+// - Modified lineWidthStylers to white list known functions only for security (ivan).
+// - Fixed crash from AFRAME 1.6, calling AFRAME.utils.coordinates.parse twice (ivan/mwfarb).
+
 /* global AFRAME, THREE */
 
 if (typeof AFRAME === 'undefined') {
@@ -43,7 +47,7 @@ AFRAME.registerComponent('thickline', {
             ],
             // Deserialize path in the form of comma-separated vec3s: `0 0 0, 1 1 1, 2 0 3`.
             parse(value) {
-                // AFRAME 1.6.0, now calls AFRAME.utils.coordinates.parse twice, modify to check type first (mwfarb/ivan)
+                // AFRAME 1.6, now calls AFRAME.utils.coordinates.parse twice, modify to check type first.
                 if (typeof value === 'string' && AFRAME) {
                     return value.split(',').map((val) => AFRAME.utils.coordinates.parse(val));
                 }
