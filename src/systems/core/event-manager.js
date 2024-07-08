@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Manager for ARENA events, particularly those related to AFRAME
  *               and ARENA loading sequence, in which scary async things happen

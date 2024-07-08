@@ -1,5 +1,3 @@
-/* global AFRAME, THREE */
-
 import EffectComposer from './effect-composer';
 
 AFRAME.registerSystem('effects', {

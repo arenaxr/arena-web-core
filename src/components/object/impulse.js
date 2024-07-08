@@ -6,8 +6,6 @@
  * @date 2020
  */
 
-/* global AFRAME, THREE */
-
 /**
  * One physics feature is applying an impulse to an object to set it in motion.
  * This happens in conjunction with an event.

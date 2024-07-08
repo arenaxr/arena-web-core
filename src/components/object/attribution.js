@@ -1,7 +1,5 @@
 /* eslint-disable max-len */
 
-/* global AFRAME */
-
 /**
  * @fileoverview Attribution Component. Add attribution message to any entity.
  *

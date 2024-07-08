@@ -6,8 +6,6 @@
  * @date 2022
  */
 
-/* global AFRAME */
-
 import { ARENAUtils } from '../../utils';
 
 const HIDDEN_CLASS = 'a-hidden';

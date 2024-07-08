@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, ARENAAUTH, Swal, THREE, $ */
+/* global ARENAAUTH, $ */
 
 import 'linkifyjs';
 import 'linkifyjs/string';

@@ -2,7 +2,6 @@
  * WebXR viewer handler and pseudo-click generator
  *
  */
-/* global AFRAME */
 
 AFRAME.registerComponent('webxr-viewer', {
     init() {

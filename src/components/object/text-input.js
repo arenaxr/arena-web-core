@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA, Swal */
-
 /**
  * @fileoverview Present an HTML prompt to user
  *

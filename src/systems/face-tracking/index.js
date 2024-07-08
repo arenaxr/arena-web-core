@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Face feature detection and tracking System. Basically acts as a global
  *               object to control ARENA's face tracking feature.

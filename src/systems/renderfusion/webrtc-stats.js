@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 const info = AFRAME.utils.debug('ARENA:webrtc-stats:info');
 
 export default class WebRTCStatsLogger {

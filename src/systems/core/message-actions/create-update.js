@@ -1,7 +1,5 @@
 /* eslint-disable no-case-declarations */
 
-/* global AFRAME, ARENA, THREE */
-
 import { ARENAUtils } from '../../../utils';
 import { ACTIONS, ARENA_EVENTS } from '../../../constants';
 

@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME */
-
 AFRAME.registerSystem('remove-stats-exit-fullscreen', {
     init() {
         this.fullScreenExitHandler = this.fullScreenExitHandler.bind(this);

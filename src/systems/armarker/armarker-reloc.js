@@ -9,8 +9,6 @@
  * @authors Ivan Liang, Nuno Pereira
  */
 
-/* global AFRAME, ARENA, THREE */
-
 import { ARENAUtils } from '../../utils';
 
 /**

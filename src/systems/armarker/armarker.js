@@ -11,8 +11,6 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, THREE, XRRigidTransform */
-
 import WebXRCameraCapture from './camera-capture/ccwebxr';
 import WebARCameraCapture from './camera-capture/ccwebar';
 import ARHeadsetCameraCapture from './camera-capture/ccarheadset';

@@ -1,5 +1,3 @@
-/* global AFRAME, THREE */
-
 /**
  * @fileoverview Capsule geometry. Adds geometry to render a capsule primitive.
  *

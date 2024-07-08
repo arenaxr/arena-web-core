@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 import { ARENAUtils } from '../../utils';
 
 /**

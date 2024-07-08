@@ -9,8 +9,6 @@
  * @date 2021
  */
 
-/* global THREE */
-
 import CVWorkerMsgs from '../worker-msgs';
 
 /**

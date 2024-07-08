@@ -6,8 +6,6 @@
  * @date 2020
  */
 
-/* global AFRAME, THREE */
-
 /**
  * Load a [THREE.js scene]{@link https://threejs.org/docs/#api/en/scenes/Scene}. THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
  * For a move portable format, using glTF is preferred.

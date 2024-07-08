@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Load scene from persistence.
  * TODO: this component is currently not used and probably needs to be updated

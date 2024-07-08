@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 import { Packr } from 'msgpackr';
 
 AFRAME.registerSystem('xr-env-publisher', {

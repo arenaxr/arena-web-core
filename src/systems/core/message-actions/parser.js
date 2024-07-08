@@ -1,7 +1,5 @@
 /* eslint-disable camelcase */
 
-/* global AFRAME */
-
 const warn = AFRAME.utils.debug('ARENA:message:warn');
 const error = AFRAME.utils.debug('ARENA:message:error');
 

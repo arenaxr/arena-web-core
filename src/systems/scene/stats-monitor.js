@@ -6,7 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA */
 import { ARENAUtils } from '../../utils';
 import { JITSI_EVENTS } from '../../constants';
 

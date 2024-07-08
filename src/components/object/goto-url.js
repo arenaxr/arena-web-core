@@ -1,5 +1,3 @@
-/* global AFRAME, Swal */
-
 /**
  * @fileoverview Goto URL Component.
  *

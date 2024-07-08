@@ -22,7 +22,7 @@
  * }
  */
 
-/* global AFRAME, $ */
+/* global $ */
 
 /**
  * Render the display of errors in #error-block for troubleshooting.

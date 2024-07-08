@@ -1,5 +1,3 @@
-/* global AFRAME, THREE */
-
 const SCALE_IN_DURATION = 333;
 
 AFRAME.registerComponent('blip', {

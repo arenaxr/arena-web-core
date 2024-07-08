@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Similar to overridden hide-on-enter-vr.js, but for VR
  */

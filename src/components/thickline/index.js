@@ -3,8 +3,6 @@
 // - Modified lineWidthStylers to white list known functions only for security (ivan).
 // - Fixed crash from AFRAME 1.6, calling AFRAME.utils.coordinates.parse twice (ivan/mwfarb).
 
-/* global AFRAME, THREE */
-
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');
 }
@@ -47,11 +45,7 @@ AFRAME.registerComponent('thickline', {
             ],
             // Deserialize path in the form of comma-separated vec3s: `0 0 0, 1 1 1, 2 0 3`.
             parse(value) {
-                // AFRAME 1.6, now calls AFRAME.utils.coordinates.parse twice, modify to check type first.
-                if (typeof value === 'string' && AFRAME) {
-                    return value.split(',').map((val) => AFRAME.utils.coordinates.parse(val));
-                }
-                return value.map((val) => AFRAME.utils.coordinates.parse(val));
+                return value.split(',').map(AFRAME.utils.coordinates.parse);
             },
             // Serialize array of vec3s in case someone does setAttribute('line', 'path', [...]).
             stringify(data) {

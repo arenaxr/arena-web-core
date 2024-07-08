@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME */
-
 const MAX_DELTA = 0.2;
 
 function isEmptyObject(keys) {

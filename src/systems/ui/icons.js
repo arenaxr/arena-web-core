@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, ARENAAUTH, Swal */
+/* global ARENAAUTH */
 
 import { ARENA_EVENTS } from '../../constants';
 import './remove-stats-exit-fullscreen';

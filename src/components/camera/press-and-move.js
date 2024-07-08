@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA, THREE */
-
 /**
  * @fileoverview Support user camera movement with the mouse.
  * Adapted from: https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js

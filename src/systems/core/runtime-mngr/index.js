@@ -1,5 +1,3 @@
-/* global ARENA */
-
 /**
  * @fileoverview Register as a runtime; Send requests to orchestrator
  *

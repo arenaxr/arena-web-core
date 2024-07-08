@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA, THREE */
-
 import ThreeMeshUI from 'three-mesh-ui';
 import RegularFontImage from './fonts/Roboto-Regular.png';
 import MonoFontImage from './fonts/Roboto-Mono.png';

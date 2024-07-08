@@ -1,5 +1,3 @@
-/* global AFRAME, THREE */
-
 import { Pass, FullScreenQuad } from './pass';
 
 class RenderPixelatedPass extends Pass {

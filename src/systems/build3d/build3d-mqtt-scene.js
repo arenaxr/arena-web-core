@@ -6,7 +6,7 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, ARENAAUTH, $ */
+/* global ARENAAUTH, $ */
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.

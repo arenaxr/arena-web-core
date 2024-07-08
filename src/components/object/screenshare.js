@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Screen share System to keep track of all screenshareable objects.
  *

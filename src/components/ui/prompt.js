@@ -1,5 +1,3 @@
-/* global AFRAME, THREE */
-
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAColorsLight, ARENAColorsDark, ARENALayout, ARENATypography } from '../../constants/ui';
 import buttonBase from './buttons';

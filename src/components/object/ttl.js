@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Component to remove entity after a specified number of seconds.
  *

@@ -1,4 +1,3 @@
-/* global AFRAME, THREE */
 import { XacroLoader } from 'xacro-parser';
 import URDFLoader from '../vendor/urdf-loader/URDFLoader';
 import { ARENAUtils } from '../../utils';

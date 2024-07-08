@@ -6,8 +6,6 @@
  * @date 2021
  */
 
-/* global AFRAME, THREE */
-
 // AFRAME Monkeypatch - AFRAME Extras Animation-Mixer (src/loaders/animation-mixer.js)
 AFRAME.components['animation-mixer'].Component.prototype.load = function(model) {
     const el = this.el;

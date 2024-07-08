@@ -1,5 +1,3 @@
-/* global THREE */
-
 const BLACK = new THREE.Color(0x000000);
 const WHITE = new THREE.Color(0xffffff);
 const TEXT_LIGHT = new THREE.Color(0x3c3c3c).convertLinearToSRGB();

@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA, THREE */
-
 import MQTTSignaling from './signaling/mqtt-signaling';
 import WebRTCStatsLogger from './webrtc-stats';
 import HybridRenderingUtils from './utils';

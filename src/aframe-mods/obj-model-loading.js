@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, THREE */
-
 const warn = AFRAME.utils.debug('components:obj-model:warn');
 
 // AFRAME Monkeypatch (src/components/obj-model.js)

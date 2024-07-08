@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA */
-
 // 'use strict';
 import { proxy, wrap } from 'comlink';
 import { ClientEvent, CreateUpdate, Delete } from './message-actions/index';

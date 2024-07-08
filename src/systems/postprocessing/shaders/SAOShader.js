@@ -1,5 +1,3 @@
-/* global THREE */
-
 const SAOShader = {
     defines: {
         NUM_SAMPLES: 7,

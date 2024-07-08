@@ -7,8 +7,6 @@
  * @date 2022
  */
 
-/* global ARENA */
-
 import CVWorkerMsgs from '../worker-msgs';
 import { ARENAUtils } from '../../../utils';
 

@@ -5,7 +5,6 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-/* global ARENA */
 
 import './webar-session';
 import WebARCameraCapture from '../armarker/camera-capture/ccwebar';

@@ -1,5 +1,3 @@
-/* global AFRAME, THREE */
-
 import { FullScreenQuad, Pass } from './pass';
 import DigitalGlitch from '../shaders/DigitalGlitch';
 

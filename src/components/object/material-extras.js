@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-/* global AFRAME, THREE */
 
 import { ARENAUtils } from '../../utils';
 

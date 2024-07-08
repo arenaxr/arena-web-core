@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 const error = AFRAME.utils.debug('ARENA:delete:error');
 
 /**

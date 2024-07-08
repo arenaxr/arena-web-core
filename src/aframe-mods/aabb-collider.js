@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, THREE */
-
 import { ARENAUtils } from '../utils';
 
 if (typeof AFRAME === 'undefined') {

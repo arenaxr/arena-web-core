@@ -1,7 +1,5 @@
 /* eslint-disable max-len */
 
-/* global AFRAME */
-
 /**
  * @fileoverview Armarker Component/System. Support for ARMarkers in a scene
  *

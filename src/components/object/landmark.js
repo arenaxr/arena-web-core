@@ -6,8 +6,6 @@
  * @date 2021
  */
 
-/* global AFRAME, ARENA, THREE */
-
 import { ARENA_EVENTS } from '../../constants';
 
 /**

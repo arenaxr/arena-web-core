@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
 
-/* global AFRAME, THREE */
-
 import { Pass, FullScreenQuad } from './pass';
 import SAOShader from '../shaders/SAOShader';
 import { DepthLimitedBlurShader, BlurShaderUtils } from '../shaders/DepthLimitedBlurShader';

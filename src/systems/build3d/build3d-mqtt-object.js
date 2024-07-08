@@ -6,8 +6,6 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA */
-
 const symbols = { create: 'create', update: 'update', delete: 'delete' };
 
 function LogToUser(msg, attributeName, changes) {

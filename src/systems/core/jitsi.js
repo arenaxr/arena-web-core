@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, JitsiMeetJS, $ */
+/* global JitsiMeetJS, $ */
 import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../../constants';
 

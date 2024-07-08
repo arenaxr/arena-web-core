@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Listen for collisions, callback on event.
  *

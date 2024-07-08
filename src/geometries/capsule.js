@@ -6,8 +6,6 @@
  * @date 2020
  */
 
-/* global AFRAME, THREE */
-
 AFRAME.registerGeometry('capsule', {
     schema: {
         length: { default: 1, min: 0 },

@@ -6,7 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA */
 import { ARENA_EVENTS, JITSI_EVENTS } from '../../constants';
 
 /**

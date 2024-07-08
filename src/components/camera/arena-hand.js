@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, THREE */
-
 import { ARENA_EVENTS } from '../../constants';
 
 // path to controller models

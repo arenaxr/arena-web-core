@@ -1,5 +1,3 @@
-/* global AFRAME, THREE */
-
 AFRAME.registerComponent('remote-render', {
     schema: {
         enabled: { type: 'boolean', default: false },

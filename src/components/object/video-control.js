@@ -1,4 +1,4 @@
-/* global AFRAME, ARENA, $ */
+/* global $ */
 
 import { ARENAUtils } from '../../utils';
 

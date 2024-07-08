@@ -4,8 +4,6 @@
  * - getNode allows optional param to allow non-coplanar closestNode
  */
 
-/* global AFRAME, THREE */
-
 const { Pathfinding } = require('three-pathfinding');
 
 const ZONE = 'level';

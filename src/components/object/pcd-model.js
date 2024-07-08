@@ -1,4 +1,3 @@
-/* global AFRAME */
 import { PCDLoader } from '../vendor/pcd-loader';
 
 /**

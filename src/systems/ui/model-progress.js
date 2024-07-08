@@ -11,8 +11,6 @@
  * @private
  */
 
-/* global AFRAME, ARENA */
-
 class LoadAlertTable {
     constructor(maxRows = 10, errorsOnTop = true, timeoutMs = 4000, rowTimeout = 2000) {
         this.maxRows = maxRows;

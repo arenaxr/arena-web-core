@@ -1,5 +1,3 @@
-/* global ARENA */
-
 import { ARENAUtils } from '../../../utils';
 
 const Paho = require('paho-mqtt');

@@ -1,5 +1,3 @@
-/* global THREE */
-
 import { FullScreenQuad, Pass } from './pass';
 import CompositorShader from '../shaders/compositor-shader';
 import DecoderShader from '../shaders/decoder-shader';

@@ -6,8 +6,6 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, THREE */
-
 const { isIOS, isTablet, isR7, isMobileVR } = AFRAME.utils.device;
 
 /**

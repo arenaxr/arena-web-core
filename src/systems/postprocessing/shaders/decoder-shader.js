@@ -1,5 +1,3 @@
-/* global THREE */
-
 import vertGLSL from './glsl/decoder/vert.glsl';
 import fragGLSL from './glsl/decoder/frag.glsl';
 

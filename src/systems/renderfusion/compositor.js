@@ -1,5 +1,3 @@
-/* global AFRAME, THREE */
-
 import CompositorPass from '../postprocessing/passes/compositor-pass';
 
 AFRAME.registerSystem('compositor', {

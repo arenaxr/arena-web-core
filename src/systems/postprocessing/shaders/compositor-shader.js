@@ -1,5 +1,3 @@
-/* global ARENA, THREE */
-
 import vertGLSL from './glsl/compositor/vert.glsl';
 import fragGLSL from './glsl/compositor/frag.glsl';
 
