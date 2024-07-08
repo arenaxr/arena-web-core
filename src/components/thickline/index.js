@@ -45,7 +45,11 @@ AFRAME.registerComponent('thickline', {
             ],
             // Deserialize path in the form of comma-separated vec3s: `0 0 0, 1 1 1, 2 0 3`.
             parse(value) {
-                return value.split(',').map(AFRAME.utils.coordinates.parse);
+                // AFRAME 1.6, now calls AFRAME.utils.coordinates.parse twice, modify to check type first.
+                if (typeof value === 'string' && AFRAME) {
+                    return value.split(',').map((val) => AFRAME.utils.coordinates.parse(val));
+                }
+                return value.map((val) => AFRAME.utils.coordinates.parse(val));
             },
             // Serialize array of vec3s in case someone does setAttribute('line', 'path', [...]).
             stringify(data) {
