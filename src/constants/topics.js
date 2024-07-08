@@ -48,7 +48,7 @@ const TOPICS = Object.freeze({
         SCENE_USER:            `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}`,
         SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}/{toUid}`, // Need to add face_ privs
         SCENE_OBJECTS:         `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}`, // All client placeholder
-        SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{camName}/{toUid}`,
+        SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}/{toUid}`,
         SCENE_RENDER:          `${REALM}/s/{nameSpace}/{sceneName}/r/{camName}`,
         SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/{camName}/-`, // To avoid unpriv sub
         SCENE_ENV:             `${REALM}/s/{nameSpace}/{sceneName}/e/{camName}`,
