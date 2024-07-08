@@ -8,6 +8,7 @@
 
 import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
+import { TOPICS } from '../../../constants';
 
 const MINTOCKINTERVAL = 3 * 1000;
 let lastTock = new Date().getTime();
@@ -123,7 +124,7 @@ class MQTTWorker {
     onMessageArrivedDispatcher(message) {
         const now = new Date().getTime();
         const topic = message.destinationName;
-        const topicCategory = topic.split('/')[1];
+        const topicCategory = topic.split('/')[TOPICS.TOKENS.TYPE];
         const handler = this.messageHandlers[topicCategory];
         const trimmedMessage = {
             destinationName: message.destinationName,

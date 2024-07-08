@@ -177,8 +177,7 @@ AFRAME.registerSystem('arena-mqtt', {
         let topicUser;
         if (message.destinationName) {
             // This is a Paho.MQTT.Message
-            // [realm, category, namespace, scene, user]
-            [, , , , topicUser] = message.destinationName.split('/');
+            topicUser = message.destinationName.split('/')[TOPICS.TOKENS.UUID];
         }
 
         switch (
