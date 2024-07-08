@@ -1,3 +1,4 @@
+// Modified from: https://github.com/andreasplesch/aframe-meshline-component
 /* global AFRAME, THREE */
 
 if (typeof AFRAME === 'undefined') {

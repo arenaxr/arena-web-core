@@ -1,3 +1,4 @@
+// Modified from: https://github.com/andreasplesch/aframe-meshline-component
 /* eslint-disable */
 ;(function() {
     var root = this;
