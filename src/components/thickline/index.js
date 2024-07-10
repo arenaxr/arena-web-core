@@ -1,5 +1,4 @@
 // Modified from: https://github.com/andreasplesch/aframe-meshline-component
-// - Added near/far params (ivan).
 // - Modified lineWidthStylers to white list known functions only for security (ivan).
 // - Fixed crash from AFRAME 1.6, calling AFRAME.utils.coordinates.parse twice (ivan/mwfarb).
 
@@ -36,8 +35,6 @@ AFRAME.registerComponent('thickline', {
         lineWidth: { default: 10 },
         lineWidthStyler: { default: '' }, // One of lineWidthStyles above
         sizeAttenuation: { default: 0 },
-        near: { default: 0.1 },
-        far: { default: 1000 },
         path: {
             default: [
                 { x: -0.5, y: 0, z: 0 },
@@ -86,22 +83,18 @@ AFRAME.registerComponent('thickline', {
             resolution: this.resolution,
             sizeAttenuation: this.data.sizeAttenuation,
             lineWidth: this.data.lineWidth,
-            near: this.data.near,
-            far: this.data.far,
         });
 
-        const geometry = new THREE.BufferGeometry();
-        const positions = [];
+        const vertices = [];
+
         this.data.path.forEach((vec3) => {
-            positions.push(vec3.x, vec3.y, vec3.z);
+            vertices.push(vec3.x || 0, vec3.y || 0, vec3.z || 0);
         });
-
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 
         const widthFn = lineWidthStylers[this.data.lineWidthStyler] ?? (() => 1);
         // ? try {var w = widthFn(0);} catch(e) {warn(e);}
         const line = new THREE.MeshLine();
-        line.setGeometry(geometry, widthFn);
+        line.setGeometry(new Float32Array(vertices), widthFn);
 
         this.el.setObject3D('mesh', new THREE.Mesh(line.geometry, material));
     },
