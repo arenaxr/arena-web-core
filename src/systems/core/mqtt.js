@@ -92,6 +92,7 @@ AFRAME.registerSystem('arena-mqtt', {
             proxy((messages) => {
                 messages.forEach(this.onSceneMessageArrived);
             }),
+            true,
             true
         );
         worker.registerMessageQueue('s', true);
@@ -174,10 +175,10 @@ AFRAME.registerSystem('arena-mqtt', {
         theMessage.id = theMessage.object_id;
         delete theMessage.object_id;
 
-        let topicUser;
+        let topicUuid;
         if (message.destinationName) {
             // This is a Paho.MQTT.Message
-            topicUser = message.destinationName.split('/')[TOPICS.TOKENS.UUID];
+            topicUuid = message.destinationName.split('/')[TOPICS.TOKENS.UUID];
         }
 
         switch (
@@ -190,7 +191,7 @@ AFRAME.registerSystem('arena-mqtt', {
                 }
                 // check topic
                 if (message.destinationName) {
-                    if (topicUser !== theMessage.data.source) {
+                    if (topicUuid !== theMessage.data.source) {
                         warn(
                             'Malformed message (topic does not pass check):',
                             JSON.stringify(message),
@@ -207,31 +208,10 @@ AFRAME.registerSystem('arena-mqtt', {
                     warn('Malformed message (no data field):', JSON.stringify(message));
                     return;
                 }
-                // check topic
-                if (message.destinationName) {
-                    if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
-                        warn(
-                            'Malformed message (topic does not pass check):',
-                            JSON.stringify(message),
-                            message.destinationName
-                        );
-                        return;
-                    }
-                }
                 CreateUpdate.handle(theMessage.action, theMessage);
                 break;
             case ACTIONS.DELETE:
                 // check topic
-                if (message.destinationName) {
-                    if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
-                        warn(
-                            'Malformed message (topic does not pass check):',
-                            JSON.stringify(message),
-                            message.destinationName
-                        );
-                        return;
-                    }
-                }
                 Delete.handle(theMessage);
                 break;
             case ACTIONS.GET_PERSIST:
