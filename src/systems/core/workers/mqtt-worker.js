@@ -10,7 +10,6 @@ import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
 const MINTOCKINTERVAL = 3 * 1000;
-let lastMetricTick = new Date().getTime();
 let lastTock = new Date().getTime();
 
 /**
@@ -158,10 +157,6 @@ class MQTTWorker {
         this.messageQueues[topicCategory] = [];
         const now = new Date().getTime();
         lastTock = now;
-        if (now - lastMetricTick > MINTOCKINTERVAL) {
-            console.log(`Worker batching ${batch.length} messages for ${topicCategory}`);
-            lastMetricTick = now;
-        }
         return batch;
     }
 

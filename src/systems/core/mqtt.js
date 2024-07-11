@@ -14,8 +14,6 @@ import { ARENA_EVENTS, ACTIONS } from '../../constants';
 const warn = AFRAME.utils.debug('ARENA:MQTT:warn');
 // const error = AFRAME.utils.debug('ARENA:MQTT:error');
 
-let lastMetricTick = new Date().getTime();
-
 AFRAME.registerSystem('arena-mqtt', {
     schema: {
         mqttHost: { type: 'string', default: ARENA.defaults.mqttHost },
@@ -149,11 +147,6 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {object} message
      */
     onSceneMessageArrived(message) {
-        const now = new Date().getTime();
-        if (now - lastMetricTick > 1000) {
-            console.log(`Worker message delay: ${now - message.workerTimestamp}ms`);
-            lastMetricTick = now;
-        }
         delete message.workerTimestamp;
         const theMessage = message.payloadObj; // This will be given as json
 
