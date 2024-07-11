@@ -640,7 +640,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         const _this = this; /* save reference to class instance */
 
-        this.mqttc.registerMessageHandler('c', proxy(this.onMessageArrived.bind(_this)), true);
+        this.mqttc.registerMessageHandler('c', proxy(this.onMessageArrived.bind(_this)), true, false);
         this.mqttc.addConnectionLostHandler(proxy(this.onConnectionLost.bind(_this)));
 
         this.mqttc.subscribe(this.subscribePublicTopic);
