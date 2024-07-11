@@ -81,7 +81,15 @@ AFRAME.registerSystem('arena-mqtt', {
             //     }
             // }),
         );
-        worker.registerMessageHandler('s', proxy(this.onSceneMessageArrived.bind(this)), true);
+        this.onSceneMessageArrived = this.onSceneMessageArrived.bind(this);
+        worker.registerMessageHandler(
+            's',
+            proxy((messages) => {
+                messages.forEach(this.onSceneMessageArrived);
+            }),
+            true
+        );
+        worker.registerMessageQueue('s', true);
         return worker;
     },
 
@@ -139,6 +147,7 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {object} message
      */
     onSceneMessageArrived(message) {
+        delete message.workerTimestamp;
         const theMessage = message.payloadObj; // This will be given as json
 
         if (!theMessage) {
@@ -228,5 +237,11 @@ AFRAME.registerSystem('arena-mqtt', {
                 warn('Malformed message (invalid action field):', JSON.stringify(message));
                 break;
         }
+    },
+
+    tock() {
+        this.MQTTWorker?.tock('s').then((messages) => {
+            messages.forEach(this.onSceneMessageArrived);
+        });
     },
 });

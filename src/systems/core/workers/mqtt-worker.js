@@ -9,6 +9,9 @@
 import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
+const MINTOCKINTERVAL = 3 * 1000;
+let lastTock = new Date().getTime();
+
 /**
  * Main ARENA MQTT webworker client
  */
@@ -18,6 +21,10 @@ class MQTTWorker {
     subscriptions = [];
 
     connectionLostHandlers = [];
+
+    messageQueues = {};
+
+    messageQueueConf = {};
 
     /**
      * @param {object} ARENAConfig
@@ -114,12 +121,43 @@ class MQTTWorker {
      * @param {Paho.Message} message
      */
     onMessageArrivedDispatcher(message) {
+        const now = new Date().getTime();
         const topic = message.destinationName;
         const topicCategory = topic.split('/')[1];
         const handler = this.messageHandlers[topicCategory];
-        if (handler) {
-            handler(message);
+        const trimmedMessage = {
+            destinationName: message.destinationName,
+            payloadString: message.payloadString,
+            workerTimestamp: now,
+        };
+        if (this.messageQueues[topicCategory]) {
+            if (this.messageQueueConf[topicCategory]) {
+                try {
+                    trimmedMessage.payloadObj = JSON.parse(message.payloadString);
+                } catch (e) {
+                    // Ignore
+                }
+            }
+            this.messageQueues[topicCategory].push(trimmedMessage);
+            // Been too long since last tock (lost focus?), flush queue to main thread instead of waiting for pull
+            if (now - lastTock > MINTOCKINTERVAL && handler) {
+                const batch = this.messageQueues[topicCategory];
+                this.messageQueues[topicCategory] = [];
+                lastTock = now;
+                console.log(`Worker flushing ${batch.length} messages for ${topicCategory}`);
+                handler(batch);
+            }
+        } else if (handler) {
+            handler(trimmedMessage);
         }
+    }
+
+    tock(topicCategory) {
+        const batch = this.messageQueues[topicCategory];
+        this.messageQueues[topicCategory] = [];
+        const now = new Date().getTime();
+        lastTock = now;
+        return batch;
     }
 
     /**
@@ -142,6 +180,16 @@ class MQTTWorker {
         } else {
             this.messageHandlers[topicCategory] = mainHandler;
         }
+    }
+
+    /**
+     * Register a message handler for a given topic category beneath realm (second level).
+     * @param {string} topicCategory - the topic category to register a handler for
+     * @param {boolean} isJson - whether the payload is expected to be well-formed json
+     */
+    registerMessageQueue(topicCategory, isJson) {
+        this.messageQueues[topicCategory] = [];
+        this.messageQueueConf[topicCategory] = isJson;
     }
 
     /**
