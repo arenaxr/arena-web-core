@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.28.1](https://github.com/arenaxr/arena-web-core/compare/v1.28.0...v1.28.1) (2024-07-11)
+
+
+### Bug Fixes
+
+* **arenaui-card:** build page default blank img causes title not to render ([#647](https://github.com/arenaxr/arena-web-core/issues/647)) ([41a05d2](https://github.com/arenaxr/arena-web-core/commit/41a05d257f8b965708dd2d96b3bd700b00d0d547))
+* **auth:** allow filestore upload for arena ui card image ([fca5a37](https://github.com/arenaxr/arena-web-core/commit/fca5a378a258ac033340db05b93e174bb0fab9ba))
+* **build3d:** handle single boolean attribute as string conversion ([0b4e215](https://github.com/arenaxr/arena-web-core/commit/0b4e215da5cad2c00825c71f422adab65a42bddb))
+* **build3d:** sync with production aframe-inspector ([4ffb2f7](https://github.com/arenaxr/arena-web-core/commit/4ffb2f7617fe8a9345345637867d2b4a5e7360a1))
+* **build3d:** update build page build3d icon as 3d globe ([cc172c7](https://github.com/arenaxr/arena-web-core/commit/cc172c7cf163a3ac8d07db18d0e9b53b22e4eb30))
+* **build:** add eye button to publish visible prop, closes [#649](https://github.com/arenaxr/arena-web-core/issues/649) ([2fdff10](https://github.com/arenaxr/arena-web-core/commit/2fdff10630cbb846a1176f9ebb3df2aeda365a12))
+* **build:** add gray color to non-visible objects in list ([e77ecca](https://github.com/arenaxr/arena-web-core/commit/e77ecca46c3ca10ec2cc505dbab54a7683484c82))
+* **build:** add inherited visible property to entity schema ([97b35b6](https://github.com/arenaxr/arena-web-core/commit/97b35b6c8830e6fb2cdfc3adccffb5c2fc28537c))
+* listen on enter-vr for env publisher ([b771078](https://github.com/arenaxr/arena-web-core/commit/b7710787880bce74b69206e6a4a15b34bc1a4cb2))
+* **settings:** update settings build links to use proper names ([170638d](https://github.com/arenaxr/arena-web-core/commit/170638dce152e2f047fb586f948637fedff9b442))
+* **thinkline:** handle crash from aframe 1.6 utils.coordinates.parse ([42ea490](https://github.com/arenaxr/arena-web-core/commit/42ea490f1bfb2ca8856e46a7114dab40554d31bf))
+* typos ([7d9367b](https://github.com/arenaxr/arena-web-core/commit/7d9367b0f777e3c021d6d4edcd8a3d7c85e46846))
+* un-revert clobbered 42ea490f for meshline parse ([d4c0b35](https://github.com/arenaxr/arena-web-core/commit/d4c0b35cf6876af7b43b80195894dd1166804afd))
+
 ## [1.28.0](https://github.com/arenaxr/arena-web-core/compare/v1.27.0...v1.28.0) (2024-06-11)
 
 
