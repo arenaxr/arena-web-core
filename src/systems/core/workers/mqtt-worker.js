@@ -124,7 +124,8 @@ class MQTTWorker {
     onMessageArrivedDispatcher(message) {
         const now = new Date().getTime();
         const topic = message.destinationName;
-        const topicCategory = topic.split('/')[TOPICS.TOKENS.TYPE];
+        const topicSplit = topic.split('/');
+        const topicCategory = topicSplit[TOPICS.TOKENS.TYPE];
         const handler = this.messageHandlers[topicCategory];
         const trimmedMessage = {
             destinationName: message.destinationName,
@@ -132,11 +133,18 @@ class MQTTWorker {
             workerTimestamp: now,
         };
         if (this.messageQueues[topicCategory]) {
-            if (this.messageQueueConf[topicCategory]) {
+            const { isJson, validateUuid } = this.messageQueueConf[topicCategory] ?? {};
+            if (isJson) {
                 try {
                     trimmedMessage.payloadObj = JSON.parse(message.payloadString);
+                    if (validateUuid) {
+                        const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
+                        if (topicUuid !== trimmedMessage.payloadObj.object_id) {
+                            return; // mismatched uuid
+                        }
+                    }
                 } catch (e) {
-                    // Ignore
+                    return;
                 }
             }
             this.messageQueues[topicCategory].push(trimmedMessage);
@@ -162,17 +170,25 @@ class MQTTWorker {
     }
 
     /**
-     * Register a message handler for a given topic category beneath realm (second level).
+     * Register a message handler for a given topic category beneath realm (second level). This is required even
+     * if a message is batch queued, as this we need this to flush the queue whenever the max interval is reached.
      * @param {string} topicCategory - the topic category to register a handler for
      * @param {function} mainHandler - main thread handler, pass in whatever expected format
      * @param {boolean} isJson - whether the payload is expected to be well-formed json
+     * @param {boolean} validateUuid - whether to validate the object_id matches the topic uuid
      */
-    registerMessageHandler(topicCategory, mainHandler, isJson) {
+    registerMessageHandler(topicCategory, mainHandler, isJson, validateUuid) {
         if (isJson) {
             // Parse json in worker
             this.messageHandlers[topicCategory] = (message) => {
                 try {
                     const jsonPayload = JSON.parse(message.payloadString);
+                    if (validateUuid) {
+                        const topicUuid = message.destinationName.split('/')[TOPICS.TOKENS.UUID];
+                        if (topicUuid !== jsonPayload.object_id) {
+                            return; // mismatched uuid
+                        }
+                    }
                     mainHandler({ ...message, payloadObj: jsonPayload });
                 } catch (e) {
                     // Ignore
@@ -187,10 +203,14 @@ class MQTTWorker {
      * Register a message handler for a given topic category beneath realm (second level).
      * @param {string} topicCategory - the topic category to register a handler for
      * @param {boolean} isJson - whether the payload is expected to be well-formed json
+     * @param {boolean} validateUuid - whether to validate the object_id matches the topic uuid
      */
-    registerMessageQueue(topicCategory, isJson) {
+    registerMessageQueue(topicCategory, isJson = true, validateUuid = true) {
         this.messageQueues[topicCategory] = [];
-        this.messageQueueConf[topicCategory] = isJson;
+        this.messageQueueConf[topicCategory] = {
+            isJson,
+            validateUuid,
+        };
     }
 
     /**
