@@ -2,6 +2,11 @@
 
 ## [1.28.1](https://github.com/arenaxr/arena-web-core/compare/v1.28.0...v1.28.1) (2024-07-11)
 
+### Features
+
+* MQTT messages on webworker are now buffered and processed as batches every frame tock (or max every 3s if
+  the tab or window is out of focus/rAF-halted). This enables much higher message update throughput.
+
 
 ### Bug Fixes
 
