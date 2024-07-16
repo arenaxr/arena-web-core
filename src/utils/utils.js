@@ -446,6 +446,7 @@ export default class ARENAUtils {
                         // Modify look component axes separately
                         lookComponent.yawObject.rotation.y = this.overrideEuler.y;
                         lookComponent.pitchObject.rotation.x = this.overrideEuler.x;
+                        lookComponent.updateOrientation();
                     } else {
                         // Directly mod camera rotation
                         userCamRotationObj.setFromQuaternion(this.overrideQuat);
