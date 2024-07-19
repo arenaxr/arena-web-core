@@ -36,7 +36,7 @@ AFRAME.registerSystem('arena-jitsi', {
                 domain: data.jitsiHost.split(':')[0], // remove port, if exists.
                 muc: `conference.${data.jitsiHost.split(':')[0]}`, // remove port, if exists. FIXME: use XEP-0030
             },
-            bosh: `//${data.jitsiHost}/http-bind`, // FIXME: use xep-0156 for that
+            serviceUrl: `//${data.jitsiHost}/http-bind`, // FIXME: use xep-0156 for that
 
             // The name of client node advertised in XEP-0115 'c' stanza
             clientNode: 'http://jitsi.org/jitsimeet',
