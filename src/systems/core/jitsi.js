@@ -807,6 +807,24 @@ AFRAME.registerSystem('arena-jitsi', {
                 this.initialized = false;
                 console.warn(err);
             });
+
+        // TODO (mwfarb): VADProcessor WIP
+        // JitsiMeetJS.createTrackVADEmitter ( localAudioDeviceId: string, sampleRate: 256 | 512 | 1024 | 4096 | 8192 | 16384, vadProcessor: VADProcessor ) => Promise<TrackVADEmitter>;
+        // sampleRate: 256 | 512 | 1024 | 4096 | 8192 | 16384
+        const sampleRate = 256;
+        const vadProcessor = new VADProcessor();
+        JitsiMeetJS.createTrackVADEmitter(this.jitsiAudioTrack.deviceId, sampleRate, vadProcessor)
+            .then(async (tracks) => {
+                await this.onLocalTracks(tracks);
+                if (this.withVideo) {
+                    this.setupCornerVideo.bind(this)();
+                    this.stopVideo();
+                }
+            })
+            .catch((err) => {
+                this.initialized = false;
+                console.warn(err);
+            });
     },
 
     /**
