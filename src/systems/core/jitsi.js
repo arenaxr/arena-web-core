@@ -1172,7 +1172,7 @@ AFRAME.registerSystem('arena-jitsi', {
         enableTalkWhileMuted: true,
         enableNoisyMicDetection: true,
         p2p: {
-            enabled: false,
+            enabled: true,
         },
 
         // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
