@@ -1169,10 +1169,10 @@ AFRAME.registerSystem('arena-jitsi', {
     // https://github.com/jitsi/jitsi-meet/blob/master/config.js
     confOptions: {
         openBridgeChannel: true,
-        enableTalkWhileMuted: true,
-        enableNoisyMicDetection: true,
+        // enableTalkWhileMuted: true,
+        // enableNoisyMicDetection: true,
         p2p: {
-            enabled: true,
+            enabled: false,
         },
 
         // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
@@ -1181,5 +1181,88 @@ AFRAME.registerSystem('arena-jitsi', {
 
         // https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md.
         useNewBandwidthAllocationStrategy: true,
+
+        // TODO (mwfarb): resolve bitrate throttle in lib-jitsi-meet v1844, starts at v1654
+        // Current v1844 jitsi-meet client config.js:
+
+        // Specify the settings for video quality optimizations on the client.
+        // videoQuality: {
+        //
+        //    // Provides a way to set the codec preference on desktop based endpoints.
+        //    codecPreferenceOrder: [ 'VP9', 'VP8', 'H264' ],
+        //
+        //    // Provides a way to set the codec for screenshare.
+        //    screenshareCodec: 'AV1',
+        //    mobileScreenshareCodec: 'VP8',
+        //
+        //    // Codec specific settings for scalability modes and max bitrates.
+        //    av1: {
+        //      maxBitratesVideo: {
+        //          low: 100000,
+        //          standard: 300000,
+        //          high: 1000000,
+        //          fullHd: 2000000,
+        //          ultraHd: 4000000,
+        //          ssHigh: 2500000
+        //      },
+        //      scalabilityModeEnabled: true,
+        //      useSimulcast: false,
+        //      useKSVC: true
+        //    },
+        //    h264: {
+        //      maxBitratesVideo: {
+        //          low: 200000,
+        //          standard: 500000,
+        //          high: 1500000,
+        //          fullHd: 3000000,
+        //          ultraHd: 6000000,
+        //          ssHigh: 2500000
+        //      },
+        //      scalabilityModeEnabled: true
+        //    },
+        //    vp8: {
+        //      maxBitratesVideo: {
+        //          low: 200000,
+        //          standard: 500000,
+        //          high: 1500000,
+        //          fullHd: 3000000,
+        //          ultraHd: 6000000,
+        //          ssHigh: 2500000
+        //      },
+        //      scalabilityModeEnabled: false
+        //    },
+        //    vp9: {
+        //      maxBitratesVideo: {
+        //          low: 100000,
+        //          standard: 300000,
+        //          high: 1200000,
+        //          fullHd: 2500000,
+        //          ultraHd: 5000000,
+        //          ssHigh: 2500000
+        //      },
+        //      scalabilityModeEnabled: true,
+        //      useSimulcast: false,
+        //      useKSVC: true
+        //    },
+        //
+        //    // The options can be used to override default thresholds of video thumbnail heights corresponding to
+        //    // the video quality levels used in the application. At the time of this writing the allowed levels are:
+        //    //     'low' - for the low quality level (180p at the time of this writing)
+        //    //     'standard' - for the medium quality level (360p)
+        //    //     'high' - for the high quality level (720p)
+        //    // The keys should be positive numbers which represent the minimal thumbnail height for the quality level.
+        //    //
+        //    // With the default config value below the application will use 'low' quality until the thumbnails are
+        //    // at least 360 pixels tall. If the thumbnail height reaches 720 pixels then the application will switch to
+        //    // the high quality.
+        //    minHeightForQualityLvl: {
+        //        360: 'standard',
+        //        720: 'high',
+        //    },
+        //
+        //    // Provides a way to set the codec preference on mobile devices, both on RN and mobile browser based endpoint
+        //    mobileCodecPreferenceOrder: [ 'VP8', 'VP9', 'H264' ],
+        //
+        // },
     },
 });
