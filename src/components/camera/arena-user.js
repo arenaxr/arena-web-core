@@ -455,11 +455,11 @@ AFRAME.registerComponent('arena-user', {
         // Option 1: videosphere W/H/D is panoRadius x 2
         // Option 2: video cube W x H x D is 0.6m x 0.4m x 0.6m
         const fov = 80;
-        const cubeHeight = this.pano ? this.panoRadius * 3 : 0.4;
-        const cubeDepth = this.pano ? this.panoRadius * 3 : 0.6;
-        const actualDist = distance - (this.data.pano ? 0 : cubeDepth / 2);
+        const videoHeightMeters = this.data.pano ? this.panoRadius * 3 : 0.4;
+        const videoDepthMeters = this.data.pano ? this.panoRadius * 2 : 0.6;
+        const actualDist = distance - (this.data.pano ? 0 : videoDepthMeters / 2);
         const frustumHeightAtVideo = 2 * actualDist * Math.tan((fov * 0.5 * Math.PI) / 180);
-        const videoRatio2Window = (this.data.pano ? this.panoRadius * 2 : cubeHeight) / frustumHeightAtVideo;
+        const videoRatio2Window = videoHeightMeters / frustumHeightAtVideo;
         const actualCubeRes = winHeight * videoRatio2Window;
         // return actual height, since video constraints will use it
         return actualCubeRes;
