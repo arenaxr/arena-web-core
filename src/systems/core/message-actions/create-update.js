@@ -516,8 +516,8 @@ export default class CreateUpdate {
                     } else {
                         // replace dropbox links in any url or src attribute inside value
                         /* eslint-disable no-param-reassign */
-                        if (Object.hasOwn(value, 'mtl')) value.src = ARENAUtils.crossOriginDropboxSrc(value.mtl);
-                        if (Object.hasOwn(value, 'obj')) value.src = ARENAUtils.crossOriginDropboxSrc(value.obj);
+                        if (Object.hasOwn(value, 'mtl')) value.mtl = ARENAUtils.crossOriginDropboxSrc(value.mtl);
+                        if (Object.hasOwn(value, 'obj')) value.obj = ARENAUtils.crossOriginDropboxSrc(value.obj);
                         if (Object.hasOwn(value, 'src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
                         if (Object.hasOwn(value, 'url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
                         entityEl.setAttribute(attribute, value);
