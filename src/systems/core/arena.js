@@ -766,7 +766,6 @@ AFRAME.registerSystem('arena-scene', {
             environment.setAttribute('environment', 'groundTexture', 'squares');
             environment.setAttribute('environment', 'grid', 'none');
             environment.setAttribute('environment', 'fog', 0);
-            environment.setAttribute('environment', 'fog', 0);
             sceneRoot.appendChild(environment);
 
             // make default env have lights

@@ -504,6 +504,10 @@ export default class CreateUpdate {
                     // replace dropbox links in any 'src'/'url' attributes that get here
                     entityEl.setAttribute(attribute, ARENAUtils.crossOriginDropboxSrc(value));
                     break;
+                case 'spe-particles':
+                    // conflicts with env-presets THREE.js fog defaults ATM, so disable fog/particle interaction
+                    entityEl.setAttribute(attribute, 'affectedByFog', false);
+                    break;
                 default:
                     // all other attributes are pushed directly to aframe
                     if (value === null) {
