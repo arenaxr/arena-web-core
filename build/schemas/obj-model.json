@@ -1,6 +1,6 @@
 {
     "title": "OBJ Model",
-    "description":"Loads a 3D model and material using a Wavefront (.OBJ) file and a .MTL file.\n\nSee guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
+    "description": "Loads a 3D model and material using a Wavefront (.OBJ) file and a .MTL file.\n\nSee guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type.",
-                                    "enum": [
-                                        "obj-model"
-                                    ]
+                                    "enum": ["obj-model"]
                                 },
                                 "obj": {
                                     "description": "Url pointing to a .OBJ file. Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
@@ -48,19 +46,10 @@
                     "default": {
                         "object_type": "obj-model"
                     },
-                    "required": [
-                        "object_type",
-                        "obj"
-                    ]
+                    "required": ["object_type", "obj"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

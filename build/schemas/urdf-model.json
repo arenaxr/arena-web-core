@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type.",
-                                    "enum": [
-                                        "urdf-model"
-                                    ]
+                                    "enum": ["urdf-model"]
                                 },
                                 "url": {
                                     "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
@@ -26,7 +24,7 @@
                                     "type": "string"
                                 },
                                 "urlBase": {
-                                  "description": "Base path for xacro/urdf package includes. This must be an absolute path with no trailing slash, e.g. '/store/users/username/robot'",
+                                    "description": "Base path for xacro/urdf package includes. This must be an absolute path with no trailing slash, e.g. '/store/users/username/robot'",
                                     "format": "uri",
                                     "title": "URL Base for Package Includes",
                                     "type": "string"
@@ -50,20 +48,10 @@
                     "default": {
                         "object_type": "urdf-model"
                     },
-                    "required": [
-                        "object_type",
-                        "url",
-                        "urlBase"
-                    ]
+                    "required": ["object_type", "url", "urlBase"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }
