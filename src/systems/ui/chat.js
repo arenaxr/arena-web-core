@@ -88,7 +88,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.liveUsers = {};
 
         this.userId = this.arena.idTag;
-        this.cameraId = this.arena.camName;
         this.userName = this.arena.getDisplayName();
         this.realm = ARENA.defaults.realm;
         this.nameSpace = this.arena.nameSpace;
@@ -107,10 +106,10 @@ AFRAME.registerSystem('arena-chat-ui', {
             - a user (*p*rivate) topic (<realm>/c/<scene-namespace>/p/userhandle/#)
 
         Clients write always to a topic with its own userhandle:
-              - a topic for each user for private messages ( <realm>/c/<scene-namespace>/p/[other-cameraid]/userhandle)
+              - a topic for each user for private messages ( <realm>/c/<scene-namespace>/p/[other-userid]/userhandle)
             - a global topic (ugtopic; r<realm>/c/<scene-namespace>/o/userhandle);
 
-        where userhandle = cameraid + btoa(cameraid)
+        where userhandle = userid + btoa(userid)
 
         Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
         Note: scene-only messages are sent to public topic and filtered at the client
@@ -442,7 +441,6 @@ AFRAME.registerSystem('arena-chat-ui', {
                     jid: args.jid,
                     un: user.dn,
                     scene: args.scene,
-                    cid: user.cn,
                     ts: new Date().getTime(),
                     type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
                 };
@@ -463,7 +461,6 @@ AFRAME.registerSystem('arena-chat-ui', {
                 jid: user.jid,
                 un: user.dn,
                 scene: user.scene,
-                cid: user.cn,
                 ts: new Date().getTime(),
                 type: UserType.EXTERNAL, // indicate we only know about the users from jitsi
             };
@@ -485,7 +482,6 @@ AFRAME.registerSystem('arena-chat-ui', {
                 jid: user.jid,
                 un: user.dn,
                 scene: user.scene,
-                cid: user.cn,
                 ts: new Date().getTime(),
                 type: UserType.SCREENSHARE, // indicate we know the user is screensharing
             };
@@ -661,11 +657,11 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     /**
      * Utility to know if the user has been authenticated.
-     * @param {string} cameraId The user camera id.
+     * @param {string} idTag The user idTag.
      * @return {boolean} True if non-anonymous.
      */
-    isUserAuthenticated(cameraId) {
-        return !cameraId.includes('anonymous');
+    isUserAuthenticated(idTag) {
+        return !idTag.includes('anonymous');
     },
 
     isModerator(status) {
@@ -687,7 +683,6 @@ AFRAME.registerSystem('arena-chat-ui', {
             from_scene: this.scene,
             from_desc: `${decodeURI(this.userName)} (${this.toSel.options[this.toSel.selectedIndex].text})`,
             from_time: now.toJSON(),
-            cameraid: this.cameraId,
             text: msgTxt,
         };
         const dstTopic =
@@ -725,7 +720,6 @@ AFRAME.registerSystem('arena-chat-ui', {
             this.liveUsers[msg.from_uid] = {
                 un: msg.from_un,
                 scene: msg.from_scene,
-                cid: msg.cameraid,
                 ts: new Date().getTime(),
                 type: UserType.ARENA,
             };
@@ -856,7 +850,6 @@ AFRAME.registerSystem('arena-chat-ui', {
                 sort_key: _this.liveUsers[key].scene === _this.scene ? 'aaa' : 'zzz',
                 scene: _this.liveUsers[key].scene,
                 un: _this.liveUsers[key].un,
-                cid: _this.liveUsers[key].cid,
                 type: _this.liveUsers[key].type,
                 speaker: _this.liveUsers[key].speaker,
                 stats: _this.liveUsers[key].stats,
@@ -925,10 +918,9 @@ AFRAME.registerSystem('arena-chat-ui', {
                 uBtnCtnr.appendChild(fuspan);
 
                 // span click event (move us to be in front of another clicked user)
-                const { cid } = user;
-                const { scene } = user;
+                const { uid, scene } = user;
                 fuspan.onclick = function findUserClick() {
-                    _this.moveToFrontOfCamera(cid, scene);
+                    _this.moveToFrontOfCamera(uid, scene);
                 };
 
                 if (user.scene === _this.scene) {
@@ -1113,7 +1105,6 @@ AFRAME.registerSystem('arena-chat-ui', {
             from_uid: this.userId,
             from_un: this.userName,
             from_scene: this.scene,
-            cameraid: this.cameraId,
             text,
         };
         // console.info('ctrl', msg, 'to', dstTopic);
@@ -1161,19 +1152,19 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     /**
      * Teleport method to move this user's camera to the front of another user's camera.
-     * @param {string} cameraId Camera object id of the target user
+     * @param {string} userId Camera object id of the target user
      * @param {string} scene The scene name
      */
-    moveToFrontOfCamera(cameraId, scene) {
+    moveToFrontOfCamera(userId, scene) {
         const { el } = this;
 
         const { sceneEl } = el;
         const cameraEl = sceneEl.camera.el;
 
-        // console.log('Move to near camera:', cameraId);
+        // console.log('Move to near camera:', userId);
 
         if (scene !== this.scene) {
-            localStorage.setItem('moveToFrontOfCamera', cameraId);
+            localStorage.setItem('moveToFrontOfCamera', userId);
             const path = window.location.pathname.substring(1);
             let devPath = '';
             if (this.devInstance && path.length > 0) {
@@ -1192,12 +1183,12 @@ AFRAME.registerSystem('arena-chat-ui', {
             return;
         }
 
-        const toCam = sceneEl.querySelector(`[id='${cameraId}']`);
+        const toCam = sceneEl.querySelector(`[id='${userId}']`);
 
         if (!toCam) {
             // TODO: find a better way to do this
             // when we jump to a scene, the "to" user needs to move for us to be able to find his camera
-            console.error('Could not find destination user camera', cameraId);
+            console.error('Could not find destination user', userId);
             return;
         }
 

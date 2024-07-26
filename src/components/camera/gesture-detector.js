@@ -160,12 +160,12 @@ AFRAME.registerComponent('gesture-detector', {
 
         // generated finger move
         const thisMsg = {
-            object_id: ARENA.camName,
+            object_id: ARENA.idTag,
             action: 'clientEvent',
             type: eventName,
             data: {
                 clickPos: ARENAUtils.vec3ToObject(this.cameraPos),
-                source: ARENA.camName,
+                source: ARENA.idTag,
                 position: {
                     x: parseFloat(eventDetail.position.x.toFixed(5)),
                     y: parseFloat(eventDetail.position.y.toFixed(5)),

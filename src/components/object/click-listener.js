@@ -85,7 +85,7 @@ AFRAME.registerComponent('click-listener', {
                 data: {
                     clickPos,
                     position: coordsData,
-                    source: ARENA.camName,
+                    source: ARENA.idTag,
                 },
             };
             if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {

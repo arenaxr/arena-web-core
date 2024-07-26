@@ -357,7 +357,7 @@ AFRAME.registerComponent('box-collision-publisher', {
     },
     init() {
         const thisEl = this.el;
-        const sourceName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
+        const sourceName = thisEl.id === 'my-camera' ? ARENA.idTag : thisEl.components['arena-hand'].name;
         const topicParams = {
             nameSpace: ARENA.nameSpace,
             sceneName: ARENA.sceneName,

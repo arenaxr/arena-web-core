@@ -50,7 +50,7 @@ export default class CreateUpdate {
         switch (message.type) {
             case 'object':
                 // our own camera/controllers: bail, this message is meant for all other viewers
-                if (id === ARENA.camName) {
+                if (id === ARENA.idTag) {
                     return;
                 }
                 if (id === ARENA.handLName) {
@@ -99,7 +99,7 @@ export default class CreateUpdate {
                 if (addObj) {
                     // Parent/Child handling
                     if (parentName) {
-                        if (ARENA.camName === message.data.parent) {
+                        if (ARENA.idTag === message.data.parent) {
                             // our camera is named 'my-camera'
                             if (!message.data.camera) {
                                 // Don't attach extra cameras, use own id to skip
@@ -155,12 +155,12 @@ export default class CreateUpdate {
                 return;
 
             case 'camera-override':
-                if (id !== ARENA.camName) return; // bail if not for us
+                if (id !== ARENA.idTag) return; // bail if not for us
                 this.handleCameraOverride(action, message);
                 return;
 
             case 'rig':
-                if (id === ARENA.camName) {
+                if (id === ARENA.idTag) {
                     // our camera Rig
                     const cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
                     const cameraRigObj3D = document.getElementById('cameraRig').object3D;

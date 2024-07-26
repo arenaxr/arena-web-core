@@ -15,7 +15,7 @@ export default class ClientEvent {
         const clicker = data.source;
 
         // ignore events from ourselves
-        if (clicker === ARENA.camName) {
+        if (clicker === ARENA.idTag) {
             return;
         }
         if (clicker === ARENA.handLName) {
