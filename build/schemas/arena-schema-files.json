@@ -84,10 +84,10 @@
         "file": "schemas/line.json",
         "title": "Line"
     },
-    "obj-model":{
-        "description":"Load an OBJ model",
-        "file":"schemas/obj-model.json",
-        "title":"OBJ Model"
+    "obj-model": {
+        "description": "Load an OBJ model",
+        "file": "schemas/obj-model.json",
+        "title": "OBJ Model"
     },
     "ocean": {
         "description": "Draw a wave-form plane.",
