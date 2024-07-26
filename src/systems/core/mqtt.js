@@ -65,14 +65,14 @@ AFRAME.registerSystem('arena-mqtt', {
     },
 
     async initWorker() {
-        const { nameSpace, sceneName, camName, idTag } = ARENA;
+        const { nameSpace, sceneName, idTag } = ARENA;
 
         const MQTTWorker = wrap(new Worker(new URL('./workers/mqtt-worker.js', import.meta.url), { type: 'module' }));
         const worker = await new MQTTWorker(
             {
                 subscriptions: [
                     TOPICS.SUBSCRIBE.SCENE_PUBLIC.formatStr({ nameSpace, sceneName }),
-                    TOPICS.SUBSCRIBE.SCENE_PRIVATE.formatStr({ nameSpace, sceneName, camName }),
+                    TOPICS.SUBSCRIBE.SCENE_PRIVATE.formatStr({ nameSpace, sceneName, idTag }),
                 ],
                 mqttHostURI: this.mqttHostURI,
                 idTag,

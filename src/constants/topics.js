@@ -18,7 +18,6 @@
  * - sceneName - name of the scene
  * - userName - name of the user per arena-auth (e.g. jdoe)
  * - idTag - username prefixed with a uuid (e.g. 1448081341_jdoe)
- * - camName - idTag prefixed with camera_ (e.g. camera_1448081341_jdoe)
  */
 
 const REALM = ARENA.defaults.realm;
@@ -43,7 +42,7 @@ const TOPICS = Object.freeze({
         PROC_CTL:              `${REALM}/proc/control/{uuid}/#`,
         PROC_DBG:              `${REALM}/proc/debug/{uuid}`,
         SCENE_PUBLIC:          `${REALM}/s/{nameSpace}/{sceneName}/+/+`,
-        SCENE_PRIVATE:         `${REALM}/s/{nameSpace}/{sceneName}/+/+/{camName}/#`,
+        SCENE_PRIVATE:         `${REALM}/s/{nameSpace}/{sceneName}/+/+/{idTag}/#`,
     },
     PUBLISH: {
         NETWORK_LATENCY:       '$NETWORK/latency',
@@ -58,13 +57,13 @@ const TOPICS = Object.freeze({
         SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}/{toUid}`, // Need to add face_ privs
         SCENE_OBJECTS:         `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}`, // All client placeholder
         SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}/{toUid}`,
-        SCENE_RENDER:          `${REALM}/s/{nameSpace}/{sceneName}/r/{camName}`,
-        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/{camName}/-`, // To avoid unpriv sub
-        SCENE_ENV:             `${REALM}/s/{nameSpace}/{sceneName}/e/{camName}`,
-        SCENE_ENV_PRIVATE:     `${REALM}/s/{nameSpace}/{sceneName}/e/{camName}/-`, // To avoid unpriv sub
-        SCENE_PROGRAM:         `${REALM}/s/{nameSpace}/{sceneName}/p/{camName}`,
-        SCENE_PROGRAM_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/p/{camName}/{toUid}`,
-        SCENE_DEBUG:           `${REALM}/s/{nameSpace}/{sceneName}/d/{camName}/-`, // To avoid unpriv sub
+        SCENE_RENDER:          `${REALM}/s/{nameSpace}/{sceneName}/r/{idTag}`,
+        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/{idTag}/-`, // To avoid unpriv sub
+        SCENE_ENV:             `${REALM}/s/{nameSpace}/{sceneName}/e/{idTag}`,
+        SCENE_ENV_PRIVATE:     `${REALM}/s/{nameSpace}/{sceneName}/e/{idTag}/-`, // To avoid unpriv sub
+        SCENE_PROGRAM:         `${REALM}/s/{nameSpace}/{sceneName}/p/{idTag}`,
+        SCENE_PROGRAM_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/p/{idTag}/{toUid}`,
+        SCENE_DEBUG:           `${REALM}/s/{nameSpace}/{sceneName}/d/{idTag}/-`, // To avoid unpriv sub
     },
 });
 

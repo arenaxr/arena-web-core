@@ -95,9 +95,8 @@ AFRAME.registerSystem('arena-scene', {
         this.topicParams = {
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
-            camName: this.camName,
             idTag: this.idTag,
-            userObj: this.camName,
+            userObj: this.idTag,
         };
 
         if (this.isUsersPermitted()) {
@@ -272,9 +271,6 @@ AFRAME.registerSystem('arena-scene', {
     setIdTag(idTag) {
         if (idTag === undefined) throw new Error('setIdTag: idTag not defined.'); // idTag must be set
         this.idTag = idTag;
-
-        // set camName
-        this.camName = `camera_${this.idTag}`; // e.g. camera_1234_eric
 
         // set faceName, avatarName, handLName, handRName which depend on user name
         this.faceName = `face_${this.idTag}`; // e.g. face_9240_X
@@ -532,7 +528,7 @@ AFRAME.registerSystem('arena-scene', {
          */
         const createObj = (obj, descendants = []) => {
             const { parent } = obj.attributes;
-            if (obj.object_id === this.camName) {
+            if (obj.object_id === this.idTag) {
                 arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
                 return;
             }
@@ -600,11 +596,11 @@ AFRAME.registerSystem('arena-scene', {
             }
         }
         ARENA.events.addEventListener(ARENA_EVENTS.RUNTIME_MNGR_LOADED, () => {
-            // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
+            // arena variables that are replaced; keys are the variable names e.g. ${scene},${userid}, ...
             const avars = {
                 scene: this.sceneName,
                 namespace: this.nameSpace,
-                cameraid: this.camName,
+                userid: this.idTag,
                 username: this.getDisplayName(),
                 mqtth: ARENA.Mqtt.mqttHost,
             };
@@ -647,7 +643,7 @@ AFRAME.registerSystem('arena-scene', {
     //             const l = arenaObjects.length;
     //             for (let i = 0; i < l; i++) {
     //                 const obj = arenaObjects[i];
-    //                 if (obj.object_id === this.camName) {
+    //                 if (obj.object_id === this.idTag) {
     //                     // don't load our own camera/head assembly
     //                 } else {
     //                     const msg = {

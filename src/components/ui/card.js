@@ -293,7 +293,7 @@ AFRAME.registerComponent('arenaui-card', {
                     clickPos,
                     buttonName: 'Close',
                     position: coordsData,
-                    source: ARENA.camName,
+                    source: ARENA.idTag,
                 },
             };
             ARENAUtils.publishClientEvent(

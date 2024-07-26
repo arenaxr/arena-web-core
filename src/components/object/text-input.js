@@ -62,7 +62,7 @@ AFRAME.registerComponent('textinput', {
                     action: 'clientEvent',
                     type: 'textinput',
                     data: {
-                        writer: ARENA.camName,
+                        writer: ARENA.idTag,
                         text,
                     },
                 };

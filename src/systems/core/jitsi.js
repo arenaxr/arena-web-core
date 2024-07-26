@@ -324,24 +324,23 @@ AFRAME.registerSystem('arena-jitsi', {
             track.attach(vidEl[0]);
 
             const user = this.conference.getParticipantById(participantId);
-            let camNames = user.getProperty('arenaCameraName');
-            if (!camNames) camNames = user.getDisplayName();
-            if (!camNames) return; // handle jitsi-only users that have not set the display name
+            let idTags = user.getProperty('arenaId');
+            if (!idTags) idTags = user.getDisplayName();
+            if (!idTags) return; // handle jitsi-only users that have not set the display name
 
-            if (camNames.includes(data.screensharePrefix)) {
+            if (idTags.includes(data.screensharePrefix)) {
                 let dn = user.getProperty('screenshareDispName');
                 if (!dn) dn = user.getDisplayName();
                 if (!dn) dn = `No Name #${participantId}`;
-                const camName = user.getProperty('screenshareCamName');
+                const idTag = user.getProperty('screenshareidTag');
                 let objectIds = user.getProperty('screenshareObjIds');
 
-                if (camName && objectIds) {
+                if (idTag && objectIds) {
                     objectIds = objectIds.split(',');
                     sceneEl.emit(JITSI_EVENTS.SCREENSHARE, {
                         jid: participantId,
                         id: participantId,
                         dn,
-                        cn: camName,
                         sn: objectIds[0],
                         scene: this.arena.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
@@ -414,13 +413,11 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.getParticipants().forEach((user) => {
             const arenaId = user.getProperty('arenaId');
             const arenaDisplayName = user.getProperty('arenaDisplayName');
-            const arenaCameraName = user.getProperty('arenaCameraName');
             if (arenaId) {
                 pl.push({
                     jid: user._id,
                     id: arenaId,
                     dn: arenaDisplayName,
-                    cn: arenaCameraName,
                 });
             }
         });
@@ -615,7 +612,6 @@ AFRAME.registerSystem('arena-jitsi', {
         // set local properties
         this.conference.setLocalParticipantProperty('arenaId', this.arena.idTag);
         this.conference.setLocalParticipantProperty('arenaDisplayName', this.arena.displayName);
-        this.conference.setLocalParticipantProperty('arenaCameraName', this.arena.camName);
 
         this.conference.on(
             JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED,
@@ -1053,7 +1049,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * @returns
      */
     getUserId(participantJitsiId) {
-        if (this.jitsiId === participantJitsiId) return this.arena.camName;
+        if (this.jitsiId === participantJitsiId) return this.arena.idTag;
         // our arena id (camera name) is the jitsi display name
         return this.conference.getParticipantById(participantJitsiId)._displayName;
     },

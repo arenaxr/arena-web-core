@@ -54,7 +54,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
                     clickPos,
                     position,
                     rotation,
-                    source: ARENA.camName,
+                    source: ARENA.idTag,
                 },
             };
             ARENA.Mqtt.publish(this.pubTopic, thisMsg);
@@ -80,7 +80,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
                     clickPos,
                     position,
                     rotation,
-                    source: ARENA.camName,
+                    source: ARENA.idTag,
                 },
             };
             ARENA.Mqtt.publish(this.pubTopic, thisMsg);

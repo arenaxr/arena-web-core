@@ -108,7 +108,7 @@ AFRAME.registerComponent('arena-camera', {
 
         const arenaUser = { displayName: data.displayName, color: data.color };
         const msg = {
-            object_id: ARENA.camName,
+            object_id: ARENA.idTag,
             action,
             type: 'object',
             data: {

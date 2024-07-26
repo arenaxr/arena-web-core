@@ -102,7 +102,7 @@ export default class ARMarkerRelocalization {
         this.DFT_DETECTION_MSG = {
             scene: ARENA.sceneName,
             namespace: ARENA.nameSpace,
-            camera_id: ARENA.camName,
+            camera_id: ARENA.idTag,
             type: 'armarker',
         };
         Object.freeze(this.DFT_DETECTION_MSG); // no more changes

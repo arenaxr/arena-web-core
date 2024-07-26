@@ -84,7 +84,7 @@ AFRAME.registerComponent('arena-hand', {
                     object_type: `hand${data.hand}`,
                     position: { x: 0, y: -1, z: 0 },
                     url: this.getControllerURL(),
-                    dep: ARENA.camName,
+                    dep: ARENA.idTag,
                 },
             };
             if (msg.data.url.includes('magicleap')) {
@@ -155,7 +155,7 @@ AFRAME.registerComponent('arena-hand', {
                     w: parseFloat(this.rotation._w.toFixed(3)),
                 },
                 url: this.getControllerURL(),
-                dep: ARENA.camName,
+                dep: ARENA.idTag,
             },
         };
         if (msg.data.url.includes('magicleap')) {
