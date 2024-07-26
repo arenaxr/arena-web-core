@@ -485,6 +485,18 @@ export default class ARENAUtils {
         }
         ARENA.Mqtt.publish(pubTopic, msg);
     }
+
+    /**
+     * Get username from idTag, which may or may not have a prefixed set of random digits to dedupe multiple connections
+     * from a single username. If the first underscore-delimited token is all digits, assume is that prefix and
+     * return the remainder. If there are no underscores, assume that the entire string is the username.
+     * @param {string} idTag - most likely extracted from a pubsub msg
+     * @return {string} username
+     */
+    static getUsernameFromIdTag(idTag) {
+        const idParts = idTag.split('_');
+        return idParts.length > 1 && /^\d+$/.test(idParts[0]) ? idParts.slice(1).join('_') : idTag;
+    }
 }
 
 // eslint-disable-next-line no-extend-native
