@@ -86,6 +86,8 @@ AFRAME.registerSystem('arena-scene', {
         this.privateScene = false;
         this.videoFrustumCulling = true;
         this.videoDistanceConstraints = true;
+        this.videoDefaultResolutionConstraint = 180;
+        this.physics = false;
 
         this.mqttToken = evt.detail;
 
@@ -656,7 +658,7 @@ AFRAME.registerSystem('arena-scene', {
 
         const { sceneEl } = el;
 
-        const sceneOptions = {};
+        let sceneOptions = {};
 
         // we add all elements to our scene root
         const sceneRoot = document.getElementById('sceneRoot');
@@ -670,65 +672,69 @@ AFRAME.registerSystem('arena-scene', {
 
         if (sceneData) {
             const options = sceneData.attributes;
-            Object.assign(sceneOptions, options['scene-options']);
 
-            if (sceneOptions.physics) {
-                // physics system, build with cannon-js: https://github.com/c-frame/aframe-physics-system
-                import('../vendor/aframe-physics-system.min').then(() => {
-                    const physicsWait = setInterval(() => {
-                        // wait for physics system and static-body component to be registered, needs 15-30 ms
-                        if (AFRAME.components['static-body']) {
-                            clearInterval(physicsWait);
-                            document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
-                            this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
-                        }
-                    }, 10);
+            sceneOptions = options['scene-options'];
+            if (sceneOptions) {
+                // save scene-options
+                Object.entries(sceneOptions).forEach(([attribute, value]) => {
+                    ARENA[attribute] = value;
                 });
-            }
 
-            if (sceneOptions['ar-hit-test']?.enabled !== false) {
-                sceneEl.setAttribute('ar-hit-test', {
-                    enabled: true,
-                    src: 'static/images/blank-pixel.png',
-                    mapSize: { x: 0.005, y: 0.005 },
-                });
-                sceneEl.setAttribute('ar-hit-test-listener', { enabled: true });
-            }
+                // process special handling of scene-options properties...
 
-            // deal with scene attribution
-            if (sceneOptions.attribution) {
-                const sceneAttr = document.createElement('a-entity');
-                sceneAttr.setAttribute('id', 'scene-options-attribution');
-                sceneAttr.setAttribute('attribution', sceneOptions.attribution);
-                sceneRoot.appendChild(sceneAttr);
-                delete sceneOptions.attribution;
-            }
+                if (sceneOptions.physics ?? false) {
+                    // physics system, build with cannon-js: https://github.com/c-frame/aframe-physics-system
+                    import('../vendor/aframe-physics-system.min').then(() => {
+                        const physicsWait = setInterval(() => {
+                            // wait for physics system and static-body component to be registered, needs 15-30 ms
+                            if (AFRAME.components['static-body']) {
+                                clearInterval(physicsWait);
+                                document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
+                                this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
+                            }
+                        }, 10);
+                    });
+                }
 
-            if (sceneOptions.navMesh) {
-                sceneOptions.navMesh = ARENAUtils.crossOriginDropboxSrc(sceneOptions.navMesh);
-                const navMesh = document.createElement('a-entity');
-                navMesh.id = 'navMesh';
-                navMesh.setAttribute('gltf-model', sceneOptions.navMesh);
-                navMesh.setAttribute('nav-mesh', '');
-                sceneRoot.appendChild(navMesh);
-            }
+                if (sceneOptions['ar-hit-test']?.enabled !== false) {
+                    sceneEl.setAttribute('ar-hit-test', {
+                        enabled: true,
+                        src: 'static/images/blank-pixel.png',
+                        mapSize: { x: 0.005, y: 0.005 },
+                    });
+                    sceneEl.setAttribute('ar-hit-test-listener', { enabled: true });
+                }
 
-            if (sceneOptions.sceneHeadModels) {
-                // add scene custom scene heads to selection list
-                this.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
-                    this.setupSceneHeadModels(sceneOptions.sceneHeadModels);
-                });
-            }
+                // deal with scene attribution
+                if (sceneOptions.attribution) {
+                    const sceneAttr = document.createElement('a-entity');
+                    sceneAttr.setAttribute('id', 'scene-options-attribution');
+                    sceneAttr.setAttribute('attribution', sceneOptions.attribution);
+                    sceneRoot.appendChild(sceneAttr);
+                    delete sceneOptions.attribution;
+                }
 
-            if (!sceneOptions.clickableOnlyEvents) {
-                // unusual case: clickableOnlyEvents = true by default, add warning...
-                this.health.addError('scene-options.allObjectsClickable');
-            }
+                if (sceneOptions.navMesh) {
+                    sceneOptions.navMesh = ARENAUtils.crossOriginDropboxSrc(sceneOptions.navMesh);
+                    const navMesh = document.createElement('a-entity');
+                    navMesh.id = 'navMesh';
+                    navMesh.setAttribute('gltf-model', sceneOptions.navMesh);
+                    navMesh.setAttribute('nav-mesh', '');
+                    sceneRoot.appendChild(navMesh);
+                }
 
-            // save scene options
-            Object.entries(sceneOptions).forEach(([attribute, value]) => {
-                ARENA[attribute] = value;
-            });
+                if (sceneOptions.sceneHeadModels) {
+                    // add scene custom scene heads to selection list
+                    this.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
+                        this.setupSceneHeadModels(sceneOptions.sceneHeadModels);
+                    });
+                }
+
+                if (!sceneOptions.clickableOnlyEvents ?? true) {
+                    // unusual case: clickableOnlyEvents = true by default, add warning...
+                    this.health.addError('scene-options.allObjectsClickable');
+                }
+            }
 
             const envPresets = options['env-presets'];
             Object.entries(envPresets).forEach(([attribute, value]) => {
