@@ -35,8 +35,6 @@ const TOPICS = Object.freeze({
     },
     SUBSCRIBE: {
         NETWORK:               '$NETWORK',
-        CHAT_PUBLIC:           `${REALM}/c/{nameSpace}/o/#`,
-        CHAT_PRIVATE:          `${REALM}/c/{nameSpace}/p/{idTag}/#`,
         DEVICE:                `${REALM}/d/{userName}/#`, // All client placeholder
         PROC_REG:              `${REALM}/proc/reg`,
         PROC_CTL:              `${REALM}/proc/control/{uuid}/#`,
@@ -46,13 +44,13 @@ const TOPICS = Object.freeze({
     },
     PUBLISH: {
         NETWORK_LATENCY:       '$NETWORK/latency',
-        CHAT_PUBLIC:           `${REALM}/c/{nameSpace}/o/{idTag}`,
-        CHAT_PRIVATE:          `${REALM}/c/{nameSpace}/p/{toUid}/{idTag}`,
         DEVICE:                `${REALM}/d/{nameSpace}/{sceneName}/{idTag}`,
         PROC_REG:              `${REALM}/proc/reg`,
         PROC_CTL:              `${REALM}/proc/control`,
         PROC_DBG:              `${REALM}/proc/debug/{uuid}`,
         SCENE_PRESENCE:        `${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}`,
+        SCENE_CHAT:            `${REALM}/s/{nameSpace}/{sceneName}/c/{idTag}`,
+        SCENE_CHAT_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/c/{idTag}/{toUid}`,
         SCENE_USER:            `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}`,
         SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}/{toUid}`, // Need to add face_ privs
         SCENE_OBJECTS:         `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}`, // All client placeholder

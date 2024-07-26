@@ -124,26 +124,10 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         const idTag = `${this.userId}${btoa(this.userId)}`;
 
-        // receive private messages  (subscribe only)
-        this.subscribePrivateTopic = TOPICS.SUBSCRIBE.CHAT_PRIVATE.formatStr({
-            nameSpace: this.nameSpace,
-            idTag: this.userId,
-        });
-
-        // receive open messages to everyone and/or scene (subscribe only)
-        this.subscribePublicTopic = TOPICS.SUBSCRIBE.CHAT_PUBLIC.formatStr({
-            nameSpace: this.nameSpace,
-        });
-
-        // send private messages to a user (publish only)
+        // send private messages to a user (publish only), template partially
         this.publishPrivateTopic = TOPICS.PUBLISH.CHAT_PRIVATE.formatStr({
             nameSpace: this.nameSpace,
-            idTag,
-        });
-
-        // send open messages (chat keepalive, messages to all/scene) (publish only)
-        this.publishPublicTopic = TOPICS.PUBLISH.CHAT_PUBLIC.formatStr({
-            nameSpace: this.nameSpace,
+            sceneName: this.scene,
             idTag,
         });
 
@@ -383,7 +367,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // send to all scene topic
-                        _this.ctrlMsg('scene', 'sound:off');
+                        _this.ctrlMsg('public', 'sound:off');
                     }
                 });
             };
@@ -636,11 +620,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         const _this = this; /* save reference to class instance */
 
-        this.mqttc.registerMessageHandler('c', proxy(this.onMessageArrived.bind(_this)), true, false);
         this.mqttc.addConnectionLostHandler(proxy(this.onConnectionLost.bind(_this)));
-
-        this.mqttc.subscribe(this.subscribePublicTopic);
-        this.mqttc.subscribe(this.subscribePrivateTopic);
 
         this.keepalive();
         // periodically send a keep alive
@@ -679,28 +659,24 @@ AFRAME.registerSystem('arena-chat-ui', {
      */
     sendMsg(msgTxt) {
         const now = new Date();
+        const toUid = this.toSel.value;
         const msg = {
-            object_id: ARENAUtils.uuidv4(),
+            object_id: this.userId,
             type: 'chat',
-            to_uid: this.toSel.value,
-            from_uid: this.userId,
             from_un: this.userName,
-            from_scene: this.scene,
-            from_desc: `${decodeURI(this.userName)} (${this.toSel.options[this.toSel.selectedIndex].text})`,
             from_time: now.toJSON(),
             text: msgTxt,
         };
         const dstTopic =
-            this.toSel.value === 'scene' || this.toSel.value === 'all'
-                ? this.publishPublicTopic
-                : this.publishPrivateTopic.formatStr({ toUid: this.toSel.value });
+            this.toSel.value === 'public' ? this.publishPublicTopic : this.publishPrivateTopic.formatStr({ toUid });
         // console.log('sending', msg, 'to', dstTopic);
         try {
-            this.mqttc.publish(dstTopic, JSON.stringify(msg), 0, false);
+            this.mqttc.publish(dstTopic, msg);
         } catch (err) {
             console.error('chat msg send failed:', err.message);
         }
-        this.txtAddMsg(msg.text, `${msg.from_desc} ${now.toLocaleTimeString()}`, 'self');
+        const fromDesc = `${decodeURI(this.userName)} (${this.toSel.options[this.toSel.selectedIndex].text})`;
+        this.txtAddMsg(msg.text, `${fromDesc} ${now.toLocaleTimeString()}`, 'self');
     },
 
     /**
@@ -713,35 +689,30 @@ AFRAME.registerSystem('arena-chat-ui', {
         const { sceneEl } = el;
 
         const msg = mqttMsg.payloadObj;
+        const msgTopic = msg.destinationName.split('/');
         // console.log('Received:', msg);
 
         // ignore invalid and our own messages
-        if (msg.from_uid === undefined) return;
-        if (msg.to_uid === undefined) return;
-        if (msg.from_uid === this.userId) return;
+        if (msg.object_id === this.userId) return;
 
-        // save user data and timestamp
-        if (this.liveUsers[msg.from_uid] === undefined && msg.from_un !== undefined && msg.from_scene !== undefined) {
-            this.liveUsers[msg.from_uid] = {
+        if (this.liveUsers[msg.object_id] === undefined && msg.from_un !== undefined) {
+            // save user data and timestamp
+            this.liveUsers[msg.object_id] = {
                 un: msg.from_un,
-                scene: msg.from_scene,
                 ts: new Date().getTime(),
                 type: UserType.ARENA,
             };
-            if (msg.from_scene === this.scene) this.populateUserList(this.liveUsers[msg.from_uid]);
-            else this.populateUserList();
+            this.populateUserList(this.liveUsers[msg.object_id]);
             this.keepalive(); // let this user know about us
-        } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
+        } else if (msg.from_un !== undefined) {
             if (msg?.text === 'left') {
-                delete this.liveUsers[msg.from_uid];
+                delete this.liveUsers[msg.object_id];
                 this.populateUserList();
                 return;
             }
-            this.liveUsers[msg.from_uid].un = msg.from_un;
-            this.liveUsers[msg.from_uid].scene = msg.from_scene;
-            this.liveUsers[msg.from_uid].cid = msg.cameraid;
-            this.liveUsers[msg.from_uid].ts = new Date().getTime();
-            this.liveUsers[msg.from_uid].type = UserType.ARENA;
+            this.liveUsers[msg.object_id].un = msg.from_un;
+            this.liveUsers[msg.object_id].ts = new Date().getTime();
+            this.liveUsers[msg.object_id].type = UserType.ARENA;
         }
 
         // process commands
@@ -765,12 +736,12 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         // only proceed for chat messages sent to us or to all
         if (msg.type !== 'chat') return;
-        if (msg.to_uid !== this.userId && msg.to_uid !== 'all' && msg.to_uid !== 'scene') return;
 
-        // drop messages to scenes different from our scene
-        if (msg.to_uid === 'scene' && msg.from_scene !== this.scene) return;
+        // Determine msg to based on presence of topic TO_UID token
+        const topicToUid = msgTopic[TOPICS.TOKENS.TO_UID];
+        const fromDesc = `${decodeURI(msg.from_un)} (${topicToUid === this.userId ? 'private to me' : 'public'})`;
 
-        this.txtAddMsg(msg.text, `${msg.from_desc} ${new Date(msg.from_time).toLocaleTimeString()}`, 'other');
+        this.txtAddMsg(msg.text, `${fromDesc} ${new Date(msg.from_time).toLocaleTimeString()}`, 'other');
 
         this.unreadMsgs++;
         this.chatDot.textContent = this.unreadMsgs < 100 ? this.unreadMsgs : '...';
@@ -1072,22 +1043,19 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Adds UI elements to select dropdown message destination.
      */
     addToSelOptions() {
-        let op = document.createElement('option');
-        op.value = 'scene';
-        op.textContent = `to: scene ${this.scene}`;
-        this.toSel.appendChild(op);
-
-        op = document.createElement('option');
-        op.value = 'all';
-        op.textContent = 'to: namespace';
+        const op = document.createElement('option');
+        op.value = 'public';
+        op.textContent = `to: everyone`;
         this.toSel.appendChild(op);
     },
 
     /**
      * Send a chat system keepalive control message.
+     * TODO: Move this to presence scene subtopic /x/, if we need to keep this explicit ping
+     *       Otherwise, presence is based on EXPLICIT on join/parts, IMPLICIT on camera updates and jitsi events
      */
     keepalive() {
-        this.ctrlMsg('all', 'keepalive');
+        this.ctrlMsg('public', 'keepalive');
     },
 
     /**
@@ -1098,24 +1066,21 @@ AFRAME.registerSystem('arena-chat-ui', {
      */
     ctrlMsg(to, text) {
         let dstTopic;
-        if (to === 'all' || to === 'scene') {
+        if (to === 'public') {
             dstTopic = this.publishPublicTopic; // public messages
         } else {
             // replace '{to_uid}' for the 'to' value
             dstTopic = this.publishPrivateTopic.formatStr({ toUid: to });
         }
         const msg = {
-            object_id: ARENAUtils.uuidv4(),
+            object_id: this.userId,
             type: 'chat-ctrl',
-            to_uid: to,
-            from_uid: this.userId,
             from_un: this.userName,
-            from_scene: this.scene,
             text,
         };
         // console.info('ctrl', msg, 'to', dstTopic);
         try {
-            this.mqttc.publish(dstTopic, JSON.stringify(msg), 0, false);
+            this.mqttc.publish(dstTopic, msg);
         } catch (err) {
             console.error('chat-ctrl send failed:', err.message);
         }

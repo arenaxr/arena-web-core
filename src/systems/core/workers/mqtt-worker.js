@@ -139,7 +139,7 @@ class MQTTWorker {
                     trimmedMessage.payloadObj = JSON.parse(message.payloadString);
                     if (validateUuid) {
                         const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
-                        if (topicUuid !== trimmedMessage.payloadObj.object_id) {
+                        if (topicUuid !== trimmedMessage.payloadObj[validateUuid]) {
                             return; // mismatched uuid
                         }
                     }
@@ -175,9 +175,9 @@ class MQTTWorker {
      * @param {string} topicCategory - the topic category to register a handler for
      * @param {function} mainHandler - main thread handler, pass in whatever expected format
      * @param {boolean} isJson - whether the payload is expected to be well-formed json
-     * @param {boolean} validateUuid - whether to validate the object_id matches the topic uuid
+     * @param {string|null} validateUuid - object key to validate match to the topic uuid, nullish if no validation
      */
-    registerMessageHandler(topicCategory, mainHandler, isJson, validateUuid) {
+    registerMessageHandler(topicCategory, mainHandler, isJson = true, validateUuid = 'object_id') {
         if (isJson) {
             // Parse json in worker
             this.messageHandlers[topicCategory] = (message) => {
@@ -185,7 +185,7 @@ class MQTTWorker {
                     const jsonPayload = JSON.parse(message.payloadString);
                     if (validateUuid) {
                         const topicUuid = message.destinationName.split('/')[TOPICS.TOKENS.UUID];
-                        if (topicUuid !== jsonPayload.object_id) {
+                        if (topicUuid !== jsonPayload[validateUuid]) {
                             return; // mismatched uuid
                         }
                     }
@@ -203,9 +203,9 @@ class MQTTWorker {
      * Register a message handler for a given topic category beneath realm (second level).
      * @param {string} topicCategory - the topic category to register a handler for
      * @param {boolean} isJson - whether the payload is expected to be well-formed json
-     * @param {boolean} validateUuid - whether to validate the object_id matches the topic uuid
+     * @param {string|null} validateUuid - object key to validate match to the topic uuid, nullish if no validation
      */
-    registerMessageQueue(topicCategory, isJson = true, validateUuid = true) {
+    registerMessageQueue(topicCategory, isJson = true, validateUuid = 'object_id') {
         this.messageQueues[topicCategory] = [];
         this.messageQueueConf[topicCategory] = {
             isJson,
