@@ -53,7 +53,7 @@ AFRAME.registerSystem('arena-mqtt', {
                 ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
             }),
             // last will message
-            JSON.stringify({ object_id: idTag, action: 'delete' }),
+            JSON.stringify({ object_id: idTag, type: 'presence', action: 'leave' }),
             // last will topic
             // TODO: handle /x/ presence messages for user camera/hands objs and chat
             TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
