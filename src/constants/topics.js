@@ -49,6 +49,7 @@ const TOPICS = Object.freeze({
         PROC_CTL:              `${REALM}/proc/control`,
         PROC_DBG:              `${REALM}/proc/debug/{uuid}`,
         SCENE_PRESENCE:        `${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}`,
+        SCENE_PRESENCE_PRIVATE:`${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}/{toUid}`,
         SCENE_CHAT:            `${REALM}/s/{nameSpace}/{sceneName}/c/{idTag}`,
         SCENE_CHAT_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/c/{idTag}/{toUid}`,
         SCENE_USER:            `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}`,
