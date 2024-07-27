@@ -155,6 +155,7 @@ AFRAME.registerSystem('arena-mqtt', {
     onSceneMessageArrived(message) {
         delete message.workerTimestamp;
         const theMessage = message.payloadObj; // This will be given as json
+        const topicSplit = message.destinationName.split('/');
 
         if (!theMessage) {
             warn('Received empty message');
@@ -166,32 +167,88 @@ AFRAME.registerSystem('arena-mqtt', {
             return;
         }
 
-        if (theMessage.action === undefined) {
+        // Dispatch on scene message type (chat, object, presence, etc.)
+        const sceneMsgType = topicSplit[TOPICS.TOKENS.SCENE_MSGTYPE];
+        const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
+        switch (sceneMsgType) {
+            case 'x':
+                // presence
+                break;
+            case 'c':
+                ARENA.systems['arena-chat'].onChatMessageArrived(theMessage, topicUuid);
+                break;
+            case 'u':
+                this.handleSceneUserMessage(theMessage, topicUuid, topicSplit);
+                break;
+            case 'o':
+                this.handleSceneObjectMessage(theMessage, topicUuid, topicSplit);
+                break;
+            case 'r':
+                // render
+                break;
+            case 'p':
+                // program message, probably never as recipient?
+                break;
+            default:
+                // ????
+                console.log(`Invalid scene message type: '${sceneMsgType}'`);
+        }
+    },
+
+    /**
+     * Handle scene object messages
+     * @param {object} message - the message object
+     * @param {?object} topicUuid - the topic uuid the message was addressed to
+     * @param {?string[]} topicSplit - the full topic split string array
+     */
+    handleSceneObjectMessage(message, topicUuid, topicSplit) {
+        if (message.action === undefined) {
             warn('Malformed message (no action field):', JSON.stringify(message));
             return;
         }
 
         // rename object_id to match internal handlers (and aframe)
-        theMessage.id = theMessage.object_id;
-        delete theMessage.object_id;
+        message.id = message.object_id;
+        delete message.object_id;
 
-        let topicUuid;
-        if (message.destinationName) {
-            // This is a Paho.MQTT.Message
-            topicUuid = message.destinationName.split('/')[TOPICS.TOKENS.UUID];
+        // create, delete, update
+        switch (message.action) {
+            case ACTIONS.CREATE:
+            case ACTIONS.UPDATE:
+                if (message.data === undefined) {
+                    warn('Malformed message (no data field):', JSON.stringify(message));
+                    return;
+                }
+                // TODO: deal with topicUuid and private flag for object messages
+                CreateUpdate.handle(message.action, message);
+                break;
+            case ACTIONS.DELETE:
+                // check topic
+                Delete.handle(message);
+                break;
+            default:
+                warn('Malformed message (invalid action field):', JSON.stringify(message));
+                break;
         }
+    },
 
-        switch (
-            theMessage.action // clientEvent, create, delete, update
-        ) {
+    /**
+     * Handle scene user messages, consisting of camera, hand object updates and actions
+     * @param message
+     * @param topicUuid
+     * @param topicSplit
+     */
+    handleSceneUserMessage(message, topicUuid, topicSplit) {
+        switch (message.action) {
             case ACTIONS.CLIENT_EVENT:
-                if (theMessage.data === undefined) {
+                if (message.data === undefined) {
                     warn('Malformed message (no data field):', JSON.stringify(message));
                     return;
                 }
                 // check topic
+                // TODO: Refactor clientEvents to use user/hand objects as object_id, and target vs source
                 if (message.destinationName) {
-                    if (topicUuid !== theMessage.data.source) {
+                    if (topicUuid !== message.data.source) {
                         warn(
                             'Malformed message (topic does not pass check):',
                             JSON.stringify(message),
@@ -200,22 +257,19 @@ AFRAME.registerSystem('arena-mqtt', {
                         return;
                     }
                 }
-                ClientEvent.handle(theMessage);
+                ClientEvent.handle(message);
                 break;
             case ACTIONS.CREATE:
             case ACTIONS.UPDATE:
-                if (theMessage.data === undefined) {
+                if (message.data === undefined) {
                     warn('Malformed message (no data field):', JSON.stringify(message));
                     return;
                 }
-                CreateUpdate.handle(theMessage.action, theMessage);
+                CreateUpdate.handle(message.action, message);
                 break;
             case ACTIONS.DELETE:
                 // check topic
-                Delete.handle(theMessage);
-                break;
-            case ACTIONS.GET_PERSIST:
-            case ACTIONS.RETURN_PERSIST:
+                Delete.handle(message);
                 break;
             default:
                 warn('Malformed message (invalid action field):', JSON.stringify(message));
