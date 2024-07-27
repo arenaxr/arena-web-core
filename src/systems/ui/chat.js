@@ -63,6 +63,10 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         if (!data.enabled) return;
 
+        ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, () => {
+            this.presenceMsg({ action: 'join' });
+        });
+
         this.sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect.bind(this));
 
         ARENA.events.addMultiEventListener(
@@ -123,13 +127,21 @@ AFRAME.registerSystem('arena-chat-ui', {
         */
 
         const idTag = `${this.userId}${btoa(this.userId)}`;
-
-        // send private messages to a user (publish only), template partially
-        this.publishPrivateTopic = TOPICS.PUBLISH.CHAT_PRIVATE.formatStr({
+        const topicVars = {
             nameSpace: this.nameSpace,
             sceneName: this.scene,
             idTag,
-        });
+        };
+
+        this.publicChatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr(topicVars);
+
+        // send private messages to a user (publish only), template partially
+        this.privateChatTopic = TOPICS.PUBLISH.SCENE_CHAT_PRIVATE.formatStr(topicVars);
+
+        this.publicPresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr(topicVars);
+
+        // send private presence update to a user (publish only), template partially
+        this.privatePresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr(topicVars);
 
         // counter for unread msgs
         this.unreadMsgs = 0;
@@ -381,9 +393,9 @@ AFRAME.registerSystem('arena-chat-ui', {
         }
 
         this.onNewSettings = this.onNewSettings.bind(this);
-        this.onUserJoin = this.onUserJoin.bind(this);
+        this.onUserJitsiJoin = this.onUserJitsiJoin.bind(this);
         this.onScreenshare = this.onScreenshare.bind(this);
-        this.onUserLeft = this.onUserLeft.bind(this);
+        this.onUserJitsiLeft = this.onUserJitsiLeft.bind(this);
         this.onDominantSpeakerChanged = this.onDominantSpeakerChanged.bind(this);
         this.onTalkWhileMuted = this.onTalkWhileMuted.bind(this);
         this.onNoisyMic = this.onNoisyMic.bind(this);
@@ -393,9 +405,9 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.onJitsiStatus = this.onJitsiStatus.bind(this);
 
         sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, this.onNewSettings);
-        sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onUserJoin);
+        sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onUserJitsiJoin);
         sceneEl.addEventListener(JITSI_EVENTS.SCREENSHARE, this.onScreenshare);
-        sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.onUserLeft);
+        sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.onUserJitsiLeft);
         sceneEl.addEventListener(JITSI_EVENTS.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChanged);
         sceneEl.addEventListener(JITSI_EVENTS.TALK_WHILE_MUTED, this.onTalkWhileMuted);
         sceneEl.addEventListener(JITSI_EVENTS.NOISY_MIC, this.onNoisyMic);
@@ -411,7 +423,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const args = e.detail;
         if (!args.userName) return; // only handle a user name change
         this.userName = args.userName;
-        this.keepalive(); // let other users know
+        this.presenceMsg({ action: 'update' });
         this.populateUserList();
     },
 
@@ -440,7 +452,7 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Called when user joins
      * @param {Object} e event object; e.detail contains the callback arguments
      */
-    onUserJoin(e) {
+    onUserJitsiJoin(e) {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         // check if jitsi knows about someone we don't; add to user list
@@ -483,7 +495,7 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Called when user leaves
      * @param {Object} e event object; e.detail contains the callback arguments
      */
-    onUserLeft(e) {
+    onUserJitsiLeft(e) {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         if (!this.liveUsers[user.id]) return;
@@ -612,35 +624,6 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
-     * Subscribe to mqtt channels.
-     */
-    async connect() {
-        if (this.connected === true) return;
-        this.mqttc = ARENA.Mqtt.MQTTWorker;
-
-        const _this = this; /* save reference to class instance */
-
-        this.mqttc.addConnectionLostHandler(proxy(this.onConnectionLost.bind(_this)));
-
-        this.keepalive();
-        // periodically send a keep alive
-        if (this.keepaliveInterval !== undefined) clearInterval(this.keepaliveInterval);
-        this.keepaliveInterval = setInterval(() => {
-            _this.keepalive();
-        }, this.keepalive_interval_ms);
-
-        this.connected = true;
-    },
-
-    /**
-     * Chat MQTT connection lost handler.
-     */
-    onConnectionLost() {
-        console.error('Chat disconnected.');
-        this.connected = false;
-    },
-
-    /**
      * Utility to know if the user has been authenticated.
      * @param {string} idTag The user idTag.
      * @return {boolean} True if non-anonymous.
@@ -668,7 +651,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             text: msgTxt,
         };
         const dstTopic =
-            this.toSel.value === 'public' ? this.publishPublicTopic : this.publishPrivateTopic.formatStr({ toUid });
+            this.toSel.value === 'public' ? this.publicChatTopic : this.privateChatTopic.formatStr({ toUid });
         // console.log('sending', msg, 'to', dstTopic);
         try {
             this.mqttc.publish(dstTopic, msg);
@@ -681,9 +664,10 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     /**
      * Handler for incoming subscription chat messages.
-     * @param {Object} mqttMsg The MQTT Paho message object.
+     * @param {Object} mqttMsg - The MQTT Paho message object.
+     * @param {?string} topicToUid - The target uuid from the topic
      */
-    onMessageArrived(mqttMsg) {
+    onChatMessageArrived(mqttMsg, topicToUid) {
         const { el } = this;
 
         const { sceneEl } = el;
@@ -738,7 +722,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         if (msg.type !== 'chat') return;
 
         // Determine msg to based on presence of topic TO_UID token
-        const topicToUid = msgTopic[TOPICS.TOKENS.TO_UID];
         const fromDesc = `${decodeURI(msg.from_un)} (${topicToUid === this.userId ? 'private to me' : 'public'})`;
 
         this.txtAddMsg(msg.text, `${fromDesc} ${new Date(msg.from_time).toLocaleTimeString()}`, 'other');
@@ -817,10 +800,8 @@ AFRAME.registerSystem('arena-chat-ui', {
         const _this = this;
         const userList = [];
         let nSceneUsers = 1;
-        let nTotalUsers = 1;
         Object.keys(this.liveUsers).forEach((key) => {
-            nTotalUsers++; // count all users
-            if (_this.liveUsers[key].scene === _this.scene) nSceneUsers++; // only count users in the same scene
+            nSceneUsers++; // count all users
             userList.push({
                 uid: key,
                 sort_key: _this.liveUsers[key].scene === _this.scene ? 'aaa' : 'zzz',
@@ -836,7 +817,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         userList.sort((a, b) => `${a.sort_key}${a.scene}${a.un}`.localeCompare(`${b.sort_key}${b.scene}${b.un}`));
 
-        this.nSceneUserslabel.textContent = nTotalUsers;
+        this.nSceneUserslabel.textContent = nSceneUsers;
         this.usersDot.textContent = nSceneUsers < 100 ? nSceneUsers : '...';
         if (newUser) {
             let msg = '';
@@ -1050,12 +1031,22 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
-     * Send a chat system keepalive control message.
-     * TODO: Move this to presence scene subtopic /x/, if we need to keep this explicit ping
-     *       Otherwise, presence is based on EXPLICIT on join/parts, IMPLICIT on camera updates and jitsi events
+     * Send a presence message to respective topic, either publicly or privately to a single user
+     * @param {?object} msg - presence message to merge with default fields
+     * @param {?string} to - user id to send the message to privately, otherwise public
      */
-    keepalive() {
-        this.ctrlMsg('public', 'keepalive');
+    presenceMsg(msg = {}, to = undefined) {
+        const dstTopic = to ? this.privatePresenceTopic.formatStr({ toUid: to }) : this.publicPresenceTopic;
+        try {
+            this.mqttc.publish(dstTopic, {
+                object_id: this.userId,
+                type: 'presence',
+                un: this.userName,
+                ...msg,
+            });
+        } catch (err) {
+            console.error('presenceMsg send failed:', err.message);
+        }
     },
 
     /**
@@ -1067,10 +1058,10 @@ AFRAME.registerSystem('arena-chat-ui', {
     ctrlMsg(to, text) {
         let dstTopic;
         if (to === 'public') {
-            dstTopic = this.publishPublicTopic; // public messages
+            dstTopic = this.publicChatTopic; // public messages
         } else {
             // replace '{to_uid}' for the 'to' value
-            dstTopic = this.publishPrivateTopic.formatStr({ toUid: to });
+            dstTopic = this.privateChatTopic.formatStr({ toUid: to });
         }
         const msg = {
             object_id: this.userId,
