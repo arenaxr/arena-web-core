@@ -33,6 +33,16 @@ const TOPICS = Object.freeze({
         UUID: 5,
         TO_UID: 6,
     },
+    SCENE_MSGTYPES: {
+        PRESENCE: 'x',
+        CHAT: 'c',
+        USER: 'u',
+        OBJECTS: 'o',
+        RENDER: 'r',
+        ENV: 'e',
+        PROGRAM: 'p',
+        DEBUG: 'd',
+    },
     SUBSCRIBE: {
         NETWORK:               '$NETWORK',
         DEVICE:                `${REALM}/d/{userName}/#`, // All client placeholder
