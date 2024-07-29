@@ -171,22 +171,22 @@ AFRAME.registerSystem('arena-mqtt', {
         const sceneMsgType = topicSplit[TOPICS.TOKENS.SCENE_MSGTYPE];
         const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
         switch (sceneMsgType) {
-            case 'x':
+            case TOPICS.SCENE_MSGTYPES.PRESENCE:
                 // presence
                 break;
-            case 'c':
+            case TOPICS.SCENE_MSGTYPES.CHAT:
                 ARENA.systems['arena-chat'].onChatMessageArrived(theMessage, topicUuid);
                 break;
-            case 'u':
+            case TOPICS.SCENE_MSGTYPES.USER:
                 this.handleSceneUserMessage(theMessage, topicUuid, topicSplit);
                 break;
-            case 'o':
+            case TOPICS.SCENE_MSGTYPES.OBJECTS:
                 this.handleSceneObjectMessage(theMessage, topicUuid, topicSplit);
                 break;
-            case 'r':
+            case TOPICS.SCENE_MSGTYPES.RENDER:
                 // render
                 break;
-            case 'p':
+            case TOPICS.SCENE_MSGTYPES.PROGRAM:
                 // program message, probably never as recipient?
                 break;
             default:
