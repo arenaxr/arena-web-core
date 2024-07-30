@@ -6,6 +6,8 @@
  * @date 2020
  */
 
+import { Delete } from '../../systems/core/message-actions';
+
 /**
  * Time To Live (TTL) component.
  *
@@ -36,7 +38,7 @@ AFRAME.registerComponent('ttl', {
     tick() {
         const now = new Date();
         if (now > this.expireAt) {
-            this.el.parentNode.removeChild(this.el);
+            Delete.handle({ id: this.el.id });
         }
     },
 });

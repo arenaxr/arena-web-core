@@ -256,11 +256,14 @@ export default class CreateUpdate {
         let isGeometry = false;
         switch (type) {
             case 'camera':
+                // Only set permitted camera attributes, return
                 this.setEntityAttributes(entityEl, {
                     position: data.position,
                     rotation: data.rotation,
                     'arena-user': data['arena-user'],
-                }); // Only set permitted camera attributes, return
+                });
+                // Merge-update live users, but don't repopulate userlist
+                AFRAME.scenes[0].systems.chat?.upsertLiveUser(message.id, { un: data['arena-user'].displayName }, true);
                 return true;
             case 'gltf-model':
                 if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
