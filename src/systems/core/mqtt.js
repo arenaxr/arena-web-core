@@ -167,15 +167,19 @@ AFRAME.registerSystem('arena-mqtt', {
             return;
         }
 
+        // Categorically ignore own messages
+        if (theMessage.object_id === ARENA.idTag) return;
+
         // Dispatch on scene message type (chat, object, presence, etc.)
         const sceneMsgType = topicSplit[TOPICS.TOKENS.SCENE_MSGTYPE];
         const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
+        const chatSystem = ARENA.systems['arena-chat'];
         switch (sceneMsgType) {
             case TOPICS.SCENE_MSGTYPES.PRESENCE:
-                // presence
+                chatSystem?.onPresenceMessageArrived(theMessage, topicUuid);
                 break;
             case TOPICS.SCENE_MSGTYPES.CHAT:
-                ARENA.systems['arena-chat'].onChatMessageArrived(theMessage, topicUuid);
+                chatSystem?.onChatMessageArrived(theMessage, topicUuid);
                 break;
             case TOPICS.SCENE_MSGTYPES.USER:
                 this.handleSceneUserMessage(theMessage, topicUuid, topicSplit);
@@ -184,7 +188,7 @@ AFRAME.registerSystem('arena-mqtt', {
                 this.handleSceneObjectMessage(theMessage, topicUuid, topicSplit);
                 break;
             case TOPICS.SCENE_MSGTYPES.RENDER:
-                // render
+                // TODO: render message refactor
                 break;
             case TOPICS.SCENE_MSGTYPES.PROGRAM:
                 // program message, probably never as recipient?

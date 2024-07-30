@@ -63,6 +63,8 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         if (!data.enabled) return;
 
+        this.upsertLiveUser = this.upsertLiveUser.bind(this);
+
         ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, () => {
             this.presenceMsg({ action: 'join' });
         });
@@ -389,7 +391,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const moveToCamera = localStorage.getItem('moveToFrontOfCamera');
         if (moveToCamera !== null) {
             localStorage.removeItem('moveToFrontOfCamera');
-            this.moveToFrontOfCamera(moveToCamera, this.scene);
+            this.moveToFrontOfCamera(moveToCamera);
         }
 
         this.onNewSettings = this.onNewSettings.bind(this);
@@ -428,6 +430,27 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
+     * Upserts a user in the liveUsers dictionary. Updates timestamp tag either way
+     * @param {string} id - User ID, typically idTag
+     * @param {object} user - User object
+     * @param {boolean} merge - If true, merge user object with existing user
+     * @return {boolean} - True if user is a new addition
+     */
+    upsertLiveUser(id, user, merge = false) {
+        let newUser = false;
+        if (!this.liveUsers[id]) newUser = true;
+
+        if (!this.liveUsers[id] || merge === false) {
+            this.liveUsers[id] = user;
+        } else {
+            this.liveUsers[id] = { ...this.liveUsers[id], ...user };
+        }
+        this.liveUsers[id].ts = new Date().getTime();
+        if (newUser) this.populateUserList(this.liveUsers[id]);
+        return newUser;
+    },
+
+    /**
      * Called when we connect to a jitsi conference (including reconnects)
      * @param {Object} e event object; e.detail contains the callback arguments
      */
@@ -436,15 +459,11 @@ AFRAME.registerSystem('arena-chat-ui', {
         args.pl.forEach((user) => {
             // console.log('Jitsi User: ', user);
             // check if jitsi knows about someone we don't; add to user list
-            if (!this.liveUsers[user.id]) {
-                this.liveUsers[user.id] = {
-                    jid: args.jid,
-                    un: user.dn,
-                    scene: args.scene,
-                    ts: new Date().getTime(),
-                    type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
-                };
-            }
+            this.upsertLiveUser(user.id, {
+                jid: user.jid,
+                un: user.dn,
+                type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
+            });
         });
     },
 
@@ -456,17 +475,12 @@ AFRAME.registerSystem('arena-chat-ui', {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         // check if jitsi knows about someone we don't; add to user list
-        if (!this.liveUsers[user.id]) {
-            this.liveUsers[user.id] = {
-                jid: user.jid,
-                un: user.dn,
-                scene: user.scene,
-                ts: new Date().getTime(),
-                type: UserType.EXTERNAL, // indicate we only know about the users from jitsi
-            };
-            if (user.scene === this.scene) this.populateUserList(this.liveUsers[user.id]);
-            else this.populateUserList();
-        }
+        const newUser = this.upsertLiveUser(user.id, {
+            jid: user.jid,
+            un: user.dn,
+            type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
+        });
+        if (!newUser) this.populateUserList();
     },
 
     /**
@@ -476,19 +490,13 @@ AFRAME.registerSystem('arena-chat-ui', {
     onScreenshare(e) {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
-        // check if jitsi knows about someone we don't; add to user list
-        if (!this.liveUsers[user.id]) {
-            this.liveUsers[user.id] = {
-                jid: user.jid,
-                un: user.dn,
-                scene: user.scene,
-                sid: user.sn,
-                ts: new Date().getTime(),
-                type: UserType.SCREENSHARE, // indicate we know the user is screensharing
-            };
-            if (user.scene === this.scene) this.populateUserList(this.liveUsers[user.id]);
-            else this.populateUserList();
-        }
+        const newUser = this.upsertLiveUser(user.id, {
+            jid: user.jid,
+            un: user.dn,
+            sid: user.sn,
+            type: UserType.SCREENSHARE, // indicate we know the user is screensharing
+        });
+        if (!newUser) this.populateUserList();
     },
 
     /**
@@ -498,8 +506,6 @@ AFRAME.registerSystem('arena-chat-ui', {
     onUserJitsiLeft(e) {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
-        if (!this.liveUsers[user.id]) return;
-        if (this.liveUsers[user.id].type === UserType.ARENA) return; // will be handled through mqtt messaging
         delete this.liveUsers[user.id];
         this.populateUserList();
     },
@@ -510,20 +516,18 @@ AFRAME.registerSystem('arena-chat-ui', {
      */
     onDominantSpeakerChanged(e) {
         const user = e.detail;
-        const roomName = this.scene.toLowerCase().replace(/[!#$&'()*+,/:;=?@[\]]/g, '_');
-        if (user.scene === roomName) {
-            // if speaker exists, show speaker graph in user list
-            const speakerId = user.id ? user.id : this.userId; // or self is speaker
-            if (this.liveUsers[speakerId]) {
-                this.liveUsers[speakerId].speaker = true;
-            }
-            // if previous speaker exists, show speaker graph in user list
-            if (this.liveUsers[user.pid]) {
-                this.liveUsers[user.pid].speaker = false;
-            }
-            this.isSpeaker = speakerId === this.userId;
-            this.populateUserList();
+
+        // if speaker exists, show speaker graph in user list
+        const speakerId = user.id ? user.id : this.userId; // or self is speaker
+        if (this.liveUsers[speakerId]) {
+            this.liveUsers[speakerId].speaker = true;
         }
+        // if previous speaker exists, show speaker graph in user list
+        if (this.liveUsers[user.pid]) {
+            this.liveUsers[user.pid].speaker = false;
+        }
+        this.isSpeaker = speakerId === this.userId;
+        this.populateUserList();
     },
 
     /**
@@ -585,6 +589,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             if (!this.liveUsers[arenaId].stats) this.liveUsers[arenaId].stats = {};
             this.liveUsers[arenaId].stats.conn = stats;
             this.liveUsers[arenaId].jid = jid;
+            this.liveUsers[arenaId].ts = new Date().getTime();
             this.populateUserList();
             // update arena-user connection quality
             if (stats && stats.connectionQuality) {
@@ -611,6 +616,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         // remote
         if (this.liveUsers[arenaId]) {
             this.liveUsers[arenaId].status = status;
+            this.liveUsers[arenaId].ts = new Date().getTime();
         }
         this.populateUserList();
     },
@@ -663,6 +669,33 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
+     * Handles incoming presence topic messages
+     * @param {object} msg - The message object
+     * @param {?string} topicToUid - The target uuid from the topic, if set
+     */
+    onPresenceMessageArrived(msg, topicToUid) {
+        switch (msg.action) {
+            case 'join':
+                if (!topicToUid) {
+                    // This is a public join, respond privately to user
+                    this.presenceMsg({ action: 'join' }, msg.object_id);
+                }
+            // NO break, fallthrough to update
+            case 'update':
+                this.upsertLiveUser(msg.object_id, { un: msg.from_un, type: UserType.ARENA }, true);
+                break;
+            case 'leave':
+                delete this.liveUsers[msg.object_id];
+                this.populateUserList();
+                // Explicity remove user object from the scene, as this new lastWill
+                document.getElementById(msg.object_id)?.remove();
+                break;
+            default:
+                console.log('Unknown presence action:', msg.action);
+        }
+    },
+
+    /**
      * Handler for incoming subscription chat messages.
      * @param {Object} mqttMsg - The MQTT Paho message object.
      * @param {?string} topicToUid - The target uuid from the topic
@@ -673,30 +706,13 @@ AFRAME.registerSystem('arena-chat-ui', {
         const { sceneEl } = el;
 
         const msg = mqttMsg.payloadObj;
-        const msgTopic = msg.destinationName.split('/');
         // console.log('Received:', msg);
 
         // ignore invalid and our own messages
         if (msg.object_id === this.userId) return;
 
-        if (this.liveUsers[msg.object_id] === undefined && msg.from_un !== undefined) {
-            // save user data and timestamp
-            this.liveUsers[msg.object_id] = {
-                un: msg.from_un,
-                ts: new Date().getTime(),
-                type: UserType.ARENA,
-            };
-            this.populateUserList(this.liveUsers[msg.object_id]);
-            this.keepalive(); // let this user know about us
-        } else if (msg.from_un !== undefined) {
-            if (msg?.text === 'left') {
-                delete this.liveUsers[msg.object_id];
-                this.populateUserList();
-                return;
-            }
-            this.liveUsers[msg.object_id].un = msg.from_un;
-            this.liveUsers[msg.object_id].ts = new Date().getTime();
-            this.liveUsers[msg.object_id].type = UserType.ARENA;
+        if (msg.from_un !== undefined) {
+            this.upsertLiveUser(msg.object_id, { un: msg.from_un, type: UserType.ARENA }, true);
         }
 
         // process commands
@@ -804,8 +820,6 @@ AFRAME.registerSystem('arena-chat-ui', {
             nSceneUsers++; // count all users
             userList.push({
                 uid: key,
-                sort_key: _this.liveUsers[key].scene === _this.scene ? 'aaa' : 'zzz',
-                scene: _this.liveUsers[key].scene,
                 un: _this.liveUsers[key].un,
                 sid: _this.liveUsers[key].sid,
                 type: _this.liveUsers[key].type,
@@ -815,7 +829,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             });
         });
 
-        userList.sort((a, b) => `${a.sort_key}${a.scene}${a.un}`.localeCompare(`${b.sort_key}${b.scene}${b.un}`));
+        userList.sort((a, b) => a.un.localeCompare(b.un));
 
         this.nSceneUserslabel.textContent = nSceneUsers;
         this.usersDot.textContent = nSceneUsers < 100 ? nSceneUsers : '...';
@@ -862,9 +876,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             if (user.speaker) {
                 uli.style.color = 'green';
             }
-            uli.textContent = `${user.scene === _this.scene ? '' : `${user.scene}/`}${decodeURI(name)}${
-                user.type === UserType.EXTERNAL ? ' (external)' : ''
-            }`;
+            uli.textContent = `${decodeURI(name)}${user.type === UserType.EXTERNAL ? ' (external)' : ''}`;
             const uBtnCtnr = document.createElement('div');
             uBtnCtnr.className = 'users-list-btn-ctnr';
             uli.appendChild(uBtnCtnr);
@@ -881,53 +893,50 @@ AFRAME.registerSystem('arena-chat-ui', {
             };
 
             if (user.type !== UserType.SCREENSHARE) {
-                if (user.scene === _this.scene) {
-                    const sspan = document.createElement('span');
-                    sspan.className = 'users-list-btn s';
-                    sspan.title = 'Mute User';
-                    uBtnCtnr.appendChild(sspan);
+                const sspan = document.createElement('span');
+                sspan.className = 'users-list-btn s';
+                sspan.title = 'Mute User';
+                uBtnCtnr.appendChild(sspan);
 
-                    // span click event (send sound on/off msg to ussr)
-                    sspan.onclick = function muteUserClick() {
-                        // message to target user
-                        _this.ctrlMsg(user.uid, 'sound:off');
-                    };
+                // span click event (send sound on/off msg to ussr)
+                sspan.onclick = function muteUserClick() {
+                    // message to target user
+                    _this.ctrlMsg(user.uid, 'sound:off');
+                };
 
-                    // Remove user to be rendered for all users, allowing full moderation for all.
-                    // This follows Jitsi's philosophy that everyone should have the power to kick
-                    // out inappropriate participants: https://jitsi.org/security/.
-                    const kospan = document.createElement('span');
-                    kospan.className = 'users-list-btn ko';
-                    kospan.title = 'Remove User';
-                    uBtnCtnr.appendChild(kospan);
-                    kospan.onclick = function kickUserClick() {
-                        Swal.fire({
-                            title: 'Are you sure?',
-                            text: `This will send an automatic logout request to ${decodeURI(user.un)}.`,
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Yes',
-                            reverseButtons: true,
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
-                                _this.ctrlMsg(user.uid, 'logout');
-                                // kick jitsi channel directly as well
-                                const warn = `You have been asked to leave by ${_this.userName}.`;
-                                _this.jitsi.kickout(user.uid, warn);
-                            }
-                        });
-                    };
+                // Remove user to be rendered for all users, allowing full moderation for all.
+                // This follows Jitsi's philosophy that everyone should have the power to kick
+                // out inappropriate participants: https://jitsi.org/security/.
+                const kospan = document.createElement('span');
+                kospan.className = 'users-list-btn ko';
+                kospan.title = 'Remove User';
+                uBtnCtnr.appendChild(kospan);
+                kospan.onclick = function kickUserClick() {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: `This will send an automatic logout request to ${decodeURI(user.un)}.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        reverseButtons: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
+                            _this.ctrlMsg(user.uid, 'logout');
+                            // kick jitsi channel directly as well
+                            const warn = `You have been asked to leave by ${_this.userName}.`;
+                            _this.jitsi.kickout(user.uid, warn);
+                        }
+                    });
+                };
 
-                    if (user.type === UserType.EXTERNAL) uli.className = 'external';
-                } else {
-                    uli.className = 'oscene';
-                }
+                if (user.type === UserType.EXTERNAL) uli.className = 'external';
+
                 if (newUser) {
                     // only update 'to' select for new users
                     const op = document.createElement('option');
                     op.value = user.uid;
-                    op.textContent = `to: ${decodeURI(user.un)}${user.scene !== _this.scene ? ` (${user.scene})` : ''}`;
+                    op.textContent = `to: ${decodeURI(user.un)}`;
                     _this.toSel.appendChild(op);
                 }
             }
@@ -1115,35 +1124,14 @@ AFRAME.registerSystem('arena-chat-ui', {
     /**
      * Teleport method to move this user's camera to the front of another user's camera.
      * @param {string} userId Camera object id of the target user
-     * @param {string} scene The scene name
      */
-    moveToFrontOfCamera(userId, scene) {
+    moveToFrontOfCamera(userId) {
         const { el } = this;
 
         const { sceneEl } = el;
         const cameraEl = sceneEl.camera.el;
 
         // console.log('Move to near camera:', userId);
-
-        if (scene !== this.scene) {
-            localStorage.setItem('moveToFrontOfCamera', userId);
-            const path = window.location.pathname.substring(1);
-            let devPath = '';
-            if (this.devInstance && path.length > 0) {
-                try {
-                    [devPath] = path.match(/(?:x|dev)\/([^/]+)\/?/g);
-                } catch (e) {
-                    // no devPath
-                }
-            }
-            const href = new URL(
-                `${document.location.protocol}//${document.location.hostname}${
-                    document.location.port ? `:${document.location.port}` : ''
-                }/${devPath}${scene}`
-            );
-            document.location.href = href.toString();
-            return;
-        }
 
         const toCam = sceneEl.querySelector(`[id='${userId}']`);
 
