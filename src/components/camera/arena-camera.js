@@ -126,6 +126,7 @@ AFRAME.registerComponent('arena-camera', {
                     w: parseFloat(rotation._w.toFixed(3)),
                 },
                 'arena-user': arenaUser,
+                ttl: 30,
             },
         };
         if (this.presenceEl) {
