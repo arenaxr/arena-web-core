@@ -223,7 +223,7 @@ AFRAME.registerSystem('arena-mqtt', {
                     warn('Malformed message (no data field):', JSON.stringify(message));
                     return;
                 }
-                // TODO: deal with topicUuid and private flag for object messages
+                // TODO: deal with topicToUid and private flag for object messages
                 CreateUpdate.handle(message.action, message);
                 break;
             case ACTIONS.DELETE:
