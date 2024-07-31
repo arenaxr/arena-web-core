@@ -95,7 +95,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.realm = ARENA.defaults.realm;
         this.userName = ARENA.getDisplayName();
         this.nameSpace = this.arena.nameSpace;
-        this.scene = this.arena.namespacedScene;
+        this.scene = this.arena.sceneName;
         this.devInstance = ARENA.defaults.devInstance;
         this.isSceneWriter = this.arena.isUserSceneWriter();
 
