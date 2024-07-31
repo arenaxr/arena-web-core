@@ -51,7 +51,7 @@ AFRAME.registerComponent('arena-hand', {
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
         this.lastPose = '';
-        this.initialized = false;
+        this.isReady = false;
 
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
     },
@@ -119,7 +119,7 @@ AFRAME.registerComponent('arena-hand', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.params.camUpdateIntervalMs, this);
 
-        this.initialized = true;
+        this.isReady = true;
     },
 
     getControllerURL() {
@@ -190,7 +190,7 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     tick() {
-        if (!this.initialized) return;
+        if (!this.isReady) return;
 
         if (!this.name) {
             this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;

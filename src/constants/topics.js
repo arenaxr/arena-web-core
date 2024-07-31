@@ -6,11 +6,7 @@
  * @date 2024
  */
 
-/* global ARENA */
-
-/**
- # remote rendering
- */
+/* global globalThis */
 
 /**
  * ARENA pubsub topic variables
@@ -20,7 +16,13 @@
  * - idTag - username prefixed with a uuid (e.g. 1448081341_jdoe)
  */
 
-const REALM = ARENA.defaults.realm;
+// TODO: handle this scriptImport somehow (which can't be done in parcel with a worker...)
+let REALM;
+if (globalThis.ARENA === undefined) {
+    REALM = 'realm';
+} else {
+    REALM = ARENA.defaults.realm;
+}
 
 // prettier-ignore
 const TOPICS = Object.freeze({

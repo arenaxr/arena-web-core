@@ -5,6 +5,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
     schema: {
         enabled: { type: 'boolean', default: true },
     },
+    dependencies: ['arena-camera'],
 
     init() {
         this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);

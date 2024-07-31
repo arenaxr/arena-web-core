@@ -33,10 +33,17 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     init() {
-        this.initialized = false;
+        this.isReady = false;
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
+
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.params.camUpdateIntervalMs, this);
+        this.el.sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, (e) => {
+            const args = e.detail;
+            if (!args.userName) return; // only handle a user name change
+            this.data.displayName = args.userName;
+        });
     },
 
     ready() {
@@ -64,7 +71,6 @@ AFRAME.registerComponent('arena-camera', {
         this.headModelPathEl = document.getElementById('headModelPathSelect');
 
         this.heartBeatCounter = 0;
-        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.params.camUpdateIntervalMs, this);
 
         this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
 
@@ -93,7 +99,7 @@ AFRAME.registerComponent('arena-camera', {
         if (this.data.showStats) {
             document.getElementById('pose-stats').style.display = 'block';
         }
-        this.initialized = true;
+        this.isReady = true;
     },
 
     /**
@@ -182,7 +188,7 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     tick() {
-        if (!this.initialized) return;
+        if (!this.isReady) return;
         const { el, position, rotation } = this;
 
         this.heartBeatCounter++;
