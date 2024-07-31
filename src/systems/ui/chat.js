@@ -639,6 +639,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const msg = {
             object_id: this.userId,
             type: 'chat',
+            dn: this.displayName,
             from_time: now.toJSON(),
             text: msgTxt,
         };
