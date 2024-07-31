@@ -172,20 +172,20 @@ AFRAME.registerSystem('arena-mqtt', {
 
         // Dispatch on scene message type (chat, object, presence, etc.)
         const sceneMsgType = topicSplit[TOPICS.TOKENS.SCENE_MSGTYPE];
-        const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
+        const topicToUid = topicSplit[TOPICS.TOKENS.TO_UID];
         const chatSystem = this.sceneEl.systems['arena-chat-ui'];
         switch (sceneMsgType) {
             case TOPICS.SCENE_MSGTYPES.PRESENCE:
-                chatSystem?.onPresenceMessageArrived(theMessage, topicUuid);
+                chatSystem?.onPresenceMessageArrived(theMessage, topicToUid);
                 break;
             case TOPICS.SCENE_MSGTYPES.CHAT:
-                chatSystem?.onChatMessageArrived(theMessage, topicUuid);
+                chatSystem?.onChatMessageArrived(theMessage, topicToUid);
                 break;
             case TOPICS.SCENE_MSGTYPES.USER:
-                this.handleSceneUserMessage(theMessage, topicUuid, topicSplit);
+                this.handleSceneUserMessage(theMessage, topicToUid, topicSplit);
                 break;
             case TOPICS.SCENE_MSGTYPES.OBJECTS:
-                this.handleSceneObjectMessage(theMessage, topicUuid, topicSplit);
+                this.handleSceneObjectMessage(theMessage, topicToUid, topicSplit);
                 break;
             case TOPICS.SCENE_MSGTYPES.RENDER:
                 // TODO: render message refactor
@@ -202,10 +202,10 @@ AFRAME.registerSystem('arena-mqtt', {
     /**
      * Handle scene object messages
      * @param {object} message - the message object
-     * @param {?object} topicUuid - the topic uuid the message was addressed to
+     * @param {?object} topicToUid - the topic uuid the message was addressed to
      * @param {?string[]} topicSplit - the full topic split string array
      */
-    handleSceneObjectMessage(message, topicUuid, topicSplit) {
+    handleSceneObjectMessage(message, topicToUid, topicSplit) {
         if (message.action === undefined) {
             warn('Malformed message (no action field):', JSON.stringify(message));
             return;
@@ -239,10 +239,10 @@ AFRAME.registerSystem('arena-mqtt', {
     /**
      * Handle scene user messages, consisting of camera, hand object updates and actions
      * @param message
-     * @param topicUuid
+     * @param topicToUid
      * @param topicSplit
      */
-    handleSceneUserMessage(message, topicUuid, topicSplit) {
+    handleSceneUserMessage(message, topicToUid, topicSplit) {
         if (message.action === undefined) {
             warn('Malformed message (no action field):', JSON.stringify(message));
             return;
