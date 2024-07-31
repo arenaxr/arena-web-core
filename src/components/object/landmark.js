@@ -50,7 +50,6 @@ AFRAME.registerComponent('landmark', {
             default: true,
         },
     },
-    dependencies: ['look-controls'],
 
     init() {
         this.system.registerComponent(this);
