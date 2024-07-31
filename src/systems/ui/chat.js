@@ -688,16 +688,12 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     /**
      * Handler for incoming subscription chat messages.
-     * @param {Object} mqttMsg - The MQTT Paho message object.
+     * @param {Object} msg - The message object.
      * @param {?string} topicToUid - The target uuid from the topic
      */
-    onChatMessageArrived(mqttMsg, topicToUid) {
+    onChatMessageArrived(msg, topicToUid) {
         const { el } = this;
-
         const { sceneEl } = el;
-
-        const msg = mqttMsg.payloadObj;
-        // console.log('Received:', msg);
 
         // ignore invalid and our own messages
         if (msg.object_id === this.userId) return;
@@ -723,7 +719,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             return;
         }
 
-        // only proceed for chat messages sent to us or to all
+        // only proceed for chat messages
         if (msg.type !== 'chat') return;
 
         // Determine msg to based on presence of topic TO_UID token
