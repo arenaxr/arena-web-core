@@ -350,20 +350,22 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         }
 
         // add visibility convenience "button"
-        let visible = Object.hasOwn(sceneObjs[i].attributes, 'visible') ? sceneObjs[i].attributes.visible : true;
-        const visspan = document.createElement('span');
-        const iconVis = document.createElement('i');
-        updateListItemVisibility(visible, li, iconVis);
-        visspan.className = 'visible';
-        visspan.title = 'Toggle Visible';
-        visspan.appendChild(iconVis);
-        li.appendChild(visspan);
-
-        visspan.onclick = function () {
-            visible = !visible;
+        if (sceneObjs[i].type === 'object') {
+            let visible = Object.hasOwn(sceneObjs[i].attributes, 'visible') ? sceneObjs[i].attributes.visible : true;
+            const visspan = document.createElement('span');
+            const iconVis = document.createElement('i');
             updateListItemVisibility(visible, li, iconVis);
-            persist.visObjHandler(sceneObjs[i], visible);
-        };
+            visspan.className = 'visible';
+            visspan.title = 'Toggle Visible';
+            visspan.appendChild(iconVis);
+            li.appendChild(visspan);
+
+            visspan.onclick = function () {
+                visible = !visible;
+                updateListItemVisibility(visible, li, iconVis);
+                persist.visObjHandler(sceneObjs[i], visible);
+            };
+        }
 
         // highlight object type errors
         const schemaType = sceneObjs[i].type === 'object' ? sceneObjs[i].attributes.object_type : sceneObjs[i].type;
