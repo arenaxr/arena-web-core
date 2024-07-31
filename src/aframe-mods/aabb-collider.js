@@ -355,7 +355,6 @@ AFRAME.registerComponent('box-collision-publisher', {
     schema: {
         enabled: { default: true },
     },
-    dependencies: ['arena-hand'],
     init() {
         const thisEl = this.el;
         const sourceName = thisEl.id === 'my-camera' ? ARENA.idTag : thisEl.components['arena-hand'].name;

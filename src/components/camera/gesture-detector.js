@@ -19,7 +19,6 @@ AFRAME.registerComponent('gesture-detector', {
             default: 200,
         },
     },
-    dependencies: ['arena-camera'],
 
     init() {
         this.internalState = {
