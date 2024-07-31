@@ -261,6 +261,7 @@ export default class CreateUpdate {
                     position: data.position,
                     rotation: data.rotation,
                     'arena-user': data['arena-user'],
+                    ttl: data.ttl,
                 });
                 // Merge-update live users, but don't repopulate userlist
                 AFRAME.scenes[0].systems.chat?.upsertLiveUser(message.id, { dn: data['arena-user'].displayName }, true);
