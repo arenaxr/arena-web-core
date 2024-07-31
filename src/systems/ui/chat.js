@@ -99,11 +99,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.devInstance = ARENA.defaults.devInstance;
         this.isSceneWriter = this.arena.isUserSceneWriter();
 
-        const idTag = `${this.userId}${btoa(this.userId)}`;
         const topicVars = {
             nameSpace: this.nameSpace,
             sceneName: this.scene,
-            idTag,
+            idTag: this.userId,
         };
         this.publicChatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr(topicVars);
         // send private messages to a user (publish only), template partially
