@@ -828,6 +828,9 @@ AFRAME.registerSystem('arena-jitsi', {
          */
         function setCornerVideoHeight() {
             const videoWidth = localVideoWidth;
+            if (!this.jitsiVideoElem) {
+                console.error('Attempting to set cornerVideo size before element is available!');
+            }
             const videoHeight = this.jitsiVideoElem.videoHeight / (this.jitsiVideoElem.videoWidth / videoWidth);
             this.jitsiVideoElem.style.width = `${videoWidth}px`;
             this.jitsiVideoElem.style.height = `${videoHeight}px`;
