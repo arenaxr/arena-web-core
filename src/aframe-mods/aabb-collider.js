@@ -357,17 +357,17 @@ AFRAME.registerComponent('box-collision-publisher', {
     },
     init() {
         const thisEl = this.el;
-        const sourceName = thisEl.id === 'my-camera' ? ARENA.idTag : thisEl.components['arena-hand'].name;
-        const topicParams = {
-            nameSpace: ARENA.nameSpace,
-            sceneName: ARENA.sceneName,
-            userObj: sourceName,
-        };
-        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
-        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
-        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
         thisEl.addEventListener('box-collide-start', (e) => {
+            const sourceName = thisEl.id === 'my-camera' ? ARENA.idTag : thisEl.components['arena-hand'].name;
+            const topicParams = {
+                nameSpace: ARENA.nameSpace,
+                sceneName: ARENA.sceneName,
+                userObj: sourceName,
+            };
+            const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+            const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+            const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
             e.detail.intersectedEls.forEach((inEl) => {
                 const thisMsg = {
                     object_id: inEl.id,
@@ -383,6 +383,15 @@ AFRAME.registerComponent('box-collision-publisher', {
             });
         });
         thisEl.addEventListener('box-collide-end', (e) => {
+            const sourceName = thisEl.id === 'my-camera' ? ARENA.idTag : thisEl.components['arena-hand'].name;
+            const topicParams = {
+                nameSpace: ARENA.nameSpace,
+                sceneName: ARENA.sceneName,
+                userObj: sourceName,
+            };
+            const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+            const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+            const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
             e.detail.endIntersectedEls.forEach((inEl) => {
                 const thisMsg = {
                     object_id: inEl.id,
