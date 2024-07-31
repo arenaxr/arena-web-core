@@ -98,18 +98,17 @@ AFRAME.registerSystem('arena-jitsi', {
         const { el } = this;
         const { sceneEl } = el;
 
-        this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
 
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,/:;=?@[\]]/g, '_');
+        this.conferenceName = ARENA.namespacedScene.toLowerCase().replace(/[!#$&'()*+,/:;=?@[\]]/g, '_');
 
         JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
         // signal that jitsi is loaded. note: jitsi is not necessarily CONNECTED when this event is fired,
         ARENA.events.emit(ARENA_EVENTS.JITSI_LOADED, true);
 
-        if (!this.arena.params.noav && this.arena.isJitsiPermitted()) {
+        if (!ARENA.params.noav && ARENA.isJitsiPermitted()) {
             const _this = this;
             ARENA.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
                 // Only show if no previous preferences were set / first time AV setup
@@ -151,7 +150,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         this.connection = new JitsiMeetJS.JitsiConnection(
             data.arenaAppId,
-            this.arena.mqttToken.mqtt_token,
+            ARENA.mqttToken.mqtt_token,
             this.connectOptions
         );
         this.connection.addEventListener(
@@ -342,7 +341,7 @@ AFRAME.registerSystem('arena-jitsi', {
                         id: participantId,
                         dn,
                         sn: objectIds[0],
-                        scene: this.arena.namespacedScene,
+                        scene: ARENA.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
                     });
 
@@ -361,8 +360,7 @@ AFRAME.registerSystem('arena-jitsi', {
                         jid: participantId,
                         id: participantId,
                         dn,
-                        cn: undefined,
-                        scene: this.arena.namespacedScene,
+                        scene: ARENA.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
                     });
                     return;
@@ -425,7 +423,7 @@ AFRAME.registerSystem('arena-jitsi', {
         this.initialized = true;
 
         sceneEl.emit(JITSI_EVENTS.CONNECTED, {
-            scene: this.arena.namespacedScene,
+            scene: ARENA.namespacedScene,
             pl,
         });
     },
@@ -445,15 +443,13 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
         const arenaDisplayName = this.conference.getParticipantById(id).getProperty('arenaDisplayName');
-        const arenaCameraName = this.conference.getParticipantById(id).getProperty('arenaCameraName');
-        if (arenaId && arenaDisplayName && arenaCameraName) {
+        if (arenaId && arenaDisplayName) {
             // emit user joined event in the off chance we know all properties of this arena user
             sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
                 jid: id,
                 id: arenaId,
                 dn: arenaDisplayName,
-                cn: arenaCameraName,
-                scene: this.arena.namespacedScene,
+                scene: ARENA.namespacedScene,
                 src: EVENT_SOURCES.JITSI,
             });
         } else {
@@ -465,8 +461,7 @@ AFRAME.registerSystem('arena-jitsi', {
                 jid: id,
                 id,
                 dn,
-                cn: undefined,
-                scene: this.arena.namespacedScene,
+                scene: ARENA.namespacedScene,
                 src: EVENT_SOURCES.JITSI,
             };
 
@@ -590,7 +585,7 @@ AFRAME.registerSystem('arena-jitsi', {
             this.conference.sendEndpointStatsMessage(stats); // send to remote
             sceneEl.emit(JITSI_EVENTS.STATS_LOCAL, {
                 jid: this.jitsiId,
-                id: this.arena.idTag,
+                id: ARENA.idTag,
                 stats,
             });
         });
@@ -607,11 +602,11 @@ AFRAME.registerSystem('arena-jitsi', {
         });
 
         // set the ARENA user's name with a "unique" ARENA tag
-        this.conference.setDisplayName(`${this.arena.displayName} (${data.arenaUserPrefix}_${this.arena.idTag})`);
+        this.conference.setDisplayName(`${ARENA.displayName} (${data.arenaUserPrefix}_${ARENA.idTag})`);
 
         // set local properties
-        this.conference.setLocalParticipantProperty('arenaId', this.arena.idTag);
-        this.conference.setLocalParticipantProperty('arenaDisplayName', this.arena.displayName);
+        this.conference.setLocalParticipantProperty('arenaId', ARENA.idTag);
+        this.conference.setLocalParticipantProperty('arenaDisplayName', ARENA.displayName);
 
         this.conference.on(
             JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED,
@@ -635,7 +630,6 @@ AFRAME.registerSystem('arena-jitsi', {
                             jid: id,
                             id: arenaId,
                             dn: arenaDisplayName,
-                            cn: arenaCameraName,
                             scene: this.conferenceName,
                             src: EVENT_SOURCES.JITSI,
                         });
@@ -655,7 +649,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const statusPayload = {
             jid: this.jitsiId,
-            id: this.arena.idTag,
+            id: ARENA.idTag,
             status: {
                 role: this.conference.getRole(),
             },
@@ -1049,7 +1043,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * @returns
      */
     getUserId(participantJitsiId) {
-        if (this.jitsiId === participantJitsiId) return this.arena.idTag;
+        if (this.jitsiId === participantJitsiId) return ARENA.idTag;
         // our arena id (camera name) is the jitsi display name
         return this.conference.getParticipantById(participantJitsiId)._displayName;
     },
