@@ -516,7 +516,7 @@ AFRAME.registerSystem('arena-scene', {
                 type: 'object',
                 data: { parent: parentName },
             };
-            mqtt.processMessage(msg);
+            mqtt.handleSceneObjectMessage(msg);
         }
 
         const arenaObjects = new Map(sceneObjs.map((object) => [object.object_id, object]));
@@ -567,7 +567,7 @@ AFRAME.registerSystem('arena-scene', {
                 persist: true,
                 data: obj.attributes,
             };
-            mqtt.processMessage(msg);
+            mqtt.handleSceneObjectMessage(msg);
             arenaObjects.delete(obj.object_id);
         };
 
