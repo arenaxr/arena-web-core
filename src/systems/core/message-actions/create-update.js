@@ -263,7 +263,7 @@ export default class CreateUpdate {
                     'arena-user': data['arena-user'],
                 });
                 // Merge-update live users, but don't repopulate userlist
-                AFRAME.scenes[0].systems.chat?.upsertLiveUser(message.id, { un: data['arena-user'].displayName }, true);
+                AFRAME.scenes[0].systems.chat?.upsertLiveUser(message.id, { dn: data['arena-user'].displayName }, true);
                 return true;
             case 'gltf-model':
                 if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
