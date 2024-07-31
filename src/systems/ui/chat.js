@@ -424,10 +424,11 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Upserts a user in the liveUsers dictionary. Updates timestamp tag either way
      * @param {string} id - User ID, typically idTag
      * @param {object} user - User object
-     * @param {boolean} merge - If true, merge user object with existing user
+     * @param {?boolean} merge - If true, merge user object with existing user
+     * @param {?boolean} skipUserlist - If true, do not update user list
      * @return {boolean} - True if user is a new addition
      */
-    upsertLiveUser(id, user, merge = false) {
+    upsertLiveUser(id, user, merge = false, skipUserlist = false) {
         let newUser = false;
         if (!this.liveUsers[id]) newUser = true;
 
@@ -437,7 +438,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             this.liveUsers[id] = { ...this.liveUsers[id], ...user };
         }
         this.liveUsers[id].ts = new Date().getTime();
-        if (newUser) this.populateUserList(this.liveUsers[id]);
+        if (newUser && !skipUserlist) this.populateUserList(this.liveUsers[id]);
         return newUser;
     },
 
@@ -453,10 +454,11 @@ AFRAME.registerSystem('arena-chat-ui', {
             const userObj = {
                 jid: user.jid,
                 dn: user.dn,
-                type: this.upsertLiveUser[user.id] ? UserType.ARENA : UserType.EXTERNAL,
+                type: this.liveUsers[user.id] ? UserType.ARENA : UserType.EXTERNAL,
             };
-            this.upsertLiveUser(user.id, userObj);
+            this.upsertLiveUser(user.id, userObj, true, true);
         });
+        this.populateUserList();
     },
 
     /**
@@ -466,13 +468,11 @@ AFRAME.registerSystem('arena-chat-ui', {
     onUserJitsiJoin(e) {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
-        // check if jitsi knows about someone we don't; add to user list
-        const newUser = this.upsertLiveUser(user.id, {
+        this.upsertLiveUser(user.id, {
             jid: user.jid,
             dn: user.dn,
-            type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
+            type: this.liveUsers[user.id] ? UserType.ARENA : UserType.EXTERNAL,
         });
-        if (!newUser) this.populateUserList();
     },
 
     /**

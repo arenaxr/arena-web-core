@@ -613,15 +613,10 @@ AFRAME.registerSystem('arena-jitsi', {
             (user, propertyKey, oldPropertyValue, propertyValue) => {
                 // console.log(`Property changed: ${user.getId()} ${propertyKey} ${propertyValue} ${oldPropertyValue}`);
                 const id = user.getId();
-                if (
-                    propertyKey === 'arenaId' ||
-                    propertyKey === 'arenaDisplayName' ||
-                    propertyKey === 'arenaCameraName'
-                ) {
+                if (propertyKey === 'arenaId' || propertyKey === 'arenaDisplayName') {
                     const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
                     const arenaDisplayName = this.conference.getParticipantById(id).getProperty('arenaDisplayName');
-                    const arenaCameraName = this.conference.getParticipantById(id).getProperty('arenaCameraName');
-                    if (arenaId && arenaDisplayName && arenaCameraName) {
+                    if (arenaId && arenaDisplayName) {
                         // clear timeout for new user notification
                         clearInterval(this.newUserTimers[id]);
                         delete this.newUserTimers[id];
