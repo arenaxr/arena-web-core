@@ -561,7 +561,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         const { sceneEl } = el;
         const cameraEl = sceneEl.camera.el;
 
-        const speedMod = Number(this.arena.sceneOptions?.speedModifier) || 1;
+        const speedMod = Number(this.arena.speedModifier) || 1;
         if (speedMod) {
             // Set new initial speed if applicable
             cameraEl.setAttribute('wasd-controls', { acceleration: 30 * speedMod });

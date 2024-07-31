@@ -86,7 +86,7 @@ AFRAME.registerSystem('armarker', {
         // this.getARMArkersFromATLAS(true);
 
         // init networkedLocationSolver flag from ARENA scene options
-        this.data.networkedLocationSolver = !!this.arena.sceneOptions.networkedLocationSolver;
+        this.data.networkedLocationSolver = !!this.arena.networkedLocationSolver;
 
         // request camera access features
         if (!ARENA.params.camFollow) {

@@ -658,8 +658,6 @@ AFRAME.registerSystem('arena-scene', {
 
         const { sceneEl } = el;
 
-        let sceneOptions = {};
-
         // we add all elements to our scene root
         const sceneRoot = document.getElementById('sceneRoot');
 
@@ -673,7 +671,7 @@ AFRAME.registerSystem('arena-scene', {
         if (sceneData) {
             const options = sceneData.attributes;
 
-            sceneOptions = options['scene-options'];
+            const sceneOptions = options['scene-options'];
             if (sceneOptions) {
                 // save scene-options
                 Object.entries(sceneOptions).forEach(([attribute, value]) => {
@@ -789,7 +787,6 @@ AFRAME.registerSystem('arena-scene', {
             sceneRoot.appendChild(light);
             sceneRoot.appendChild(light1);
         }
-        this.sceneOptions = sceneOptions;
         this.events.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
     },
 
