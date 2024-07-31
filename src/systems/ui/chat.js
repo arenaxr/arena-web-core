@@ -91,7 +91,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         this.userId = this.arena.idTag;
         this.realm = ARENA.defaults.realm;
-        this.userName = ARENA.getDisplayName();
+        this.displayName = ARENA.getDisplayName();
         this.nameSpace = this.arena.nameSpace;
         this.scene = this.arena.sceneName;
         this.devInstance = ARENA.defaults.devInstance;
@@ -415,7 +415,7 @@ AFRAME.registerSystem('arena-chat-ui', {
     onNewSettings(e) {
         const args = e.detail;
         if (!args.userName) return; // only handle a user name change
-        this.userName = args.userName;
+        this.displayName = args.userName;
         this.presenceMsg({ action: 'update' });
         this.populateUserList();
     },
@@ -452,7 +452,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             // check if jitsi knows about someone we don't; add to user list
             const userObj = {
                 jid: user.jid,
-                un: user.dn,
+                dn: user.dn,
                 type: this.upsertLiveUser[user.id] ? UserType.ARENA : UserType.EXTERNAL,
             };
             this.upsertLiveUser(user.id, userObj);
@@ -469,7 +469,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         // check if jitsi knows about someone we don't; add to user list
         const newUser = this.upsertLiveUser(user.id, {
             jid: user.jid,
-            un: user.dn,
+            dn: user.dn,
             type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
         });
         if (!newUser) this.populateUserList();
@@ -484,7 +484,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const user = e.detail;
         const newUser = this.upsertLiveUser(user.id, {
             jid: user.jid,
-            un: user.dn,
+            dn: user.dn,
             sid: user.sn,
             type: UserType.SCREENSHARE, // indicate we know the user is screensharing
         });
@@ -644,7 +644,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         const msg = {
             object_id: this.userId,
             type: 'chat',
-            from_un: this.userName,
             from_time: now.toJSON(),
             text: msgTxt,
         };
@@ -656,7 +655,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         } catch (err) {
             console.error('chat msg send failed:', err.message);
         }
-        const fromDesc = `${decodeURI(this.userName)} (${this.toSel.options[this.toSel.selectedIndex].text})`;
+        const fromDesc = `${decodeURI(this.displayName)} (${this.toSel.options[this.toSel.selectedIndex].text})`;
         this.txtAddMsg(msg.text, `${fromDesc} ${now.toLocaleTimeString()}`, 'self');
     },
 
@@ -674,7 +673,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 }
             // NO break, fallthrough to update
             case 'update':
-                this.upsertLiveUser(msg.object_id, { un: msg.from_un, type: msg.type }, true);
+                this.upsertLiveUser(msg.object_id, { dn: msg.dn, type: msg.type }, true);
                 break;
             case 'leave':
                 // Explicity remove user object from the scene, as this new lastWill
@@ -703,9 +702,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         // ignore invalid and our own messages
         if (msg.object_id === this.userId) return;
 
-        if (msg.from_un !== undefined) {
-            this.upsertLiveUser(msg.object_id, { un: msg.from_un, type: UserType.ARENA }, true);
-        }
+        this.upsertLiveUser(msg.object_id, { dn: msg.dn, type: UserType.ARENA }, true);
 
         // process commands
         if (msg.type === 'chat-ctrl') {
@@ -717,7 +714,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                     sideMenu.clickButton(sideMenu.buttons.AUDIO);
                 }
             } else if (msg.text === 'logout') {
-                const warn = `You have been asked to leave in 5 seconds by ${msg.from_un}.`;
+                const warn = `You have been asked to leave in 5 seconds by ${msg.dn}.`;
                 this.displayAlert(warn, 5000, 'warning');
                 setTimeout(() => {
                     ARENAAUTH.signOut();
@@ -730,7 +727,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         if (msg.type !== 'chat') return;
 
         // Determine msg to based on presence of topic TO_UID token
-        const fromDesc = `${decodeURI(msg.from_un)} (${topicToUid === this.userId ? 'private to me' : 'public'})`;
+        const fromDesc = `${decodeURI(msg.dn)} (${topicToUid === this.userId ? 'private to me' : 'public'})`;
 
         this.txtAddMsg(msg.text, `${fromDesc} ${new Date(msg.from_time).toLocaleTimeString()}`, 'other');
 
@@ -740,7 +737,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         // check if chat is visible
         if (this.chatPopup.style.display === 'none') {
             const msgText = msg.text.length > 15 ? `${msg.text.substring(0, 15)}...` : msg.text;
-            this.displayAlert(`New message from ${msg.from_un}: ${msgText}.`, 3000);
+            this.displayAlert(`New message from ${msg.dn}: ${msgText}.`, 3000);
             this.chatDot.style.display = 'block';
         }
     },
@@ -812,7 +809,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             nSceneUsers++; // count all users
             userList.push({
                 uid: key,
-                un: _this.liveUsers[key].un,
+                dn: _this.liveUsers[key].dn,
                 sid: _this.liveUsers[key].sid,
                 type: _this.liveUsers[key].type,
                 speaker: _this.liveUsers[key].speaker,
@@ -821,16 +818,16 @@ AFRAME.registerSystem('arena-chat-ui', {
             });
         });
 
-        userList.sort((a, b) => a.un.localeCompare(b.un));
+        userList.sort((a, b) => a.dn.localeCompare(b.dn));
 
         this.nSceneUserslabel.textContent = nSceneUsers;
         this.usersDot.textContent = nSceneUsers < 100 ? nSceneUsers : '...';
         if (newUser) {
             let msg = '';
             if (newUser.type !== UserType.SCREENSHARE) {
-                msg = `${newUser.un}${newUser.type === UserType.EXTERNAL ? ' (external)' : ''} joined.`;
+                msg = `${newUser.dn}${newUser.type === UserType.EXTERNAL ? ' (external)' : ''} joined.`;
             } else {
-                msg = `${newUser.un} started screen sharing.`;
+                msg = `${newUser.dn} started screen sharing.`;
             }
             let alertType = 'info';
             if (newUser.type !== 'arena') alertType = 'warning';
@@ -838,7 +835,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         }
 
         const meUli = document.createElement('li');
-        meUli.textContent = `${this.userName} (Me)`;
+        meUli.textContent = `${this.displayName} (Me)`;
         if (this.isSpeaker) {
             meUli.style.color = 'green';
         }
@@ -864,7 +861,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         // list users
         userList.forEach((user) => {
             const uli = document.createElement('li');
-            const name = user.type !== UserType.SCREENSHARE ? user.un : `${user.un}'s Screen Share`;
+            const name = user.type !== UserType.SCREENSHARE ? user.dn : `${user.dn}'s Screen Share`;
             if (user.speaker) {
                 uli.style.color = 'green';
             }
@@ -906,17 +903,17 @@ AFRAME.registerSystem('arena-chat-ui', {
                 kospan.onclick = function kickUserClick() {
                     Swal.fire({
                         title: 'Are you sure?',
-                        text: `This will send an automatic logout request to ${decodeURI(user.un)}.`,
+                        text: `This will send an automatic logout request to ${decodeURI(user.dn)}.`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Yes',
                         reverseButtons: true,
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
+                            _this.displayAlert(`Notifying ${decodeURI(user.dn)} of removal.`, 5000);
                             _this.ctrlMsg(user.uid, 'logout');
                             // kick jitsi channel directly as well
-                            const warn = `You have been asked to leave by ${_this.userName}.`;
+                            const warn = `You have been asked to leave by ${_this.displayName}.`;
                             _this.jitsi.kickout(user.uid, warn);
                         }
                     });
@@ -928,7 +925,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                     // only update 'to' select for new users
                     const op = document.createElement('option');
                     op.value = user.uid;
-                    op.textContent = `to: ${decodeURI(user.un)}`;
+                    op.textContent = `to: ${decodeURI(user.dn)}`;
                     _this.toSel.appendChild(op);
                 }
             }
@@ -1040,7 +1037,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const dstTopic = to ? this.privatePresenceTopic.formatStr({ toUid: to }) : this.publicPresenceTopic;
         this.mqttc.publish(dstTopic, {
             object_id: this.userId,
-            un: this.userName,
+            dn: this.displayName,
             ...msg,
         });
     },
@@ -1062,7 +1059,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         const msg = {
             object_id: this.userId,
             type: 'chat-ctrl',
-            from_un: this.userName,
             text,
         };
         // console.info('ctrl', msg, 'to', dstTopic);
