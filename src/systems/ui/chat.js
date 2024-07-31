@@ -10,9 +10,7 @@
 
 import 'linkifyjs';
 import 'linkifyjs/string';
-import { proxy } from 'comlink';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES, TOPICS } from '../../constants';
 import { Delete } from '../core/message-actions';
 
