@@ -1040,15 +1040,11 @@ AFRAME.registerSystem('arena-chat-ui', {
      */
     presenceMsg(msg = {}, to = undefined) {
         const dstTopic = to ? this.privatePresenceTopic.formatStr({ toUid: to }) : this.publicPresenceTopic;
-        try {
-            this.mqttc.publish(dstTopic, {
-                object_id: this.userId,
-                un: this.userName,
-                ...msg,
-            });
-        } catch (err) {
-            console.error('presenceMsg send failed:', err.message);
-        }
+        this.mqttc.publish(dstTopic, {
+            object_id: this.userId,
+            un: this.userName,
+            ...msg,
+        });
     },
 
     /**
