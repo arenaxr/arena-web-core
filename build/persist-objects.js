@@ -257,26 +257,28 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
 
         // save obj json so we can use later in selected object actions (delete/copy)
         li.setAttribute('data-obj', JSON.stringify(sceneObjs[i]));
-        let inputValue = '';
+        let typeDisplay = '';
 
         if (sceneObjs[i].attributes === undefined) continue;
         if (objTypeFilter[sceneObjs[i].type] === false) continue;
         if (re.test(sceneObjs[i].object_id) === false) continue;
 
         if (sceneObjs[i].type === 'object') {
-            inputValue = `${sceneObjs[i].object_id} ( ${sceneObjs[i].attributes.object_type} )`;
+            typeDisplay = sceneObjs[i].attributes.object_type;
             img.src = 'assets/3dobj-icon.png';
             if (objTypeFilter[sceneObjs[i].attributes.object_type] === false) continue;
         } else if (sceneObjs[i].type === 'program') {
             const ptype = sceneObjs[i].attributes.filetype === 'WA' ? 'WASM program' : 'python program';
-            inputValue = `${sceneObjs[i].object_id} ( ${ptype}: ${sceneObjs[i].attributes.filename} )`;
+            typeDisplay = `${ptype}: ${sceneObjs[i].attributes.filename}`;
             img.src = 'assets/program-icon.png';
         } else if (sceneObjs[i].type === 'scene-options') {
-            inputValue = `${sceneObjs[i].object_id} ( scene options )`;
+            typeDisplay = 'scene options';
             img.src = 'assets/options-icon.png';
         } else if (sceneObjs[i].type === 'landmarks') {
-            inputValue = `${sceneObjs[i].object_id} ( landmarks )`;
+            typeDisplay = 'landmarks';
             img.src = 'assets/map-icon.png';
+        } else {
+            typeDisplay = sceneObjs[i].type; // display unknown type
         }
 
         const r = sceneObjs[i].attributes.rotation;
@@ -299,7 +301,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             }
         }
 
-        const t = document.createTextNode(inputValue);
+        const t = document.createTextNode(`${sceneObjs[i].object_id} ( ${typeDisplay} )`);
         li.appendChild(t);
 
         // add image
@@ -362,6 +364,12 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             updateListItemVisibility(visible, li, iconVis);
             persist.visObjHandler(sceneObjs[i], visible);
         };
+
+        // highlight object type errors
+        const schemaType = sceneObjs[i].type === 'object' ? sceneObjs[i].attributes.object_type : sceneObjs[i].type;
+        if (!objTypeFilter[schemaType]) {
+            li.style.color = 'red';
+        }
 
         persist.objList.appendChild(li);
     }

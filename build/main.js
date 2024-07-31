@@ -182,7 +182,10 @@ window.addEventListener('onauth', async (e) => {
         const updateobj = getARENAObject(obj, action);
 
         const schemaType = updateobj.type === 'object' ? updateobj.data.object_type : updateobj.type;
-        const schemaFile = objSchemas[schemaType].file;
+        let schemaFile = objSchemas.entity.file; // use default in case schema type is undefined
+        if (objSchemas[schemaType]) {
+            schemaFile = objSchemas[schemaType].file;
+        }
         const data = await fetch(schemaFile);
         schema = await data.json();
         selectSchema.value = schemaFile;
@@ -202,8 +205,8 @@ window.addEventListener('onauth', async (e) => {
             window.location.hash = 'edit_section';
 
             Alert.fire({
-                icon: 'info',
-                title: 'Loaded.',
+                icon: objSchemas[schemaType] ? 'info' : 'error',
+                title: objSchemas[schemaType] ? 'Loaded.' : `Unknown "${schemaType}" loaded as "entity".`,
                 html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/> Press "<b>A</b>dd/Update Object" button when done.',
                 timer: 10000,
             });
