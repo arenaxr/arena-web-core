@@ -22,7 +22,7 @@ export default class Delete {
 
         // Clean up linked dependents
         try {
-            document.querySelectorAll(`[dep=${id}]`).forEach((depEl) => {
+            document.querySelectorAll(`[dep='${id}']`).forEach((depEl) => {
                 this.blipRemove(depEl);
             });
         } catch (e) {
