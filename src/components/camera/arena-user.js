@@ -193,27 +193,27 @@ AFRAME.registerComponent('arena-user', {
         if (!micIconEl) {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
-            micIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
-            micIconEl.setAttribute('material', 'shader', 'flat');
-            micIconEl.setAttribute('scale', '0.2 0.2 0.2');
-            if (data.presence !== 'Portal') {
-                micIconEl.setAttribute('position', '0 0.3 0.045');
-            } else {
-                micIconEl.setAttribute('position', '-0.75 1.25 -0.035');
-            }
-            micIconEl.setAttribute('src', 'url(src/systems/ui/images/audio-off.png)');
             el.appendChild(micIconEl);
         }
+        micIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
+        micIconEl.setAttribute('material', 'shader', 'flat');
+        micIconEl.setAttribute('scale', '0.2 0.2 0.2');
+        if (data.presence !== 'Portal') {
+            micIconEl.setAttribute('position', '0 0.3 0.045');
+        } else {
+            micIconEl.setAttribute('position', '-0.75 1.25 -0.035');
+        }
+        micIconEl.setAttribute('src', 'url(src/systems/ui/images/audio-off.png)');
+        this.micIconEl = micIconEl;
     },
 
     removeMicrophone() {
         const { el } = this;
 
-        const name = `muted_${el.id}`;
-        const micIconEl = document.querySelector(`#${name}`);
-        if (micIconEl) {
-            el.removeChild(micIconEl);
+        if (el.contains(this.micIconEl)) {
+            el.removeChild(this.micIconEl);
         }
+        this.micIconEl = null;
     },
 
     drawQuality() {
@@ -225,28 +225,27 @@ AFRAME.registerComponent('arena-user', {
         if (!qualIconEl) {
             qualIconEl = document.createElement('a-image');
             qualIconEl.setAttribute('id', name);
-            qualIconEl.setAttribute('material', 'shader', 'flat');
-            qualIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
-            qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
-            if (data.presence !== 'Portal') {
-                qualIconEl.setAttribute('position', `${0 - 0.2} 0.3 0.045`);
-            } else {
-                qualIconEl.setAttribute('position', `${-0.75 - 0.2}-0.75 1.25 -0.035`);
-            }
             el.appendChild(qualIconEl);
         }
-        // update signal strength
-        qualIconEl.setAttribute('src', this.getQualityIcon(data.jitsiQuality));
+        qualIconEl.setAttribute('material', 'shader', 'flat');
+        qualIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
+        qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
+        if (data.presence !== 'Portal') {
+            qualIconEl.setAttribute('position', `${0 - 0.2} 0.3 0.045`);
+        } else {
+            qualIconEl.setAttribute('position', `${-0.75 - 0.2}-0.75 1.25 -0.035`);
+        }
+        qualIconEl.setAttribute('src', this.getQualityIcon(data.jitsiQuality)); // update signal
+        this.qualIconEl = qualIconEl;
     },
 
     removeQuality() {
         const { el } = this;
 
-        const name = `quality_${el.id}`;
-        const qualIconEl = document.querySelector(`#${name}`);
-        if (qualIconEl) {
-            el.removeChild(qualIconEl);
+        if (el.contains(this.qualIconEl)) {
+            el.removeChild(this.qualIconEl);
         }
+        this.qualIconEl = null;
     },
 
     getQualityIcon(quality) {
@@ -502,7 +501,7 @@ AFRAME.registerComponent('arena-user', {
             }
         }
 
-        if (this.data.jitsiId) {
+        if (data.jitsiQuality !== oldData.jitsiQuality && this.data.jitsiId) {
             if (data.jitsiQuality < 66.7) {
                 this.drawQuality();
             } else {
