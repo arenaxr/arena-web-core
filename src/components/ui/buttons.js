@@ -39,6 +39,7 @@ const buttonBase = {
         this.topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         this.topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
     },
+    dependencies: ['arena-camera'],
 
     createButtonStates() {
         this.buttonStates = {

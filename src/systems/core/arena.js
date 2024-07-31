@@ -316,7 +316,7 @@ AFRAME.registerSystem('arena-scene', {
         This now checks if the public scene topic, which all users currently can *subscribe* to
         for all message types, is also *writable* for this JWT token.
         */
-        const writeTopic = TOPICS.SCENE_PUBLIC.formatStr({
+        const writeTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
         });

@@ -35,6 +35,7 @@ AFRAME.registerComponent('arenaui-card', {
         themeOverride: { type: 'array', default: [] }, // Annoyingly can't be an object, so we have to use an array
         materialSides: { type: 'string', default: 'both' },
     },
+    dependencies: ['arena-camera'],
 
     init() {
         buttonBase.init.bind(this)();

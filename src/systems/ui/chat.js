@@ -14,6 +14,7 @@ import { proxy } from 'comlink';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES, TOPICS } from '../../constants';
+import { Delete } from '../core/message-actions';
 
 const UserType = Object.freeze({
     EXTERNAL: 'external',
@@ -65,10 +66,6 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         this.upsertLiveUser = this.upsertLiveUser.bind(this);
 
-        ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, () => {
-            this.presenceMsg({ action: 'join' });
-        });
-
         this.sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect.bind(this));
 
         ARENA.events.addMultiEventListener(
@@ -83,6 +80,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
+        this.mqttc = ARENA.Mqtt.MQTTWorker;
         this.jitsi = sceneEl.systems['arena-jitsi'];
         this.health = sceneEl.systems['arena-health-ui'];
 
@@ -94,15 +92,30 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.liveUsers = {};
 
         this.userId = this.arena.idTag;
-        this.userName = this.arena.getDisplayName();
         this.realm = ARENA.defaults.realm;
+        this.userName = ARENA.getDisplayName();
         this.nameSpace = this.arena.nameSpace;
         this.scene = this.arena.namespacedScene;
         this.devInstance = ARENA.defaults.devInstance;
         this.isSceneWriter = this.arena.isUserSceneWriter();
 
-        this.keepalive_interval_ms = 30000;
+        const idTag = `${this.userId}${btoa(this.userId)}`;
+        const topicVars = {
+            nameSpace: this.nameSpace,
+            sceneName: this.scene,
+            idTag,
+        };
+        this.publicChatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr(topicVars);
+        // send private messages to a user (publish only), template partially
+        this.privateChatTopic = TOPICS.PUBLISH.SCENE_CHAT_PRIVATE.formatStr(topicVars);
+        this.publicPresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr(topicVars);
+        // send private presence update to a user (publish only), template partially
+        this.privatePresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr(topicVars);
 
+        // Announce ASAP
+        this.presenceMsg({ action: 'join', type: UserType.ARENA });
+
+        this.keepalive_interval_ms = 30000;
         // cleanup userlist periodically
         window.setInterval(this.userCleanup.bind(this), this.keepalive_interval_ms * 3);
 
@@ -127,23 +140,6 @@ AFRAME.registerSystem('arena-chat-ui', {
             <realm>/c/<scene-namespace>/o/userhandle - send open messages (chat keepalive, messages to all/scene)
             <realm>/c/<scene-namespace>/p/[regex-matching-any-userid]/userhandle - private messages to user
         */
-
-        const idTag = `${this.userId}${btoa(this.userId)}`;
-        const topicVars = {
-            nameSpace: this.nameSpace,
-            sceneName: this.scene,
-            idTag,
-        };
-
-        this.publicChatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr(topicVars);
-
-        // send private messages to a user (publish only), template partially
-        this.privateChatTopic = TOPICS.PUBLISH.SCENE_CHAT_PRIVATE.formatStr(topicVars);
-
-        this.publicPresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr(topicVars);
-
-        // send private presence update to a user (publish only), template partially
-        this.privatePresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr(topicVars);
 
         // counter for unread msgs
         this.unreadMsgs = 0;
@@ -417,8 +413,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         sceneEl.addEventListener(JITSI_EVENTS.STATS_LOCAL, this.onJitsiStatsLocal);
         sceneEl.addEventListener(JITSI_EVENTS.STATS_REMOTE, this.onJitsiStatsRemote);
         sceneEl.addEventListener(JITSI_EVENTS.STATUS, this.onJitsiStatus);
-
-        await this.connect();
     },
 
     onNewSettings(e) {
@@ -459,11 +453,12 @@ AFRAME.registerSystem('arena-chat-ui', {
         args.pl.forEach((user) => {
             // console.log('Jitsi User: ', user);
             // check if jitsi knows about someone we don't; add to user list
-            this.upsertLiveUser(user.id, {
+            const userObj = {
                 jid: user.jid,
                 un: user.dn,
-                type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
-            });
+                type: this.upsertLiveUser[user.id] ? UserType.ARENA : UserType.EXTERNAL,
+            };
+            this.upsertLiveUser(user.id, userObj);
         });
     },
 
@@ -678,17 +673,17 @@ AFRAME.registerSystem('arena-chat-ui', {
             case 'join':
                 if (!topicToUid) {
                     // This is a public join, respond privately to user
-                    this.presenceMsg({ action: 'join' }, msg.object_id);
+                    this.presenceMsg({ action: 'join', type: UserType.ARENA }, msg.object_id);
                 }
             // NO break, fallthrough to update
             case 'update':
-                this.upsertLiveUser(msg.object_id, { un: msg.from_un, type: UserType.ARENA }, true);
+                this.upsertLiveUser(msg.object_id, { un: msg.from_un, type: msg.type }, true);
                 break;
             case 'leave':
+                // Explicity remove user object from the scene, as this new lastWill
+                Delete.handle({ id: msg.object_id });
                 delete this.liveUsers[msg.object_id];
                 this.populateUserList();
-                // Explicity remove user object from the scene, as this new lastWill
-                document.getElementById(msg.object_id)?.remove();
                 break;
             default:
                 console.log('Unknown presence action:', msg.action);
@@ -1049,7 +1044,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         try {
             this.mqttc.publish(dstTopic, {
                 object_id: this.userId,
-                type: 'presence',
                 un: this.userName,
                 ...msg,
             });

@@ -21,6 +21,7 @@ AFRAME.registerComponent('arrow-controls', {
     schema: {
         acceleration: { default: 1.1 },
     },
+    dependencies: ['look-controls'],
 
     init() {
         this.keys = {};

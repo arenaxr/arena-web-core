@@ -22,6 +22,7 @@ AFRAME.registerSystem('arena-mqtt', {
 
     init() {
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
+        this.onSceneMessageArrived = this.onSceneMessageArrived.bind(this);
     },
     async ready() {
         const { data } = this;
@@ -53,7 +54,7 @@ AFRAME.registerSystem('arena-mqtt', {
                 ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
             }),
             // last will message
-            JSON.stringify({ object_id: idTag, type: 'presence', action: 'leave' }),
+            JSON.stringify({ object_id: idTag, action: 'leave' }),
             // last will topic
             // TODO: handle /x/ presence messages for user camera/hands objs and chat
             TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
@@ -86,7 +87,6 @@ AFRAME.registerSystem('arena-mqtt', {
             //     }
             // }),
         );
-        this.onSceneMessageArrived = this.onSceneMessageArrived.bind(this);
         worker.registerMessageHandler(
             's',
             proxy((messages) => {
@@ -173,7 +173,7 @@ AFRAME.registerSystem('arena-mqtt', {
         // Dispatch on scene message type (chat, object, presence, etc.)
         const sceneMsgType = topicSplit[TOPICS.TOKENS.SCENE_MSGTYPE];
         const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
-        const chatSystem = ARENA.systems['arena-chat'];
+        const chatSystem = this.sceneEl.systems['arena-chat-ui'];
         switch (sceneMsgType) {
             case TOPICS.SCENE_MSGTYPES.PRESENCE:
                 chatSystem?.onPresenceMessageArrived(theMessage, topicUuid);
@@ -243,6 +243,15 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param topicSplit
      */
     handleSceneUserMessage(message, topicUuid, topicSplit) {
+        if (message.action === undefined) {
+            warn('Malformed message (no action field):', JSON.stringify(message));
+            return;
+        }
+
+        // rename object_id to match internal handlers (and aframe)
+        message.id = message.object_id;
+        delete message.object_id;
+
         switch (message.action) {
             case ACTIONS.CLIENT_EVENT:
                 if (message.data === undefined) {

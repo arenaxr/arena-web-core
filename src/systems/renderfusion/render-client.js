@@ -46,7 +46,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     async init() {
-        this.initialized = false;
+        this.isReady = false;
         ARENA.events.addMultiEventListener(
             [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.MQTT_LOADED],
             this.ready.bind(this)
@@ -98,7 +98,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         document.addEventListener('MSFullscreenChange', this.onEnterVR.bind(this));
         document.addEventListener('webkitfullscreenchange', this.onEnterVR.bind(this));
 
-        this.initialized = true;
+        this.isReady = true;
     },
 
     connectToCloud() {
@@ -417,7 +417,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     tick(t) {
-        if (!this.initialized) return;
+        if (!this.isReady) return;
         const { data, el } = this;
 
         const { sceneEl } = el;
