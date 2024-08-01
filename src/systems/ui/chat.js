@@ -645,7 +645,6 @@ AFRAME.registerSystem('arena-chat-ui', {
             object_id: this.userId,
             type: 'chat',
             dn: this.displayName,
-            from_time: now.toJSON(),
             text: msgTxt,
         };
         const dstTopic =
@@ -726,7 +725,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         // Determine msg to based on presence of topic TO_UID token
         const fromDesc = `${decodeURI(msg.dn)} (${topicToUid === this.userId ? 'private to me' : 'public'})`;
 
-        this.txtAddMsg(msg.text, `${fromDesc} ${new Date(msg.from_time).toLocaleTimeString()}`, 'other');
+        this.txtAddMsg(msg.text, `${fromDesc} ${new Date(msg.timestamp).toLocaleTimeString()}`, 'other');
 
         this.unreadMsgs++;
         this.chatDot.textContent = this.unreadMsgs < 100 ? this.unreadMsgs : '...';
