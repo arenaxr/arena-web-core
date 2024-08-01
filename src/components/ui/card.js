@@ -286,14 +286,14 @@ AFRAME.registerComponent('arenaui-card', {
             const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = ARENAUtils.setClickData({ detail: evtDetail });
             const thisMsg = {
-                object_id: this.el.id,
+                object_id: ARENA.idTag,
                 action: 'clientEvent',
                 type: 'buttonClick',
                 data: {
-                    clickPos,
+                    originPosition: clickPos,
                     buttonName: 'Close',
-                    position: coordsData,
-                    source: ARENA.idTag,
+                    targetPosition: coordsData,
+                    target: this.el.id,
                 },
             };
             ARENAUtils.publishClientEvent(

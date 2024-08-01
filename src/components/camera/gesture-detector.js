@@ -164,13 +164,12 @@ AFRAME.registerComponent('gesture-detector', {
             action: 'clientEvent',
             type: eventName,
             data: {
-                clickPos: ARENAUtils.vec3ToObject(this.cameraPos),
-                source: ARENA.idTag,
-                position: {
+                originPosition: ARENAUtils.vec3ToObject(this.cameraPos),
+                targetPosition: {
                     x: parseFloat(eventDetail.position.x.toFixed(5)),
                     y: parseFloat(eventDetail.position.y.toFixed(5)),
                 },
-                positionStart: {
+                targetPositionStart: {
                     x: parseFloat(eventDetail.positionStart.x.toFixed(5)),
                     y: parseFloat(eventDetail.positionStart.y.toFixed(5)),
                 },

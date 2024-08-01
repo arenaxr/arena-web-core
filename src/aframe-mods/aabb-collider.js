@@ -370,13 +370,13 @@ AFRAME.registerComponent('box-collision-publisher', {
             const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
             e.detail.intersectedEls.forEach((inEl) => {
                 const thisMsg = {
-                    object_id: inEl.id,
+                    object_id: sourceName,
                     action: 'clientEvent',
                     type: 'collision-start',
                     data: {
-                        source: sourceName,
+                        target: inEl.id,
                         targetPosition: ARENAUtils.getWorldPos(inEl),
-                        position: ARENAUtils.getWorldPos(thisEl),
+                        originPosition: ARENAUtils.getWorldPos(thisEl),
                     },
                 };
                 ARENAUtils.publishClientEvent(inEl, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
@@ -394,13 +394,13 @@ AFRAME.registerComponent('box-collision-publisher', {
             const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
             e.detail.endIntersectedEls.forEach((inEl) => {
                 const thisMsg = {
-                    object_id: inEl.id,
+                    object_id: sourceName,
                     action: 'clientEvent',
                     type: 'collision-end',
                     data: {
-                        source: sourceName,
+                        target: inEl.id,
                         targetPosition: ARENAUtils.getWorldPos(inEl),
-                        position: ARENAUtils.getWorldPos(thisEl),
+                        originPosition: ARENAUtils.getWorldPos(thisEl),
                     },
                 };
                 ARENAUtils.publishClientEvent(inEl, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);

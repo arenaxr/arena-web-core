@@ -79,13 +79,13 @@ AFRAME.registerComponent('click-listener', {
         if ('cursorEl' in evt.detail) {
             // original click event; simply publish to MQTT
             const thisMsg = {
-                object_id: this.el.id,
+                object_id: ARENA.idTag,
                 action: 'clientEvent',
                 type: evtType,
                 data: {
-                    clickPos,
-                    position: coordsData,
-                    source: ARENA.idTag,
+                    originPosition: clickPos,
+                    targetPosition: coordsData,
+                    target: this.el.id,
                 },
             };
             if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
