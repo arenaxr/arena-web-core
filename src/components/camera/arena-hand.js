@@ -183,8 +183,8 @@ AFRAME.registerComponent('arena-hand', {
             action: 'clientEvent',
             type: eventName,
             data: {
-                position: coordsData,
-                source: this.name,
+                originPosition: coordsData,
+                target: this.name,
             },
         });
     },

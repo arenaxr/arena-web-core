@@ -58,11 +58,11 @@ AFRAME.registerComponent('textinput', {
                 const text = result.value.substring(0, 140);
 
                 const thisMsg = {
-                    object_id: this.id,
+                    object_id: ARENA.idTag,
                     action: 'clientEvent',
                     type: 'textinput',
                     data: {
-                        writer: ARENA.idTag,
+                        target: this.id,
                         text,
                     },
                 };

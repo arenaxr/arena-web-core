@@ -47,14 +47,13 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         if ('inputSource' in evt.detail) {
             // original hit-test event; simply publish to MQTT
             const thisMsg = {
-                object_id: 'scene',
+                object_id: 'ARENA.idTag',
                 action: 'clientEvent',
                 type: 'hitstart',
                 data: {
-                    clickPos,
-                    position,
-                    rotation,
-                    source: ARENA.idTag,
+                    originPosition: clickPos,
+                    targetPosition: position,
+                    targetRotation: rotation,
                 },
             };
             ARENA.Mqtt.publish(this.pubTopic, thisMsg);

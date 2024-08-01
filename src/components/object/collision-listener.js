@@ -40,12 +40,12 @@ AFRAME.registerComponent('collision-listener', {
 
             // original click event; simply publish to MQTT
             const thisMsg = {
-                object_id: this.id,
+                object_id: collider,
                 action: 'clientEvent',
                 type: 'collision',
                 data: {
-                    position: coordsData,
-                    source: collider,
+                    targetPosition: coordsData,
+                    target: this.id,
                 },
             };
             // publishing events attached to user id objects allows sculpting security
