@@ -117,6 +117,7 @@ AFRAME.registerComponent('arena-camera', {
             object_id: ARENA.idTag,
             action,
             type: 'object',
+            ttl: 30,
             data: {
                 object_type: 'camera',
                 position: {
@@ -132,7 +133,6 @@ AFRAME.registerComponent('arena-camera', {
                     w: parseFloat(rotation._w.toFixed(3)),
                 },
                 'arena-user': arenaUser,
-                ttl: 30,
             },
         };
         if (this.presenceEl) {
