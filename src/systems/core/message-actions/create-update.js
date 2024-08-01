@@ -137,7 +137,7 @@ export default class CreateUpdate {
 
                 if (message.ttl !== undefined) {
                     // Allow falsy value of 0
-                    entityEl.setAttribute('ttl', { seconds: message.ttl });
+                    entityEl.setAttribute('ttl', message.ttl);
                 }
 
                 // Private and program_id flags. Falsy values unset (undefined, null, 0, '')
@@ -268,7 +268,6 @@ export default class CreateUpdate {
                     position: data.position,
                     rotation: data.rotation,
                     'arena-user': data['arena-user'],
-                    ttl: data.ttl,
                 });
                 // Merge-update live users, but don't repopulate userlist
                 AFRAME.scenes[0].systems.chat?.upsertLiveUser(message.id, { dn: data['arena-user'].displayName }, true);
@@ -509,10 +508,6 @@ export default class CreateUpdate {
                 case 'scale':
                     // scale is set directly in the THREE.js object, for performance reasons
                     entityEl.object3D.scale.set(value.x, value.y, value.z);
-                    break;
-                case 'ttl':
-                    // ttl is applied to property 'seconds' of ttl component
-                    entityEl.setAttribute('ttl', { seconds: value });
                     break;
                 case 'obj':
                 case 'mtl':
