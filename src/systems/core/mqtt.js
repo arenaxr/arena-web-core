@@ -261,7 +261,7 @@ AFRAME.registerSystem('arena-mqtt', {
                 // check topic
                 // TODO: Refactor clientEvents to use user/hand objects as object_id, and target vs source
                 if (message.destinationName) {
-                    if (topicUuid !== message.data.source) {
+                    if (topicToUid !== message.data.source) {
                         warn(
                             'Malformed message (topic does not pass check):',
                             JSON.stringify(message),
