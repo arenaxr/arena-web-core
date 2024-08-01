@@ -140,10 +140,17 @@ export default class CreateUpdate {
                     entityEl.setAttribute('ttl', { seconds: message.ttl });
                 }
 
+                // Private and program_id flags. Falsy values unset (undefined, null, 0, '')
                 if (message.private) {
                     entityEl.setAttribute('private', message.private);
-                } else if (message.private === false) {
+                } else if (!!message.private === false) {
                     entityEl.removeAttribute('private');
+                }
+
+                if (message.program_id) {
+                    entityEl.setAttribute('program', message.program_id);
+                } else if (!!message.program_id === false) {
+                    entityEl.removeAttribute('program');
                 }
 
                 // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer

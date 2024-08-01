@@ -474,11 +474,12 @@ export default class ARENAUtils {
     static publishClientEvent(objectEl, msg, scenePublic, scenePrivate, programPrivate) {
         let pubTopic;
         const privateAttr = objectEl.getAttribute('private');
+        const programIdAttr = objectEl.getAttribute('program_id');
         if (privateAttr) {
-            if (privateAttr === true) {
-                pubTopic = scenePrivate.formatStr({ toUid: privateAttr }); // Send to the specified program
+            if (programIdAttr) {
+                pubTopic = programPrivate.formatStr({ toUid: programIdAttr }); // Send to the target object itself
             } else {
-                pubTopic = programPrivate.formatStr({ toUid: objectEl.id }); // Send to the target object itself
+                pubTopic = scenePrivate.formatStr({ toUid: objectEl.id }); // Send to the specified program
             }
         } else {
             pubTopic = scenePublic; // Public client event
