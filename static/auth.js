@@ -45,6 +45,7 @@ window.ARENAAUTH = {
         sound: ['sound.src'],
         'spe-particles': ['spe-particles.texture'],
         'video-control': ['video-control.frame_object', 'video-control.video_path'],
+        // TODO (mwfarb): 'scene-options': ['scene-options.navMesh'],
     },
     /**
      * Merge defaults and any URL params into single ARENA.params obj. Nonexistent keys should be checked as undefined.
