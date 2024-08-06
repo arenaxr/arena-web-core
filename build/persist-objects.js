@@ -8,7 +8,7 @@
 
 /* global Alert, ARENAAUTH, ARENADefaults, Swal, THREE */
 /* eslint-disable import/extensions */
-import { TOPICS } from '../src/constants';
+import TOPICS from '../src/constants/topics.js';
 import MqttClient from './mqtt-client.js';
 import ARENAUserAccount from './arena-account.js';
 import {TTLCache} from './ttl-cache.js';
