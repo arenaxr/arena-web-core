@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.28.2](https://github.com/arenaxr/arena-web-core/compare/v1.28.1...v1.28.2) (2024-08-07)
+
+
+### Bug Fixes
+
+* **arena-user:** fix garbled avatar 3d icons from 'usedTimes' crashes ([7689466](https://github.com/arenaxr/arena-web-core/commit/7689466f18bc4293e296b879a4c6a39a7a7feaad))
+* **build:** highlight/show unknown types in red & allow edit/delete ([5287340](https://github.com/arenaxr/arena-web-core/commit/52873409895f63bbb372aa8e884ebcf1d62eaee5))
+* **build:** only show visibility property for object types ([5176571](https://github.com/arenaxr/arena-web-core/commit/5176571e16288a56e2f05d66e234d47aa51bf50f))
+* force look-component update with camfollow ([bee70a3](https://github.com/arenaxr/arena-web-core/commit/bee70a3c03f16b9487278e832f2e4df25916c48c))
+* **jitsi:** fixed jitsi crash in setupCornerVideo ([1868664](https://github.com/arenaxr/arena-web-core/commit/18686646790c0ad1a8b57e3c11a08a485ab2a78d))
+* **jitsi:** improve videosphere resolution est, also lib-jitsi-meet v1650 ([54c6919](https://github.com/arenaxr/arena-web-core/commit/54c6919d286b6c82eebca8b35892b1010f94f1fb))
+* **obj-model:** corrected assignment of dropbox links for obj models ([29bc02b](https://github.com/arenaxr/arena-web-core/commit/29bc02b45fb68a27a134918ed0f076b853a0de74))
+* **particles:** remove particle conflict with scene fog, closes [#654](https://github.com/arenaxr/arena-web-core/issues/654) ([f54e682](https://github.com/arenaxr/arena-web-core/commit/f54e68200b3eae92fe1fc17f2fc856f511638d71))
+* **scene-options:** fix scene-options json parse when empty/undefined ([01384e2](https://github.com/arenaxr/arena-web-core/commit/01384e21ce2b8bd0095d3f0dc6a301d09f89a110))
+
 ## [1.28.1](https://github.com/arenaxr/arena-web-core/compare/v1.28.0...v1.28.1) (2024-07-11)
 
 ### Features
