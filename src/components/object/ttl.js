@@ -6,6 +6,8 @@
  * @date 2020
  */
 
+import { Delete } from '../../systems/core/message-actions';
+
 /**
  * Time To Live (TTL) component.
  *
@@ -17,17 +19,17 @@
  * @module ttl
  */
 AFRAME.registerComponent('ttl', {
-    schema: {
-        seconds: { type: 'number' },
-    },
+    schema: { type: 'number', default: 0 }, // 0 = disabled
     init() {
-        const now = new Date();
-        now.setSeconds(now.getSeconds() + this.data.seconds);
-        this.expireAt = now;
-        this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
+        if (this.data > 0) {
+            const now = new Date();
+            now.setSeconds(now.getSeconds() + this.data.seconds);
+            this.expireAt = now;
+            this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
+        }
     },
     update(oldData) {
-        if (oldData.seconds !== this.data.expireAt) {
+        if (oldData !== this.data && this.data > 0) {
             const now = new Date();
             now.setSeconds(now.getSeconds() + this.data.seconds);
             this.expireAt = now;
@@ -36,7 +38,7 @@ AFRAME.registerComponent('ttl', {
     tick() {
         const now = new Date();
         if (now > this.expireAt) {
-            this.el.parentNode.removeChild(this.el);
+            Delete.handle({ id: this.el.id });
         }
     },
 });

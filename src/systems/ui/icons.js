@@ -654,7 +654,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     screenSharePrefix: this.jitsi.data.screensharePrefix,
                     conferenceName: this.jitsi.conferenceName,
                     displayName: cameraEl.getAttribute('arena-camera').displayName,
-                    camName: this.arena.camName,
+                    idTag: this.arena.idTag,
                     objectIds: objectIds.join(),
                 };
             });

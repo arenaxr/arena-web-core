@@ -807,7 +807,7 @@ window.addEventListener('onauth', async (e) => {
         // add scene if it does not exist
         if (newScene) await PersistObjects.addNewScene(namespaceinput.value, sceneinput.value, undefined);
 
-        await PersistObjects.addObject(obj, `${namespaceinput.value}/${sceneinput.value}`);
+        await PersistObjects.addObject(obj, namespaceinput.value, sceneinput.value);
         setTimeout(async () => {
             PersistObjects.populateObjectList(
                 `${namespaceinput.value}/${sceneinput.value}`,
@@ -1004,3 +1004,9 @@ function updatePublishControlsByToken(namespace, scenename, mqttToken) {
         item.disabled = !editor;
     });
 }
+
+// eslint-disable-next-line no-extend-native
+String.prototype.formatStr = function formatStr(...args) {
+    const params = arguments.length === 1 && typeof args[0] === 'object' ? args[0] : args;
+    return this.replace(/\{([^}]+)\}/g, (match, key) => (typeof params[key] !== 'undefined' ? params[key] : match));
+};

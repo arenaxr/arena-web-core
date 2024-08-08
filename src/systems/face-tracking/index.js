@@ -5,6 +5,7 @@
  */
 
 import { FaceTracker, FaceTrackerSource } from './face-tracker.min';
+import { TOPICS } from '../../constants';
 
 AFRAME.registerSystem('face-tracking', {
     schema: {
@@ -35,6 +36,13 @@ AFRAME.registerSystem('face-tracking', {
         this.faceTracker = new FaceTracker(faceTrackerSource);
 
         const _this = this;
+
+        const faceTopic = TOPICS.PUBLISH.SCENE_USER.formatStr({
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+            userObj: ARENA.faceName,
+        });
+
         window.addEventListener('onFaceTrackerInit', (e) => {
             const video = e.detail.source;
             video.classList.add('flip-video');
@@ -89,8 +97,7 @@ AFRAME.registerSystem('face-tracking', {
 
             const faceJSON = this.createFaceJSON(valid, landmarks, bbox, pose);
             if (faceJSON !== this.prevJSON) {
-                const FACE_TOPIC = `${ARENA.outputTopic}${ARENA.camName}/face/${faceJSON.object_id}`;
-                ARENA.Mqtt.publish(FACE_TOPIC, faceJSON);
+                ARENA.Mqtt.publish(faceTopic, faceJSON);
                 this.prevJSON = faceJSON;
             }
 

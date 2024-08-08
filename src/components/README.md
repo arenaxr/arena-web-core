@@ -111,7 +111,6 @@ Tracking camera movement in real time. Emits camera pose change and VIO change e
 | Name        | Type                              | Description                                               |
 | ----------- | --------------------------------- | --------------------------------------------------------- |
 | enabled     | <code>boolean</code>              | Indicates whether camera tracking is enabled.             |
-| vioEnabled  | <code>boolean</code>              | Indicates whether to publish VIO on every tick (if true). |
 | displayName | <code>string</code>               | User display name (used to publish camera data).          |
 | color       | <code>string</code>               | Head text color.                                          |
 | rotation    | <code>Array.&lt;number&gt;</code> | Last camera rotation value.                               |

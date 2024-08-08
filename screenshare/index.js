@@ -116,10 +116,10 @@ function onConnectionSuccess() {
     });
 
     conference.setDisplayName(
-        `${(+new Date()).toString(36)} ${window.params.screenSharePrefix}_${window.params.camName}`
+        `${(+new Date()).toString(36)} ${window.params.screenSharePrefix}_${window.params.idTag}`
     );
     conference.setLocalParticipantProperty('screenshareDispName', window.params.displayName);
-    conference.setLocalParticipantProperty('screenshareCamName', window.params.camName);
+    conference.setLocalParticipantProperty('screenshareidTag', window.params.idTag);
     conference.setLocalParticipantProperty('screenshareObjIds', window.params.objectIds);
 
     conference.join();

@@ -8,6 +8,7 @@
 
 import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
+import { TOPICS } from '../../../constants';
 
 const MINTOCKINTERVAL = 3 * 1000;
 let lastTock = new Date().getTime();
@@ -35,7 +36,7 @@ class MQTTWorker {
         this.config = ARENAConfig;
         this.healthCheck = healthCheck;
 
-        this.subscriptions = [this.config.renderTopic]; // Add main scene renderTopic by default to subs
+        this.subscriptions = this.config.subscriptions;
         this.connectionLostHandlers = [
             (responseObject) => {
                 if (responseObject.errorCode !== 0) {
@@ -123,7 +124,8 @@ class MQTTWorker {
     onMessageArrivedDispatcher(message) {
         const now = new Date().getTime();
         const topic = message.destinationName;
-        const topicCategory = topic.split('/')[1];
+        const topicSplit = topic.split('/');
+        const topicCategory = topicSplit[TOPICS.TOKENS.TYPE];
         const handler = this.messageHandlers[topicCategory];
         const trimmedMessage = {
             destinationName: message.destinationName,
@@ -131,11 +133,18 @@ class MQTTWorker {
             workerTimestamp: now,
         };
         if (this.messageQueues[topicCategory]) {
-            if (this.messageQueueConf[topicCategory]) {
+            const { isJson, validateUuid } = this.messageQueueConf[topicCategory] ?? {};
+            if (isJson) {
                 try {
                     trimmedMessage.payloadObj = JSON.parse(message.payloadString);
+                    if (validateUuid) {
+                        const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
+                        if (topicUuid !== trimmedMessage.payloadObj[validateUuid]) {
+                            return; // mismatched uuid
+                        }
+                    }
                 } catch (e) {
-                    // Ignore
+                    return;
                 }
             }
             this.messageQueues[topicCategory].push(trimmedMessage);
@@ -161,17 +170,25 @@ class MQTTWorker {
     }
 
     /**
-     * Register a message handler for a given topic category beneath realm (second level).
+     * Register a message handler for a given topic category beneath realm (second level). This is required even
+     * if a message is batch queued, as this we need this to flush the queue whenever the max interval is reached.
      * @param {string} topicCategory - the topic category to register a handler for
      * @param {function} mainHandler - main thread handler, pass in whatever expected format
      * @param {boolean} isJson - whether the payload is expected to be well-formed json
+     * @param {string|null} validateUuid - object key to validate match to the topic uuid, nullish if no validation
      */
-    registerMessageHandler(topicCategory, mainHandler, isJson) {
+    registerMessageHandler(topicCategory, mainHandler, isJson = true, validateUuid = 'object_id') {
         if (isJson) {
             // Parse json in worker
             this.messageHandlers[topicCategory] = (message) => {
                 try {
                     const jsonPayload = JSON.parse(message.payloadString);
+                    if (validateUuid) {
+                        const topicUuid = message.destinationName.split('/')[TOPICS.TOKENS.UUID];
+                        if (topicUuid !== jsonPayload[validateUuid]) {
+                            return; // mismatched uuid
+                        }
+                    }
                     mainHandler({ ...message, payloadObj: jsonPayload });
                 } catch (e) {
                     // Ignore
@@ -186,10 +203,14 @@ class MQTTWorker {
      * Register a message handler for a given topic category beneath realm (second level).
      * @param {string} topicCategory - the topic category to register a handler for
      * @param {boolean} isJson - whether the payload is expected to be well-formed json
+     * @param {string|null} validateUuid - object key to validate match to the topic uuid, nullish if no validation
      */
-    registerMessageQueue(topicCategory, isJson) {
+    registerMessageQueue(topicCategory, isJson = true, validateUuid = 'object_id') {
         this.messageQueues[topicCategory] = [];
-        this.messageQueueConf[topicCategory] = isJson;
+        this.messageQueueConf[topicCategory] = {
+            isJson,
+            validateUuid,
+        };
     }
 
     /**
