@@ -87,7 +87,7 @@ const DigitalGlitch = {
             gl_FragColor=texture2D (tDiffuse, vUv);
         }
         if (isSRGB) {
-            gl_FragColor = LinearTosRGB(gl_FragColor);
+            gl_FragColor = sRGBTransferOETF(gl_FragColor);
         }
     }`,
 };

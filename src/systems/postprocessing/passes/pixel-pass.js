@@ -174,7 +174,7 @@ class RenderPixelatedPass extends Pass {
 				float Strength = dei > 0.0 ? (1.0 - depthEdgeStrength * dei) : (1.0 + normalEdgeStrength * nei);
 				gl_FragColor = texel * Strength;
 				if (isSRGB) {
-				    gl_FragColor = LinearTosRGB(gl_FragColor);
+				    gl_FragColor = sRGBTransferOETF(gl_FragColor);
 	            }		    
 			}`,
         });

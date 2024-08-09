@@ -25,7 +25,7 @@ const CopyShader = {
         gl_FragColor = texture2D( tDiffuse, vUv );
         gl_FragColor.a *= opacity;
         if (convertSRGB) {
-            gl_FragColor = LinearTosRGB(gl_FragColor);
+            gl_FragColor = sRGBTransferOETF(gl_FragColor);
         }
     }`,
 };
