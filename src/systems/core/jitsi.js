@@ -357,6 +357,32 @@ AFRAME.registerSystem('arena-jitsi', {
                         scene: this.arena.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
                     });
+
+                    // render external user above screen share
+                    const arenaUser = {
+                        displayName: user.getDisplayName(),
+                        color: `#${this.getJitsiId().substring(2)}`,
+                        jitsiId: this.getJitsiId(),
+                        hasAudio: this.hasAudio,
+                        hasVideo: this.hasVideo,
+                        headModelPath: ARENA.defaults.headModelPath,
+                    };
+                    const extUserElId = `camera_${this.getJitsiId()}`;
+                    let extUserEl = document.getElementById(extUserElId);
+                    if (!extUserEl) {
+                        // create if doesn't exist
+                        extUserEl = document.createElement('a-entity');
+                        extUserEl.setAttribute('id', extUserElId);
+                        extUserEl.setAttribute('position', `0 3.1 -3`);
+                        extUserEl.setAttribute('look-at', '#my-camera');
+                        sceneEl.appendChild(extUserEl);
+                    }
+                    extUserEl.removeAttribute('arena-user');
+                    Object.entries(arenaUser).forEach(([attribute, value]) => {
+                        extUserEl.setAttribute('arena-user', attribute, value);
+                    });
+                    console.log(sceneEl);
+                    console.log(extUserEl);
                     return;
                 }
             }
