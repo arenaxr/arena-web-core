@@ -8,10 +8,10 @@ import {
 	Mesh,
 	Sphere,
 	Vector3,
-	Vector4
+	Vector4,
+	Line2NodeMaterial
 } from 'three';
-import { LineSegmentsGeometry } from '../lines/LineSegmentsGeometry.js';
-import { LineMaterial } from '../lines/LineMaterial.js';
+import { LineSegmentsGeometry } from '../../lines/LineSegmentsGeometry.js';
 
 const _viewport = new Vector4();
 
@@ -226,7 +226,7 @@ function raycastScreenSpace( lineSegments, camera, intersects ) {
 
 class LineSegments2 extends Mesh {
 
-	constructor( geometry = new LineSegmentsGeometry(), material = new LineMaterial( { color: Math.random() * 0xffffff } ) ) {
+	constructor( geometry = new LineSegmentsGeometry(), material = new Line2NodeMaterial( { color: Math.random() * 0xffffff } ) ) {
 
 		super( geometry, material );
 
