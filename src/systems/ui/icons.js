@@ -173,7 +173,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
 
         // Create AV Settings button
         if (data.avButtonEnabled) {
-            this.avButton = createIconButton('options', this.avButtonText, this.onAVButtonClick);
+            this.avButton = createIconButton('options', data.avButtonText, this.onAVButtonClick);
 
             if (jitsiPermitted) {
                 this._buttonList[this.buttons.AVSETTINGS] = this.avButton;
