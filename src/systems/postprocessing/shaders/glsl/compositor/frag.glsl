@@ -324,9 +324,7 @@ void main() {
 
     // force srgb
 #ifdef IS_SRGB
-     localColor.r = LinearTosRGB(localColor.r);
-     localColor.g = LinearTosRGB(localColor.g);
-     localColor.b = LinearTosRGB(localColor.b);
+    localColor = LinearTosRGB(localColor);
 #endif // IS_SRGB
 
     vec4 color = localColor;
