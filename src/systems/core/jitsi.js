@@ -357,32 +357,6 @@ AFRAME.registerSystem('arena-jitsi', {
                         scene: this.arena.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
                     });
-
-                    // render external user above screen share
-                    const arenaUser = {
-                        displayName: user.getDisplayName(),
-                        color: `#${this.getJitsiId().substring(2)}`,
-                        jitsiId: this.getJitsiId(),
-                        hasAudio: this.hasAudio,
-                        hasVideo: this.hasVideo,
-                        headModelPath: ARENA.defaults.headModelPath,
-                    };
-                    const extUserElId = `camera_${this.getJitsiId()}`;
-                    let extUserEl = document.getElementById(extUserElId);
-                    if (!extUserEl) {
-                        // create if doesn't exist
-                        extUserEl = document.createElement('a-entity');
-                        extUserEl.setAttribute('id', extUserElId);
-                        extUserEl.setAttribute('position', `0 3.1 -3`);
-                        extUserEl.setAttribute('look-at', '#my-camera');
-                        sceneEl.appendChild(extUserEl);
-                    }
-                    extUserEl.removeAttribute('arena-user');
-                    Object.entries(arenaUser).forEach(([attribute, value]) => {
-                        extUserEl.setAttribute('arena-user', attribute, value);
-                    });
-                    console.log(sceneEl);
-                    console.log(extUserEl);
                     return;
                 }
             }
@@ -480,12 +454,14 @@ AFRAME.registerSystem('arena-jitsi', {
             let dn = this.conference.getParticipantById(id).getDisplayName(); // get display name
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
 
+            const extUserElId = `camera_${id}`;
+
             // user join event args, to be emited below
             const userJoinedArgs = {
                 jid: id,
                 id,
                 dn,
-                cn: undefined,
+                cn: extUserElId,
                 scene: this.arena.namespacedScene,
                 src: EVENT_SOURCES.JITSI,
             };
@@ -494,6 +470,30 @@ AFRAME.registerSystem('arena-jitsi', {
             if (!dn.includes(data.arenaUserPrefix)) {
                 if (!dn.includes(data.screensharePrefix)) {
                     sceneEl.emit(JITSI_EVENTS.USER_JOINED, userJoinedArgs);
+
+                    // render external user above screen share
+                    const arenaUser = {
+                        displayName: this.conference.getParticipantById(id).getDisplayName(),
+                        color: `#${id.substring(2)}`,
+                        jitsiId: id,
+                        hasAudio: this.getAudioTrack(id) != null,
+                        hasVideo: this.getVideoTrack(id) != null,
+                        headModelPath: ARENA.defaults.headModelPath,
+                    };
+                    let extUserEl = document.getElementById(extUserElId);
+                    if (!extUserEl) {
+                        // create if doesn't exist
+                        extUserEl = document.createElement('a-entity');
+                        extUserEl.setAttribute('id', extUserElId);
+                        extUserEl.setAttribute('position', `0 3.1 -3`);
+                        extUserEl.setAttribute('rotation', `0 180 0`);
+                        // extUserEl.setAttribute('look-at', '#my-camera');
+                        sceneEl.appendChild(extUserEl);
+                    }
+                    extUserEl.removeAttribute('arena-user');
+                    Object.entries(arenaUser).forEach(([attribute, value]) => {
+                        extUserEl.setAttribute('arena-user', attribute, value);
+                    });
                 }
             } else {
                 this.newUserTimers[id] = setTimeout(() => {
@@ -528,6 +528,10 @@ AFRAME.registerSystem('arena-jitsi', {
         $(`#video${id}`).remove();
         $(`#audio${id}`).remove();
         delete this.remoteTracks[id];
+
+        // this might be a jitsi-only user; emit event if name does not have the arena tag
+        const extUserElId = `camera_${id}`;
+        document.getElementById(extUserElId)?.remove();
 
         // emit user left event
         sceneEl.emit(JITSI_EVENTS.USER_LEFT, {
