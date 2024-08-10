@@ -473,7 +473,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
                     // render external user above screen share
                     const arenaUser = {
-                        displayName: this.conference.getParticipantById(id).getDisplayName(),
+                        displayName: `${this.conference.getParticipantById(id).getDisplayName()} (external)`,
                         color: `#${id.substring(2)}`,
                         jitsiId: id,
                         hasAudio: this.getAudioTrack(id) != null,

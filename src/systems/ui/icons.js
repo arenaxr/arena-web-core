@@ -376,6 +376,14 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         version.title = 'Show the ARENA versions listed on a new page';
         pagesDiv.appendChild(version);
 
+        // add temp jitsi web link
+        pagesDiv.append(' | ');
+        const jitsi2d = document.createElement('a');
+        jitsi2d.href = `https://${this.jitsi.data.jitsiHost}/${this.jitsi.conferenceName}?jwt=${this.arena.mqttToken.mqtt_token}`;
+        jitsi2d.innerHTML = '2D';
+        jitsi2d.title = 'Join conference in 2D';
+        pagesDiv.appendChild(jitsi2d);
+
         // Auth status
         appendBold(formDiv, 'Scene: ');
         this.sceneNameDiv = document.createElement('span');
