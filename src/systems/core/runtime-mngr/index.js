@@ -130,7 +130,15 @@ export default class RuntimeMngr {
 
         // on unload, send delete client modules requests
         const rt = this;
-        window.onbeforeunload = rt.cleanup;
+        window.onbeforeunload = rt.cleanup;       
+        
+        // listen to program "refresh" key combination
+        window.addEventListener("keyup", (e) => {
+            if (e.altKey && e.shiftKey && e.which == 80) {
+                RuntimeMngr.instance.reload(true);
+            }
+        });
+
     }
 
     setOptions({
@@ -160,7 +168,7 @@ export default class RuntimeMngr {
         this.debug = debug;
     }
 
-    async init() {
+    async init(performRegister=false) {
         // mqtt connect; setup delete runtime msg as last will
         const rtMngr = this;
         this.mc = new MQTTClient({
@@ -179,7 +187,9 @@ export default class RuntimeMngr {
         this.mc.subscribe(this.regTopic);
 
         // registration
+        this.isRegistered = !performRegister; // TMP: skip registration
         this.register();
+        if (!performRegister) this.onRuntimeRegistered();
         ARENA.events.emit(ARENA_EVENTS.RUNTIME_MNGR_LOADED, true);
     }
 
@@ -243,7 +253,7 @@ export default class RuntimeMngr {
     onRuntimeRegistered() {
         this.isRegistered = true;
 
-        console.info('Runtime-Mngr: Registered.');
+        console.info("Runtime-Mngr: Registered. %cShift+Opt+P to force program reload", "color: orange"); 
 
         this.mc.unsubscribe(this.regTopic);
         // subscribe to ctl/runtime_uuid
@@ -305,11 +315,9 @@ export default class RuntimeMngr {
         // instanciate create module message
         const modCreateMsg = this.rtMsgs.createModuleFromPersistObj(persistObj, replaceVars);
 
-        // if instantiate 'per client', save this module data to delete before exit
-        if (persistObj.attributes.instantiate === 'client') {
-            this.clientModules.push(modCreateMsg.data);
-        }
-
+        // save this module data to delete before exit
+        this.modules.push({"isClientInstantiate": persistObj.attributes.instantiate === 'client', "moduleCreateMsg": modCreateMsg});
+        
         // TODO: save pending req uuid and check orchestrator responses
         // NOTE: object_id in runtime messages are used as a transaction id
         // this.pendingReq.push(modCreateMsg.object_id); // pending_req is a list with object_id of requests waiting arts response
@@ -319,16 +327,44 @@ export default class RuntimeMngr {
     }
 
     /**
-     * Send delete module messages for all 'per client' modules; called on 'before unload' event
+     * Send delete module messages for 'per client' modules; if all==true, sends delete to all modules requested for current scene
+     * called on 'before unload' event
+     * @param {boolean} all -  sends delete to all modules requested for current scene; default is to onlt delete client instance programs
      */
-    cleanup() {
-        this.clientModules.forEach((mod) => {
-            const modDelMsg = this.rtMsgs.deleteModule(mod);
-            this.mc.publish(this.ctlTopic, JSON.stringify(modDelMsg));
+    cleanup(all=false) {
+        console.info(`Runtime-Mngr: Cleanup(all=${all})`, this.modules);        
+        this.modules.forEach((saved) => {
+            if (saved.isClientInstantiate || all==true) {
+                const modDelMsg = this.rtMsgs.deleteModule(saved.moduleCreateMsg.data);
+                if (this.debug === true) console.info('Sending delete module request:', modDelMsg);
+                this.mc.publish(this.ctlTopic, JSON.stringify(modDelMsg));
+            }
         });
 
         // sent in case last will fails (this will be a duplicate of last will)
         this.mc.publish(this.regTopic, this.lastWillStringMsg);
+    }
+
+    /**
+     * Requests modules previously loaded in current scene; by default only client instance ones
+     * @param {boolean} all - relead all modules requested for current scene; default is to only request client instance programs
+     */
+    restart(all=false) {
+        console.info(`Runtime-Mngr: Restart(all=${all})`, this.modules);        
+        this.modules.forEach((saved) => {
+            if (saved.isClientInstantiate || all==true) {
+                if (this.debug === true) console.info('Sending create module request:', saved.moduleCreateMsg);
+                this.mc.publish(this.ctlTopic, JSON.stringify(saved.moduleCreateMsg));
+            }
+        });
+    }
+
+    /**
+     * Cleanup all modules in the scene and request them again
+     */
+    reload(all=false) {
+        this.cleanup(all);
+        this.restart(all);
     }
 
     /* public getters */
