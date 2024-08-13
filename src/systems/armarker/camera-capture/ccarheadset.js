@@ -98,6 +98,7 @@ export default class ARHeadsetCameraCapture {
         this.arMarkerSystem.initialLocalized = false;
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
+        this.canvas.id = 'cameraCanvas';
         if (ARENAUtils.isWebGLOffscreenCanvasSupported(this.canvas)) {
             this.canvas = this.canvas.transferControlToOffscreen();
         }

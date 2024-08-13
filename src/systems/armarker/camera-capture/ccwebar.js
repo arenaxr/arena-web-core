@@ -83,6 +83,7 @@ export default class WebARCameraCapture {
                     document.body.appendChild(videoElem);
 
                     this.canvas = document.createElement('canvas');
+                    this.canvas.id = 'cameraCanvas';
                     if (ARENAUtils.isWebGLOffscreenCanvasSupported(this.canvas)) {
                         this.canvas = this.canvas.transferControlToOffscreen();
                     }
