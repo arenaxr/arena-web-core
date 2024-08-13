@@ -64,6 +64,11 @@ export default class WebXRCameraCapture {
     /* worker to send images captured */
     cvWorker;
 
+    /* Offscreen canvas to draw the camera frame for other CV */
+    needOffscreenCanvas = false;
+
+    offscreenCanvas;
+
     /**
      * Setup camera frame capture
      * @param {object} xrSession -  WebXR Device API's XRSession
@@ -172,6 +177,17 @@ export default class WebXRCameraCapture {
     }
 
     /**
+     * Gets or creates a new offscreenCanvas
+     */
+    getOffscreenCanvas() {
+        if (!this.offscreenCanvas) {
+            this.offscreenCanvas = new OffscreenCanvas(this.frameWidth, this.frameHeight);
+            this.offscreenCanvas.id = 'cameraCanvas';
+        }
+        return this.offscreenCanvas;
+    }
+
+    /**
      * Process received frames to extract grayscale pixels and post them to cv worker
      * @param {object} time - DOMHighResTimeStamp of the frame
      * @param {object} session -  XRSession for the frame
@@ -221,6 +237,16 @@ export default class WebXRCameraCapture {
         );
         // bind back to xr session's framebuffer
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, glLayer.framebuffer);
+
+        // Flip the image horizontally for offscreenCanvas
+        if (this.needOffscreenCanvas && this.getOffscreenCanvas()) {
+            this.offscreenCanvas.width = this.frameWidth;
+            this.offscreenCanvas.height = this.frameHeight;
+            const ctx = this.offscreenCanvas.getContext('2d');
+            ctx.putImageData(this.framePixels, 0, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(this.offscreenCanvas, -this.frameWidth, 0);
+        }
 
         // grayscale and mirror image
         for (let r = this.frameWidth * (this.frameHeight - 1), j = 0; r >= 0; r -= this.frameWidth) {

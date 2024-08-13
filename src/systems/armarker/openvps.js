@@ -1,0 +1,147 @@
+/* global AFRAME, ARENA, Swal */
+
+import { ARENAUtils } from '../../utils';
+import WebXRCameraCapture from './camera-capture/ccwebxr';
+import { ARENA_EVENTS } from '../../constants';
+
+AFRAME.registerComponent('openvps', {
+    schema: {
+        enabled: { type: 'boolean', default: false },
+        url: { type: 'string', default: '' },
+        interval: { type: 'number', default: 5000 },
+        confirmed: { type: 'boolean', default: false },
+        imgQuality: { type: 'number', default: 0.8 },
+        imgType: { type: 'string', default: 'image/png' },
+    },
+    init() {
+        const { el: sceneEl } = this;
+        // Check localStorage if always-allowed to use OpenVPS for this URL
+        this.openvpsAllowedList = JSON.parse(localStorage.getItem('openvpsAllowedList')) || [];
+        if (!this.openvpsAllowedList.includes(this.data.url)) {
+            this.confirmPermission();
+        } else {
+            this.enabled = true;
+        }
+
+        this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
+        this.webXrSessionEnded = this.webXrSessionEnded.bind(this);
+        sceneEl.addEventListener('enter-vr', this.webXRSessionStarted);
+        sceneEl.addEventListener('exit-vr', this.webXrSessionEnded);
+
+        this.tick = AFRAME.utils.throttleTick(this.tick, this.data.interval, this);
+
+        // Set ccwebxr needsOffscreenCanvas to true
+        ARENA.events.addEventListener(ARENA_EVENTS.CV_INITIALIZED, () => {
+            const webxrcc = new WebXRCameraCapture();
+            webxrcc.needsOffscreenCanvas = true;
+        });
+
+        this.cameraCanvas = undefined;
+        this.cameraEl = document.getElementById('my-camera');
+        this.webxrActive = false;
+        // Use offscreen canvas to flip the camera image, not mutate original canvas
+        this.flipOffscreenCanvas = document.createElement('offscreenCanvas');
+    },
+
+    webXRSessionStarted() {
+        this.webxrActive = true;
+    },
+
+    webXrSessionEnded() {
+        this.webxrActive = false;
+    },
+
+    tick() {
+        if (!this.enabled || !this.url || !this.webxrActive) return;
+        this.uploadImage().then(() => {
+            // Some indicator?
+        });
+    },
+
+    confirmPermission() {
+        const { el: sceneEl, data, openvpsAllowedList } = this;
+        Swal.fire({
+            title: 'OpenVPS',
+            html: `This scene is requesting to use OpenVPS to localize your position to see AR content. This will
+                   <strong>capture and send camera images from your phone</strong> to the OpenVPS server: ${data.url}.`,
+            icon: 'question',
+            showConfirmButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Allow',
+            cancelButtonText: 'Deny',
+            input: 'checkbox',
+            inputPlaceholder: 'Always trust and allow for this server URL.',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (result.value) {
+                    // Save this URL to localStorage
+                    this.openvpsAllowedList.push(this.data.openvps.url);
+                    localStorage.setItem('openvpsAllowedList', JSON.stringify(openvpsAllowedList));
+                }
+                this.data.confirmed = true;
+            } else if (result.isDenied) {
+                sceneEl.removeAttribute('openvps');
+            }
+        });
+    },
+    async uploadImage() {
+        const { data, cameraEl, flipOffscreenCanvas } = this;
+        const cameraCanvas = this.getCanvas();
+        if (!cameraCanvas) {
+            console.error('No camera image canvas found');
+            return;
+        }
+
+        flipOffscreenCanvas.width = cameraCanvas.width;
+        flipOffscreenCanvas.height = cameraCanvas.height;
+        const flipCtx = flipOffscreenCanvas.getContext('2d');
+        flipCtx.scale(1, -1); // Flip the image vertically
+        flipCtx.drawImage(cameraCanvas, cameraCanvas.width, -cameraCanvas.height);
+
+        const imgBlob = await flipOffscreenCanvas.convertToBlob({ type: data.imgType, quality: data.imgQuality });
+
+        const formData = new FormData();
+        formData.append('name', ARENA.sceneName);
+        formData.append('img', imgBlob);
+        formData.append('aframe_camera_matrix_world', cameraEl.object3D.matrixWorld.toArray());
+
+        fetch(data.url, {
+            method: 'POST',
+            body: formData,
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    console.error(`openVPS Server error response: ${response.statusText}`);
+                } else {
+                    const resJson = response.json();
+                    ARENAUtils.relocateUserCamera(null, null, resJson.arscene_pose);
+                }
+            })
+            .catch((error) => {
+                console.error(`Error getting pose from openVPS server: ${error.message}`);
+            });
+    },
+    getCanvas() {
+        if (this.cameraCanvas) {
+            return this.cameraCanvas;
+        }
+        // Try cameraCanvas id object. Works for ar headset, spot ar, and webxr
+        const cameraCanvas = document.getElementById('cameraCanvas');
+        if (cameraCanvas) {
+            this.cameraCanvas = cameraCanvas;
+            return cameraCanvas;
+        }
+        // Try to get XRBrowser's injected canvas
+        const canvasEls = document.querySelector('canvas');
+        // eslint-disable-next-line no-restricted-syntax
+        for (const canvasEl of canvasEls) {
+            const elStyle = canvasEl.style;
+            if (elStyle.display === 'block' && elStyle.width === '100%') {
+                this.cameraCanvas = canvasEl;
+                return canvasEl;
+            }
+        }
+
+        return undefined;
+    },
+});
