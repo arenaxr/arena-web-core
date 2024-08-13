@@ -452,9 +452,15 @@
                             "description": "Whether to use OpenVPS.",
                             "type": "boolean"
                         },
-                        "url": {
+                        "imageUrl": {
                             "default": "",
-                            "description": "URL of the OpenVPS server.",
+                            "description": "URL of the OpenVPS image matching service.",
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "meshUrl": {
+                            "default": "",
+                            "description": "URL of the OpenVPS mesh matching service.",
                             "type": "string",
                             "format": "uri"
                         },
@@ -469,7 +475,7 @@
                             "type": "number"
                         }
                     },
-                    "required": ["enabled", "url"],
+                    "required": ["enabled"],
                     "title": "OpenVPS Settings",
                     "type": "object",
                     "description": "Set an OpenVPS server to localize by camera image on mobile devices"

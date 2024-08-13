@@ -5,7 +5,8 @@ import { ARENA_EVENTS } from '../../constants';
 AFRAME.registerComponent('openvps', {
     schema: {
         enabled: { type: 'boolean', default: false },
-        url: { type: 'string', default: '' },
+        imageUrl: { type: 'string', default: '' },
+        meshUrl: { type: 'string', default: '' },
         interval: { type: 'number', default: 5000 },
         confirmed: { type: 'boolean', default: false },
         imgQuality: { type: 'number', default: 0.8 },
@@ -15,7 +16,7 @@ AFRAME.registerComponent('openvps', {
         const { el: sceneEl } = this;
         // Check localStorage if always-allowed to use OpenVPS for this URL
         this.openvpsAllowedList = JSON.parse(localStorage.getItem('openvpsAllowedList')) || [];
-        if (!this.openvpsAllowedList.includes(this.data.url)) {
+        if (!this.openvpsAllowedList.includes(this.data.imageUrl)) {
             this.confirmPermission();
         } else {
             this.data.enabled = true;
@@ -58,7 +59,7 @@ AFRAME.registerComponent('openvps', {
     },
 
     tick() {
-        if (!this.data.enabled || !this.data.url || !this.webxrActive) return;
+        if (!this.data.enabled || !this.data.imageUrl || !this.webxrActive) return;
         this.uploadImage().then(() => {
             // Some indicator?
         });
@@ -69,7 +70,8 @@ AFRAME.registerComponent('openvps', {
         Swal.fire({
             title: 'OpenVPS',
             html: `This scene is requesting to use OpenVPS to localize your position to see AR content. This will
-                   <strong>capture and send camera images from your phone</strong> to the OpenVPS server: ${data.url}.`,
+                   <strong>capture and send camera images from your phone</strong> to the OpenVPS server:<br/>
+                   ${data.imageUrl}.`,
             icon: 'question',
             showConfirmButton: true,
             showCancelButton: true,
@@ -81,7 +83,7 @@ AFRAME.registerComponent('openvps', {
             if (result.isConfirmed) {
                 if (result.value) {
                     // Save this URL to localStorage
-                    this.openvpsAllowedList.push(this.data.url);
+                    this.openvpsAllowedList.push(this.data.imageUrl);
                     localStorage.setItem('openvpsAllowedList', JSON.stringify(openvpsAllowedList));
                 }
                 this.data.confirmed = true;
@@ -130,10 +132,10 @@ AFRAME.registerComponent('openvps', {
         formData.append('aframe_camera_matrix_world', matrixArray);
 
         console.log(
-            `Sending image of size ${imageBlob.size}. FlippedH: ${flipHorizontal}, FlippedV: ${flipVertical}, Dims: ${cameraCanvas.width}x${cameraCanvas.height} to ${data.url}`
+            `Sending image of size ${imageBlob.size}. FlippedH: ${flipHorizontal}, FlippedV: ${flipVertical}, Dims: ${cameraCanvas.width}x${cameraCanvas.height} to ${data.imageUrl}`
         );
 
-        fetch(data.url, {
+        fetch(data.imageUrl, {
             method: 'POST',
             mode: 'cors',
             body: formData,
