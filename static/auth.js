@@ -25,8 +25,8 @@
 // auth namespace
 window.ARENAAUTH = {
     nonScenePaths: ['/scenes/', '/build/', '/programs/', '/network/', '/files/'],
-    signInPath: `//${window.location.host}/user/login`,
-    signOutPath: `//${window.location.host}/user/logout`,
+    signInPath: `//${window.location.host}/user/v2/login`,
+    signOutPath: `//${window.location.host}/user/v2/logout`,
     filestoreUploadSchema: {
         // top level data adds, first
         'arenaui-card': ['img'],
@@ -129,7 +129,7 @@ window.ARENAAUTH = {
         // 'remember' uri for post-login, just before login redirect
         localStorage.setItem('request_uri', window.location.href);
 
-        const res = await this.makeUserRequest('GET', '/user/user_state');
+        const res = await this.makeUserRequest('GET', '/user/v2/user_state');
         if (!res) return;
         const userStateRes = await res.json();
         this.authenticated = userStateRes.authenticated;
@@ -229,7 +229,7 @@ window.ARENAAUTH = {
         try {
             const res = await this.makeUserRequest(
                 'POST',
-                '/user/mqtt_auth',
+                '/user/v2/mqtt_auth',
                 authParams,
                 'application/x-www-form-urlencoded'
             );
@@ -410,7 +410,7 @@ window.ARENAAUTH = {
                         // request fs token endpoint if auth not ready or expired
                         let token = this.getCookie('auth');
                         if (!this.isTokenUsable(token)) {
-                            await this.makeUserRequest('GET', '/user/storelogin');
+                            await this.makeUserRequest('GET', '/user/v2/storelogin');
                             token = this.getCookie('auth');
                         }
                         const fullDestUrlAttr = document.querySelector('input[name=radioAttr]:checked').value;
@@ -527,7 +527,7 @@ window.ARENAAUTH = {
      * Open profile in new page to avoid mqtt disconnect.
      */
     showProfile() {
-        window.open(`${window.location.protocol}//${window.location.host}/user/profile`);
+        window.open(`${window.location.protocol}//${window.location.host}/user/v2/profile`);
     },
 
     /**

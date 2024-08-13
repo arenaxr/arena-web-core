@@ -349,7 +349,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         pagesDiv.append(' | ');
 
         const profile = document.createElement('a');
-        profile.href = `/user/profile`;
+        profile.href = `/user/v2/profile`;
         profile.target = '_blank';
         profile.rel = 'noopener noreferrer';
         profile.innerHTML = 'Profile';
@@ -384,7 +384,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             // add permissions link
             formDiv.append(' (');
             const aSec = document.createElement('a');
-            aSec.href = `/user/profile/scenes/${this.arena.namespacedScene}`;
+            aSec.href = `/user/v2/profile/scenes/${this.arena.namespacedScene}`;
             aSec.target = '_blank';
             aSec.rel = 'noopener noreferrer';
             aSec.innerHTML = 'Security';
