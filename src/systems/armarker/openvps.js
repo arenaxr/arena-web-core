@@ -1,4 +1,4 @@
-/* global AFRAME, ARENA, Swal, THREE */
+import { MapServer } from '../../../static/vendor/openvps/map-server.ts';
 
 import { ARENA_EVENTS } from '../../constants';
 
@@ -22,6 +22,8 @@ AFRAME.registerComponent('openvps', {
             this.data.enabled = true;
         }
 
+        this.mapServer = new MapServer(this.data.imageUrl);
+
         this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
         this.webXrSessionEnded = this.webXrSessionEnded.bind(this);
         this.uploadImage = this.uploadImage.bind(this);
@@ -44,7 +46,7 @@ AFRAME.registerComponent('openvps', {
         this.flipOffscreenCanvas = new OffscreenCanvas(1, 1);
         this.flipHorizontal = false;
         this.flipVertical = false;
-        this.origRigMatrix = new THREE.Matrix4();
+        this.currentCameraMatrixInverse = new THREE.Matrix4();
         this.solutionMatrix = new THREE.Matrix4();
         this.newRigMatrix = new THREE.Matrix4();
         this.scaleVector = new THREE.Vector3(1, 1, 1);
@@ -98,7 +100,6 @@ AFRAME.registerComponent('openvps', {
 
         const rig = document.getElementById('cameraRig').object3D;
         const spinner = document.getElementById('cameraSpinner').object3D;
-        this.origRigMatrix.compose(rig.position, spinner.quaternion, this.scaleVector);
 
         // Call canvas update if exists
         if (this.updateCaptureCanvas) {
@@ -114,7 +115,7 @@ AFRAME.registerComponent('openvps', {
         }
 
         cameraEl.object3D.updateMatrixWorld(true);
-        const matrixArray = cameraEl.object3D.matrixWorld.toArray(); // Do this close as possible to canvas image set
+        this.currentCameraMatrixInverse.copy(cameraEl.object3D.matrix).invert(); // Do this close as possible to canvas image set
 
         flipOffscreenCanvas.width = cameraCanvas.width;
         flipOffscreenCanvas.height = cameraCanvas.height;
@@ -129,15 +130,8 @@ AFRAME.registerComponent('openvps', {
 
         const imageBlob = await flipOffscreenCanvas.convertToBlob({ type: data.imgType, quality: data.imgQuality });
 
-        const formData = new FormData();
-        formData.append('image', imageBlob, 'image.jpeg');
-        formData.append('aframe_camera_matrix_world', matrixArray);
-
-        fetch(data.imageUrl, {
-            method: 'POST',
-            mode: 'cors',
-            body: formData,
-        })
+        this.mapServer
+            .localize(imageBlob, 'image')
             .then(async (response) => {
                 if (!response.ok) {
                     console.error(`openVPS Server error response: ${response.status}`);
@@ -151,8 +145,8 @@ AFRAME.registerComponent('openvps', {
                     }
                     ARENA.debugXR('| Higher, relocalizing', false);
                     this.sessionMaxConfidence = resJson.confidence;
-                    this.solutionMatrix.fromArray(resJson.arscene_pose).invert();
-                    this.newRigMatrix.multiplyMatrices(this.solutionMatrix, this.origRigMatrix);
+                    this.solutionMatrix.fromArray(resJson.arscene_pose);
+                    this.newRigMatrix.multiplyMatrices(this.solutionMatrix, this.currentCameraMatrixInverse);
                     rig.position.setFromMatrixPosition(this.newRigMatrix);
                     spinner.quaternion.setFromRotationMatrix(this.newRigMatrix);
                 }
