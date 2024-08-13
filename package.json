@@ -23,6 +23,7 @@
     "aframe-extras": "^7.0.0",
     "aframe-gaussian-splatting-component": "^0.0.19",
     "aframe-thickline-component": "^0.0.3",
+    "axios": "^1.7.3",
     "comlink": "^4.3.0",
     "he": "^1.2.0",
     "linkifyjs": "^2.1.9",
@@ -53,7 +54,8 @@
     "jsdoc-to-markdown": "^7.0.1",
     "parcel": "^2.2.1",
     "parcel-resolver-ignore": "^2.0.0",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "process": "^0.11.10"
   },
   "scripts": {
     "collect-static": "cp src/systems/armarker/apriltag-detector/apriltag*.* dist/",
