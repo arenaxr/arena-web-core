@@ -7,9 +7,8 @@
             "properties": {
                 "name": {
                     "type": "string",
-                    "description": "Name of the program in the format namespace/program-name.",
-                    "minLength": 5,
-                    "pattern": "[0-9a-zA-Z]+/[0-9a-zA-Z]+"
+                    "description": "Name of the program.",
+                    "minLength": 3
                 },
                 "affinity": {
                     "type": "string",
@@ -23,11 +22,25 @@
                     "enum": ["single", "client"],
                     "default": "client"
                 },
-                "filename": {
-                    "type": "string",
-                    "description": "Filename of the entry binary.",
-                    "minLength": 5
-                },
+                "file":{
+                    "type":"string",
+                    "title":"file",
+                    "description":"The path to a `.wasm` file (e.g. `counter.wasm`, `user1/counter.wasm`) in the ARENA filestore, starting from the location field indicated below. See location. Example: user1/py/counter/counter.py should have file: `counter.py` and location: `user1/py/counter`. Note that the runtime will download all files in parent folder (e.g. you can add a requirements.txt)",
+                    "examples":[
+                       "counter.wasm",
+                       "py/counter/counter.py"
+                    ]
+                 },
+                 "location":{
+                    "type":"string",
+                    "title":"File location",
+                    "description":"Filestore path starting at user home; Example: `user1/hello` for a program inside folder `hello` of user1. Should, at least be the user filesore home folder.",
+                    "minLength": 3,
+                    "examples":[
+                       "user1/python-programs/program1",
+                       "user1/py/counter"
+                    ]
+                 },
                 "filetype": {
                     "type": "string",
                     "description": "Type of the program (WA=WASM or PY=Python).",
@@ -36,9 +49,10 @@
                 },
                 "parent": {
                     "type": "string",
-                    "description": "Request the orchestrator to deploy to this runtime (can be a runtime name or UUID); usually left blank.",
+                    "description": "Request the orchestrator to deploy to this runtime (can be a runtime name or UUID); Temporarily must be arena-rt1.",
                     "minLength": 5,
-                    "default": "pytest"
+                    "enum": ["arena-rt1"],
+                    "default": "arena-rt1"
                 },
                 "args": {
                     "type": "array",
@@ -189,7 +203,7 @@
                     }
                 }
             },
-            "required": ["name", "filename", "filetype", "instantiate", "parent", "env"]
+            "required": ["name", "file", "location", "filetype", "instantiate", "parent", "env"]
         }
     },
     "type": "object",
