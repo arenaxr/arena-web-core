@@ -34,7 +34,8 @@
                  "location":{
                     "type":"string",
                     "title":"File location",
-                    "description":"Filestore path starting at user home; Example `user1/hello` for a program inside folder `hello` of user1",
+                    "description":"Filestore path starting at user home; Example: `user1/hello` for a program inside folder `hello` of user1. Should, at least be the user filesore home folder.",
+                    "minLength": 3,
                     "examples":[
                        "user1/python-programs/program1",
                        "user1/py/counter"
