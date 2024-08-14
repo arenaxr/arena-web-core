@@ -2,6 +2,7 @@ import { ARENAUtils } from '../../../utils';
 
 const Paho = require('paho-mqtt');
 
+// TODO (mwfarb): update to new scene-scoped render fusion topic-v5 structure
 const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/offer';
 const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/answer';
 const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/candidate';
