@@ -121,6 +121,7 @@ export default class RuntimeMngr {
         this.pendingModulesArgs = [];
         this.clientModules = [];
         this.isRegistered = false;
+        this.reloading = false;
 
         // instanciate runtime messages factory
         this.rtMsgs = new RuntimeMsgs(this);
@@ -129,9 +130,9 @@ export default class RuntimeMngr {
         this.lastWillStringMsg = JSON.stringify(this.rtMsgs.deleteRuntime());
 
         // on unload, send delete client modules requests
-        const rt = this;
-        window.onbeforeunload = rt.cleanup;       
-        
+        const rtMngr = this;
+        addEventListener("beforeunload", (event) => { rtMngr.cleanup(); });
+
         // listen to program "refresh" key combination
         window.addEventListener("keyup", (e) => {
             if (e.altKey && e.shiftKey && e.which == 80) {
@@ -363,8 +364,15 @@ export default class RuntimeMngr {
      * Cleanup all modules in the scene and request them again
      */
     reload(all=false) {
-        this.cleanup(all);
-        this.restart(all);
+        let rtMngr = this;
+        if (rtMngr.reloading) return;
+        rtMngr.reloading = true;
+        rtMngr.cleanup(all);
+        // restart in 5 seconds so modules have time to stop
+        setTimeout(() => {
+            rtMngr.restart(all);
+            rtMngr.reloading = false;
+          }, 1000);
     }
 
     /* public getters */

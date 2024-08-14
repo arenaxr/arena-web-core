@@ -269,7 +269,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             if (objTypeFilter[sceneObjs[i].attributes.object_type] === false) continue;
         } else if (sceneObjs[i].type === 'program') {
             const ptype = sceneObjs[i].attributes.filetype === 'WA' ? 'WASM program' : 'python program';
-            typeDisplay = `${ptype}: ${sceneObjs[i].attributes.filename}`;
+            typeDisplay = `${ptype}: ${sceneObjs[i].attributes.file}`;
             img.src = 'assets/program-icon.png';
         } else if (sceneObjs[i].type === 'scene-options') {
             typeDisplay = 'scene options';
