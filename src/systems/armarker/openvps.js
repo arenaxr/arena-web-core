@@ -23,6 +23,9 @@ AFRAME.registerComponent('openvps', {
         }
 
         this.mapServer = new MapServer(this.data.imageUrl);
+        // TEMPORARY UNTIL SERVER IMPLEMENTS CAPABILITY QUERY
+        this.mapServer.capabilities.push('image');
+        // TEMPORARY UNTIL SERVER IMPLEMENTS CAPABILITY QUERY
 
         this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
         this.webXrSessionEnded = this.webXrSessionEnded.bind(this);
