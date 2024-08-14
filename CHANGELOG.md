@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.28.3](https://github.com/arenaxr/arena-web-core/compare/v1.28.2...v1.28.3) (2024-08-14)
+
+
+### Bug Fixes
+
+* compositor shader sRGB force per three 167 ([af1ef98](https://github.com/arenaxr/arena-web-core/commit/af1ef98628441f39246522d80b6ed17a274d7b10))
+* **icons:** restore missing a/v settings button tooltip ([d54a5a9](https://github.com/arenaxr/arena-web-core/commit/d54a5a9901451dee6f9b6111c30eb67a916aa580))
+* location min size ([624f391](https://github.com/arenaxr/arena-web-core/commit/624f391bef768ca818b9ebdaa5a1d3841cdfdcef))
+* program schemas ([c96b629](https://github.com/arenaxr/arena-web-core/commit/c96b6293b14e25123e2954e330839ad3f9b8cf38))
+* remove registration; add program reload ([2c7e213](https://github.com/arenaxr/arena-web-core/commit/2c7e2139c12c5ce630785646207b142d4bdc9dcc))
+* Update LinearTosRGB to sRGBTransferOETF ([f9c473a](https://github.com/arenaxr/arena-web-core/commit/f9c473a146b2ffac8eb19fec138fd9d4b5fa1d59))
+
 ## [1.28.2](https://github.com/arenaxr/arena-web-core/compare/v1.28.1...v1.28.2) (2024-08-07)
 
 
