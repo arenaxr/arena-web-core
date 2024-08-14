@@ -3,6 +3,7 @@
 /* eslint-disable import/extensions */
 import * as PersistObjects from './persist-objects.js';
 import ARENAUserAccount from './arena-account.js';
+import TOPICS from '../src/constants/topics.js';
 
 const Alert = Swal.mixin({
     toast: true,
@@ -1038,7 +1039,11 @@ Swal.fire({
  * @param {string} mqttToken
  */
 function updatePublishControlsByToken(namespace, scenename, mqttToken) {
-    const objectsTopic = `realm/s/${namespace}/${scenename}`;
+    const objectsTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+        nameSpace: namespace,
+        sceneName: scenename,
+        objectId: '+',
+    });
     const editor = ARENAAUTH.isUserSceneEditor(mqttToken, objectsTopic);
     const delButton = document.getElementById('delobj');
     const deleteSceneButton = document.getElementById('deletescene');
