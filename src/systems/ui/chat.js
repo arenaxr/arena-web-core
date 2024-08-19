@@ -117,6 +117,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         window.setInterval(this.userCleanup.bind(this), this.keepalive_interval_ms * 3);
 
         /*
+        // TODO (mwfarb): update to new scene-scoped chat topic-v5 structure
         Clients listen for chat messages on:
             - global public (*o*pen) topic (<realm>/c/<scene-namespace>/o/#)
             - a user (*p*rivate) topic (<realm>/c/<scene-namespace>/p/userhandle/#)

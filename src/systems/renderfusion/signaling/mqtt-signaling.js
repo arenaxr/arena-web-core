@@ -60,6 +60,7 @@ export default class MQTTSignaling {
     mqttOnConnect() {
         this.client.onMessageArrived = this.mqttOnMessageArrived.bind(this);
 
+        // TODO (mwfarb): update to new scene-scoped render fusion topic-v5 structure
         this.client.subscribe(`${SERVER_HEALTH_CHECK}/${ARENA.namespacedScene}/#`);
         this.client.subscribe(`${SERVER_OFFER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
         this.client.subscribe(`${SERVER_ANSWER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
