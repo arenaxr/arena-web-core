@@ -299,12 +299,16 @@ AFRAME.registerSystem('arena-scene', {
 
     /**
      * Checks loaded MQTT/Jitsi token for user interaction permission.
-     * TODO: This should perhaps use another flag, more general, not just chat.
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
     isUsersPermitted() {
         if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
-        return ARENAAUTH.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
+        const usersTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            objectId: '+',
+        });
+        return ARENAAUTH.matchJWT(usersTopic, this.mqttToken.token_payload.subs);
     },
 
     /**
@@ -319,6 +323,7 @@ AFRAME.registerSystem('arena-scene', {
         const writeTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
+            idTag: '+',
         });
         return ARENAAUTH.matchJWT(writeTopic, this.mqttToken.token_payload.publ);
     },
