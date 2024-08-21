@@ -1,6 +1,6 @@
 import MQTTSignaling from './signaling/mqtt-signaling';
 import WebRTCStatsLogger from './webrtc-stats';
-import HybridRenderingUtils from './utils';
+import RenderFusionUtils from './utils';
 import { ARENA_EVENTS } from '../../constants';
 
 const info = AFRAME.utils.debug('ARENA:render-client:info');
@@ -447,8 +447,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
             if (t < 1000 && changed === false) return;
 
-            const camMsg = HybridRenderingUtils.doublesToCamMsg(...camPose.elements, parseFloat(this.frameID));
-            this.inputDataChannel.send(camMsg);
+            const poseMsg = RenderFusionUtils.packPoseMsg(camPose.elements, parseFloat(this.frameID));
+            this.inputDataChannel.send(poseMsg);
 
             if (renderer.xr.enabled === true && renderer.xr.isPresenting === true) {
                 const camPoseL = new THREE.Matrix4();

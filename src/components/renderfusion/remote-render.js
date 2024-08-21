@@ -64,7 +64,7 @@ AFRAME.registerComponent('remote-render', {
             }
         });
 
-        console.log('Triangle count:', el.id, triangleCount);
+        // console.log('Triangle count:', el.id, triangleCount);
 
         const box = new THREE.Box3().setFromObject(el.object3D);
 
@@ -80,7 +80,7 @@ AFRAME.registerComponent('remote-render', {
         const cameraPosition = camera.position;
         const solidAngle = this.solidAngleSubtendedByBoundingBox(cameraPosition, center, dimensions);
 
-        console.log('Total solid angle:', el.id, solidAngle);
+        // console.log('Total solid angle:', el.id, solidAngle);
     },
 
     update() {
