@@ -480,15 +480,24 @@ AFRAME.registerSystem('arena-jitsi', {
                         hasVideo: this.getVideoTrack(id) != null,
                         headModelPath: ARENA.defaults.headModelPath,
                     };
+                    const extSlot = 1; // TODO: assign slots
+                    const extSlotElId = `external_slot_${extSlot}`;
+                    let extSlotEl = document.getElementById(extSlotElId);
+                    if (!extSlotEl) {
+                        // create if doesn't exist
+                        extSlotEl = document.createElement('a-entity');
+                        extSlotEl.setAttribute('id', extSlotElId);
+                        extSlotEl.setAttribute('position', `0 3.1 -3`); // TODO: set correct slot position
+                        extSlotEl.setAttribute('look-at', '#my-camera');
+                        sceneEl.appendChild(extSlotEl);
+                    }
                     let extUserEl = document.getElementById(extUserElId);
                     if (!extUserEl) {
                         // create if doesn't exist
                         extUserEl = document.createElement('a-entity');
                         extUserEl.setAttribute('id', extUserElId);
-                        extUserEl.setAttribute('position', `0 3.1 -3`);
                         extUserEl.setAttribute('rotation', `0 180 0`);
-                        // extUserEl.setAttribute('look-at', '#my-camera');
-                        sceneEl.appendChild(extUserEl);
+                        extSlotEl.appendChild(extUserEl);
                     }
                     extUserEl.removeAttribute('arena-user');
                     Object.entries(arenaUser).forEach(([attribute, value]) => {
