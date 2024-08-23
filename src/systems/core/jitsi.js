@@ -471,6 +471,21 @@ AFRAME.registerSystem('arena-jitsi', {
                 if (!dn.includes(data.screensharePrefix)) {
                     sceneEl.emit(JITSI_EVENTS.USER_JOINED, userJoinedArgs);
 
+                    const user = this.conference.getParticipantById(id);
+                    let objectIds = ['screenshare'];
+                    const screenshareIds = user.getProperty('screenshareObjIds');
+                    if (screenshareIds) objectIds = [...screenshareIds.split(','), ...objectIds];
+                    const extSlot = 1; // TODO: assign slots
+                    let slotPos = '0 3.1 -3'; // TODO: set correct slot position
+                    const scnShareEl = document.getElementById(objectIds[0]);
+                    let p = '8 6 0.01'.split(' '); // TODO: use default string
+                    let s = '0 3.1 -3'.split(' ');
+                    if (scnShareEl) {
+                        p = scnShareEl.getAttribute('position').split(' ');
+                        s = scnShareEl.getAttribute('scale').split(' ');
+                    }
+                    slotPos = `${p[0]} ${parseFloat(p[1]) + parseFloat(s[1]) / 2} ${p[2]}`;
+
                     // render external user above screen share
                     const arenaUser = {
                         displayName: `${this.conference.getParticipantById(id).getDisplayName()} (external)`,
@@ -480,14 +495,13 @@ AFRAME.registerSystem('arena-jitsi', {
                         hasVideo: this.getVideoTrack(id) != null,
                         headModelPath: ARENA.defaults.headModelPath,
                     };
-                    const extSlot = 1; // TODO: assign slots
                     const extSlotElId = `external_slot_${extSlot}`;
                     let extSlotEl = document.getElementById(extSlotElId);
                     if (!extSlotEl) {
                         // create if doesn't exist
                         extSlotEl = document.createElement('a-entity');
                         extSlotEl.setAttribute('id', extSlotElId);
-                        extSlotEl.setAttribute('position', `0 3.1 -3`); // TODO: set correct slot position
+                        extSlotEl.setAttribute('position', slotPos);
                         extSlotEl.setAttribute('look-at', '#my-camera');
                         sceneEl.appendChild(extSlotEl);
                     }
