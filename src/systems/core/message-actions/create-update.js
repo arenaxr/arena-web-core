@@ -506,7 +506,8 @@ export default class CreateUpdate {
                     break;
                 case 'spe-particles':
                     // conflicts with env-presets THREE.js fog defaults ATM, so disable fog/particle interaction
-                    entityEl.setAttribute(attribute, 'affectedByFog', false);
+                    if (!Object.hasOwn(value, 'affectedByFog')) value.affectedByFog = false;
+                    entityEl.setAttribute(attribute, value);
                     break;
                 default:
                     // all other attributes are pushed directly to aframe
