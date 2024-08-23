@@ -265,6 +265,14 @@ AFRAME.registerSystem('arena-jitsi', {
         screenShareEl.setAttribute('material', 'shader', 'flat');
         screenShareEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
         this.screenShareDict[participantId] = screenShareEl;
+
+        // add a default landmark for any screen share object
+        if (!screenShareEl.hasAttribute('landmark')) {
+            screenShareEl.setAttribute(
+                'landmark',
+                `label: "${screenShareId} (nearby)"; randomRadiusMin: 1; randomRadiusMax: 3`
+            );
+        }
     },
 
     /**
@@ -328,15 +336,16 @@ AFRAME.registerSystem('arena-jitsi', {
                 let objectIds = user.getProperty('screenshareObjIds');
 
                 if (camName && objectIds) {
+                    objectIds = objectIds.split(',');
                     sceneEl.emit(JITSI_EVENTS.SCREENSHARE, {
                         jid: participantId,
                         id: participantId,
                         dn,
                         cn: camName,
+                        sn: objectIds[0],
                         scene: this.arena.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
                     });
-                    objectIds = objectIds.split(',');
 
                     // handle screen share video
                     for (let i = 0; i < objectIds.length; i++) {
