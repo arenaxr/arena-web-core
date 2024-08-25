@@ -48,7 +48,7 @@ export async function init(settings) {
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
-        exportSceneButton: settings.exportSceneButton,
+        exportSceneButton: settings.exportSceneButton
     };
 
     persist.currentSceneObjs = [];
@@ -746,4 +746,26 @@ function onMqttMessage(message) {}
 
 function onMqttConnectionLost() {
     persist.mqttConnected = false;
+}
+
+export function pubProgramMsg(action, obj) {
+    const programTopic = 'realm/proc/control';
+    const programObj = JSON.stringify({
+        "object_id": ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)),
+        "action": action,
+        "type":"req",
+        "data":{
+            "type":"module",
+            "uuid": obj.object_id,
+            "name": obj.name,
+            "parent": obj.parent,
+            "file": obj.file,
+            "location": obj.location,
+            "filetype": obj.filetype,
+            "env": obj.env,
+            "args": obj.args ? obj.args : [],
+            "channels": obj.chanels ? obj.chanels: {}, 
+            "apis":obj.apis ? obj.apis : []}});
+        persist.mc.publish(programTopic, programObj);            
 }

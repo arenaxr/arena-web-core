@@ -22,6 +22,7 @@ window.addEventListener('onauth', async (e) => {
     let dfts;
     let objSchemas;
     let dftSceneObjects = [];
+    let currentEditObj;
     const objTypeFilter = {};
 
     const username = e.detail.mqtt_username;
@@ -41,7 +42,8 @@ window.addEventListener('onauth', async (e) => {
     const objFilterSel = document.getElementById('objfiltersel');
     const arenaHostLbl = document.getElementById('arenahost');
     const sceneLinks = document.getElementById('scenelinks');
-
+    const programButtons = document.getElementById('program-buttons');
+    
     // Buttons/s
     const openAddSceneButton = document.getElementById('openaddscene');
     const deleteSceneButton = document.getElementById('deletescene');
@@ -55,6 +57,9 @@ window.addEventListener('onauth', async (e) => {
     const delButton = document.getElementById('delobj');
     const cpyButton = document.getElementById('copyobj');
     const allButton = document.getElementById('selectall');
+    const programStopButton = document.getElementById('stoppgrm');
+    const programStartButton = document.getElementById('startpgrm');
+    const programRestartButton = document.getElementById('restartpgrm');
     const clearselButton = document.getElementById('clearlist');
     const refreshButton = document.getElementById('refreshlist');
     const refreshSlButton = document.getElementById('refreshscenelist');
@@ -165,7 +170,7 @@ window.addEventListener('onauth', async (e) => {
     };
 
     const getARENAObject = function (obj, action = 'create', persist = true) {
-        // create updateobj, where data = attributes if object comes from persist
+        // create arena object, where data = attributes if object comes from persist
         const arenaObj = {
             object_id: obj.object_id,
             action,
@@ -178,10 +183,10 @@ window.addEventListener('onauth', async (e) => {
 
     // we indicate this function as the edit handler to persist
     const editObject = async function (obj, action = 'update') {
-        // create updateobj, where data = attributes if object comes from persist
-        const updateobj = getARENAObject(obj, action);
+        // create editObj, where data = attributes if object comes from persist
+        currentEditObj = getARENAObject(obj, action);
 
-        const schemaType = updateobj.type === 'object' ? updateobj.data.object_type : updateobj.type;
+        const schemaType = currentEditObj.type === 'object' ? currentEditObj.data.object_type : currentEditObj.type;
         let schemaFile = objSchemas.entity.file; // use default in case schema type is undefined
         if (objSchemas[schemaType]) {
             schemaFile = objSchemas[schemaType].file;
@@ -193,13 +198,13 @@ window.addEventListener('onauth', async (e) => {
         if (jsoneditor) jsoneditor.destroy();
         jsoneditor = new JSONEditor(editor, {
             schema,
-            startval: updateobj,
+            startval: currentEditObj,
         });
 
         await jsoneditor.on('ready', () => {
             window.jsoneditor = jsoneditor;
-            jsoneditor.setValue(updateobj);
-            output.value = JSON.stringify(updateobj, null, 2);
+            jsoneditor.setValue(currentEditObj);
+            output.value = JSON.stringify(currentEditObj, null, 2);
             reload(true);
 
             window.location.hash = 'edit_section';
@@ -211,6 +216,14 @@ window.addEventListener('onauth', async (e) => {
                 timer: 10000,
             });
         });
+
+        // if program, show buttons
+        if (currentEditObj.type === 'program') {
+            programButtons.style.visibility='visible'; 
+        } else {
+            programButtons.style.visibility='hidden';
+        }
+
     };
 
     /**
@@ -761,6 +774,43 @@ window.addEventListener('onauth', async (e) => {
         });
     });
 
+
+
+    programStopButton.addEventListener('click', () => {
+        if (!currentEditObj && !currentEditObj.type === 'program') return;
+        
+        if (currentEditObj.data.instantiate !== 'single' ) {
+            Alert.fire({
+                icon: 'info',
+                title: 'For now, we only support stopping "instantiate=single" programs.',
+                timer: 5000,
+            });            
+            return;
+        }
+        PersistObjects.pubProgramMsg('delete', currentEditObj);
+        Alert.fire({
+            icon: 'info',
+            title: 'Module requested to stop',
+            timer: 5000,
+        });                
+    });
+
+    programStartButton.addEventListener('click', () => {
+        Alert.fire({
+            icon: 'info',
+            title: 'Not implemented. <br/>(entering the scene will start programs)',
+            timer: 5000,
+        });           
+    });
+
+    programRestartButton.addEventListener('click', () => {
+        Alert.fire({
+            icon: 'info',
+            title: 'Not implemented. <br/>(entering the scene will start programs)',
+            timer: 5000,
+        });        
+    });
+
     async function setAllTypes(showHide) {
         for (const [key, value] of Object.entries(objTypeFilter)) {
             objTypeFilter[key] = showHide; // true = show
@@ -901,7 +951,7 @@ window.addEventListener('onauth', async (e) => {
         authState,
         mqttUsername: username,
         mqttToken,
-        exportSceneButton,
+        exportSceneButton
     });
 
     // load default objects, convert to mqtt wire format
