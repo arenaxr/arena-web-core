@@ -299,16 +299,20 @@ AFRAME.registerSystem('arena-scene', {
 
     /**
      * Checks loaded MQTT/Jitsi token for user interaction permission.
-     * @return {boolean} True if the user has permission to send/receive chats in this scene.
+     * @return {boolean} True if the user has permission to send/receive presence in this scene.
      */
     isUsersPermitted() {
         if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
         const usersTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
-            objectId: '+',
+            idTag: this.idTag,
         });
-        return ARENAAUTH.matchJWT(usersTopic, this.mqttToken.token_payload.subs);
+        return ARENAAUTH.matchJWT(usersTopic, this.mqttToken.token_payload.publ);
     },
 
     /**
@@ -333,6 +337,10 @@ AFRAME.registerSystem('arena-scene', {
      // * @return {boolean} True if the user has permission to chat in this scene.
      */
     isUserChatWriter() {
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
         const chatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr({
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
