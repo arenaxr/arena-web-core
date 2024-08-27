@@ -329,6 +329,19 @@ AFRAME.registerSystem('arena-scene', {
     },
 
     /**
+     * Checks token for scene chat write permissions.
+     // * @return {boolean} True if the user has permission to chat in this scene.
+     */
+    isUserChatWriter() {
+        const chatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            idTag: this.idTag,
+        });
+        return ARENAAUTH.matchJWT(chatTopic, this.mqttToken.token_payload.publ);
+    },
+
+    /**
      * Checks the state of build3d request and for scene write permissions.
      */
     isBuild3dEnabled() {

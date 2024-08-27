@@ -152,6 +152,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.chatBtn.style.backgroundImage = "url('src/systems/ui/images/message.png')";
         btnGroup.appendChild(this.chatBtn);
 
+        // TODO (mwfarb): make more granular by rendering when incoming message arrives
+        // use token permissions to render message ui
+        this.chatBtn.style.display = this.arena.isUserChatWriter() ? 'block' : 'none';
+
         this.chatDot = document.createElement('span');
         this.chatDot.className = 'dot';
         this.chatDot.innerText = '...';
