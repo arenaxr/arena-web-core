@@ -155,6 +155,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.chatDot.innerText = '...';
         this.chatBtn.appendChild(this.chatDot);
 
+        // TODO (mwfarb): make more granular by rendering when incoming message arrives
+        // use token permissions to render message ui
+        this.chatBtn.style.display = this.arena.isUsersPermitted() ? 'block' : 'none';
+
         this.usersBtn = document.createElement('div');
         this.usersBtn.className = 'arena-button users-button';
         this.usersBtn.setAttribute('title', 'User List');
