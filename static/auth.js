@@ -214,9 +214,9 @@ window.ARENAAUTH = {
             authParams.realm = ARENA.params.realm;
         }
 
-        if (ARENA.params.scene) {
-            authParams.scene = decodeURIComponent(ARENA.params.scene);
-        } else if (!this.nonScenePaths.includes(window.location.pathname)) {
+        // only request single-scene specific perms when rendering scene
+        // pages /scenes and /build should have general permissions for the user's scene objects
+        if (!this.nonScenePaths.includes(window.location.pathname)) {
             // handle full ARENA scene
             if (ARENA.sceneName) {
                 authParams.scene = ARENA.namespacedScene;

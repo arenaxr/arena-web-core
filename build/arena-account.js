@@ -101,7 +101,8 @@ export default class ARENAUserAccount {
         let params = `username=${mqttUsername}`;
         params += `&id_auth=${authType}`;
         params += `&realm=${ARENADefaults ? ARENADefaults.realm : 'realm'}`;
-        params += `&scene=${namespacedScene}`;
+        // only request single-scene specific perms when rendering scene
+        // pages /scenes and /build should have general permissions for the user's scene objects
         const result = await ARENAUserAccount._makeRequest(
             'POST',
             `/user/mqtt_auth`,
