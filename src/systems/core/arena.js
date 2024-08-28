@@ -337,6 +337,7 @@ AFRAME.registerSystem('arena-scene', {
      // * @return {boolean} True if the user has permission to chat in this scene.
      */
     isUserChatWriter() {
+        if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
         /*
         This now checks if the public scene topic, which all users currently can *subscribe* to
         for all message types, is also *writable* for this JWT token.
