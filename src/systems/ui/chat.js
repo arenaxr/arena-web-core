@@ -479,6 +479,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 un: user.dn,
                 scene: user.scene,
                 cid: user.cn,
+                sid: user.sn,
                 ts: new Date().getTime(),
                 type: UserType.SCREENSHARE, // indicate we know the user is screensharing
             };
@@ -850,6 +851,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 scene: _this.liveUsers[key].scene,
                 un: _this.liveUsers[key].un,
                 cid: _this.liveUsers[key].cid,
+                sid: _this.liveUsers[key].sid,
                 type: _this.liveUsers[key].type,
                 speaker: _this.liveUsers[key].speaker,
                 stats: _this.liveUsers[key].stats,
@@ -907,23 +909,23 @@ AFRAME.registerSystem('arena-chat-ui', {
             uli.textContent = `${user.scene === _this.scene ? '' : `${user.scene}/`}${decodeURI(name)}${
                 user.type === UserType.EXTERNAL ? ' (external)' : ''
             }`;
+            const uBtnCtnr = document.createElement('div');
+            uBtnCtnr.className = 'users-list-btn-ctnr';
+            uli.appendChild(uBtnCtnr);
+
+            const fuspan = document.createElement('span');
+            fuspan.className = 'users-list-btn fu';
+            fuspan.title = 'Find User';
+            uBtnCtnr.appendChild(fuspan);
+
+            // span click event (move us to be in front of another clicked user)
+            const cid = user.sid ? user.sid : user.cid; // screen share, or user camera
+            const { scene } = user;
+            fuspan.onclick = function findUserClick() {
+                _this.moveToFrontOfCamera(cid, scene);
+            };
+
             if (user.type !== UserType.SCREENSHARE) {
-                const uBtnCtnr = document.createElement('div');
-                uBtnCtnr.className = 'users-list-btn-ctnr';
-                uli.appendChild(uBtnCtnr);
-
-                const fuspan = document.createElement('span');
-                fuspan.className = 'users-list-btn fu';
-                fuspan.title = 'Find User';
-                uBtnCtnr.appendChild(fuspan);
-
-                // span click event (move us to be in front of another clicked user)
-                const { cid } = user;
-                const { scene } = user;
-                fuspan.onclick = function findUserClick() {
-                    _this.moveToFrontOfCamera(cid, scene);
-                };
-
                 if (user.scene === _this.scene) {
                     const sspan = document.createElement('span');
                     sspan.className = 'users-list-btn s';
