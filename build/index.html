@@ -142,23 +142,19 @@
                     <p></p>
                     <form class="form-inline">
                         <a class="btn btn-small btn-danger" href="#" id="delobj" title="Delete Selected Objects"
-                            ><i class="icon-trash"></i> Delete Selected</a
-                        >
+                            ><i class="icon-trash"></i> Delete Selected</a>
                         <a class="btn btn-small" href="#" id="copyobj" title="Copy Selected Objects"
-                            ><i class="icon-share"></i> Copy Selected</a
-                        >
+                            ><i class="icon-share"></i> Copy Selected</a>
                         <a class="btn btn-small" href="#" id="selectall" title="Selected All Objects in the List"
-                            ><i class="icon-check"></i> Select All</a
-                        >
+                            ><i class="icon-check"></i> Select All</a>
                         <a class="btn btn-small" href="#" id="clearlist" title="Clear Selection"
-                            ><i class="icon-remove"></i> Clear Selected</a
-                        >
+                            ><i class="icon-remove"></i> Clear Selected</a>
                         <a class="btn btn-small" href="#" id="refreshlist" title="Refresh List from Database"
-                            ><i class="icon-refresh"></i
-                        ></a>
-                    </form>
-                    <p></p>
+                            ><i class="icon-refresh"></i></a>
+       
+                    </form>                  
                 </div>
+
                 <div class="span4 col-md-4 columns four large-4">
                     <h3>Filter Object Type</h3>
                     <p>Click to show/hide object type from scene object list</p>
@@ -204,6 +200,11 @@
                             </button>
                             <!--<small>(Press 'Enter' to add/update object)</small>-->
                         </form>
+                        <div id="program-buttons" class="btn-group" style="visibility: hidden">
+                            <a class="btn btn-small" href="#" id="startpgrm" title="Start Program"><i class="icon-play"></i> Start Program</a>
+                            <a class="btn btn-small" href="#" id="restartpgrm" title="Restart Program"><i class="icon-repeat"></i> Restart Program</a>
+                            <a class="btn btn-small" href="#" id="stoppgrm" title="Stop Program"><i class="icon-stop"></i> Stop Program</a>
+                        </div>                          
                     </div>
                     <div class="span4 col-md-4 columns four large-4"></div>
                 </div>

@@ -48,7 +48,7 @@ export async function init(settings) {
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
-        exportSceneButton: settings.exportSceneButton,
+        exportSceneButton: settings.exportSceneButton
     };
 
     persist.currentSceneObjs = [];
@@ -64,32 +64,7 @@ export async function init(settings) {
         false
     );
 
-    // start mqtt client
-    persist.mc = new MqttClient({
-        uri: persist.mqttUri,
-        onMessageCallback: onMqttMessage,
-        mqtt_username: persist.mqttUsername,
-        mqtt_token: persist.mqttToken,
-        dbg: true,
-    });
-
-    console.info(`Starting connection to ${persist.mqttUri}...`);
-
-    // connect
-    try {
-        persist.mc.connect();
-    } catch (error) {
-        console.error(error); // Failure!
-        Alert.fire({
-            icon: 'error',
-            title: `Error connecting to MQTT: ${JSON.stringify(error)}`,
-            timer: 5000,
-        });
-        return;
-    }
-
-    persist.mqttConnected = true;
-    console.info('Connected.');
+    mqttReconnect();    
 }
 
 export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, sceneList) {
@@ -709,10 +684,10 @@ export async function addObject(obj, scene) {
     }
 }
 
-export function mqttReconnect(settings) {
-    settings = settings || {};
+export function mqttReconnect(settings=undefined) {
+    settings = settings ? settings : persist;
 
-    persist.mqttUri = settings.mqtt_uri !== undefined ? settings.mqtt_uri : 'wss://arena.andrew.cmu.edu/mqtt/';
+    persist.mqttUri = settings.mqttUri !== undefined ? settings.mqttUri : 'wss://arena.andrew.cmu.edu/mqtt/';
 
     if (persist.mc) persist.mc.disconnect();
 
@@ -720,15 +695,15 @@ export function mqttReconnect(settings) {
 
     // start mqtt client
     persist.mc = new MqttClient({
-        uri: persist.mqttUri,
+        uri: settings.mqttUri,
         onMessageCallback: onMqttMessage,
         onConnectionLost: onMqttConnectionLost,
-        mqtt_username: persist.mqttUsername,
-        mqtt_token: persist.mqttToken,
+        mqtt_username: settings.mqttUsername,
+        mqtt_token: settings.mqttToken,
     });
 
     try {
-        persist.mc.connect();
+        settings.mc.connect();
     } catch (error) {
         Alert.fire({
             icon: 'error',
@@ -737,8 +712,9 @@ export function mqttReconnect(settings) {
         });
         return;
     }
-    persist.mqttConnected = true;
-    console.info(`Connected to ${persist.mqttUri}`);
+    settings.mqttConnected = true;
+    console.info(`Connected to ${settings.mqttUri}`);
+
 }
 
 // callback from mqttclient; on reception of message
@@ -746,4 +722,26 @@ function onMqttMessage(message) {}
 
 function onMqttConnectionLost() {
     persist.mqttConnected = false;
+}
+
+export function pubProgramMsg(action, obj) {
+    const programTopic = 'realm/proc/control';
+    const programObj = JSON.stringify({
+        "object_id": ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)),
+        "action": action,
+        "type":"req",
+        "data":{
+            "type":"module",
+            "uuid": obj.object_id,
+            "name": obj.name,
+            "parent": obj.parent,
+            "file": obj.file,
+            "location": obj.location,
+            "filetype": obj.filetype,
+            "env": obj.env,
+            "args": obj.args ? obj.args : [],
+            "channels": obj.chanels ? obj.chanels: {}, 
+            "apis":obj.apis ? obj.apis : []}});
+        persist.mc.publish(programTopic, programObj);            
 }
