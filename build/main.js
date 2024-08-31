@@ -658,6 +658,7 @@ window.addEventListener('onauth', async (e) => {
         localStorage.setItem('scene', sceneinput.value);
         updateUrl();
         updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
+        
     });
 
     // Focus listener for scene

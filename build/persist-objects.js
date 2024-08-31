@@ -64,32 +64,7 @@ export async function init(settings) {
         false
     );
 
-    // start mqtt client
-    persist.mc = new MqttClient({
-        uri: persist.mqttUri,
-        onMessageCallback: onMqttMessage,
-        mqtt_username: persist.mqttUsername,
-        mqtt_token: persist.mqttToken,
-        dbg: true,
-    });
-
-    console.info(`Starting connection to ${persist.mqttUri}...`);
-
-    // connect
-    try {
-        persist.mc.connect();
-    } catch (error) {
-        console.error(error); // Failure!
-        Alert.fire({
-            icon: 'error',
-            title: `Error connecting to MQTT: ${JSON.stringify(error)}`,
-            timer: 5000,
-        });
-        return;
-    }
-
-    persist.mqttConnected = true;
-    console.info('Connected.');
+    mqttReconnect();    
 }
 
 export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, sceneList) {
@@ -709,10 +684,10 @@ export async function addObject(obj, scene) {
     }
 }
 
-export function mqttReconnect(settings) {
-    settings = settings || {};
+export function mqttReconnect(settings=undefined) {
+    settings = settings ? settings : persist;
 
-    persist.mqttUri = settings.mqtt_uri !== undefined ? settings.mqtt_uri : 'wss://arena.andrew.cmu.edu/mqtt/';
+    persist.mqttUri = settings.mqttUri !== undefined ? settings.mqttUri : 'wss://arena.andrew.cmu.edu/mqtt/';
 
     if (persist.mc) persist.mc.disconnect();
 
@@ -720,15 +695,15 @@ export function mqttReconnect(settings) {
 
     // start mqtt client
     persist.mc = new MqttClient({
-        uri: persist.mqttUri,
+        uri: settings.mqttUri,
         onMessageCallback: onMqttMessage,
         onConnectionLost: onMqttConnectionLost,
-        mqtt_username: persist.mqttUsername,
-        mqtt_token: persist.mqttToken,
+        mqtt_username: settings.mqttUsername,
+        mqtt_token: settings.mqttToken,
     });
 
     try {
-        persist.mc.connect();
+        settings.mc.connect();
     } catch (error) {
         Alert.fire({
             icon: 'error',
@@ -737,8 +712,9 @@ export function mqttReconnect(settings) {
         });
         return;
     }
-    persist.mqttConnected = true;
-    console.info(`Connected to ${persist.mqttUri}`);
+    settings.mqttConnected = true;
+    console.info(`Connected to ${settings.mqttUri}`);
+
 }
 
 // callback from mqttclient; on reception of message
