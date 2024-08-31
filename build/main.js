@@ -42,7 +42,6 @@ window.addEventListener('onauth', async (e) => {
     const objFilterSel = document.getElementById('objfiltersel');
     const arenaHostLbl = document.getElementById('arenahost');
     const sceneLinks = document.getElementById('scenelinks');
-    const programButtons = document.getElementById('program-buttons');
     
     // Buttons/s
     const openAddSceneButton = document.getElementById('openaddscene');
@@ -57,9 +56,9 @@ window.addEventListener('onauth', async (e) => {
     const delButton = document.getElementById('delobj');
     const cpyButton = document.getElementById('copyobj');
     const allButton = document.getElementById('selectall');
-    const programStopButton = document.getElementById('stoppgrm');
-    const programStartButton = document.getElementById('startpgrm');
-    const programRestartButton = document.getElementById('restartpgrm');
+    //const programStopButton = document.getElementById('stoppgrm');
+    //const programStartButton = document.getElementById('startpgrm');
+    //const programRestartButton = document.getElementById('restartpgrm');
     const clearselButton = document.getElementById('clearlist');
     const refreshButton = document.getElementById('refreshlist');
     const refreshSlButton = document.getElementById('refreshscenelist');
@@ -217,11 +216,11 @@ window.addEventListener('onauth', async (e) => {
             });
         });
 
-        // if program, show buttons
+        // if program, show program instances
         if (currentEditObj.type === 'program') {
-            programButtons.style.visibility='visible'; 
+            PersistObjects.populateProgramInstanceList();
         } else {
-            programButtons.style.visibility='hidden';
+            PersistObjects.hideProgramInstanceList();
         }
 
     };
@@ -774,9 +773,7 @@ window.addEventListener('onauth', async (e) => {
             });
         });
     });
-
-
-
+/*
     programStopButton.addEventListener('click', () => {
         if (!currentEditObj && !currentEditObj.type === 'program') return;
         
@@ -811,7 +808,7 @@ window.addEventListener('onauth', async (e) => {
             timer: 5000,
         });        
     });
-
+*/
     async function setAllTypes(showHide) {
         for (const [key, value] of Object.entries(objTypeFilter)) {
             objTypeFilter[key] = showHide; // true = show
@@ -949,6 +946,7 @@ window.addEventListener('onauth', async (e) => {
         addEditSection: document.getElementById('addeditsection'),
         editObjHandler: editObject,
         visObjHandler: visObject,
+        programList: document.getElementById('proglist'),
         authState,
         mqttUsername: username,
         mqttToken,

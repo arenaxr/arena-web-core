@@ -45,6 +45,7 @@ export async function init(settings) {
         addEditSection: settings.addEditSection,
         editObjHandler: settings.editObjHandler,
         visObjHandler: settings.visObjHandler,
+        programList: settings.programList,
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
@@ -52,6 +53,7 @@ export async function init(settings) {
     };
 
     persist.currentSceneObjs = [];
+    persist.programs = {};
 
     // set select when clicking on a list item
     persist.objList.addEventListener(
@@ -245,7 +247,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         } else if (sceneObjs[i].type === 'program') {
             const ptype = sceneObjs[i].attributes.filetype === 'WA' ? 'WASM program' : 'python program';
             typeDisplay = `${ptype}: ${sceneObjs[i].attributes.file}`;
-            img.src = 'assets/program-icon.png';
+            img.src = 'assets/prog-icon.png';
         } else if (sceneObjs[i].type === 'scene-options') {
             typeDisplay = 'scene options';
             img.src = 'assets/options-icon.png';
@@ -351,6 +353,22 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         persist.objList.appendChild(li);
     }
     persist.addEditSection.style = 'display:block';
+
+    updateSubscribeTopic(scene);
+}
+
+export function updateSubscribeTopic(scene) {
+    console.log("updateSubscribeTopic", persist.currentScene, scene);
+    if (persist.currentScene === scene) return;
+
+    if (persist.currentScene) persist.mc.unsubscribe(persist.currentScene);
+    if (scene) { 
+        let topic = `realm/s/${scene}/#`
+        persist.mc.subscribe(topic);
+        console.log("subscribed:", topic);
+        persist.currentScene = scene;
+        
+    }
 }
 
 export async function populateNamespaceList(nsInput, nsList) {
@@ -714,11 +732,22 @@ export function mqttReconnect(settings=undefined) {
     }
     settings.mqttConnected = true;
     console.info(`Connected to ${settings.mqttUri}`);
-
 }
 
 // callback from mqttclient; on reception of message
-function onMqttMessage(message) {}
+function onMqttMessage(message) {
+    let payload = message.payloadString;//.split("\\").join("");
+    let obj = JSON.parse(payload);
+    if (obj.type === 'program') {
+        console.log(obj, obj.object_id in persist.programs);
+        if (obj.data) {
+            if (obj.object_id in persist.programs === false) {
+                persist.programs[obj.object_id]= {...{"uuid": obj.object_id},...obj.data}
+                populateProgramInstanceList();
+            }
+        }
+    }
+}
 
 function onMqttConnectionLost() {
     persist.mqttConnected = false;
@@ -744,4 +773,50 @@ export function pubProgramMsg(action, obj) {
             "channels": obj.chanels ? obj.chanels: {}, 
             "apis":obj.apis ? obj.apis : []}});
         persist.mc.publish(programTopic, programObj);            
+}
+
+export function populateProgramInstanceList() {
+
+    let programList = persist.programList;
+
+    while (programList.firstChild) {
+        programList.removeChild(programList.firstChild);
+    }
+
+    for (const [id, program] of Object.entries(persist.programs)) {
+        console.log(id, program);
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        const img = document.createElement('img');
+
+        //li.setAttribute('data-obj', JSON.stringify(sceneObjs[i]));
+        img.src = 'assets/prog-icon.png';
+
+        const t = document.createTextNode(`${id} ( ${program.file} )`);
+        li.appendChild(t);
+
+        // add image
+        img.width = 16;
+        span.className = 'objtype';
+        span.appendChild(img);
+        li.appendChild(span);
+
+        // add stop "button"
+        const stopspan = document.createElement('span');
+        const ielem = document.createElement('i');
+        ielem.className = 'icon-remove';
+        stopspan.className = 'edit';
+        stopspan.title = 'Stop Program';
+        stopspan.appendChild(ielem);
+        stopspan.style.backgroundColor = '#EC806A';
+        li.appendChild(stopspan);
+        
+        programList.appendChild(li);
+    }
+
+    programList.style.visibility='visible';
+}
+
+export function hideProgramInstanceList() {
+    programList.style.visibility='hidden';
 }
