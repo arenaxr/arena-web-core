@@ -10,6 +10,7 @@
 /* eslint-disable import/extensions */
 import MqttClient from './mqtt-client.js';
 import ARENAUserAccount from './arena-account.js';
+import {TTLCache} from './ttl-cache.js';
 
 let persist;
 
@@ -45,6 +46,7 @@ export async function init(settings) {
         addEditSection: settings.addEditSection,
         editObjHandler: settings.editObjHandler,
         visObjHandler: settings.visObjHandler,
+        programList: settings.programList,
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
@@ -52,6 +54,13 @@ export async function init(settings) {
     };
 
     persist.currentSceneObjs = [];
+    persist.programs = new TTLCache({
+        mutationCall: () => {
+            console.log("mutation");
+            populateProgramInstanceList();
+            
+        },
+    });
 
     // set select when clicking on a list item
     persist.objList.addEventListener(
@@ -232,28 +241,28 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
 
         // save obj json so we can use later in selected object actions (delete/copy)
         li.setAttribute('data-obj', JSON.stringify(sceneObjs[i]));
-        let typeDisplay = '';
+        let objectDisplay = '';
 
         if (sceneObjs[i].attributes === undefined) continue;
         if (objTypeFilter[sceneObjs[i].type] === false) continue;
         if (re.test(sceneObjs[i].object_id) === false) continue;
 
         if (sceneObjs[i].type === 'object') {
-            typeDisplay = sceneObjs[i].attributes.object_type;
+            objectDisplay = `${sceneObjs[i].object_id} ( ${sceneObjs[i].attributes.object_type} )`;
             img.src = 'assets/3dobj-icon.png';
             if (objTypeFilter[sceneObjs[i].attributes.object_type] === false) continue;
         } else if (sceneObjs[i].type === 'program') {
-            const ptype = sceneObjs[i].attributes.filetype === 'WA' ? 'WASM program' : 'python program';
-            typeDisplay = `${ptype}: ${sceneObjs[i].attributes.file}`;
-            img.src = 'assets/program-icon.png';
+            const program = sceneObjs[i].attributes;
+            objectDisplay = `${sceneObjs[i].object_id} (${program.name}): ${program.file}`;
+            img.src = 'assets/prog-icon.png';
         } else if (sceneObjs[i].type === 'scene-options') {
-            typeDisplay = 'scene options';
+            objectDisplay = `${sceneObjs[i].object_id} ( 'scene options' )`;
             img.src = 'assets/options-icon.png';
         } else if (sceneObjs[i].type === 'landmarks') {
-            typeDisplay = 'landmarks';
+            objectDisplay = `${sceneObjs[i].object_id} ( 'landmarks' )`;
             img.src = 'assets/map-icon.png';
         } else {
-            typeDisplay = sceneObjs[i].type; // display unknown type
+            objectDisplay = `${sceneObjs[i].object_id} ( sceneObjs[i].type; )` // display unknown type
         }
 
         const r = sceneObjs[i].attributes.rotation;
@@ -276,7 +285,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             }
         }
 
-        const t = document.createTextNode(`${sceneObjs[i].object_id} ( ${typeDisplay} )`);
+        const t = document.createTextNode(objectDisplay);
         li.appendChild(t);
 
         // add image
@@ -351,6 +360,20 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         persist.objList.appendChild(li);
     }
     persist.addEditSection.style = 'display:block';
+
+    updateSubscribeTopic(scene);
+}
+
+export function updateSubscribeTopic(scene) {
+    if (persist.currentScene === scene) return;
+
+    if (persist.currentScene) persist.mc.unsubscribe(persist.currentScene);
+    if (scene) { 
+        let topic = `realm/s/${scene}/#`
+        persist.mc.subscribe(topic);
+        persist.currentScene = scene;   
+        populateProgramInstanceList();
+    }
 }
 
 export async function populateNamespaceList(nsInput, nsList) {
@@ -632,7 +655,6 @@ export async function addObject(obj, scene) {
                 confirmButtonText: `Create`,
                 denyButtonText: `Update (i'm sure)`,
             });
-            console.log(result);
             if (result.isConfirmed) {
                 obj.action = 'create';
             } else if (result.isDismissed) {
@@ -714,11 +736,18 @@ export function mqttReconnect(settings=undefined) {
     }
     settings.mqttConnected = true;
     console.info(`Connected to ${settings.mqttUri}`);
-
 }
 
 // callback from mqttclient; on reception of message
-function onMqttMessage(message) {}
+function onMqttMessage(message) {
+    let payload = message.payloadString;//.split("\\").join("");
+    let obj = JSON.parse(payload);
+    if (obj.type === 'program') {
+        if (obj.data) {
+            persist.programs.set(obj.object_id, {...{"uuid": obj.object_id},...obj.data});
+        }
+    }
+}
 
 function onMqttConnectionLost() {
     persist.mqttConnected = false;
@@ -733,7 +762,7 @@ export function pubProgramMsg(action, obj) {
         "type":"req",
         "data":{
             "type":"module",
-            "uuid": obj.object_id,
+            "uuid": obj.object_id ? obj.object_id : obj.uuid,
             "name": obj.name,
             "parent": obj.parent,
             "file": obj.file,
@@ -743,5 +772,78 @@ export function pubProgramMsg(action, obj) {
             "args": obj.args ? obj.args : [],
             "channels": obj.chanels ? obj.chanels: {}, 
             "apis":obj.apis ? obj.apis : []}});
-        persist.mc.publish(programTopic, programObj);            
+        persist.mc.publish(programTopic, programObj);        
+}
+
+export function populateProgramInstanceList() {
+    let programList = persist.programList;
+
+    //if (persist.programs == undefined) return;
+
+    while (programList.firstChild) {
+        programList.removeChild(programList.firstChild);
+    }
+
+    const programs = persist.programs.list();
+
+    if (programs.length == 0) {
+        const li = document.createElement('li');
+        const t = document.createTextNode('No running programs found in the scene');
+        li.appendChild(t);
+        programList.appendChild(li);
+    }
+
+    programs.forEach((program) => {
+        console.log(program);
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        const img = document.createElement('img');
+
+        img.src = 'assets/prog-icon.png';
+        li.title="Run info:\n" + JSON.stringify(program.run_info, undefined, 2).replace("{", "", -1).slice(0, -1);
+        const t = document.createTextNode(`${program.uuid.substr(0,8)}... (${program.name}): ${program.file}@${program.parent} (${program.state}) ${program.display_msg ? "- " + program.display_msg : ""}`);
+        li.appendChild(t);
+
+        // add image
+        img.width = 16;
+        span.className = 'objtype';
+        span.appendChild(img);
+        li.appendChild(span);
+
+        // add stop "button"
+        const stopspan = document.createElement('span');
+        const ielem = document.createElement('i');
+        ielem.className = 'icon-trash';
+        stopspan.className = 'edit';
+        stopspan.title = 'Stop Program';
+        stopspan.appendChild(ielem);
+        stopspan.style.backgroundColor = '#da4f49';
+        li.appendChild(stopspan);
+        
+        
+        console.log(JSON.stringify(program));
+        stopspan.onclick = (function () {
+            Swal.fire({
+                title: 'Stop Program ?',
+                text: "You won't be able to revert this.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, stop it!',
+            }).then(async (result) => {
+                if (result.isConfirmed) {            
+                    pubProgramMsg('delete', {...program});
+                    persist.programs.set(program.uuid, {...program, ...{"display_msg": "deleting..."}}, true, true);
+                }})
+        });
+
+        programList.appendChild(li);
+    });
+
+    programList.style.visibility='visible';
+}
+
+export function hideProgramInstanceList() {
+    programList.style.visibility='hidden';
 }
