@@ -128,6 +128,12 @@
             <!-- row 1-->
             <div class="row">
                 <div class="span8 col-md-8 columns eight large-8">
+                    <h3>Running Programs</h3>
+                    <div class="objlist">
+                        <ul id="proglist">
+                            <li>No running programs found in the scene</li>
+                        </ul>                
+                    </div>    
                     <h3>Scene Objects (Persisted)</h3>
                     <div class="input-prepend">
                         <span class="add-on">Filter object_id (regex)</span>
@@ -151,8 +157,7 @@
                             ><i class="icon-remove"></i> Clear Selected</a>
                         <a class="btn btn-small" href="#" id="refreshlist" title="Refresh List from Database"
                             ><i class="icon-refresh"></i></a>
-       
-                    </form>                  
+                    </form>
                 </div>
 
                 <div class="span4 col-md-4 columns four large-4">
@@ -200,9 +205,6 @@
                             </button>
                             <!--<small>(Press 'Enter' to add/update object)</small>-->
                         </form>
-                        <ul id="proglist">
-                            <li>No program instances found in the scene</li>
-                        </ul>
                         <!--
                         <div id="programs" class="btn-group" style="visibility: hidden">
                             <a class="btn btn-small" href="#" id="startpgrm" title="Start Program"><i class="icon-play"></i> Start Program</a>
