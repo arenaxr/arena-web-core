@@ -532,6 +532,14 @@ AFRAME.registerSystem('arena-scene', {
                 arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
                 return;
             }
+            // add a default landmark for any screen share object
+            if (obj.object_id === 'screenshare' && !obj.attributes?.landmark) {
+                obj.attributes.landmark = {
+                    label: `Screen: ${obj.object_id} (nearby)`,
+                    randomRadiusMin: 2,
+                    randomRadiusMax: 3,
+                };
+            }
             // if parent is specified, but doesn't yet exist
             if (parent && document.getElementById(parent) === null) {
                 // Check for circular references

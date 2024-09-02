@@ -15,7 +15,10 @@ AFRAME.registerComponent('screenshareable', {
         this.update();
         // add a default landmark for any screen share object
         if (!this.el.hasAttribute('landmark')) {
-            this.el.setAttribute('landmark', `label: "${this.el.id} (nearby)"; randomRadiusMin: 1; randomRadiusMax: 3`);
+            this.el.setAttribute(
+                'landmark',
+                `label: Screen: ${this.el.id} (nearby); randomRadiusMin: 2; randomRadiusMax: 3`
+            );
         }
     },
 

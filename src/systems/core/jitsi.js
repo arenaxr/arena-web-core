@@ -270,7 +270,7 @@ AFRAME.registerSystem('arena-jitsi', {
         if (!screenShareEl.hasAttribute('landmark')) {
             screenShareEl.setAttribute(
                 'landmark',
-                `label: "${screenShareId} (nearby)"; randomRadiusMin: 1; randomRadiusMax: 3`
+                `label: Screen: ${screenShareId} (nearby); randomRadiusMin: 2; randomRadiusMax: 3`
             );
         }
     },
