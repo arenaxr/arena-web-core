@@ -366,6 +366,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
 
 export function updateSubscribeTopic(scene) {
     if (persist.currentScene === scene) return;
+    if (!persist.mqttConnected) persist.pendingSubscribeUpdate = (scene) => updateSubscribeTopic(scene);
 
     if (persist.currentScene) persist.mc.unsubscribe(persist.currentScene);
     if (scene) { 
@@ -736,6 +737,10 @@ export function mqttReconnect(settings=undefined) {
     }
     settings.mqttConnected = true;
     console.info(`Connected to ${settings.mqttUri}`);
+    if (persist.pendingSubscribeUpdate) {
+        persist.pendingSubscribeUpdate();
+        persist.pendingSubscribeUpdate = undefined;
+    }
 }
 
 // callback from mqttclient; on reception of message
