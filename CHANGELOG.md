@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.29.0](https://github.com/arenaxr/arena-web-core/compare/v1.28.3...v1.29.0) (2024-09-02)
+
+
+### Features
+
+* **landmark:** add screenshare teleport landmarks ([#661](https://github.com/arenaxr/arena-web-core/issues/661)) ([69a7682](https://github.com/arenaxr/arena-web-core/commit/69a768297d3d984ac08bc7235a8c9504cc9c5361))
+* program buttons: stop only ([8f00fa1](https://github.com/arenaxr/arena-web-core/commit/8f00fa1859aa8847aec43e15ebdaa69e5396d57a))
+* program instance list ([ea639fc](https://github.com/arenaxr/arena-web-core/commit/ea639fccf8972af821766246bdf7bb35137848a3))
+* program list with ttl ([7eb2cc7](https://github.com/arenaxr/arena-web-core/commit/7eb2cc712ad413cdb8466185726d12e200f6dc7a))
+
+
+### Bug Fixes
+
+* **auth:** only request single-scene specific perms when rendering scene ([43d80fe](https://github.com/arenaxr/arena-web-core/commit/43d80fead76196a8485f45e9d3938cebef5997af))
+* **chat:** disable chat message ui when user permissions are removed ([4e9e801](https://github.com/arenaxr/arena-web-core/commit/4e9e801404f2a2f9760c65f640342ed1148f8516))
+* make sure subscribe is only called after connect ([4c802fb](https://github.com/arenaxr/arena-web-core/commit/4c802fb9456dfe843cbe6f8a5b9eff14aa2c9915))
+* mqtt connect ([64c4fd4](https://github.com/arenaxr/arena-web-core/commit/64c4fd44dfc28fcdb414fc07a27b5d37c06fa169))
+* **particles:** fix particle load failure introduced in #f54e682 ([5c85f87](https://github.com/arenaxr/arena-web-core/commit/5c85f87514628c179aa886485b08da2f0c0ae437))
+* **screenshare:** add landmarks for named screenshare objects ([c00455b](https://github.com/arenaxr/arena-web-core/commit/c00455b6bc65b292ae02001efcf6b7a319fa8110))
+
 ## [1.28.3](https://github.com/arenaxr/arena-web-core/compare/v1.28.2...v1.28.3) (2024-08-14)
 
 
