@@ -290,11 +290,15 @@ window.ARENAAUTH = {
         if (ARENA) {
             // TODO: Check for some other indicator
             lines.push('');
+            let role = 'None';
             if (perms.room) {
-                lines.push(`Video Conference: allowed`);
-            } else {
-                lines.push(`Video Conference: disallowed`);
+                if (perms.moderator) {
+                    role = 'Moderator';
+                } else {
+                    role = 'Participant';
+                }
             }
+            lines.push(`Video Conference Role: ${role}`);
         }
         lines.push('');
         lines.push(`MQTT Publish topics:`);
