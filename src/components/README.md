@@ -108,16 +108,16 @@ Tracking camera movement in real time. Emits camera pose change and VIO change e
 
 **Properties**
 
-| Name        | Type                              | Description                                               |
-| ----------- | --------------------------------- | --------------------------------------------------------- |
-| enabled     | <code>boolean</code>              | Indicates whether camera tracking is enabled.             |
-| displayName | <code>string</code>               | User display name (used to publish camera data).          |
-| color       | <code>string</code>               | Head text color.                                          |
-| rotation    | <code>Array.&lt;number&gt;</code> | Last camera rotation value.                               |
-| position    | <code>Array.&lt;number&gt;</code> | Last camera position value.                               |
-| vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value.                                  |
-| vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value.                                  |
-| showStats   | <code>boolean</code>              | Display camera position on the screen.                    |
+| Name        | Type                              | Description                                      |
+| ----------- | --------------------------------- | ------------------------------------------------ |
+| enabled     | <code>boolean</code>              | Indicates whether camera tracking is enabled.    |
+| displayName | <code>string</code>               | User display name (used to publish camera data). |
+| color       | <code>string</code>               | Head text color.                                 |
+| rotation    | <code>Array.&lt;number&gt;</code> | Last camera rotation value.                      |
+| position    | <code>Array.&lt;number&gt;</code> | Last camera position value.                      |
+| vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value.                         |
+| vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value.                         |
+| showStats   | <code>boolean</code>              | Display camera position on the screen.           |
 
 <a name="module_arena-hand"></a>
 

@@ -135,15 +135,16 @@ export default class RuntimeMngr {
 
         // on unload, send delete client modules requests
         const rtMngr = this;
-        addEventListener("beforeunload", (event) => { rtMngr.cleanup(); });
+        window.addEventListener('beforeunload', (event) => {
+            rtMngr.cleanup();
+        });
 
         // listen to program "refresh" key combination
-        window.addEventListener("keyup", (e) => {
+        window.addEventListener('keyup', (e) => {
             if (e.altKey && e.shiftKey && e.which == 80) {
                 RuntimeMngr.instance.reload(true);
             }
         });
-
     }
 
     setOptions({
@@ -177,7 +178,7 @@ export default class RuntimeMngr {
         this.debug = debug;
     }
 
-    async init(performRegister=false) {
+    async init(performRegister = false) {
         // mqtt connect; setup delete runtime msg as last will
         const rtMngr = this;
         this.mc = new MQTTClient({
@@ -262,7 +263,7 @@ export default class RuntimeMngr {
     onRuntimeRegistered() {
         this.isRegistered = true;
 
-        console.info("Runtime-Mngr: Registered. %cShift+Opt+P to force program reload", "color: orange");
+        console.info('Runtime-Mngr: Registered. %cShift+Opt+P to force program reload', 'color: orange');
 
         this.mc.unsubscribe(this.regTopic);
         // subscribe to ctl/runtime_uuid
@@ -325,7 +326,10 @@ export default class RuntimeMngr {
         const modCreateMsg = this.rtMsgs.createModuleFromPersistObj(persistObj, replaceVars);
 
         // save this module data to delete before exit
-        this.modules.push({"isClientInstantiate": persistObj.attributes.instantiate === 'client', "moduleCreateMsg": modCreateMsg});
+        this.modules.push({
+            isClientInstantiate: persistObj.attributes.instantiate === 'client',
+            moduleCreateMsg: modCreateMsg,
+        });
 
         // TODO: save pending req uuid and check orchestrator responses
         // NOTE: object_id in runtime messages are used as a transaction id
@@ -340,10 +344,10 @@ export default class RuntimeMngr {
      * called on 'before unload' event
      * @param {boolean} all -  sends delete to all modules requested for current scene; default is to onlt delete client instance programs
      */
-    cleanup(all=false) {
+    cleanup(all = false) {
         console.info(`Runtime-Mngr: Cleanup(all=${all})`, this.modules);
         this.modules.forEach((saved) => {
-            if (saved.isClientInstantiate || all==true) {
+            if (saved.isClientInstantiate || all === true) {
                 const modDelMsg = this.rtMsgs.deleteModule(saved.moduleCreateMsg.data);
                 if (this.debug === true) console.info('Sending delete module request:', modDelMsg);
                 this.mc.publish(this.ctlTopicPub, JSON.stringify(modDelMsg));
@@ -358,10 +362,10 @@ export default class RuntimeMngr {
      * Requests modules previously loaded in current scene; by default only client instance ones
      * @param {boolean} all - relead all modules requested for current scene; default is to only request client instance programs
      */
-    restart(all=false) {
+    restart(all = false) {
         console.info(`Runtime-Mngr: Restart(all=${all})`, this.modules);
         this.modules.forEach((saved) => {
-            if (saved.isClientInstantiate || all==true) {
+            if (saved.isClientInstantiate || all === true) {
                 if (this.debug === true) console.info('Sending create module request:', saved.moduleCreateMsg);
                 this.mc.publish(this.ctlTopic, JSON.stringify(saved.moduleCreateMsg));
             }
@@ -371,8 +375,8 @@ export default class RuntimeMngr {
     /**
      * Cleanup all modules in the scene and request them again
      */
-    reload(all=false) {
-        let rtMngr = this;
+    reload(all = false) {
+        const rtMngr = this;
         if (rtMngr.reloading) return;
         rtMngr.reloading = true;
         rtMngr.cleanup(all);
@@ -380,7 +384,7 @@ export default class RuntimeMngr {
         setTimeout(() => {
             rtMngr.restart(all);
             rtMngr.reloading = false;
-          }, 1000);
+        }, 1000);
     }
 
     /* public getters */
