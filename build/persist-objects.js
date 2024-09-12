@@ -255,13 +255,13 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             objectDisplay = `${sceneObjs[i].object_id} (${program.name}): ${program.file}`;
             img.src = 'assets/prog-icon.png';
         } else if (sceneObjs[i].type === 'scene-options') {
-            objectDisplay = `${sceneObjs[i].object_id} ( 'scene options' )`;
+            objectDisplay = `${sceneObjs[i].object_id} ( scene options )`;
             img.src = 'assets/options-icon.png';
         } else if (sceneObjs[i].type === 'landmarks') {
-            objectDisplay = `${sceneObjs[i].object_id} ( 'landmarks' )`;
+            objectDisplay = `${sceneObjs[i].object_id} ( landmarks )`;
             img.src = 'assets/map-icon.png';
         } else {
-            objectDisplay = `${sceneObjs[i].object_id} ( sceneObjs[i].type; )`; // display unknown type
+            objectDisplay = `${sceneObjs[i].object_id} ( ${sceneObjs[i].type} )`; // display unknown type
         }
 
         const r = sceneObjs[i].attributes.rotation;
