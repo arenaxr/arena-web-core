@@ -67,7 +67,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect.bind(this));
 
         ARENA.events.addMultiEventListener(
-            [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.MQTT_LOADED, ARENA_EVENTS.JITSI_LOADED],
+            [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.MQTT_SUBSCRIBED, ARENA_EVENTS.JITSI_LOADED],
             this.ready.bind(this)
         );
     },

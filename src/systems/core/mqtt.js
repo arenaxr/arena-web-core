@@ -75,6 +75,11 @@ AFRAME.registerSystem('arena-mqtt', {
                     TOPICS.SUBSCRIBE.SCENE_PUBLIC.formatStr({ nameSpace, sceneName }),
                     TOPICS.SUBSCRIBE.SCENE_PRIVATE.formatStr({ nameSpace, sceneName, idTag }),
                 ],
+                onSubscribed: () => {
+                    proxy(() => {
+                        ARENA.events.emit(ARENA_EVENTS.MQTT_SUBSCRIBED, true);
+                    });
+                },
                 mqttHostURI: this.mqttHostURI,
                 idTag,
             },

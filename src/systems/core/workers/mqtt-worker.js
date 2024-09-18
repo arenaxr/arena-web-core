@@ -37,6 +37,9 @@ class MQTTWorker {
         this.healthCheck = healthCheck;
 
         this.subscriptions = this.config.subscriptions;
+        this.onSubscribed = this.config.onSubscribed;
+        this.subCount = 0;
+
         this.connectionLostHandlers = [
             (responseObject) => {
                 if (responseObject.errorCode !== 0) {
@@ -245,7 +248,15 @@ class MQTTWorker {
         });
 
         this.subscriptions.forEach((topic) => {
-            this.mqttClient.subscribe(topic);
+            this.mqttClient.subscribe(topic, {
+                onSuccess: () => {
+                    this.subCount += 1;
+                    if (this.subCount === this.subscriptions.length) {
+                        this.onSubscribed();
+                        this.subCount = 0;
+                    }
+                },
+            });
         });
 
         if (reconnect) {
