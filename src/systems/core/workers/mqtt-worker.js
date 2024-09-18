@@ -30,14 +30,15 @@ class MQTTWorker {
     /**
      * @param {object} ARENAConfig
      * @param {function} healthCheck
+     * @param {function} onSubscribed
      */
-    constructor(ARENAConfig, healthCheck) {
+    constructor(ARENAConfig, healthCheck, onSubscribed) {
         // this.restartJitsi = restartJitsi;
         this.config = ARENAConfig;
         this.healthCheck = healthCheck;
 
         this.subscriptions = this.config.subscriptions;
-        this.onSubscribed = this.config.onSubscribed;
+        this.onSubscribed = onSubscribed;
         this.subCount = 0;
 
         this.connectionLostHandlers = [
