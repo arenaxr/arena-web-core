@@ -107,7 +107,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.privateChatTopic = TOPICS.PUBLISH.SCENE_CHAT_PRIVATE.formatStr(topicVars);
         this.publicPresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr(topicVars);
         // send private presence update to a user (publish only), template partially
-        this.privatePresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr(topicVars);
+        this.privatePresenceTopic = TOPICS.PUBLISH.SCENE_PRESENCE_PRIVATE.formatStr(topicVars);
 
         // Announce ASAP
         this.presenceMsg({ action: 'join', type: UserType.ARENA });
