@@ -736,7 +736,7 @@ AFRAME.registerSystem('arena-scene', {
                     });
                 }
 
-                if (!sceneOptions.clickableOnlyEvents ?? true) {
+                if (typeof sceneOptions.clickableOnlyEvents !== 'undefined' && !sceneOptions.clickableOnlyEvents) {
                     // unusual case: clickableOnlyEvents = true by default, add warning...
                     this.health.addError('scene-options.allObjectsClickable');
                 }
