@@ -31,6 +31,12 @@
                        "py/counter/counter.py"
                     ]
                  },
+                 "filename": {
+                    "title": "DEPRECATED (filename)",
+                    "type": "string",
+                    "description": "DEPRECATED: data.filename is deprecated for type: program, use data.file and data.location instead.",
+                    "deprecated": true
+                },
                  "location":{
                     "type":"string",
                     "title":"File location",
