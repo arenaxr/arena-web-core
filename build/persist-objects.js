@@ -606,8 +606,8 @@ export function performActionArgObjList(action, scene, objList, json = true) {
             theNewScene = obj.sceneId;
         }
         const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
-            nameSpace: obj.namespace,
-            sceneName: obj.sceneId,
+            nameSpace: theNewScene.split('/')[0],
+            sceneName: theNewScene.split('/')[1],
             objectId: obj.object_id,
         });
         console.info(`Publish [ ${topic}]: ${actionObj}`);
