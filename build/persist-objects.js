@@ -11,7 +11,7 @@
 import TOPICS from '../src/constants/topics.js';
 import MqttClient from './mqtt-client.js';
 import ARENAUserAccount from './arena-account.js';
-import {TTLCache} from './ttl-cache.js';
+import { TTLCache } from './ttl-cache.js';
 
 let persist;
 
@@ -51,15 +51,14 @@ export async function init(settings) {
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
-        exportSceneButton: settings.exportSceneButton
+        exportSceneButton: settings.exportSceneButton,
     };
 
     persist.currentSceneObjs = [];
     persist.programs = new TTLCache({
         mutationCall: () => {
-            console.log("mutation");
+            console.log('mutation');
             populateProgramInstanceList();
-            
         },
     });
 
@@ -74,7 +73,7 @@ export async function init(settings) {
         false
     );
 
-    mqttReconnect();    
+    mqttReconnect();
 }
 
 export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, sceneList) {
@@ -263,7 +262,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             objectDisplay = `${sceneObjs[i].object_id} ( 'landmarks' )`;
             img.src = 'assets/map-icon.png';
         } else {
-            objectDisplay = `${sceneObjs[i].object_id} ( sceneObjs[i].type; )` // display unknown type
+            objectDisplay = `${sceneObjs[i].object_id} ( sceneObjs[i].type; )`; // display unknown type
         }
 
         const r = sceneObjs[i].attributes.rotation;
@@ -370,10 +369,10 @@ export function updateSubscribeTopic(scene) {
     if (!persist.mqttConnected) persist.pendingSubscribeUpdate = (scene) => updateSubscribeTopic(scene);
 
     if (persist.currentScene) persist.mc.unsubscribe(persist.currentScene);
-    if (scene) { 
-        let topic = `realm/s/${scene}/#`
+    if (scene) {
+        const topic = `realm/s/${scene}/#`;
         persist.mc.subscribe(topic);
-        persist.currentScene = scene;   
+        persist.currentScene = scene;
         populateProgramInstanceList();
     }
 }
@@ -716,8 +715,8 @@ export async function addObject(obj, nameSpace, sceneName) {
     }
 }
 
-export function mqttReconnect(settings=undefined) {
-    settings = settings ? settings : persist;
+export function mqttReconnect(settings = undefined) {
+    settings = settings || persist;
 
     persist.mqttUri = settings.mqttUri !== undefined ? settings.mqttUri : 'wss://arena.andrew.cmu.edu/mqtt/';
 
@@ -754,11 +753,11 @@ export function mqttReconnect(settings=undefined) {
 
 // callback from mqttclient; on reception of message
 function onMqttMessage(message) {
-    let payload = message.payloadString;//.split("\\").join("");
-    let obj = JSON.parse(payload);
+    const payload = message.payloadString; // .split("\\").join("");
+    const obj = JSON.parse(payload);
     if (obj.type === 'program') {
         if (obj.data) {
-            persist.programs.set(obj.object_id, {...{"uuid": obj.object_id},...obj.data});
+            persist.programs.set(obj.object_id, { ...{ uuid: obj.object_id }, ...obj.data });
         }
     }
 }
@@ -770,29 +769,32 @@ function onMqttConnectionLost() {
 export function pubProgramMsg(action, obj) {
     const programTopic = 'realm/proc/control';
     const programObj = JSON.stringify({
-        "object_id": ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)),
-        "action": action,
-        "type":"req",
-        "data":{
-            "type":"module",
-            "uuid": obj.object_id ? obj.object_id : obj.uuid,
-            "name": obj.name,
-            "parent": obj.parent,
-            "file": obj.file,
-            "location": obj.location,
-            "filetype": obj.filetype,
-            "env": obj.env,
-            "args": obj.args ? obj.args : [],
-            "channels": obj.chanels ? obj.chanels: {}, 
-            "apis":obj.apis ? obj.apis : []}});
-        persist.mc.publish(programTopic, programObj);        
+        object_id: ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+        ),
+        action,
+        type: 'req',
+        data: {
+            type: 'module',
+            uuid: obj.object_id ? obj.object_id : obj.uuid,
+            name: obj.name,
+            parent: obj.parent,
+            file: obj.file,
+            location: obj.location,
+            filetype: obj.filetype,
+            env: obj.env,
+            args: obj.args ? obj.args : [],
+            channels: obj.chanels ? obj.chanels : {},
+            apis: obj.apis ? obj.apis : [],
+        },
+    });
+    persist.mc.publish(programTopic, programObj);
 }
 
 export function populateProgramInstanceList() {
-    let programList = persist.programList;
+    const { programList } = persist;
 
-    //if (persist.programs == undefined) return;
+    // if (persist.programs == undefined) return;
 
     while (programList.firstChild) {
         programList.removeChild(programList.firstChild);
@@ -814,8 +816,10 @@ export function populateProgramInstanceList() {
         const img = document.createElement('img');
 
         img.src = 'assets/prog-icon.png';
-        li.title="Run info:\n" + JSON.stringify(program.run_info, undefined, 2).replace("{", "", -1).slice(0, -1);
-        const t = document.createTextNode(`${program.uuid.substr(0,8)}... (${program.name}): ${program.file}@${program.parent} (${program.state}) ${program.display_msg ? "- " + program.display_msg : ""}`);
+        li.title = `Run info:\n${JSON.stringify(program.run_info, undefined, 2).replace('{', '', -1).slice(0, -1)}`;
+        const t = document.createTextNode(
+            `${program.uuid.substr(0, 8)}... (${program.name}): ${program.file}@${program.parent} (${program.state}) ${program.display_msg ? `- ${program.display_msg}` : ''}`
+        );
         li.appendChild(t);
 
         // add image
@@ -833,10 +837,9 @@ export function populateProgramInstanceList() {
         stopspan.appendChild(ielem);
         stopspan.style.backgroundColor = '#da4f49';
         li.appendChild(stopspan);
-        
-        
+
         console.log(JSON.stringify(program));
-        stopspan.onclick = (function () {
+        stopspan.onclick = function () {
             Swal.fire({
                 title: 'Stop Program ?',
                 text: "You won't be able to revert this.",
@@ -846,18 +849,19 @@ export function populateProgramInstanceList() {
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Yes, stop it!',
             }).then(async (result) => {
-                if (result.isConfirmed) {            
-                    pubProgramMsg('delete', {...program});
-                    persist.programs.set(program.uuid, {...program, ...{"display_msg": "deleting..."}}, true, true);
-                }})
-        });
+                if (result.isConfirmed) {
+                    pubProgramMsg('delete', { ...program });
+                    persist.programs.set(program.uuid, { ...program, ...{ display_msg: 'deleting...' } }, true, true);
+                }
+            });
+        };
 
         programList.appendChild(li);
     });
 
-    programList.style.visibility='visible';
+    programList.style.visibility = 'visible';
 }
 
 export function hideProgramInstanceList() {
-    programList.style.visibility='hidden';
+    programList.style.visibility = 'hidden';
 }
