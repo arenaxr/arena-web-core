@@ -7,6 +7,7 @@
  */
 
 const { isIOS, isTablet, isR7, isMobileVR } = AFRAME.utils.device;
+const { TOPICS } = '../constants';
 
 /**
  * Wrapper class for various utility functions
@@ -75,7 +76,7 @@ export default class ARENAUtils {
             action: 'update',
             data: msg,
         };
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}/debug`, message);
+        ARENA.Mqtt.publish(TOPICS.PUBLISH.SCENE_DEBUG.formatStr(ARENA.topicParams), message);
     }
 
     /**
@@ -460,4 +461,47 @@ export default class ARENAUtils {
             }
         }
     }
+
+    /**
+     * Publishes clientEvent when interacting with objects. This can be directed to several possible topics
+     * depending on the object being a private object.
+     * @param {HTMLElement} objectEl - object element
+     * @param {object} msg - message to publish
+     * @param {string} scenePublic - public scene topic to publish to
+     * @param {string} scenePrivate - private scene topic to publish to
+     * @param {string} programPrivate - private program topic to publish to
+     */
+    static publishClientEvent(objectEl, msg, scenePublic, scenePrivate, programPrivate) {
+        let pubTopic;
+        const privateAttr = objectEl.getAttribute('private');
+        const programIdAttr = objectEl.getAttribute('program_id');
+        if (privateAttr) {
+            if (programIdAttr) {
+                pubTopic = programPrivate.formatStr({ toUid: programIdAttr }); // Send to the target object itself
+            } else {
+                pubTopic = scenePrivate.formatStr({ toUid: objectEl.id }); // Send to the specified program
+            }
+        } else {
+            pubTopic = scenePublic; // Public client event
+        }
+        ARENA.Mqtt.publish(pubTopic, msg);
+    }
+
+    /**
+     * Get username from idTag, which may or may not have a prefixed set of random digits to dedupe multiple connections
+     * from a single username. If the first underscore-delimited token is all digits, assume is that prefix and
+     * return the remainder. If there are no underscores, assume that the entire string is the username.
+     * @param {string} idTag - most likely extracted from a pubsub msg
+     * @return {string} username
+     */
+    static getUsernameFromIdTag(idTag) {
+        const idParts = idTag.split('_');
+        return idParts.length > 1 && /^\d+$/.test(idParts[0]) ? idParts.slice(1).join('_') : idTag;
+    }
 }
+
+// eslint-disable-next-line no-extend-native
+String.prototype.formatStr = function formatStr(...args) {
+    const params = arguments.length === 1 && typeof args[0] === 'object' ? args[0] : args;
+    return this.replace(/\{([^}]+)\}/g, (match, key) => (typeof params[key] !== 'undefined' ? params[key] : match));
+};

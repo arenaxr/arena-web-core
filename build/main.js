@@ -3,6 +3,7 @@
 /* eslint-disable import/extensions */
 import * as PersistObjects from './persist-objects.js';
 import ARENAUserAccount from './arena-account.js';
+import TOPICS from '../src/constants/topics.js';
 
 const Alert = Swal.mixin({
     toast: true,
@@ -853,7 +854,7 @@ window.addEventListener('onauth', async (e) => {
         // add scene if it does not exist
         if (newScene) await PersistObjects.addNewScene(namespaceinput.value, sceneinput.value, undefined);
 
-        await PersistObjects.addObject(obj, `${namespaceinput.value}/${sceneinput.value}`);
+        await PersistObjects.addObject(obj, namespaceinput.value, sceneinput.value);
         setTimeout(async () => {
             PersistObjects.populateObjectList(
                 `${namespaceinput.value}/${sceneinput.value}`,
@@ -1036,7 +1037,11 @@ Swal.fire({
  * @param {string} mqttToken
  */
 function updatePublishControlsByToken(namespace, scenename, mqttToken) {
-    const objectsTopic = `realm/s/${namespace}/${scenename}`;
+    const objectsTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+        nameSpace: namespace,
+        sceneName: scenename,
+        objectId: '+',
+    });
     const editor = ARENAAUTH.isUserSceneEditor(mqttToken, objectsTopic);
     const delButton = document.getElementById('delobj');
     const deleteSceneButton = document.getElementById('deletescene');
@@ -1051,3 +1056,9 @@ function updatePublishControlsByToken(namespace, scenename, mqttToken) {
         item.disabled = !editor;
     });
 }
+
+// eslint-disable-next-line no-extend-native
+String.prototype.formatStr = function formatStr(...args) {
+    const params = arguments.length === 1 && typeof args[0] === 'object' ? args[0] : args;
+    return this.replace(/\{([^}]+)\}/g, (match, key) => (typeof params[key] !== 'undefined' ? params[key] : match));
+};

@@ -66,7 +66,7 @@ function getStorePath() {
 }
 
 window.addEventListener('onauth', async (e) => {
-    await ARENAAUTH.makeUserRequest('GET', '/user/storelogin');
+    await ARENAAUTH.makeUserRequest('GET', '/user/v2/storelogin');
     const authToken = ARENAAUTH.getCookie('auth');
     loadStoreFront(authToken);
 });

@@ -1,5 +1,6 @@
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
+import { TOPICS } from '../../constants';
 import { ARENAColorsLight, ARENAColorsDark, ARENALayout, ARENATypography, EVENTS } from '../../constants/ui';
 
 // BUTTONS
@@ -32,6 +33,11 @@ const buttonBase = {
 
         this.buttonOptions = { ...buttonOptions, backgroundOpacity: this.ARENAColors.buttonBgOpacity };
         this.createButtonStates();
+
+        const { topicParams } = ARENA;
+        this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        this.topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        this.topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
     },
 
     createButtonStates() {
@@ -164,20 +170,26 @@ const buttonBase = {
                     const clickPos = ARENAUtils.vec3ToObject(position);
                     const coordsData = ARENAUtils.setClickData({ detail: evtDetail });
                     const thisMsg = {
-                        object_id: this.el.id,
+                        object_id: ARENA.idTag,
                         action: 'clientEvent',
                         type: 'buttonClick',
                         data: {
-                            clickPos,
+                            originPosition: clickPos,
                             buttonName,
                             buttonIndex: index,
-                            position: coordsData,
-                            source: ARENA.camName,
+                            targetPosition: coordsData,
+                            target: this.el.id,
                         },
                     };
                     if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
                         // publishing events attached to user id objects allows sculpting security
-                        ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+                        ARENAUtils.publishClientEvent(
+                            this.el,
+                            thisMsg,
+                            this.topicBase,
+                            this.topicBasePrivate,
+                            this.topicBasePrivateProg
+                        );
                     }
                 }),
         };

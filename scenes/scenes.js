@@ -122,7 +122,7 @@ window.addEventListener('onauth', async (e) => {
             window.userSceneId = _e.target.value;
             updateUriBuilderCheckboxes(true);
             updateUserSceneUrlBox(`${window.location.origin}/${_e.target.value}`);
-            scenePermsLink.href = `${window.location.origin}/user/profile/scenes/${_e.target.value}`;
+            scenePermsLink.href = `${window.location.origin}/user/v2/profile/scenes/${_e.target.value}`;
             deleteUserSceneBtn.value = _e.target.value;
             toggleUserSceneButtons(true);
         } else {
@@ -229,7 +229,7 @@ window.addEventListener('onauth', async (e) => {
     deleteUserSceneBtn.addEventListener('click', () => {
         if (confirm(`Are you sure you want to delete ${deleteUserSceneBtn.value}?`)) {
             const deletes = [
-                axios.delete(`/user/scenes/${deleteUserSceneBtn.value}`, {
+                axios.delete(`/user/v2/scenes/${deleteUserSceneBtn.value}`, {
                     withCredentials: true,
                 }),
                 axios.delete(`/persist/${deleteUserSceneBtn.value}`),
@@ -327,7 +327,7 @@ window.addEventListener('onauth', async (e) => {
     // my_scenes may include 'public' namespaces for staff
     // my_scenes may include other editor namespaces that have been granted
     axios
-        .get('/user/my_scenes', {
+        .get('/user/v2/my_scenes', {
             withCredentials: true,
         })
         .then((res) => {

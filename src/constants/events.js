@@ -10,6 +10,7 @@ export const ARENA_EVENTS = Object.freeze({
     ON_AUTH: 'onauth',
     USER_PARAMS_LOADED: 'onarenauserparamsloaded',
     MQTT_LOADED: 'onarenamqttloaded',
+    MQTT_SUBSCRIBED: 'onarenamqttsubscribed', // For listeners sensitive to actual msg flow
     JITSI_LOADED: 'onarenajitsiLoaded',
     SCENE_OPT_LOADED: 'onarenasceneoptionsloaded',
     SCENE_OBJ_LOADED: 'onarenasceneobjectsloaded',

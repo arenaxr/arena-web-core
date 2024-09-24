@@ -2,6 +2,7 @@ import { ARENAUtils } from '../../../utils';
 
 const Paho = require('paho-mqtt');
 
+// TODO (mwfarb): update to new scene-scoped render fusion topic-v5 structure
 const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/offer';
 const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/answer';
 const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/candidate';
@@ -59,6 +60,7 @@ export default class MQTTSignaling {
     mqttOnConnect() {
         this.client.onMessageArrived = this.mqttOnMessageArrived.bind(this);
 
+        // TODO (mwfarb): update to new scene-scoped render fusion topic-v5 structure
         this.client.subscribe(`${SERVER_HEALTH_CHECK}/${ARENA.namespacedScene}/#`);
         this.client.subscribe(`${SERVER_OFFER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
         this.client.subscribe(`${SERVER_ANSWER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);

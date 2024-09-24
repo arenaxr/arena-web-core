@@ -61,7 +61,7 @@ export default class ARENAUserAccount {
      * @return {UserAccountData} object with user account data
      */
     static async userAuthState() {
-        return ARENAUserAccount._makeRequest('GET', `/user/user_state`);
+        return ARENAUserAccount._makeRequest('GET', `/user/v2/user_state`);
     }
 
     /**
@@ -69,7 +69,7 @@ export default class ARENAUserAccount {
      * @return {[string]} list of scene names
      */
     static async userScenes() {
-        return ARENAUserAccount._makeRequest('GET', '/user/my_scenes');
+        return ARENAUserAccount._makeRequest('GET', '/user/v2/my_scenes');
     }
 
     /**
@@ -80,7 +80,7 @@ export default class ARENAUserAccount {
     static async requestUserNewScene(sceneNamespace, isPublic = false) {
         const params = new FormData();
         // TODO: add public parameter
-        return ARENAUserAccount._makeRequest('POST', `/user/scenes/${sceneNamespace}`);
+        return ARENAUserAccount._makeRequest('POST', `/user/v2/scenes/${sceneNamespace}`);
     }
 
     /**
@@ -88,7 +88,7 @@ export default class ARENAUserAccount {
      * @param {string} sceneNamespace name of the scene without namespace
      */
     static async requestDeleteUserScene(sceneNamespace) {
-        return ARENAUserAccount._makeRequest('DELETE', `/user/scenes/${sceneNamespace}`);
+        return ARENAUserAccount._makeRequest('DELETE', `/user/v2/scenes/${sceneNamespace}`);
     }
 
     /**
@@ -105,7 +105,7 @@ export default class ARENAUserAccount {
         // pages /scenes and /build should have general permissions for the user's scene objects
         const result = await ARENAUserAccount._makeRequest(
             'POST',
-            `/user/mqtt_auth`,
+            `/user/v2/mqtt_auth`,
             params,
             'application/x-www-form-urlencoded'
         );
