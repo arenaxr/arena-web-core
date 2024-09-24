@@ -775,7 +775,7 @@ export function pubProgramMsg(action, obj) {
             filetype: obj.filetype,
             env: obj.env,
             args: obj.args ? obj.args : [],
-            channels: obj.chanels ? obj.chanels : {},
+            channels: obj.channels ? obj.channels : {},
             apis: obj.apis ? obj.apis : [],
         },
     });
