@@ -422,7 +422,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         this.initialized = true;
 
-        sceneEl.emit(JITSI_EVENTS.CONNECTED, {
+        ARENA.events.emit(JITSI_EVENTS.CONNECTED, {
             scene: ARENA.namespacedScene,
             pl,
         });

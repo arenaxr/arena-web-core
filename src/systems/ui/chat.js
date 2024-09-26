@@ -64,8 +64,6 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         this.upsertLiveUser = this.upsertLiveUser.bind(this);
 
-        this.sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect.bind(this));
-
         ARENA.events.addMultiEventListener(
             [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.MQTT_SUBSCRIBED, ARENA_EVENTS.JITSI_LOADED],
             this.ready.bind(this)
@@ -404,6 +402,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.onJitsiStatsRemote = this.onJitsiStatsRemote.bind(this);
         this.onJitsiStatus = this.onJitsiStatus.bind(this);
 
+        ARENA.events.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect.bind(this));
         sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, this.onNewSettings);
         sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onUserJitsiJoin);
         sceneEl.addEventListener(JITSI_EVENTS.SCREENSHARE, this.onScreenshare);
