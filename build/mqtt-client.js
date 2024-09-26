@@ -24,7 +24,7 @@ export default class MqttClient {
             port: st.port !== undefined ? st.port : 8083,
             path: st.path !== undefined ? st.path : '/mqtt/',
             clientid:
-                st.clientid !== undefined ? st.clientid : `this.mqttc-client-${Math.round(Math.random() * 10000)}`,
+                st.clientid !== undefined ? st.clientid : `build-client-${Math.round(Math.random() * 10000)}`,
             subscribeTopics: st.subscribeTopics,
             onConnectCallback: st.onConnectCallback,
             onConnectCallbackContext: st.onConnectCallbackContext,
