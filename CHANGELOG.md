@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.29.1](https://github.com/arenaxr/arena-web-core/compare/v1.29.0...v1.29.1) (2024-09-26)
+
+
+### Bug Fixes
+
+* **build:** add 'build' to mqtt client id ([fe2eb73](https://github.com/arenaxr/arena-web-core/commit/fe2eb73208d397125da705f98a4fd7a9cc5f58aa))
+* **build:** correct unknown object type display ([4caf6fe](https://github.com/arenaxr/arena-web-core/commit/4caf6fefbe1a5e2885f3b5afc9cadb36afbba781))
+* **build:** fixed typo obj.chanels -&gt; obj.channels ([8a4c1db](https://github.com/arenaxr/arena-web-core/commit/8a4c1dbec93dc1b87ff25fff4f1153ce8c80fee4))
+* **scene-options:** fixed incorrrect warning when missing clickableOnlyEvents option ([58cab4d](https://github.com/arenaxr/arena-web-core/commit/58cab4d0ec282fadd910070366a19c45526edc2d))
+* **scenes:** correct adding demoMode in URL builder ([1ad7211](https://github.com/arenaxr/arena-web-core/commit/1ad721199ee48ecc1dd85b763f0567128112831c))
+
 ## [1.29.0](https://github.com/arenaxr/arena-web-core/compare/v1.28.3...v1.29.0) (2024-09-02)
 
 
