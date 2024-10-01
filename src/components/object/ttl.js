@@ -23,15 +23,15 @@ AFRAME.registerComponent('ttl', {
     init() {
         if (this.data > 0) {
             const now = new Date();
-            now.setSeconds(now.getSeconds() + this.data.seconds);
+            now.setSeconds(now.getSeconds() + this.data);
             this.expireAt = now;
             this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
         }
     },
-    update(oldData) {
-        if (oldData !== this.data && this.data > 0) {
+    update() {
+        if (this.data > 0) {
             const now = new Date();
-            now.setSeconds(now.getSeconds() + this.data.seconds);
+            now.setSeconds(now.getSeconds() + this.data);
             this.expireAt = now;
         }
     },
