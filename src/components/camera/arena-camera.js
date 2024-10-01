@@ -113,11 +113,12 @@ AFRAME.registerComponent('arena-camera', {
         if (!data.enabled) return;
 
         const arenaUser = { displayName: data.displayName, color: data.color };
+        const jitter = new Date().getSeconds() % 2;
         const msg = {
             object_id: ARENA.idTag,
             action,
             type: 'object',
-            ttl: 30,
+            ttl: 29.5 + jitter,
             data: {
                 object_type: 'camera',
                 position: {
