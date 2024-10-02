@@ -137,7 +137,7 @@ export default class CreateUpdate {
 
                 if (message.ttl !== undefined) {
                     // Allow falsy value of 0
-                    entityEl.setAttribute('ttl', message.ttl);
+                    entityEl.setAttribute('ttl', { seconds: message.ttl });
                 }
 
                 // Private and program_id flags. Falsy values unset (undefined, null, 0, '')

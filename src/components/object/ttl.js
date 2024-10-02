@@ -15,23 +15,25 @@ import { Delete } from '../../systems/core/message-actions';
  * Update *is* allowed, which will reset the timer to start from that moment.
  *
  * @property {number} seconds - Seconds until entity is removed
- * @property {object} expireAt - Expiration time [Date object]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date}
  * @module ttl
  */
 AFRAME.registerComponent('ttl', {
-    schema: { type: 'number', default: 0 }, // 0 = disabled
+    schema: {
+        seconds: { type: 'number' },
+    },
     init() {
         if (this.data > 0) {
             const now = new Date();
-            now.setSeconds(now.getSeconds() + this.data);
+            now.setSeconds(now.getSeconds() + this.data.seconds);
             this.expireAt = now;
             this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
         }
     },
     update() {
-        if (this.data > 0) {
+        if (this.data >= 0) {
+            // Allow -1 to bypass TTL update, retains previous timeout
             const now = new Date();
-            now.setSeconds(now.getSeconds() + this.data);
+            now.setSeconds(now.getSeconds() + this.data.seconds);
             this.expireAt = now;
         }
     },
