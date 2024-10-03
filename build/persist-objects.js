@@ -370,7 +370,10 @@ export function updateSubscribeTopic(scene) {
 
     if (persist.currentScene) persist.mc.unsubscribe(persist.currentScene);
     if (scene) {
-        const topic = `realm/s/${scene}/#`;
+        const topic = TOPICS.SUBSCRIBE.SCENE_PUBLIC.formatStr({
+            nameSpace: scene.split('/')[0],
+            sceneName: scene.split('/')[1],
+        });
         persist.mc.subscribe(topic);
         persist.currentScene = scene;
         populateProgramInstanceList();
