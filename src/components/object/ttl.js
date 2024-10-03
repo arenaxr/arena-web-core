@@ -12,7 +12,8 @@ import { Delete } from '../../systems/core/message-actions';
  * Time To Live (TTL) component.
  *
  * When applied to an entity, the entity will remove itself from DOM after the specified number of seconds.
- * Update *is* allowed, which will reset the timer to start from that moment.
+ * Update *is* allowed, which will reset the timer to start from that moment. Note that this is a top-level property
+ * in MQTT messages, with the seconds value simply as a scalar rather than a nested object property.
  *
  * @property {number} seconds - Seconds until entity is removed
  * @module ttl
