@@ -53,6 +53,7 @@ const TOPICS = Object.freeze({
         PROC_DBG:              `${REALM}/proc/debug/{uuid}`,
         SCENE_PUBLIC:          `${REALM}/s/{nameSpace}/{sceneName}/+/+`,
         SCENE_PRIVATE:         `${REALM}/s/{nameSpace}/{sceneName}/+/+/{idTag}/#`,
+        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/+/{idTag}`,
     },
     PUBLISH: {
         NETWORK_LATENCY:       '$NETWORK/latency',
