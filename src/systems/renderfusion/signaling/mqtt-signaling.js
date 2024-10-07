@@ -46,10 +46,14 @@ export default class MQTTSignaling {
     mqttOnConnect() {
         this.client.onMessageArrived = this.mqttOnMessageArrived.bind(this);
 
-        this.publicRenderTopic = TOPICS.PUBLISH.SCENE_RENDER.formatStr(ARENA.topicParams);
-        this.privateRenderTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
-
-        this.client.subscribe(`${this.privateRenderTopic}`);
+        this.publicRenderClientTopic = TOPICS.PUBLISH.SCENE_RENDER.formatStr({
+            ...ARENA.topicParams,
+            ...{ idTag: '-' },
+        });
+        this.privateRenderClientTopic = `${TOPICS.PUBLISH.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams)}`;
+        console.log(`hybrid rendering pub ${this.publicRenderClientTopic} pri ${this.privateRenderClientTopic}`);
+        this.client.subscribe(`${this.publicRenderClientTopic}`);
+        console.log(`hybrid rendering subscribed to ${this.publicRenderClientTopic}`);
     }
 
     mqttOnConnectionLost(responseObject) {
@@ -106,32 +110,32 @@ export default class MQTTSignaling {
             screenWidth: 1.25 * width,
             screenHeight: height,
         };
-        this.sendMessage(`${this.publicRenderTopic}`, 'connect-ack', connectData);
+        this.sendMessage(`${this.privateRenderClientTopic}`, 'connect-ack', connectData);
     }
 
     closeConnection() {
-        this.sendMessage(`${this.publicRenderTopic}`, 'disconnect');
+        this.sendMessage(`${this.privateRenderClientTopic}`, 'disconnect');
 
         this.client.disconnect();
     }
 
     sendOffer(offer) {
-        this.sendMessage(`${this.publicRenderTopic}`, 'offer', offer);
+        this.sendMessage(`${this.privateRenderClientTopic}`, 'offer', offer);
     }
 
     sendAnswer(answer) {
-        this.sendMessage(`${this.publicRenderTopic}`, 'answer', answer);
+        this.sendMessage(`${this.privateRenderClientTopic}`, 'answer', answer);
     }
 
     sendCandidate(candidate) {
-        this.sendMessage(`${this.publicRenderTopic}`, 'ice', candidate);
+        this.sendMessage(`${this.privateRenderClientTopic}`, 'ice', candidate);
     }
 
     sendHealthCheckAck() {
-        this.sendMessage(`${this.publicRenderTopic}`, 'health', '');
+        this.sendMessage(`${this.privateRenderClientTopic}`, 'health', '');
     }
 
     sendStats(stats) {
-        this.publish(`${this.publicRenderTopic}`, JSON.stringify(stats));
+        this.publish(`${this.privateRenderClientTopic}`, JSON.stringify(stats));
     }
 }
