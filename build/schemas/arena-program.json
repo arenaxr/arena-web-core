@@ -130,7 +130,7 @@
                             "type": "pubsub",
                             "mode": "rw",
                             "params": {
-                                "topic": "realm/s/${scene}"
+                                "topic": "realm/s/${scene}/${namespace}"
                             }
                         }
                     ]
