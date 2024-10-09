@@ -230,7 +230,15 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.screenshareButton.style.display = 'none';
             this.settingsButtons.push(this.screenshareButton);
 
-            if (jitsiPermitted && !ARENA.utils.isMobile()) {
+            // non-editors cannot change/obscure the scene by generating a new screenshare object
+            let screenObjPermitted = this.arena.isUserSceneWriter();
+            if (!screenObjPermitted) {
+                // without object permissions, are there existing objects to screenshare upon?
+                screenObjPermitted =
+                    sceneEl.querySelector('[screenshareable]') || sceneEl.querySelector('#screenshare');
+            }
+
+            if (screenObjPermitted && jitsiPermitted && !ARENA.utils.isMobile()) {
                 // no screenshare on mobile - doesn't work
                 this._buttonList[this.buttons.SCREENSHARE] = this.screenshareButton;
                 this.iconsDiv.appendChild(this.screenshareButton);
