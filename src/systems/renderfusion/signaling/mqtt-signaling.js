@@ -46,14 +46,15 @@ export default class MQTTSignaling {
     mqttOnConnect() {
         this.client.onMessageArrived = this.mqttOnMessageArrived.bind(this);
 
-        this.publicRenderClientTopic = TOPICS.PUBLISH.SCENE_RENDER.formatStr({
-            ...ARENA.topicParams,
-            ...{ idTag: '-' },
-        });
-        this.privateRenderClientTopic = `${TOPICS.PUBLISH.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams)}`;
-        console.log(`hybrid rendering pub ${this.publicRenderClientTopic} pri ${this.privateRenderClientTopic}`);
-        this.client.subscribe(`${this.publicRenderClientTopic}`);
-        console.log(`hybrid rendering subscribed to ${this.publicRenderClientTopic}`);
+        this.pubRenderClientPrivateTopic = TOPICS.PUBLISH.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
+        this.subRenderClientPublicTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PUBLIC.formatStr(ARENA.topicParams);
+        this.subRenderClientPrivateTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
+        this.client.subscribe(`${this.subRenderClientPublicTopic}`);
+        this.client.subscribe(`${this.subRenderClientPrivateTopic}`);
+        console.log(`hybrid rendering pub ${this.pubRenderClientPrivateTopic}`);
+        console.log(
+            `hybrid rendering subscribed to ${this.subRenderClientPublicTopic} ${this.subRenderClientPrivateTopic}`
+        );
     }
 
     mqttOnConnectionLost(responseObject) {
@@ -110,32 +111,32 @@ export default class MQTTSignaling {
             screenWidth: 1.25 * width,
             screenHeight: height,
         };
-        this.sendMessage(`${this.privateRenderClientTopic}`, 'connect-ack', connectData);
+        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'connect-ack', connectData);
     }
 
     closeConnection() {
-        this.sendMessage(`${this.privateRenderClientTopic}`, 'disconnect');
+        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'disconnect');
 
         this.client.disconnect();
     }
 
     sendOffer(offer) {
-        this.sendMessage(`${this.privateRenderClientTopic}`, 'offer', offer);
+        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'offer', offer);
     }
 
     sendAnswer(answer) {
-        this.sendMessage(`${this.privateRenderClientTopic}`, 'answer', answer);
+        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'answer', answer);
     }
 
     sendCandidate(candidate) {
-        this.sendMessage(`${this.privateRenderClientTopic}`, 'ice', candidate);
+        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'ice', candidate);
     }
 
     sendHealthCheckAck() {
-        this.sendMessage(`${this.privateRenderClientTopic}`, 'health', '');
+        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'health', '');
     }
 
     sendStats(stats) {
-        this.publish(`${this.privateRenderClientTopic}`, JSON.stringify(stats));
+        this.publish(`${this.pubRenderClientPrivateTopic}`, JSON.stringify(stats));
     }
 }
