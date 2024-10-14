@@ -10,12 +10,6 @@ import MQTTClient from './mqtt-client';
 import RuntimeMsgs from './runtime-msgs';
 import { ARENA_EVENTS, TOPICS } from '../../../constants';
 
-// eslint-disable-next-line no-extend-native
-String.prototype.formatStr = function formatStr(...args) {
-    const params = arguments.length === 1 && typeof args[0] === 'object' ? args[0] : args;
-    return this.replace(/\{([^}]+)\}/g, (match, key) => (typeof params[key] !== 'undefined' ? params[key] : match));
-};
-
 /**
  * Send requests to orchestrator: register as a runtime, create modules from persist objects.
  * TODO: start modules on the browser
