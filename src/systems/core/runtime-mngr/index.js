@@ -10,6 +10,12 @@ import MQTTClient from './mqtt-client';
 import RuntimeMsgs from './runtime-msgs';
 import { ARENA_EVENTS, TOPICS } from '../../../constants';
 
+// eslint-disable-next-line no-extend-native
+String.prototype.formatStr = function formatStr(...args) {
+    const params = arguments.length === 1 && typeof args[0] === 'object' ? args[0] : args;
+    return this.replace(/\{([^}]+)\}/g, (match, key) => (typeof params[key] !== 'undefined' ? params[key] : match));
+};
+
 /**
  * Send requests to orchestrator: register as a runtime, create modules from persist objects.
  * TODO: start modules on the browser
@@ -37,14 +43,13 @@ export default class RuntimeMngr {
     /* @property {string[]} [apis=[]] - apis supported by the runtime (TODO: add apis once we support running modules) */
     apis;
 
-    /* @property {string} [regTopic="realm/proc/reg"] - pubsub topic where the runtime sends register messages */
-    regTopic;
+    /* @property {string} - pubsub topic where the runtime sends register messages and also receives confirmations */
+    runtimeTopicPub;
+    runtimeTopicSub;
 
-    /*  @property {string} [ctlTopic="realm/proc/ctl"] - pubsub topic where the runtime listens for control messages (module create/delete) */
-    ctlTopic;
-
-    /* @property {string} [dbgTopic="realm/proc/debug"] - pubsub topic where the runtime sends/receives output (stdout/stdin) */
-    dbgTopic;
+    /*  @property {string} - pubsub topic where client sends out module requests and the runtime listens for control messages (module create/delete) */
+    modulesTopicPub;
+    modulesTopicSub;
 
     /* @property {number} [regTimeoutSeconds=30] - how long we wait for responses to register msgs */
     regTimeoutSeconds;
@@ -82,16 +87,14 @@ export default class RuntimeMngr {
         mqttHost = 'wss://arenaxr.org/mqtt/',
         mqttUsername = 'noauth',
         mqttToken = 'noauth',
-        realm = 'realm',
+        realm = TOPICS.REALM,
+        nameSpace = 'public',
+        sceneName = 'default',
+        idTag = `${Math.floor(Math.random() * 10000000000 + 1000000000)}-anonymous-User`,
         uuid = UUID.generate(),
         name = `rt-${(Math.random() + 1).toString(36).substring(2)}`,
         maxNmodules = 0, // TMP: cannot run any modules
         apis = [],
-        regTopic = TOPICS.SUBSCRIBE.PROC_REG,
-        regTopicPub = TOPICS.PUBLISH.PROC_REG,
-        ctlTopic = TOPICS.SUBSCRIBE.PROC_CTL,
-        ctlTopicPub = TOPICS.PUBLISH.PROC_CTL,
-        dbgTopic = TOPICS.PUBLISH.PROC_DBG,
         regTimeoutSeconds = 5,
         onInitCallback = null,
         fsLocation = '/store/users/',
@@ -111,11 +114,31 @@ export default class RuntimeMngr {
         this.name = name;
         this.maxNmodules = maxNmodules;
         this.apis = apis;
-        this.regTopic = regTopic;
-        this.regTopicPub = regTopicPub;
-        this.ctlTopic = ctlTopic;
-        this.ctlTopicPub = ctlTopicPub;
-        this.dbgTopic = dbgTopic;
+        //{nameSpace}/p/{rtUuid}
+        this.runtimeTopicPub = TOPICS.PUBLISH.RT_RUNTIME.formatStr({
+            nameSpace: nameSpace,
+            rtUuid: uuid,
+        });
+        //{nameSpace}/p/{rtUuid}
+        this.runtimeTopicSub = TOPICS.SUBSCRIBE.RT_RUNTIME.formatStr({
+            nameSpace: nameSpace,
+            rtUuid: uuid,
+        });
+        //{nameSpace}/{sceneName}/p/{idTag}
+        this.modulesTopicPub = TOPICS.PUBLISH.RT_MODULES.formatStr({
+            nameSpace: nameSpace,
+            sceneName: sceneName,
+            idTag: idTag
+        });
+        //{nameSpace}/{sceneName}/p/+
+        this.modulesTopicSub = TOPICS.SUBSCRIBE.RT_MODULES.formatStr({
+            nameSpace: nameSpace,
+            sceneName: sceneName,
+        });
+        console.info('runtimeTopicPub:', this.runtimeTopicPub);
+        console.info('runtimeTopicSub:', this.runtimeTopicSub);
+        console.info('modulesTopicPub:', this.modulesTopicPub);
+        console.info('modulesTopicSub:', this.modulesTopicSub);
         this.regTimeoutSeconds = regTimeoutSeconds;
         this.onInitCallback = onInitCallback;
         this.fsLocation = fsLocation;
@@ -152,11 +175,10 @@ export default class RuntimeMngr {
         name = this.name,
         maxNmodules = this.maxNmodules,
         apis = this.apis,
-        regTopic = this.regTopic,
-        regTopicPub = this.regTopicPub,
-        ctlTopic = this.ctlTopic,
-        ctlTopicPub = this.ctlTopicPub,
-        dbgTopic = this.dbgTopic,
+        runtimeTopicPub = this.runtimeTopicPub,
+        runtimeTopicSub = this.runtimeTopicSub,
+        modulesTopicPub = this.modulesTopicPub,
+        modulesTopicSub = this.modulesTopicSub,
         regTimeoutSeconds = this.regTimeoutSeconds,
         onInitCallback = this.onInitCallback,
         fsLocation = this.fsLocation,
@@ -167,11 +189,10 @@ export default class RuntimeMngr {
         this.name = name;
         this.maxNmodules = maxNmodules;
         this.apis = apis;
-        this.regTopic = regTopic;
-        this.regTopicPub = regTopicPub;
-        this.ctlTopic = ctlTopic;
-        this.ctlTopicPub = ctlTopicPub;
-        this.dbgTopic = dbgTopic;
+        this.runtimeTopicPub = runtimeTopicPub;
+        this.runtimeTopicSub = runtimeTopicSub;
+        this.modulesTopicPub = modulesTopicPub;
+        this.modulesTopicSub = modulesTopicSub;
         this.regTimeoutSeconds = regTimeoutSeconds;
         this.onInitCallback = onInitCallback;
         this.fsLocation = fsLocation;
@@ -187,14 +208,14 @@ export default class RuntimeMngr {
             mqtt_token: rtMngr.mqttToken,
             onMessageCallback: rtMngr.onMqttMessage.bind(rtMngr),
             willMessage: rtMngr.lastWillStringMsg,
-            willMessageTopic: rtMngr.regTopicPub,
+            willMessageTopic: rtMngr.runtimeTopicPub,
             userid: rtMngr.name,
         });
 
         await this.mc.connect();
 
-        // subscribe to reg to receive registration confirmation
-        this.mc.subscribe(this.regTopic);
+        // subscribe to runtime topic to receive registration confirmation
+        this.mc.subscribe(this.runtimeTopicSub);
 
         // registration
         this.isRegistered = !performRegister; // TMP: skip registration
@@ -214,7 +235,7 @@ export default class RuntimeMngr {
         const regMsg = this.rtMsgs.registerRuntime();
         this.regRequestUuid = regMsg.object_id; // save message uuid for confirmation
 
-        this.mc.publish(this.regTopicPub, JSON.stringify(regMsg));
+        this.mc.publish(this.runtimeTopicPub, JSON.stringify(regMsg));
 
         setTimeout(this.register.bind(this), this.regTimeoutSeconds * 1000); // try register again
     }
@@ -265,9 +286,9 @@ export default class RuntimeMngr {
 
         console.info('Runtime-Mngr: Registered. %cShift+Opt+P to force program reload', 'color: orange');
 
-        this.mc.unsubscribe(this.regTopic);
-        // subscribe to ctl/runtime_uuid
-        this.mc.subscribe(this.ctlTopic.formatStr({ uuid: this.uuid }));
+        this.mc.unsubscribe(this.runtimeTopicSub);
+        // subscribe to receive module requests
+        this.mc.subscribe(this.modulesTopicSub);
 
         // check if we have modules to start
         if (this.pendingModulesArgs.length > 0) {
@@ -335,8 +356,8 @@ export default class RuntimeMngr {
         // NOTE: object_id in runtime messages are used as a transaction id
         // this.pendingReq.push(modCreateMsg.object_id); // pending_req is a list with object_id of requests waiting arts response
 
-        console.info('Sending create module request:', modCreateMsg);
-        this.mc.publish(this.ctlTopicPub, JSON.stringify(modCreateMsg));
+        console.info('Sending create module request:', this.modulesTopicPub, modCreateMsg);
+        this.mc.publish(this.modulesTopicPub, JSON.stringify(modCreateMsg));
     }
 
     /**
@@ -350,24 +371,24 @@ export default class RuntimeMngr {
             if (saved.isClientInstantiate || all === true) {
                 const modDelMsg = this.rtMsgs.deleteModule(saved.moduleCreateMsg.data);
                 if (this.debug === true) console.info('Sending delete module request:', modDelMsg);
-                this.mc.publish(this.ctlTopicPub, JSON.stringify(modDelMsg));
+                this.mc.publish(this.modulesTopicPub, JSON.stringify(modDelMsg));
             }
         });
 
         // sent in case last will fails (this will be a duplicate of last will)
-        this.mc.publish(this.regTopicPub, this.lastWillStringMsg);
+        this.mc.publish(this.runtimeTopicPub, this.lastWillStringMsg);
     }
 
     /**
      * Requests modules previously loaded in current scene; by default only client instance ones
-     * @param {boolean} all - relead all modules requested for current scene; default is to only request client instance programs
+     * @param {boolean} all - reload all modules requested for current scene; default is to only request client instance programs
      */
     restart(all = false) {
         console.info(`Runtime-Mngr: Restart(all=${all})`, this.modules);
         this.modules.forEach((saved) => {
             if (saved.isClientInstantiate || all === true) {
                 if (this.debug === true) console.info('Sending create module request:', saved.moduleCreateMsg);
-                this.mc.publish(this.ctlTopic, JSON.stringify(saved.moduleCreateMsg));
+                this.mc.publish(this.modulesTopicPub, JSON.stringify(saved.moduleCreateMsg));
             }
         });
     }
@@ -407,9 +428,5 @@ export default class RuntimeMngr {
 
     getFSLocation() {
         return this.fsLocation;
-    }
-
-    getRtDbgTopic() {
-        return this.dbgTopic.formatStr({ uuid: this.uuid });
     }
 }

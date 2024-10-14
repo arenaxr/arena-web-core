@@ -48,9 +48,8 @@ const TOPICS = Object.freeze({
     SUBSCRIBE: {
         NETWORK:               '$NETWORK',
         DEVICE:                `${REALM}/d/{deviceName}/#`, // All client placeholder
-        PROC_REG:              `${REALM}/proc/reg`,
-        PROC_CTL:              `${REALM}/proc/control/{uuid}/#`,
-        PROC_DBG:              `${REALM}/proc/debug/{uuid}`,
+        RT_RUNTIME:            `${REALM}/g/{nameSpace}/p/{rtUuid}`,
+        RT_MODULES:            `${REALM}/s/{nameSpace}/{sceneName}/p/+`,
         SCENE_PUBLIC:          `${REALM}/s/{nameSpace}/{sceneName}/+/+`,
         SCENE_PRIVATE:         `${REALM}/s/{nameSpace}/{sceneName}/+/+/{idTag}/#`,
         SCENE_RENDER_PUBLIC:   `${REALM}/s/{nameSpace}/{sceneName}/r/-`, // TODO: consolidate
@@ -59,8 +58,8 @@ const TOPICS = Object.freeze({
     PUBLISH: {
         NETWORK_LATENCY:       '$NETWORK/latency',
         DEVICE:                `${REALM}/d/{deviceName}/{idTag}`,
-        PROC_REG:              `${REALM}/proc/reg`,
-        PROC_CTL:              `${REALM}/proc/control`,
+        RT_RUNTIME:            `${REALM}/g/{nameSpace}/p/{rtUuid}`,
+        RT_MODULES:            `${REALM}/s/{nameSpace}/{sceneName}/p/{idTag}`,
         PROC_DBG:              `${REALM}/proc/debug/{uuid}`,
         SCENE_PRESENCE:        `${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}`,
         SCENE_PRESENCE_PRIVATE:`${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}/{toUid}`,

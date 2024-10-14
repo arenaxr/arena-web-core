@@ -222,6 +222,9 @@ AFRAME.registerSystem('arena-scene', {
             name: `rt-${this.idTag}`,
             mqttUsername: this.mqttToken.mqtt_username,
             mqttToken: this.mqttToken.mqtt_token,
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            idTag: this.idTag,    
         });
         this.RuntimeManager.init();
     },
