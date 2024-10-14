@@ -34,6 +34,7 @@ export default class MQTTSignaling {
                 userName: this.mqttUsername,
                 password: this.mqttToken,
                 onSuccess: () => {
+                    // TODO (elu2): fixme, this is called once per second after first server connection
                     _this.mqttOnConnect();
                     resolve();
                 },
@@ -49,12 +50,8 @@ export default class MQTTSignaling {
         this.pubRenderClientPrivateTopic = TOPICS.PUBLISH.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
         this.subRenderClientPublicTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PUBLIC.formatStr(ARENA.topicParams);
         this.subRenderClientPrivateTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
-        this.client.subscribe(`${this.subRenderClientPublicTopic}`);
-        this.client.subscribe(`${this.subRenderClientPrivateTopic}`);
-        console.log(`hybrid rendering pub ${this.pubRenderClientPrivateTopic}`);
-        console.log(
-            `hybrid rendering subscribed to ${this.subRenderClientPublicTopic} ${this.subRenderClientPrivateTopic}`
-        );
+        this.client.subscribe(this.subRenderClientPublicTopic);
+        this.client.subscribe(this.subRenderClientPrivateTopic);
     }
 
     mqttOnConnectionLost(responseObject) {
@@ -111,32 +108,32 @@ export default class MQTTSignaling {
             screenWidth: 1.25 * width,
             screenHeight: height,
         };
-        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'connect-ack', connectData);
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'connect-ack', connectData);
     }
 
     closeConnection() {
-        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'disconnect');
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'disconnect');
 
         this.client.disconnect();
     }
 
     sendOffer(offer) {
-        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'offer', offer);
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'offer', offer);
     }
 
     sendAnswer(answer) {
-        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'answer', answer);
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'answer', answer);
     }
 
     sendCandidate(candidate) {
-        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'ice', candidate);
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'ice', candidate);
     }
 
     sendHealthCheckAck() {
-        this.sendMessage(`${this.pubRenderClientPrivateTopic}`, 'health', '');
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'health', '');
     }
 
     sendStats(stats) {
-        this.publish(`${this.pubRenderClientPrivateTopic}`, JSON.stringify(stats));
+        this.publish(this.pubRenderClientPrivateTopic, JSON.stringify(stats));
     }
 }
