@@ -117,7 +117,7 @@ AFRAME.registerComponent('arena-camera', {
             object_id: ARENA.idTag,
             action,
             type: 'object',
-            ttl: { seconds: 30 },
+            ttl: 30,
             data: {
                 object_type: 'camera',
                 position: {
