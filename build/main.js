@@ -43,7 +43,7 @@ window.addEventListener('onauth', async (e) => {
     const objFilterSel = document.getElementById('objfiltersel');
     const arenaHostLbl = document.getElementById('arenahost');
     const sceneLinks = document.getElementById('scenelinks');
-    
+
     // Buttons/s
     const openAddSceneButton = document.getElementById('openaddscene');
     const deleteSceneButton = document.getElementById('deletescene');
@@ -57,9 +57,9 @@ window.addEventListener('onauth', async (e) => {
     const delButton = document.getElementById('delobj');
     const cpyButton = document.getElementById('copyobj');
     const allButton = document.getElementById('selectall');
-    //const programStopButton = document.getElementById('stoppgrm');
-    //const programStartButton = document.getElementById('startpgrm');
-    //const programRestartButton = document.getElementById('restartpgrm');
+    // const programStopButton = document.getElementById('stoppgrm');
+    // const programStartButton = document.getElementById('startpgrm');
+    // const programRestartButton = document.getElementById('restartpgrm');
     const clearselButton = document.getElementById('clearlist');
     const refreshButton = document.getElementById('refreshlist');
     const refreshSlButton = document.getElementById('refreshscenelist');
@@ -223,7 +223,6 @@ window.addEventListener('onauth', async (e) => {
         } else {
             PersistObjects.hideProgramInstanceList();
         }
-
     };
 
     /**
@@ -658,7 +657,6 @@ window.addEventListener('onauth', async (e) => {
         localStorage.setItem('scene', sceneinput.value);
         updateUrl();
         updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
-        
     });
 
     // Focus listener for scene
@@ -774,16 +772,16 @@ window.addEventListener('onauth', async (e) => {
             });
         });
     });
-/*
+    /*
     programStopButton.addEventListener('click', () => {
         if (!currentEditObj && !currentEditObj.type === 'program') return;
-        
+
         if (currentEditObj.data.instantiate !== 'single' ) {
             Alert.fire({
                 icon: 'info',
                 title: 'For now, we only support stopping "instantiate=single" programs.',
                 timer: 5000,
-            });            
+            });
             return;
         }
         PersistObjects.pubProgramMsg('delete', currentEditObj);
@@ -791,7 +789,7 @@ window.addEventListener('onauth', async (e) => {
             icon: 'info',
             title: 'Module requested to stop',
             timer: 5000,
-        });                
+        });
     });
 
     programStartButton.addEventListener('click', () => {
@@ -799,7 +797,7 @@ window.addEventListener('onauth', async (e) => {
             icon: 'info',
             title: 'Not implemented. <br/>(entering the scene will start programs)',
             timer: 5000,
-        });           
+        });
     });
 
     programRestartButton.addEventListener('click', () => {
@@ -807,7 +805,7 @@ window.addEventListener('onauth', async (e) => {
             icon: 'info',
             title: 'Not implemented. <br/>(entering the scene will start programs)',
             timer: 5000,
-        });        
+        });
     });
 */
     async function setAllTypes(showHide) {
@@ -951,7 +949,7 @@ window.addEventListener('onauth', async (e) => {
         authState,
         mqttUsername: username,
         mqttToken,
-        exportSceneButton
+        exportSceneButton,
     });
 
     // load default objects, convert to mqtt wire format

@@ -199,6 +199,9 @@ window.addEventListener('onauth', async (e) => {
                     case 'noavCheck':
                         sceneUrl.searchParams.append('noav', '1');
                         break;
+                    case 'demoModeCheck':
+                        sceneUrl.searchParams.append('demoMode', '1');
+                        break;
                     default:
                     // skip
                 }
