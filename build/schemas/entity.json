@@ -91,5 +91,5 @@
             }
         }
     ],
-    "required": ["object_id", "action", "type", "data", "persist", "private", "program_id"]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }
