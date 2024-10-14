@@ -9,27 +9,42 @@
             "properties": {
                 "data": {
                     "properties": {
-                        "source": {
-                            "title": "Source ID",
-                            "description": "The `object_id` of event origination. e.g camera or client program connection id.",
+                        "target": {
+                            "description": "The `object_id` of event destination.",
                             "type": "string"
                         },
-                        "position": {
+                        "targetPosition": {
                             "description": "The event destination position in 3D.",
                             "format": "grid",
-                            "$ref": "#/definitions/vector3",
-                            "title": "Position"
+                            "$ref": "#/definitions/vector3"
                         },
-                        "clickPos": {
+                        "originPosition": {
                             "description": "The event origination position in 3D.",
                             "format": "grid",
                             "$ref": "#/definitions/vector3",
-                            "title": "Click Position",
                             "default": {
                                 "x": 0,
                                 "y": 1.6,
                                 "z": 0
                             }
+                        },
+                        "source": {
+                            "title": "DEPRECATED (source)",
+                            "description": "DEPRECATED: data.source is deprecated for clientEvent, use data.target instead.",
+                            "type": "string",
+                            "deprecated": true
+                        },
+                        "position": {
+                            "title": "DEPRECATED (position)",
+                            "description": "DEPRECATED: data.position is deprecated for clientEvent, use data.targetPosition instead.",
+                            "type": "object",
+                            "deprecated": true
+                         },
+                        "clickPos": {
+                            "title": "DEPRECATED (clickPos)",
+                            "description": "DEPRECATED: data.clickPos is deprecated for clientEvent, use data.originPosition instead.",
+                            "type": "object",
+                            "deprecated": true
                         }
                     },
                     "title": "Event Data",

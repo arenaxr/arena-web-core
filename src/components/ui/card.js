@@ -286,17 +286,23 @@ AFRAME.registerComponent('arenaui-card', {
             const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = ARENAUtils.setClickData({ detail: evtDetail });
             const thisMsg = {
-                object_id: this.el.id,
+                object_id: ARENA.idTag,
                 action: 'clientEvent',
                 type: 'buttonClick',
                 data: {
-                    clickPos,
+                    originPosition: clickPos,
                     buttonName: 'Close',
-                    position: coordsData,
-                    source: ARENA.camName,
+                    targetPosition: coordsData,
+                    target: this.el.id,
                 },
             };
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+            ARENAUtils.publishClientEvent(
+                this.el,
+                thisMsg,
+                this.topicBase,
+                this.topicBasePrivate,
+                this.topicBasePrivateProg
+            );
             this.el.remove();
         });
         closeButton.set({ fontSize: ARENATypography.buttonSmall });

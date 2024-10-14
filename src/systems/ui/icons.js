@@ -230,7 +230,15 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.screenshareButton.style.display = 'none';
             this.settingsButtons.push(this.screenshareButton);
 
-            if (jitsiPermitted && !ARENA.utils.isMobile()) {
+            // non-editors cannot change/obscure the scene by generating a new screenshare object
+            let screenObjPermitted = this.arena.isUserSceneWriter();
+            if (!screenObjPermitted) {
+                // without object permissions, are there existing objects to screenshare upon?
+                screenObjPermitted =
+                    sceneEl.querySelector('[screenshareable]') || sceneEl.querySelector('#screenshare');
+            }
+
+            if (screenObjPermitted && jitsiPermitted && !ARENA.utils.isMobile()) {
                 // no screenshare on mobile - doesn't work
                 this._buttonList[this.buttons.SCREENSHARE] = this.screenshareButton;
                 this.iconsDiv.appendChild(this.screenshareButton);
@@ -349,7 +357,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         pagesDiv.append(' | ');
 
         const profile = document.createElement('a');
-        profile.href = `/user/profile`;
+        profile.href = `/user/v2/profile`;
         profile.target = '_blank';
         profile.rel = 'noopener noreferrer';
         profile.innerHTML = 'Profile';
@@ -384,7 +392,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             // add permissions link
             formDiv.append(' (');
             const aSec = document.createElement('a');
-            aSec.href = `/user/profile/scenes/${this.arena.namespacedScene}`;
+            aSec.href = `/user/v2/profile/scenes/${this.arena.namespacedScene}`;
             aSec.target = '_blank';
             aSec.rel = 'noopener noreferrer';
             aSec.innerHTML = 'Security';
@@ -654,7 +662,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     screenSharePrefix: this.jitsi.data.screensharePrefix,
                     conferenceName: this.jitsi.conferenceName,
                     displayName: cameraEl.getAttribute('arena-camera').displayName,
-                    camName: this.arena.camName,
+                    idTag: this.arena.idTag,
                     objectIds: objectIds.join(),
                 };
             });

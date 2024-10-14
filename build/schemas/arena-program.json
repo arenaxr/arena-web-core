@@ -62,7 +62,7 @@
                 },
                 "args": {
                     "type": "array",
-                    "description": "Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}.",
+                    "description": "Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${userid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}.",
                     "uniqueItems": false,
                     "items": {
                         "type": "string",
@@ -71,7 +71,7 @@
                 },
                 "env": {
                     "type": "array",
-                    "description": "Environment variables. Supports variables: ${scene}, ${namespace}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}.",
+                    "description": "Environment variables. Supports variables: ${scene}, ${namespace}, ${mqtth}, ${userid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}.",
                     "uniqueItems": false,
                     "items": {
                         "type": "string",
@@ -136,7 +136,7 @@
                             "type": "pubsub",
                             "mode": "rw",
                             "params": {
-                                "topic": "realm/s/${scene}"
+                                "topic": "realm/s/${scene}/${namespace}"
                             }
                         }
                     ]

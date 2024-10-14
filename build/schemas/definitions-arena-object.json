@@ -24,7 +24,16 @@
         },
         "ttl": {
             "description": "When applied to an entity, the entity will remove itself from DOM after the specified number of seconds. Update is allowed, which will reset the timer to start from that moment.",
-            "type": "integer"
+            "type": "number"
+        },
+        "private": {
+            "description": "If true, interactions with this object should not be broadcasted to other clients, but rather sent on private topics",
+            "type": "boolean",
+            "default": false
+        },
+        "program_id": {
+            "description": "The program_id on private program topics that interactions to be directed to, if the private flag is set true. Ignored if private flag is false.",
+            "type": "string"
         }
     }
 }

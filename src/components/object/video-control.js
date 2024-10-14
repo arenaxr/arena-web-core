@@ -83,7 +83,7 @@ AFRAME.registerComponent('video-control', {
         }
 
         this.eventHandlerFn = function eventHandlerFn(evt) {
-            if (evt.detail.cursorEl || (anyoneClicks && evt.detail.clicker && evt.detail.clicker !== ARENA.camName)) {
+            if (evt.detail.cursorEl || (anyoneClicks && evt.detail.clicker && evt.detail.clicker !== ARENA.idTag)) {
                 const theSource = this.player.getAttribute('arenaVideo');
                 const theVideoId = this.player.getAttribute('videoId');
                 const theFrameId = this.player.getAttribute('frameId');

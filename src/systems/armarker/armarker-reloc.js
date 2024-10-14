@@ -10,6 +10,7 @@
  */
 
 import { ARENAUtils } from '../../utils';
+import { TOPICS } from '../../constants';
 
 /**
  *
@@ -101,7 +102,7 @@ export default class ARMarkerRelocalization {
         this.DFT_DETECTION_MSG = {
             scene: ARENA.sceneName,
             namespace: ARENA.nameSpace,
-            camera_id: ARENA.camName,
+            camera_id: ARENA.idTag,
             type: 'armarker',
         };
         Object.freeze(this.DFT_DETECTION_MSG); // no more changes
@@ -126,6 +127,9 @@ export default class ARMarkerRelocalization {
         }
 
         [this.arenaScene] = AFRAME.scenes;
+
+        this.pubTopic = TOPICS.PUBLISH.SCENE_ENV_PRIVATE.formatStr(ARENA.topicParams);
+        this.pubTopicDynBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
     }
 
     /**
@@ -227,7 +231,7 @@ export default class ARMarkerRelocalization {
                 }
                 jsonMsg.detections.push(d);
             });
-            ARENA.Mqtt.publish(`${ARENA.defaults.realm}/g/a/${ARENA.camName}`, JSON.stringify(jsonMsg));
+            ARENA.Mqtt.publish(this.pubTopic, JSON.stringify(jsonMsg));
         }
         // this the one
         if (!this.networkedLocationSolver) {
@@ -338,23 +342,19 @@ export default class ARMarkerRelocalization {
                                 },
                             };
                             // eslint-disable-next-line max-len
-                            if (this.debug)
-                                console.info(
-                                    'Publish',
-                                    JSON.stringify(jsonMsg),
-                                    'to',
-                                    `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.obj_id}`
-                                );
-                            ARENA.Mqtt.publish(
-                                `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.obj_id}`,
-                                JSON.stringify(jsonMsg)
-                            );
+                            const objTopic = this.pubTopicDynBase.formatStr({
+                                objectId: refTag.obj_id,
+                            });
+                            if (this.debug) {
+                                console.info('Publish', JSON.stringify(jsonMsg), 'to', objTopic);
+                            }
+                            ARENA.Mqtt.publish(objTopic, JSON.stringify(jsonMsg));
                         }
                     } else console.error('Object update not sent; User does not have write permissions!');
                 }
 
                 // do we have detected markers to publish ?
-                if (pubDetList.length > 0 && ARENA) {
+                if (pubDetList.length > 0) {
                     // if (ARENA.clientCoords === undefined) {
                     //     ARENAUtils.getLocation((coords, err) => {
                     //         if (!err) ARENA.clientCoords = coords;
@@ -371,15 +371,8 @@ export default class ARMarkerRelocalization {
                         },
                         localize_tag: true,
                     };
-                    // eslint-disable-next-line max-len
-                    if (this.debug)
-                        console.info(
-                            'Publish',
-                            JSON.stringify(jsonMsg),
-                            'to',
-                            `${ARENA.defaults.realm}/g/a/${ARENA.camName}`
-                        );
-                    ARENA.Mqtt.publish(`${ARENA.defaults.realm}/g/a/${ARENA.camName}`, JSON.stringify(jsonMsg));
+                    if (this.debug) console.info('Publish', JSON.stringify(jsonMsg), 'to', this.pubTopic);
+                    ARENA.Mqtt.publish(this.pubTopic, JSON.stringify(jsonMsg));
                 }
             });
         }

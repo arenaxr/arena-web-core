@@ -4,7 +4,7 @@
 
 ## JSON Format
 
-To get face data, subscribe to topic `realm/s/<scene>/camera_<id>/face`
+To get face data, subscribe to topic `realm/s/[namespace]/[scene]/u/[user id]/face`
 
 ```
 {

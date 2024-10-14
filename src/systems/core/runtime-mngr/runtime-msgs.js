@@ -184,7 +184,7 @@ export default class RuntimeMsgs {
         const pdata = persistObj.attributes;
 
         // replaces variables given a dictionary of replacements; e.g:
-        // replaceVars('SCENE=${cameraid}', { cameraid: 'camera_1479408135_nuno' }) returns 'SCENE=camera_1479408135_nuno'
+        // replaceVars('SCENE=${userid}', { userid: '1479408135_nuno' }) returns 'SCENE=1479408135_nuno'
         const replaceVars = (tplText, args) => tplText.replace(/\${(\w+)}/g, (_, v) => args[v]);
 
         let muuid = UUID.generate(); // for per client, create a random uuid;
@@ -228,11 +228,11 @@ export default class RuntimeMsgs {
         let fn;
         if (pdata.filetype === RuntimeMsgs.FileType.wasm) {
             // full filename using file store location, name (in the form namespace/program-folder), entry filename
-        
+
         fn = [this.rt.getFSLocation(), pdata.name, pdata.filename].join('/').replace(/([^:])(\/\/+)/g, '$1/');
         } else fn = pdata.file; // just the filename
          */
-        let fn = pdata.file != undefined ? pdata.file : pdata.filename; // support both filename and file
+        const fn = pdata.file !== undefined ? pdata.file : pdata.filename; // support both filename and file
 
         // check apis
         let apis = [];
@@ -250,7 +250,7 @@ export default class RuntimeMsgs {
                 // parent is this runtime if affinity is client; otherwise, from request parent which can be undefined to let orchestrator decide
                 parent: pdata.affinity === 'client' ? { uuid: this.rt.getUuid() } : pdata.parent,
                 file: fn,
-                location: pdata.location == undefined ? "" : pdata.location,
+                location: pdata.location === undefined ? '' : pdata.location,
                 filetype: pdata.filetype,
                 channels: pdata.channels,
                 env,

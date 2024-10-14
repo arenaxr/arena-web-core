@@ -4,7 +4,7 @@ $(document).ready(() => {
     // add page header
     $('#header').load('/header-old.html', () => {
         // update auth state in nav bar
-        fetch('/user/user_state')
+        fetch('/user/v2/user_state')
             .then((response) => response.json())
             .then((data) => {
                 window.auth = data;
@@ -16,7 +16,7 @@ $(document).ready(() => {
                 dropdownMenu.append('<li><a href="/conf/versions.html">Version</a></li>');
                 if (window.auth.authenticated) {
                     authDrop.html(`${window.auth.username} <b class='caret'></b>`);
-                    dropdownMenu.append('<li><a href="/user/profile">Profile</a></li>');
+                    dropdownMenu.append('<li><a href="/user/v2/profile">Profile</a></li>');
                     dropdownMenu.append('<li><a id="show_perms" href="#">Permissions</a></li>');
                     $('#show_perms').on('click', () => {
                         const frame = document.getElementsByTagName('iframe');
@@ -27,10 +27,10 @@ $(document).ready(() => {
                             alert('No MQTT permissions');
                         }
                     });
-                    dropdownMenu.append('<li><a href="/user/logout">Logout</a></li>');
+                    dropdownMenu.append('<li><a href="/user/v2/logout">Logout</a></li>');
                 } else {
                     authDrop.html('Login <b class="caret"></b>');
-                    dropdownMenu.append('<li><a href="/user/login">Login</a></li>').on('click', (e) => {
+                    dropdownMenu.append('<li><a href="/user/v2/login">Login</a></li>').on('click', (e) => {
                         localStorage.setItem('request_uri', window.location.href);
                     });
                 }

@@ -1,20 +1,7 @@
 import { ARENAUtils } from '../../../utils';
+import { TOPICS } from '../../../constants';
 
 const Paho = require('paho-mqtt');
-
-const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/offer';
-const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/answer';
-const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/candidate';
-const SERVER_HEALTH_CHECK = 'realm/g/a/hybrid_rendering/server/health';
-const SERVER_CONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/connect';
-
-const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/connect';
-const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/disconnect';
-const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/offer';
-const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/answer';
-const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/candidate';
-const CLIENT_HEALTH_CHECK = 'realm/g/a/hybrid_rendering/client/health';
-const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/stats_browser';
 
 export default class MQTTSignaling {
     constructor(id, mqttHost, username, mqttToken) {
@@ -47,6 +34,7 @@ export default class MQTTSignaling {
                 userName: this.mqttUsername,
                 password: this.mqttToken,
                 onSuccess: () => {
+                    // TODO (elu2): fixme, this is called once per second after first server connection
                     _this.mqttOnConnect();
                     resolve();
                 },
@@ -59,11 +47,11 @@ export default class MQTTSignaling {
     mqttOnConnect() {
         this.client.onMessageArrived = this.mqttOnMessageArrived.bind(this);
 
-        this.client.subscribe(`${SERVER_HEALTH_CHECK}/${ARENA.namespacedScene}/#`);
-        this.client.subscribe(`${SERVER_OFFER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
-        this.client.subscribe(`${SERVER_ANSWER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
-        this.client.subscribe(`${SERVER_CANDIDATE_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
-        this.client.subscribe(`${SERVER_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
+        this.pubRenderClientPrivateTopic = TOPICS.PUBLISH.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
+        this.subRenderClientPublicTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PUBLIC.formatStr(ARENA.topicParams);
+        this.subRenderClientPrivateTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
+        this.client.subscribe(this.subRenderClientPublicTopic);
+        this.client.subscribe(this.subRenderClientPrivateTopic);
     }
 
     mqttOnConnectionLost(responseObject) {
@@ -120,36 +108,32 @@ export default class MQTTSignaling {
             screenWidth: 1.25 * width,
             screenHeight: height,
         };
-        this.sendMessage(
-            `${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`,
-            'connect-ack',
-            connectData
-        );
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'connect-ack', connectData);
     }
 
     closeConnection() {
-        this.sendMessage(`${CLIENT_DISCONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'disconnect');
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'disconnect');
 
         this.client.disconnect();
     }
 
     sendOffer(offer) {
-        this.sendMessage(`${CLIENT_OFFER_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'offer', offer);
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'offer', offer);
     }
 
     sendAnswer(answer) {
-        this.sendMessage(`${CLIENT_ANSWER_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'answer', answer);
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'answer', answer);
     }
 
     sendCandidate(candidate) {
-        this.sendMessage(`${CLIENT_CANDIDATE_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'ice', candidate);
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'ice', candidate);
     }
 
     sendHealthCheckAck() {
-        this.sendMessage(`${CLIENT_HEALTH_CHECK}/${ARENA.namespacedScene}/${this.id}`, 'health', '');
+        this.sendMessage(this.pubRenderClientPrivateTopic, 'health', '');
     }
 
     sendStats(stats) {
-        this.publish(`${CLIENT_STATS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, JSON.stringify(stats));
+        this.publish(this.pubRenderClientPrivateTopic, JSON.stringify(stats));
     }
 }

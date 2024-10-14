@@ -6,14 +6,16 @@
  * @date 2020
  */
 
+import { Delete } from '../../systems/core/message-actions';
+
 /**
  * Time To Live (TTL) component.
  *
  * When applied to an entity, the entity will remove itself from DOM after the specified number of seconds.
- * Update *is* allowed, which will reset the timer to start from that moment.
+ * Update *is* allowed, which will reset the timer to start from that moment. Note that this is a top-level property
+ * in MQTT messages, with the seconds value simply as a scalar rather than a nested object property.
  *
  * @property {number} seconds - Seconds until entity is removed
- * @property {object} expireAt - Expiration time [Date object]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date}
  * @module ttl
  */
 AFRAME.registerComponent('ttl', {
@@ -21,13 +23,16 @@ AFRAME.registerComponent('ttl', {
         seconds: { type: 'number' },
     },
     init() {
-        const now = new Date();
-        now.setSeconds(now.getSeconds() + this.data.seconds);
-        this.expireAt = now;
-        this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
+        if (this.data > 0) {
+            const now = new Date();
+            now.setSeconds(now.getSeconds() + this.data.seconds);
+            this.expireAt = now;
+            this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
+        }
     },
-    update(oldData) {
-        if (oldData.seconds !== this.data.expireAt) {
+    update() {
+        if (this.data >= 0) {
+            // Allow -1 to bypass TTL update, retains previous timeout
             const now = new Date();
             now.setSeconds(now.getSeconds() + this.data.seconds);
             this.expireAt = now;
@@ -36,7 +41,7 @@ AFRAME.registerComponent('ttl', {
     tick() {
         const now = new Date();
         if (now > this.expireAt) {
-            this.el.parentNode.removeChild(this.el);
+            Delete.handle({ id: this.el.id });
         }
     },
 });

@@ -6,27 +6,23 @@
  * @date 2023
  */
 
-import { ARENA_EVENTS } from '../../constants';
+import { ARENA_EVENTS, TOPICS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
 /**
  * Tracking camera movement in real time. Emits camera pose change and VIO change events.
  * @module arena-camera
  * @property {boolean} enabled - Indicates whether camera tracking is enabled.
- * @property {boolean} vioEnabled - Indicates whether to publish VIO on every tick (if true).
  * @property {string} displayName - User display name (used to publish camera data).
  * @property {string} color - Head text color.
  * @property {number[]} rotation - Last camera rotation value.
  * @property {number[]} position - Last camera position value.
- * @property {number[]} vioRotation - Last VIO rotation value.
- * @property {number[]} vioPosition - Last VIO position value.
  * @property {boolean} showStats - Display camera position on the screen.
  *
  */
 AFRAME.registerComponent('arena-camera', {
     schema: {
         enabled: { type: 'boolean', default: false },
-        vioEnabled: { type: 'boolean', default: false },
         displayName: { type: 'string', default: 'No Name' },
         color: { type: 'string', default: `#${ARENAUtils.numToPaddedHex(Math.floor(Math.random() * 16777215), 6)}` },
         showStats: { type: 'boolean', default: false },
@@ -37,12 +33,17 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     init() {
-        this.initialized = false;
+        this.isReady = false;
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
-        this.vioRotation = new THREE.Quaternion();
-        this.vioPosition = new THREE.Vector3();
+
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.params.camUpdateIntervalMs, this);
+        this.el.sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, (e) => {
+            const args = e.detail;
+            if (!args.userName) return; // only handle a user name change
+            this.data.displayName = args.userName;
+        });
     },
 
     ready() {
@@ -50,12 +51,10 @@ AFRAME.registerComponent('arena-camera', {
 
         const { sceneEl } = el;
 
-        this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
 
         this.lastPos = new THREE.Vector3();
-        this.vioMatrix = new THREE.Matrix4();
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
@@ -68,12 +67,15 @@ AFRAME.registerComponent('arena-camera', {
         this.lastPose = '';
         this.videoDefaultResolutionSet = false;
 
+        this.presenceEl = document.getElementById('presenceSelect');
+        this.headModelPathEl = document.getElementById('headModelPathSelect');
+
         this.heartBeatCounter = 0;
-        this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.params.camUpdateIntervalMs, this);
+
+        this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
 
         // send initial create
         this.publishPose('create');
-        this.publishVio('create');
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
@@ -97,7 +99,7 @@ AFRAME.registerComponent('arena-camera', {
         if (this.data.showStats) {
             document.getElementById('pose-stats').style.display = 'block';
         }
-        this.initialized = true;
+        this.isReady = true;
     },
 
     /**
@@ -112,9 +114,10 @@ AFRAME.registerComponent('arena-camera', {
 
         const arenaUser = { displayName: data.displayName, color: data.color };
         const msg = {
-            object_id: this.arena.camName,
+            object_id: ARENA.idTag,
             action,
             type: 'object',
+            ttl: 30,
             data: {
                 object_type: 'camera',
                 position: {
@@ -132,9 +135,10 @@ AFRAME.registerComponent('arena-camera', {
                 'arena-user': arenaUser,
             },
         };
-        const presence = document.getElementById('presenceSelect');
-        if (presence) {
-            arenaUser.presence = presence.value;
+        if (this.presenceEl) {
+            arenaUser.presence = this.presenceEl.value;
+        } else {
+            this.presenceEl = document.getElementById('presenceSelect');
         }
 
         if (this.jitsi.initialized) {
@@ -143,51 +147,20 @@ AFRAME.registerComponent('arena-camera', {
             arenaUser.hasVideo = this.jitsi.hasVideo;
         }
 
-        const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
+        const faceTracker = this.el.sceneEl.systems['face-tracking'];
         if (faceTracker && faceTracker.isEnabled()) {
             arenaUser.hasAvatar = faceTracker.isRunning();
         }
 
-        const headModelPathSelect = document.getElementById('headModelPathSelect');
-        if (headModelPathSelect) {
-            arenaUser.headModelPath = headModelPathSelect.value;
+        if (this.headModelPathEl) {
+            arenaUser.headModelPath = this.headModelPathEl.value;
         } else {
-            arenaUser.headModelPath = this.arena.defaults.headModelPath;
+            arenaUser.headModelPath = ARENA.defaults.headModelPath;
+            this.headModelPathEl = document.getElementById('headModelPathSelect');
         }
 
-        this.mqtt.publish(`${this.arena.outputTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
-    },
-
-    /**
-     * Publish user VIO
-     * @param {string} action One of 'update' or 'create' actions sent in the publish message
-     * @ignore
-     */
-    publishVio(action = 'update') {
-        const { data, vioPosition, vioRotation } = this;
-
-        const msg = {
-            object_id: this.arena.camName,
-            action,
-            type: 'object',
-            data: {
-                object_type: 'camera',
-                position: {
-                    x: parseFloat(vioPosition.x.toFixed(3)),
-                    y: parseFloat(vioPosition.y.toFixed(3)),
-                    z: parseFloat(vioPosition.z.toFixed(3)),
-                },
-                rotation: {
-                    // always send quaternions over the wire
-                    x: parseFloat(vioRotation._x.toFixed(3)),
-                    y: parseFloat(vioRotation._y.toFixed(3)),
-                    z: parseFloat(vioRotation._z.toFixed(3)),
-                    w: parseFloat(vioRotation._w.toFixed(3)),
-                },
-                color: data.color,
-            },
-        };
-        this.mqtt.publish(`${this.arena.vioTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
+        // extra timestamp info at end for debugging
+        this.mqtt.publish(this.pubTopic, msg);
     },
 
     /**
@@ -215,8 +188,8 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     tick() {
-        if (!this.initialized) return;
-        const { data, el, position, rotation, vioPosition, vioRotation } = this;
+        if (!this.isReady) return;
+        const { el, position, rotation } = this;
 
         this.heartBeatCounter++;
 
@@ -230,26 +203,19 @@ AFRAME.registerComponent('arena-camera', {
         // this.cpi.getInverse(this.camParent);
         this.cpi.multiply(this.cam);
 
-        if (data.vioEnabled) {
-            this.vioMatrix.copy(this.cpi);
-            vioRotation.setFromRotationMatrix(this.cpi);
-            vioPosition.setFromMatrixPosition(this.cpi);
-            this.publishVio(); // publish vio on every tick (if enabled)
-        }
-
         const rotationCoords = ARENAUtils.rotToText(rotation);
         const positionCoords = ARENAUtils.coordsToText(position);
         const newPose = `${rotationCoords} ${positionCoords}`;
 
         // update position if pose changed, or every 1 sec heartbeat
-        if (this.heartBeatCounter % (1000 / this.arena.params.camUpdateIntervalMs) === 0) {
+        if (this.heartBeatCounter % (1000 / ARENA.params.camUpdateIntervalMs) === 0) {
             // heartbeats are sent as create; TMP: sending as updates
             this.publishPose();
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
             this.lastPos.copy(this.el.object3D.position);
-            this.lastPos.y -= this.arena.defaults.camHeight;
-            sceneHist[this.arena.namespacedScene] = {
-                ...sceneHist[this.arena.namespacedScene],
+            this.lastPos.y -= ARENA.defaults.camHeight;
+            sceneHist[ARENA.namespacedScene] = {
+                ...sceneHist[ARENA.namespacedScene],
                 lastPos: this.lastPos,
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
@@ -272,24 +238,19 @@ AFRAME.registerComponent('arena-camera', {
         }
         this.lastPose = newPose;
 
-        if (
-            !this.videoDefaultResolutionSet &&
-            ARENA &&
-            this.jitsi.initialized &&
-            this.arena.videoDefaultResolutionConstraint
-        ) {
+        if (!this.videoDefaultResolutionSet && this.jitsi.initialized && ARENA?.videoDefaultResolutionConstraint) {
             // set scene-options, videoDefaultResolutionConstraint, only once
-            this.jitsi.setDefaultResolutionRemotes(this.arena.videoDefaultResolutionConstraint);
+            this.jitsi.setDefaultResolutionRemotes(ARENA.videoDefaultResolutionConstraint);
             this.videoDefaultResolutionSet = true;
         }
     },
 
     isVideoFrustumCullingEnabled() {
-        return ARENA && this.arena.videoFrustumCulling;
+        return ARENA?.videoFrustumCulling;
     },
 
     isVideoDistanceConstraintsEnabled() {
-        return ARENA && this.arena.videoDistanceConstraints;
+        return ARENA?.videoDistanceConstraints;
     },
 
     viewIntersectsObject3D(obj3D) {

@@ -10,7 +10,7 @@
 
 import { ARENAMqttConsole, ARENAUtils } from '../../utils';
 import ARENAWebARUtils from '../webar';
-import { ARENA_EVENTS, JITSI_EVENTS } from '../../constants';
+import { ARENA_EVENTS, JITSI_EVENTS, TOPICS } from '../../constants';
 import RuntimeMngr from './runtime-mngr';
 
 AFRAME.registerSystem('arena-scene', {
@@ -36,7 +36,7 @@ AFRAME.registerSystem('arena-scene', {
             // replace console with our logging
             if (!ARENA.defaults.devInstance || ARENA.params.debug) {
                 ARENAMqttConsole.init({
-                    dbgTopic: `${ARENA.params.realm}/proc/debug/stdout/${ARENA.camName}`,
+                    dbgTopic: TOPICS.PUBLISH.SCENE_DEBUG.formatStr(ARENA.topicParams),
                     publish: ARENA.Mqtt.publish.bind(ARENA.Mqtt),
                 });
             }
@@ -62,11 +62,8 @@ AFRAME.registerSystem('arena-scene', {
         this.nameSpace = ARENA.nameSpace;
         this.namespacedScene = ARENA.namespacedScene;
 
-        // Sets persistenceUrl, outputTopic, renderTopic, vioTopic
+        // Sets persistenceUrl, outputTopic
         this.persistenceUrl = `//${this.params.persistHost}${this.params.persistPath}${this.namespacedScene}`;
-        this.outputTopic = `${this.params.realm}/s/${this.namespacedScene}/`;
-        this.renderTopic = `${this.outputTopic}#`;
-        this.vioTopic = `${this.params.realm}/vio/${this.namespacedScene}/`;
 
         this.events = sceneEl.systems['arena-event-manager'];
         this.health = sceneEl.systems['arena-health-ui'];
@@ -93,6 +90,14 @@ AFRAME.registerSystem('arena-scene', {
 
         // id tag including name is set from authentication service
         this.setIdTag(this.mqttToken.ids.userid);
+
+        // Reuse object for topic parameters
+        this.topicParams = {
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            idTag: this.idTag,
+            userObj: this.idTag,
+        };
 
         if (this.isUsersPermitted()) {
             this.showEchoDisplayName();
@@ -217,6 +222,9 @@ AFRAME.registerSystem('arena-scene', {
             name: `rt-${this.idTag}`,
             mqttUsername: this.mqttToken.mqtt_username,
             mqttToken: this.mqttToken.mqtt_token,
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            idTag: this.idTag,    
         });
         this.RuntimeManager.init();
     },
@@ -267,13 +275,6 @@ AFRAME.registerSystem('arena-scene', {
         if (idTag === undefined) throw new Error('setIdTag: idTag not defined.'); // idTag must be set
         this.idTag = idTag;
 
-        // set camName
-        this.camName = `camera_${this.idTag}`; // e.g. camera_1234_eric
-        // if fixedCamera is given, then camName must be set accordingly
-        if (this.params.fixedCamera) {
-            this.camName = this.params.fixedCamera;
-        }
-
         // set faceName, avatarName, handLName, handRName which depend on user name
         this.faceName = `face_${this.idTag}`; // e.g. face_9240_X
         this.handLName = `handLeft_${this.idTag}`; // e.g. handLeft_9240_X
@@ -301,21 +302,55 @@ AFRAME.registerSystem('arena-scene', {
 
     /**
      * Checks loaded MQTT/Jitsi token for user interaction permission.
-     * TODO: This should perhaps use another flag, more general, not just chat.
-     * @return {boolean} True if the user has permission to send/receive chats in this scene.
+     * @return {boolean} True if the user has permission to send/receive presence in this scene.
      */
     isUsersPermitted() {
         if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
-        return ARENAAUTH.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
+        const usersTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            idTag: this.idTag,
+        });
+        return ARENAAUTH.matchJWT(usersTopic, this.mqttToken.token_payload.publ);
     },
 
     /**
      * Checks token for full scene object write permissions.
-     // * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      // * @return {boolean} True if the user has permission to write in this scene.
      */
     isUserSceneWriter() {
-        return ARENAAUTH.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
+        const writeTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            idTag: '+',
+        });
+        return ARENAAUTH.matchJWT(writeTopic, this.mqttToken.token_payload.publ);
+    },
+
+    /**
+     * Checks token for scene chat write permissions.
+     // * @return {boolean} True if the user has permission to chat in this scene.
+     */
+    isUserChatWriter() {
+        if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
+        const chatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            idTag: this.idTag,
+        });
+        return ARENAAUTH.matchJWT(chatTopic, this.mqttToken.token_payload.publ);
     },
 
     /**
@@ -409,11 +444,6 @@ AFRAME.registerSystem('arena-scene', {
                 }
                 cameraEl.object3D.position.copy(startPos);
                 cameraEl.object3D.position.y += data.camHeight;
-            }
-
-            // enable vio if fixedCamera is given
-            if (this.params.fixedCamera) {
-                cameraEl.setAttribute('arena-camera', 'vioEnabled', true);
             }
 
             // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
@@ -516,7 +546,7 @@ AFRAME.registerSystem('arena-scene', {
                 type: 'object',
                 data: { parent: parentName },
             };
-            mqtt.processMessage(msg);
+            mqtt.handleSceneObjectMessage(msg);
         }
 
         const arenaObjects = new Map(sceneObjs.map((object) => [object.object_id, object]));
@@ -528,7 +558,7 @@ AFRAME.registerSystem('arena-scene', {
          */
         const createObj = (obj, descendants = []) => {
             const { parent } = obj.attributes;
-            if (obj.object_id === this.camName) {
+            if (obj.object_id === this.idTag) {
                 arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
                 return;
             }
@@ -567,7 +597,7 @@ AFRAME.registerSystem('arena-scene', {
                 persist: true,
                 data: obj.attributes,
             };
-            mqtt.processMessage(msg);
+            mqtt.handleSceneObjectMessage(msg);
             arenaObjects.delete(obj.object_id);
         };
 
@@ -596,11 +626,11 @@ AFRAME.registerSystem('arena-scene', {
             }
         }
         ARENA.events.addEventListener(ARENA_EVENTS.RUNTIME_MNGR_LOADED, () => {
-            // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
+            // arena variables that are replaced; keys are the variable names e.g. ${scene},${userid}, ...
             const avars = {
                 scene: this.sceneName,
                 namespace: this.nameSpace,
-                cameraid: this.camName,
+                userid: this.idTag,
                 username: this.getDisplayName(),
                 mqtth: ARENA.Mqtt.mqttHost,
             };
@@ -643,7 +673,7 @@ AFRAME.registerSystem('arena-scene', {
     //             const l = arenaObjects.length;
     //             for (let i = 0; i < l; i++) {
     //                 const obj = arenaObjects[i];
-    //                 if (obj.object_id === this.camName) {
+    //                 if (obj.object_id === this.idTag) {
     //                     // don't load our own camera/head assembly
     //                 } else {
     //                     const msg = {

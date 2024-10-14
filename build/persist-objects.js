@@ -8,6 +8,7 @@
 
 /* global Alert, ARENAAUTH, ARENADefaults, Swal, THREE */
 /* eslint-disable import/extensions */
+import TOPICS from '../src/constants/topics.js';
 import MqttClient from './mqtt-client.js';
 import ARENAUserAccount from './arena-account.js';
 import { TTLCache } from './ttl-cache.js';
@@ -369,7 +370,10 @@ export function updateSubscribeTopic(scene) {
 
     if (persist.currentScene) persist.mc.unsubscribe(persist.currentScene);
     if (scene) {
-        const topic = `realm/s/${scene}/#`;
+        const topic = TOPICS.SUBSCRIBE.SCENE_PUBLIC.formatStr({
+            nameSpace: scene.split('/')[0],
+            sceneName: scene.split('/')[1],
+        });
         persist.mc.subscribe(topic);
         persist.currentScene = scene;
         populateProgramInstanceList();
@@ -556,7 +560,7 @@ export async function addNewScene(ns, sceneName, newObjs) {
 
     // add objects to the new scene
     newObjs.forEach((obj) => {
-        addObject(obj, `${ns}/${sceneName}`);
+        addObject(obj, ns, sceneName);
     });
     return exists;
 }
@@ -604,7 +608,11 @@ export function performActionArgObjList(action, scene, objList, json = true) {
             scene = `${obj.namespace}/${obj.sceneId}`;
             theNewScene = obj.sceneId;
         }
-        const topic = `realm/s/${scene}/${obj.object_id}`;
+        const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+            nameSpace: theNewScene.split('/')[0],
+            sceneName: theNewScene.split('/')[1],
+            objectId: obj.object_id,
+        });
         console.info(`Publish [ ${topic}]: ${actionObj}`);
         try {
             persist.mc.publish(topic, actionObj);
@@ -634,7 +642,7 @@ export function clearSelected() {
     }
 }
 
-export async function addObject(obj, scene) {
+export async function addObject(obj, nameSpace, sceneName) {
     let found = false;
     if (!persist.mqttConnected) mqttReconnect();
 
@@ -674,7 +682,11 @@ export async function addObject(obj, scene) {
 
     const persistAlert = obj.persist === false ? '<br/><strong>Object not persisted.</strong>' : '';
     const objJson = JSON.stringify(obj);
-    const topic = `realm/s/${scene}/${obj.object_id}`;
+    const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+        nameSpace,
+        sceneName,
+        objectId: obj.object_id,
+    });
     console.info(`Publish [ ${topic}]: ${objJson}`);
     try {
         persist.mc.publish(topic, objJson);

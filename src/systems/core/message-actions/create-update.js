@@ -50,7 +50,7 @@ export default class CreateUpdate {
         switch (message.type) {
             case 'object':
                 // our own camera/controllers: bail, this message is meant for all other viewers
-                if (id === ARENA.camName) {
+                if (id === ARENA.idTag) {
                     return;
                 }
                 if (id === ARENA.handLName) {
@@ -99,7 +99,7 @@ export default class CreateUpdate {
                 if (addObj) {
                     // Parent/Child handling
                     if (parentName) {
-                        if (ARENA.camName === message.data.parent) {
+                        if (ARENA.idTag === message.data.parent) {
                             // our camera is named 'my-camera'
                             if (!message.data.camera) {
                                 // Don't attach extra cameras, use own id to skip
@@ -140,6 +140,19 @@ export default class CreateUpdate {
                     entityEl.setAttribute('ttl', { seconds: message.ttl });
                 }
 
+                // Private and program_id flags. Falsy values unset (undefined, null, 0, '')
+                if (message.private) {
+                    entityEl.setAttribute('private', message.private);
+                } else if (!!message.private === false) {
+                    entityEl.removeAttribute('private');
+                }
+
+                if (message.program_id) {
+                    entityEl.setAttribute('program', message.program_id);
+                } else if (!!message.program_id === false) {
+                    entityEl.removeAttribute('program');
+                }
+
                 // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
                 if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
 
@@ -149,12 +162,12 @@ export default class CreateUpdate {
                 return;
 
             case 'camera-override':
-                if (id !== ARENA.camName) return; // bail if not for us
+                if (id !== ARENA.idTag) return; // bail if not for us
                 this.handleCameraOverride(action, message);
                 return;
 
             case 'rig':
-                if (id === ARENA.camName) {
+                if (id === ARENA.idTag) {
                     // our camera Rig
                     const cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
                     const cameraRigObj3D = document.getElementById('cameraRig').object3D;
@@ -250,11 +263,14 @@ export default class CreateUpdate {
         let isGeometry = false;
         switch (type) {
             case 'camera':
+                // Only set permitted camera attributes, return
                 this.setEntityAttributes(entityEl, {
                     position: data.position,
                     rotation: data.rotation,
                     'arena-user': data['arena-user'],
-                }); // Only set permitted camera attributes, return
+                });
+                // Merge-update live users, but don't repopulate userlist
+                AFRAME.scenes[0].systems.chat?.upsertLiveUser(message.id, { dn: data['arena-user'].displayName }, true);
                 return true;
             case 'gltf-model':
                 if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
@@ -492,10 +508,6 @@ export default class CreateUpdate {
                 case 'scale':
                     // scale is set directly in the THREE.js object, for performance reasons
                     entityEl.object3D.scale.set(value.x, value.y, value.z);
-                    break;
-                case 'ttl':
-                    // ttl is applied to property 'seconds' of ttl component
-                    entityEl.setAttribute('ttl', { seconds: value });
                     break;
                 case 'obj':
                 case 'mtl':

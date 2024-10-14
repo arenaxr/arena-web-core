@@ -12,16 +12,15 @@ export default class ClientEvent {
     static handle(message) {
         const { id } = message;
         const { data } = message;
-        const clicker = data.source;
 
         // ignore events from ourselves
-        if (clicker === ARENA.camName) {
+        if (id === ARENA.idTag) {
             return;
         }
-        if (clicker === ARENA.handLName) {
+        if (id === ARENA.handLName) {
             return;
         }
-        if (clicker === ARENA.handRName) {
+        if (id === ARENA.handRName) {
             return;
         }
 
@@ -36,16 +35,11 @@ export default class ClientEvent {
             return;
         }
 
-        let point = null;
-        if (data.position) {
-            point = new THREE.Vector3(
-                parseFloat(data.position.x),
-                parseFloat(data.position.y),
-                parseFloat(data.position.z)
-            );
-        } else {
-            warn('Malformed message (no data.position):', JSON.stringify(message));
-        }
+        const point = new THREE.Vector3(
+            parseFloat(data.targetPosition.x),
+            parseFloat(data.targetPosition.y),
+            parseFloat(data.targetPosition.z)
+        );
 
         switch (message.type) {
             case 'collision':
@@ -53,7 +47,7 @@ export default class ClientEvent {
                 entityEl.emit(
                     'mousedown',
                     {
-                        clicker,
+                        clicker: id,
                         intersection: {
                             point,
                         },
@@ -66,7 +60,7 @@ export default class ClientEvent {
                 entityEl.emit(
                     'mousedown',
                     {
-                        clicker,
+                        clicker: id,
                         intersection: {
                             point,
                         },
@@ -79,7 +73,7 @@ export default class ClientEvent {
                 entityEl.emit(
                     'mouseup',
                     {
-                        clicker,
+                        clicker: id,
                         intersection: {
                             point,
                         },

@@ -6,6 +6,8 @@
  * @date 2020
  */
 
+import { TOPICS } from '../../constants';
+
 const symbols = { create: 'create', update: 'update', delete: 'delete' };
 
 function LogToUser(msg, attributeName, changes) {
@@ -184,6 +186,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         this.observer = new MutationObserver(this.objectAttributesUpdate);
     },
     objectAttributesUpdate(mutationList, observer) {
+        const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
@@ -225,7 +228,12 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                         }
                         LogToUser(msg, mutation.attributeName, changes);
                         console.log('publishing:', msg.action, msg);
-                        ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+                        ARENA.Mqtt.publish(
+                            topicBase.formatStr({
+                                objectId: msg.object_id,
+                            }),
+                            msg
+                        );
 
                         // check rename case
                         if (
@@ -240,7 +248,12 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                             };
                             LogToUser(outMsg);
                             console.log('publishing:', outMsg.action, outMsg);
-                            ARENA.Mqtt.publish(`${ARENA.outputTopic}${outMsg.object_id}`, outMsg);
+                            ARENA.Mqtt.publish(
+                                topicBase.formatStr({
+                                    objectId: outMsg.object_id,
+                                }),
+                                outMsg
+                            );
                         }
                     }
                     break;
@@ -272,7 +285,14 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             };
             LogToUser(msg);
             console.log('publishing:', msg.action, msg);
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+            ARENA.Mqtt.publish(
+                TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+                    nameSpace: ARENA.nameSpace,
+                    sceneName: ARENA.sceneName,
+                    object_id: msg.object_id,
+                }),
+                msg
+            );
         }
     },
 });
