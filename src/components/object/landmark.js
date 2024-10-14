@@ -133,7 +133,13 @@ AFRAME.registerSystem('landmark', {
             }
         }
         if (chat && landmark.data.startingPosition === false) {
-            chat.addLandmark(landmark);
+            // wait until ui is ready before changing elements
+            const uiWait = window.setInterval(() => {
+                if (chat.ready) {
+                    clearInterval(uiWait);
+                    chat.addLandmark(landmark);
+                }
+            }, 250);
         }
     },
 
@@ -146,7 +152,12 @@ AFRAME.registerSystem('landmark', {
         delete this.landmarks[landmark.el.id];
         // TODO: fix loading order of chat and landmarks
         if (chat && landmark.data.startingPosition === false) {
-            chat.removeLandmark(landmark);
+            const uiWait = window.setInterval(() => {
+                if (chat.ready) {
+                    clearInterval(uiWait);
+                    chat.removeLandmark(landmark);
+                }
+            }, 250);
         }
     },
 
