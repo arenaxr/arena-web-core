@@ -13,37 +13,44 @@
                         {
                             "properties": {
                                 "object_type": {
+                                    "deprecated": true,
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type.",
                                     "enum": ["cube"]
                                 },
                                 "depth": {
+                                    "deprecated": true,
                                     "type": "number",
                                     "title": "depth",
                                     "default": 1
                                 },
                                 "height": {
+                                    "deprecated": true,
                                     "type": "number",
                                     "title": "height",
                                     "default": 1
                                 },
                                 "segmentsDepth": {
+                                    "deprecated": true,
                                     "type": "integer",
                                     "title": "segments depth",
                                     "default": 1
                                 },
                                 "segmentsHeight": {
+                                    "deprecated": true,
                                     "type": "integer",
                                     "title": "segments height",
                                     "default": 1
                                 },
                                 "segmentsWidth": {
+                                    "deprecated": true,
                                     "type": "integer",
                                     "title": "segments width",
                                     "default": 1
                                 },
                                 "width": {
+                                    "deprecated": true,
                                     "type": "number",
                                     "title": "width",
                                     "default": 1
