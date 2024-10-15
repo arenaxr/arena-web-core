@@ -49,7 +49,7 @@
                     },
                     "title": "Event Data",
                     "additionalProperties": true,
-                    "required": ["position", "source"]
+                    "required": ["target", "targetPosition"]
                 }
             }
         }
