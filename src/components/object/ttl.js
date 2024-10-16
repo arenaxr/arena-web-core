@@ -23,24 +23,20 @@ AFRAME.registerComponent('ttl', {
         seconds: { type: 'number' },
     },
     init() {
-        if (this.data > 0) {
-            const now = new Date();
-            now.setSeconds(now.getSeconds() + this.data.seconds);
-            this.expireAt = now;
+        if (this.data.seconds > 0) {
+            this.expireAt = Date.now() + this.data.seconds * 1000;
             this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
         }
     },
     update() {
-        if (this.data >= 0) {
+        if (this.data.seconds >= 0) {
             // Allow -1 to bypass TTL update, retains previous timeout
-            const now = new Date();
-            now.setSeconds(now.getSeconds() + this.data.seconds);
-            this.expireAt = now;
+            this.expireAt = Date.now() + this.data.seconds * 1000;
         }
     },
     tick() {
-        const now = new Date();
-        if (now > this.expireAt) {
+        const now = Date.now();
+        if (this.expireAt && now > this.expireAt) {
             Delete.handle({ id: this.el.id });
         }
     },

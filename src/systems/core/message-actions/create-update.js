@@ -136,8 +136,10 @@ export default class CreateUpdate {
                 }
 
                 if (message.ttl !== undefined) {
+                    // remove first to ensure updates will fire when seconds is unchanged as a keepalive
+                    entityEl.removeAttribute('ttl');
                     // Allow falsy value of 0
-                    entityEl.setAttribute('ttl', { seconds: message.ttl });
+                    entityEl.setAttribute('ttl', 'seconds', message.ttl);
                 }
 
                 // Private and program_id flags. Falsy values unset (undefined, null, 0, '')
