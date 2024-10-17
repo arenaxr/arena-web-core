@@ -76,10 +76,10 @@ AFRAME.registerComponent('ar-hit-test-listener', {
                 action: 'clientEvent',
                 type: 'hitend',
                 data: {
-                    clickPos,
-                    position,
-                    rotation,
-                    source: ARENA.idTag,
+                    originPosition: clickPos,
+                    targetPosition: position,
+                    targetRotation: rotation,
+                    target: ARENA.idTag,
                 },
             };
             ARENA.Mqtt.publish(this.pubTopic, thisMsg);
