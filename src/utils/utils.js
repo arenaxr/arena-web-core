@@ -86,9 +86,9 @@ export default class ARENAUtils {
      */
     static setCoordsData(evt) {
         return {
-            x: parseFloat(evt.currentTarget.object3D.position.x.toFixed(3)),
-            y: parseFloat(evt.currentTarget.object3D.position.y.toFixed(3)),
-            z: parseFloat(evt.currentTarget.object3D.position.z.toFixed(3)),
+            x: this.round3(evt.currentTarget.object3D.position.x),
+            y: this.round3(evt.currentTarget.object3D.position.y),
+            z: this.round3(evt.currentTarget.object3D.position.z),
         };
     }
 
@@ -100,23 +100,23 @@ export default class ARENAUtils {
     static setClickData(evt) {
         if (evt.detail.intersection) {
             return {
-                x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
-                y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
-                z: parseFloat(evt.detail.intersection.point.z.toFixed(3)),
+                x: this.round3(evt.detail.intersection.point.x),
+                y: this.round3(evt.detail.intersection.point.y),
+                z: this.round3(evt.detail.intersection.point.z),
             };
         }
         if (evt.detail.position && evt.detail.orientation) {
             return {
                 position: {
-                    x: parseFloat(evt.detail.position.x.toFixed(3)),
-                    y: parseFloat(evt.detail.position.y.toFixed(3)),
-                    z: parseFloat(evt.detail.position.z.toFixed(3)),
+                    x: this.round3(evt.detail.position.x),
+                    y: this.round3(evt.detail.position.y),
+                    z: this.round3(evt.detail.position.z),
                 },
                 rotation: {
-                    x: parseFloat(evt.detail.orientation.x.toFixed(3)),
-                    y: parseFloat(evt.detail.orientation.y.toFixed(3)),
-                    z: parseFloat(evt.detail.orientation.z.toFixed(3)),
-                    w: parseFloat(evt.detail.orientation.w.toFixed(3)),
+                    x: this.round3(evt.detail.orientation.x),
+                    y: this.round3(evt.detail.orientation.y),
+                    z: this.round3(evt.detail.orientation.z),
+                    w: this.round3(evt.detail.orientation.w),
                 },
             };
         }
@@ -135,9 +135,9 @@ export default class ARENAUtils {
      */
     static vec3ToObject(vec) {
         return {
-            x: parseFloat(vec.x.toFixed(3)),
-            y: parseFloat(vec.y.toFixed(3)),
-            z: parseFloat(vec.z.toFixed(3)),
+            x: this.round3(vec.x),
+            y: this.round3(vec.y),
+            z: this.round3(vec.z),
         };
     }
 
@@ -148,10 +148,10 @@ export default class ARENAUtils {
      */
     static quatToObject(q) {
         return {
-            x: parseFloat(q.x.toFixed(3)),
-            y: parseFloat(q.y.toFixed(3)),
-            z: parseFloat(q.z.toFixed(3)),
-            w: parseFloat(q.w.toFixed(3)),
+            x: this.round3(q.x),
+            y: this.round3(q.y),
+            z: this.round3(q.z),
+            w: this.round3(q.w),
         };
     }
 
@@ -497,6 +497,14 @@ export default class ARENAUtils {
     static getUsernameFromIdTag(idTag) {
         const idParts = idTag.split('_');
         return idParts.length > 1 && /^\d+$/.test(idParts[0]) ? idParts.slice(1).join('_') : idTag;
+    }
+
+    static round3(num) {
+        return Math.round(num * 1000) / 1000;
+    }
+
+    static round5(num) {
+        return Math.round(num * 100000) / 100000;
     }
 }
 

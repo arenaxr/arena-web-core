@@ -121,16 +121,16 @@ AFRAME.registerComponent('arena-camera', {
             data: {
                 object_type: 'camera',
                 position: {
-                    x: parseFloat(position.x.toFixed(3)),
-                    y: parseFloat(position.y.toFixed(3)),
-                    z: parseFloat(position.z.toFixed(3)),
+                    x: ARENAUtils.round3(position.x),
+                    y: ARENAUtils.round3(position.y),
+                    z: ARENAUtils.round3(position.z),
                 },
                 rotation: {
                     // always send quaternions over the wire
-                    x: parseFloat(rotation._x.toFixed(3)),
-                    y: parseFloat(rotation._y.toFixed(3)),
-                    z: parseFloat(rotation._z.toFixed(3)),
-                    w: parseFloat(rotation._w.toFixed(3)),
+                    x: ARENAUtils.round3(rotation._x),
+                    y: ARENAUtils.round3(rotation._y),
+                    z: ARENAUtils.round3(rotation._z),
+                    w: ARENAUtils.round3(rotation._w),
                 },
                 'arena-user': arenaUser,
             },

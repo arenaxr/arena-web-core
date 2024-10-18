@@ -6,6 +6,7 @@
 
 import { FaceTracker, FaceTrackerSource } from './face-tracker.min';
 import { TOPICS } from '../../constants';
+import { ARENAUtils } from '../../utils';
 
 AFRAME.registerSystem('face-tracking', {
     schema: {
@@ -221,15 +222,6 @@ AFRAME.registerSystem('face-tracking', {
     },
 
     /**
-     * Rounds number to 3 decimal places
-     * @param {number} num number to round
-     * @return {number} input rounded to 3 decimal places
-     */
-    round3(num) {
-        return parseFloat(num.toFixed(3));
-    },
-
-    /**
      * Creates JSON representation of face tracker output to be sent through mqtt
      * @param {boolean} hasFace whether or not features are valid
      * @param {object} landmarks landmarks
@@ -261,16 +253,16 @@ AFRAME.registerSystem('face-tracking', {
         let adjustedQuat;
         const quatAdjusted = [];
 
-        adjustedQuat = hasFace ? this.round3(quat.x) : 0;
+        adjustedQuat = hasFace ? ARENAUtils.round3(quat.x) : 0;
         quatAdjusted.push(adjustedQuat);
 
-        adjustedQuat = hasFace ? this.round3(quat.y) : 0;
+        adjustedQuat = hasFace ? ARENAUtils.round3(quat.y) : 0;
         quatAdjusted.push(adjustedQuat);
 
-        adjustedQuat = hasFace ? this.round3(quat.z) : 0;
+        adjustedQuat = hasFace ? ARENAUtils.round3(quat.z) : 0;
         quatAdjusted.push(adjustedQuat);
 
-        adjustedQuat = hasFace ? this.round3(quat.w) : 0;
+        adjustedQuat = hasFace ? ARENAUtils.round3(quat.w) : 0;
         quatAdjusted.push(adjustedQuat);
 
         faceJSON.data.pose.quaternions = quatAdjusted;
@@ -278,21 +270,21 @@ AFRAME.registerSystem('face-tracking', {
         let adjustedTrans;
         const transAdjusted = [];
 
-        adjustedTrans = hasFace ? this.round3(trans.x) : 0;
+        adjustedTrans = hasFace ? ARENAUtils.round3(trans.x) : 0;
         transAdjusted.push(adjustedTrans);
 
-        adjustedTrans = hasFace ? this.round3(trans.y) : 0;
+        adjustedTrans = hasFace ? ARENAUtils.round3(trans.y) : 0;
         transAdjusted.push(adjustedTrans);
 
-        adjustedTrans = hasFace ? this.round3(trans.z) : 0;
+        adjustedTrans = hasFace ? ARENAUtils.round3(trans.z) : 0;
         transAdjusted.push(adjustedTrans);
 
         faceJSON.data.pose.translation = transAdjusted;
 
         const landmarksAdjusted = [];
         for (let i = 0; i < 68 * 2; i += 2) {
-            const adjustedX = hasFace ? this.round3((landmarksRaw[i] - this.width / 2) / this.width) : 0;
-            const adjustedY = hasFace ? this.round3((this.height / 2 - landmarksRaw[i + 1]) / this.height) : 0;
+            const adjustedX = hasFace ? ARENAUtils.round3((landmarksRaw[i] - this.width / 2) / this.width) : 0;
+            const adjustedY = hasFace ? ARENAUtils.round3((this.height / 2 - landmarksRaw[i + 1]) / this.height) : 0;
             landmarksAdjusted.push(adjustedX);
             landmarksAdjusted.push(adjustedY);
         }
@@ -302,13 +294,13 @@ AFRAME.registerSystem('face-tracking', {
         let adjustedY;
         const bboxAdjusted = [];
 
-        adjustedX = hasFace ? this.round3((bbox.left - this.width / 2) / this.width) : 0;
-        adjustedY = hasFace ? this.round3((this.height / 2 - bbox.top) / this.height) : 0;
+        adjustedX = hasFace ? ARENAUtils.round3((bbox.left - this.width / 2) / this.width) : 0;
+        adjustedY = hasFace ? ARENAUtils.round3((this.height / 2 - bbox.top) / this.height) : 0;
         bboxAdjusted.push(adjustedX);
         bboxAdjusted.push(adjustedY);
 
-        adjustedX = hasFace ? this.round3((bbox.right - this.width / 2) / this.width) : 0;
-        adjustedY = hasFace ? this.round3((this.height / 2 - bbox.bottom) / this.height) : 0;
+        adjustedX = hasFace ? ARENAUtils.round3((bbox.right - this.width / 2) / this.width) : 0;
+        adjustedY = hasFace ? ARENAUtils.round3((this.height / 2 - bbox.bottom) / this.height) : 0;
         bboxAdjusted.push(adjustedX);
         bboxAdjusted.push(adjustedY);
 

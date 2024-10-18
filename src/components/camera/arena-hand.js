@@ -6,6 +6,7 @@
  * @date 2023
  */
 
+import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS, TOPICS } from '../../constants';
 
 // path to controller models
@@ -143,16 +144,16 @@ AFRAME.registerComponent('arena-hand', {
             data: {
                 object_type: `hand${this.data.hand}`,
                 position: {
-                    x: parseFloat(this.position.x.toFixed(3)),
-                    y: parseFloat(this.position.y.toFixed(3)),
-                    z: parseFloat(this.position.z.toFixed(3)),
+                    x: ARENAUtils.round3(this.position.x),
+                    y: ARENAUtils.round3(this.position.y),
+                    z: ARENAUtils.round3(this.position.z),
                 },
                 rotation: {
                     // always send quaternions over the wire
-                    x: parseFloat(this.rotation._x.toFixed(3)),
-                    y: parseFloat(this.rotation._y.toFixed(3)),
-                    z: parseFloat(this.rotation._z.toFixed(3)),
-                    w: parseFloat(this.rotation._w.toFixed(3)),
+                    x: ARENAUtils.round3(this.rotation._x),
+                    y: ARENAUtils.round3(this.rotation._y),
+                    z: ARENAUtils.round3(this.rotation._z),
+                    w: ARENAUtils.round3(this.rotation._w),
                 },
                 url: this.getControllerURL(),
                 dep: ARENA.idTag,
@@ -171,9 +172,9 @@ AFRAME.registerComponent('arena-hand', {
         el.object3D.getWorldPosition(newPosition);
 
         const coordsData = {
-            x: newPosition.x.toFixed(3),
-            y: newPosition.y.toFixed(3),
-            z: newPosition.z.toFixed(3),
+            x: ARENAUtils.round3(newPosition.x),
+            y: ARENAUtils.round3(newPosition.y),
+            z: ARENAUtils.round3(newPosition.z),
         };
 
         // publish to MQTT

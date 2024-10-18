@@ -166,15 +166,15 @@ AFRAME.registerComponent('gesture-detector', {
             data: {
                 originPosition: ARENAUtils.vec3ToObject(this.cameraPos),
                 targetPosition: {
-                    x: parseFloat(eventDetail.position.x.toFixed(5)),
-                    y: parseFloat(eventDetail.position.y.toFixed(5)),
+                    x: ARENAUtils.round5(eventDetail.position.x),
+                    y: ARENAUtils.round5(eventDetail.position.y),
                 },
                 targetPositionStart: {
-                    x: parseFloat(eventDetail.positionStart.x.toFixed(5)),
-                    y: parseFloat(eventDetail.positionStart.y.toFixed(5)),
+                    x: ARENAUtils.round5(eventDetail.positionStart.x),
+                    y: ARENAUtils.round5(eventDetail.positionStart.y),
                 },
-                spread: parseFloat(eventDetail.spread.toFixed(5)),
-                spreadStart: parseFloat(eventDetail.spreadStart.toFixed(5)),
+                spread: ARENAUtils.round5(eventDetail.spread),
+                spreadStart: ARENAUtils.round5(eventDetail.spreadStart),
             },
         };
         // publishing events attached to user id objects allows sculpting security
