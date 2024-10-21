@@ -90,6 +90,7 @@ async function enableChromeAEC(gainNode, spatialAudioOn) {
  * @property {string} [displayName] - User display name.
  * @property {boolean} [hasAudio=false] - Whether the user has audio on.
  * @property {boolean} [hasVideo=false] - Whether the user has video on.
+ * @property {boolean} [hasAvatar=false] - Whether the user has face tracking on.
  *
  */
 AFRAME.registerComponent('arena-user', {
@@ -101,6 +102,7 @@ AFRAME.registerComponent('arena-user', {
         displayName: { type: 'string', default: '' },
         hasAudio: { type: 'boolean', default: false },
         hasVideo: { type: 'boolean', default: false },
+        hasAvatar: { type: 'boolean', default: false },
         jitsiQuality: { type: 'number', default: 100.0 },
         resolution: { type: 'number', default: 180 },
         pano: { type: 'boolean', default: false },
