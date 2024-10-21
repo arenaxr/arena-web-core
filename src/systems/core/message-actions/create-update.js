@@ -136,10 +136,11 @@ export default class CreateUpdate {
                 }
 
                 if (message.ttl !== undefined) {
-                    // remove first to ensure updates will fire when seconds is unchanged as a keepalive
-                    entityEl.removeAttribute('ttl');
-                    // Allow falsy value of 0
-                    entityEl.setAttribute('ttl', 'seconds', message.ttl);
+                    console.log('ttl', 'message', message.ttl, id);
+                    if (message.ttl >= 0) {
+                        // Allow -1 to bypass TTL update, retains previous timeout
+                        entityEl.setAttribute('ttl', { expireAt: Date.now() + message.ttl * 1000 });
+                    }
                 }
 
                 // Private and program_id flags. Falsy values unset (undefined, null, 0, '')
