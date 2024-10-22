@@ -101,11 +101,12 @@ class MQTTWorker {
     /**
      * Subscribe to a topic and add it to list of subscriptions
      * @param {string} topic
+     * @param {object} opts
      */
-    subscribe(topic) {
+    subscribe(topic, opts) {
         if (!this.subscriptions.includes(topic)) {
             this.subscriptions.push(topic);
-            this.mqttClient.subscribe(topic);
+            this.mqttClient.subscribe(topic, opts);
         }
     }
 
@@ -256,6 +257,10 @@ class MQTTWorker {
                         this.onSubscribed();
                         this.subCount = 0;
                     }
+                    if (this.config.dbg === true) console.log(`Subscribe success to: ${topic}`);
+                },
+                onFailure: () => {
+                    throw new Error(`Subscribe FAILED to: ${topic}`);
                 },
             });
         });

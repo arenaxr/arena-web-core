@@ -734,6 +734,7 @@ export function mqttReconnect(settings = undefined) {
         onConnectionLost: onMqttConnectionLost,
         mqtt_username: settings.mqttUsername,
         mqtt_token: settings.mqttToken,
+        dbg: ARENA.defaults.devInstance,
     });
 
     try {

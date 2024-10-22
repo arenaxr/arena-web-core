@@ -6,7 +6,7 @@
  * @date 2022
  */
 import { UUID } from 'uuidjs';
-import MQTTClient from './mqtt-client';
+import MqttClient from './mqtt-client';
 import RuntimeMsgs from './runtime-msgs';
 import { ARENA_EVENTS, TOPICS } from '../../../constants';
 
@@ -39,10 +39,12 @@ export default class RuntimeMngr {
 
     /* @property {string} - pubsub topic where the runtime sends register messages and also receives confirmations */
     runtimeTopicPub;
+
     runtimeTopicSub;
 
     /*  @property {string} - pubsub topic where client sends out module requests and the runtime listens for control messages (module create/delete) */
     modulesTopicPub;
+
     modulesTopicSub;
 
     /* @property {number} [regTimeoutSeconds=30] - how long we wait for responses to register msgs */
@@ -108,26 +110,26 @@ export default class RuntimeMngr {
         this.name = name;
         this.maxNmodules = maxNmodules;
         this.apis = apis;
-        //{nameSpace}/p/{rtUuid}
+        // {nameSpace}/p/{rtUuid}
         this.runtimeTopicPub = TOPICS.PUBLISH.RT_RUNTIME.formatStr({
-            nameSpace: nameSpace,
+            nameSpace,
             rtUuid: uuid,
         });
-        //{nameSpace}/p/{rtUuid}
+        // {nameSpace}/p/{rtUuid}
         this.runtimeTopicSub = TOPICS.SUBSCRIBE.RT_RUNTIME.formatStr({
-            nameSpace: nameSpace,
+            nameSpace,
             rtUuid: uuid,
         });
-        //{nameSpace}/{sceneName}/p/{idTag}
+        // {nameSpace}/{sceneName}/p/{idTag}
         this.modulesTopicPub = TOPICS.PUBLISH.RT_MODULES.formatStr({
-            nameSpace: nameSpace,
-            sceneName: sceneName,
-            idTag: idTag
+            nameSpace,
+            sceneName,
+            idTag,
         });
-        //{nameSpace}/{sceneName}/p/+
+        // {nameSpace}/{sceneName}/p/+
         this.modulesTopicSub = TOPICS.SUBSCRIBE.RT_MODULES.formatStr({
-            nameSpace: nameSpace,
-            sceneName: sceneName,
+            nameSpace,
+            sceneName,
         });
         console.info('runtimeTopicPub:', this.runtimeTopicPub);
         console.info('runtimeTopicSub:', this.runtimeTopicSub);
@@ -196,7 +198,7 @@ export default class RuntimeMngr {
     async init(performRegister = false) {
         // mqtt connect; setup delete runtime msg as last will
         const rtMngr = this;
-        this.mc = new MQTTClient({
+        this.mc = new MqttClient({
             mqtt_host: rtMngr.mqttHost,
             mqtt_username: rtMngr.mqttUsername,
             mqtt_token: rtMngr.mqttToken,
@@ -204,6 +206,7 @@ export default class RuntimeMngr {
             willMessage: rtMngr.lastWillStringMsg,
             willMessageTopic: rtMngr.runtimeTopicPub,
             userid: rtMngr.name,
+            dbg: ARENA.defaults.devInstance,
         });
 
         await this.mc.connect();

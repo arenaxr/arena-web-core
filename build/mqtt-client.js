@@ -71,8 +71,6 @@ export default class MqttClient {
                     if (_this.settings.subscribeTopics !== undefined) {
                         // Subscribe to the requested topic
                         if (_this.settings.subscribeTopics.length > 0) {
-                            if (_this.settings.dbg === true)
-                                console.log(`Subscribing to: ${_this.settings.subscribeTopics}\n`);
                             _this.mqttc.subscribe(_this.settings.subscribeTopics);
                         }
                     }
@@ -134,8 +132,15 @@ export default class MqttClient {
     }
 
     subscribe(topic) {
-        if (this.settings.dbg === true) console.log(`Subscribing :${topic}`);
-        this.mqttc.subscribe(topic);
+        const logOptions = {
+            onSuccess: () => {
+                if (this.settings.dbg === true) console.log(`Subscribe success to: ${topic}`);
+            },
+            onFailure: () => {
+                throw new Error(`Subscribe FAILED to: ${topic}`);
+            },
+        };
+        this.mqttc.subscribe(topic, logOptions);
     }
 
     unsubscribe(topic) {

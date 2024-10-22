@@ -4,12 +4,13 @@ import { TOPICS } from '../../../constants';
 const Paho = require('paho-mqtt');
 
 export default class MQTTSignaling {
-    constructor(id, mqttHost, username, mqttToken) {
+    constructor(id, mqttHost, username, mqttToken, dbg) {
         this.id = id;
         this.connectionId = null;
         this.mqttHost = mqttHost;
         this.mqttUsername = username;
         this.mqttToken = mqttToken;
+        this.dbg = dbg;
 
         this.onConnect = null;
         this.onOffer = null;
@@ -50,8 +51,20 @@ export default class MQTTSignaling {
         this.pubRenderClientPrivateTopic = TOPICS.PUBLISH.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
         this.subRenderClientPublicTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PUBLIC.formatStr(ARENA.topicParams);
         this.subRenderClientPrivateTopic = TOPICS.SUBSCRIBE.SCENE_RENDER_PRIVATE.formatStr(ARENA.topicParams);
-        this.client.subscribe(this.subRenderClientPublicTopic);
-        this.client.subscribe(this.subRenderClientPrivateTopic);
+        this.subscribe(this.subRenderClientPublicTopic);
+        this.subscribe(this.subRenderClientPrivateTopic);
+    }
+
+    subscribe(topic) {
+        const logOptions = {
+            onSuccess: () => {
+                if (this.dbg === true) console.log(`Subscribe success to: ${topic}`);
+            },
+            onFailure: () => {
+                throw new Error(`Subscribe FAILED to: ${topic}`);
+            },
+        };
+        this.client.subscribe(topic, logOptions);
     }
 
     mqttOnConnectionLost(responseObject) {

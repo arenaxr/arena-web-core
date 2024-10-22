@@ -79,7 +79,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         const username = this.mqtt.userName;
         const token = this.arena.mqttToken.mqtt_token;
 
-        this.signaler = new MQTTSignaling(this.id, host, username, token);
+        this.signaler = new MQTTSignaling(this.id, host, username, token, ARENA.defaults.devInstance);
         this.signaler.onOffer = this.gotOffer.bind(this);
         this.signaler.onHealthCheck = this.gotHealthCheck.bind(this);
         this.signaler.onAnswer = this.gotAnswer.bind(this);
