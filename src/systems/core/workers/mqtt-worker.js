@@ -260,7 +260,7 @@ class MQTTWorker {
                     if (this.config.dbg === true) console.log(`Subscribe success to: ${topic}`);
                 },
                 onFailure: () => {
-                    throw new Error(`Subscribe FAILED to: ${topic}`);
+                    console.error(`Subscribe FAILED to: ${topic}`);
                 },
             });
         });
