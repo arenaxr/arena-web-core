@@ -658,6 +658,85 @@
             "type": "object",
             "description": "These effects are enabled in desktop and XR views."
         },
+        "position": {
+            "description": "3D environment position.",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "format": "grid",
+            "type": "object",
+            "title": "Position"
+        },
+        "rotation": {
+            "description": "3D environment rotation in quaternion representation; Right-handed coordinate system. Euler degrees are deprecated in wire message format.",
+            "properties": {
+                "w": {
+                    "default": 1,
+                    "minimum": -1,
+                    "maximum": 1,
+                    "type": "number"
+                },
+                "x": {
+                    "default": 0,
+                    "minimum": -1,
+                    "maximum": 1,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "minimum": -1,
+                    "maximum": 1,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "minimum": -1,
+                    "maximum": 1,
+                    "type": "number"
+                }
+            },
+            "required": ["w", "x", "y", "z"],
+            "format": "grid",
+            "type": "object",
+            "title": "Rotation"
+        },
+        "scale": {
+            "description": "3D environment scale.",
+            "id": "scale",
+            "properties": {
+                "x": {
+                    "default": 1,
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 1,
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 1,
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "format": "grid",
+            "type": "object",
+            "title": "Scale"
+        },
         "vector3": {
             "title": "Vector3",
             "format": "grid",
