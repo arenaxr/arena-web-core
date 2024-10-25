@@ -135,12 +135,9 @@ export default class CreateUpdate {
                     }
                 }
 
-                if (message.ttl !== undefined) {
-                    console.log('ttl', 'message', message.ttl, id);
-                    if (message.ttl >= 0) {
-                        // Allow -1 to bypass TTL update, retains previous timeout
-                        entityEl.setAttribute('ttl', { expireAt: Date.now() + message.ttl * 1000 });
-                    }
+                if (message.ttl !== undefined && message.ttl >= 0) {
+                    // Allow -1 to bypass TTL update, retains previous timeout
+                    entityEl.setAttribute('ttl', { expireAt: Date.now() + message.ttl * 1000 });
                 }
 
                 // Private and program_id flags. Falsy values unset (undefined, null, 0, '')

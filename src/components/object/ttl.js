@@ -23,16 +23,10 @@ AFRAME.registerComponent('ttl', {
         expireAt: { type: 'int' },
     },
     init() {
-        console.log('ttl', 'init', this.data.expireAt, this.el.id);
-        if (this.data.expireAt > 0) {
-            this.expireAt = Date.now() + this.data.seconds * 1000;
-            this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
-        }
+        this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     tick() {
-        const now = Date.now();
-        if (this.data.expireAt > 0 && now > this.data.expireAt) {
-            console.log('ttl', 'delete', this.data.expireAt, this.el.id);
+        if (Date.now() > this.data.expireAt) {
             Delete.handle({ id: this.el.id });
         }
     },
