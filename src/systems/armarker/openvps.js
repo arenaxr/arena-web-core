@@ -133,23 +133,18 @@ AFRAME.registerComponent('openvps', {
         this.mapServer
             .localize(imageBlob, 'image')
             .then(async (response) => {
-                if (!response.ok) {
-                    console.error(`openVPS Server error response: ${response.status}`);
-                } else {
-                    const resJson = await response.json();
-                    const now = new Date();
-                    ARENA.debugXR(`New vps solution at ${now.toISOString()}, confidence: ${resJson.confidence}`);
-                    if (resJson.confidence < this.sessionMaxConfidence) {
-                        ARENA.debugXR('| Worse, ignoring', false);
-                        return;
-                    }
-                    ARENA.debugXR('| Higher, relocalizing', false);
-                    this.sessionMaxConfidence = resJson.confidence;
-                    this.solutionMatrix.fromArray(resJson.arscene_pose);
-                    this.newRigMatrix.multiplyMatrices(this.solutionMatrix, this.currentCameraMatrixInverse);
-                    rig.position.setFromMatrixPosition(this.newRigMatrix);
-                    spinner.quaternion.setFromRotationMatrix(this.newRigMatrix);
+                const now = new Date();
+                ARENA.debugXR(`New vps solution ${now.toISOString()}, conf: ${response.serverConfidence}`);
+                if (response.confidence < this.sessionMaxConfidence) {
+                    ARENA.debugXR('| Worse, ignoring', false);
+                    return;
                 }
+                ARENA.debugXR('| Higher, relocalizing', false);
+                this.sessionMaxConfidence = response.serverConfidence;
+                this.solutionMatrix.fromArray(response.pose);
+                this.newRigMatrix.multiplyMatrices(this.solutionMatrix, this.currentCameraMatrixInverse);
+                rig.position.setFromMatrixPosition(this.newRigMatrix);
+                spinner.quaternion.setFromRotationMatrix(this.newRigMatrix);
             })
             .catch((error) => {
                 console.error(`Error getting pose from openVPS server: ${error.message}. ImageBlob: ${imageBlob.size}`);
