@@ -179,29 +179,9 @@ class MQTTWorker {
      * if a message is batch queued, as this we need this to flush the queue whenever the max interval is reached.
      * @param {string} topicCategory - the topic category to register a handler for
      * @param {function} mainHandler - main thread handler, pass in whatever expected format
-     * @param {boolean} isJson - whether the payload is expected to be well-formed json
-     * @param {string|null} validateUuid - object key to validate match to the topic uuid, nullish if no validation
      */
-    registerMessageHandler(topicCategory, mainHandler, isJson = true, validateUuid = 'object_id') {
-        if (isJson) {
-            // Parse json in worker
-            this.messageHandlers[topicCategory] = (message) => {
-                try {
-                    const jsonPayload = JSON.parse(message.payloadString);
-                    if (validateUuid) {
-                        const topicUuid = message.destinationName.split('/')[TOPICS.TOKENS.UUID];
-                        if (topicUuid !== jsonPayload[validateUuid]) {
-                            return; // mismatched uuid
-                        }
-                    }
-                    mainHandler({ ...message, payloadObj: jsonPayload });
-                } catch (e) {
-                    // Ignore
-                }
-            };
-        } else {
-            this.messageHandlers[topicCategory] = mainHandler;
-        }
+    registerMessageHandler(topicCategory, mainHandler) {
+        this.messageHandlers[topicCategory] = mainHandler;
     }
 
     /**

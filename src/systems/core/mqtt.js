@@ -95,9 +95,7 @@ AFRAME.registerSystem('arena-mqtt', {
             's',
             proxy((messages) => {
                 messages.forEach(this.onSceneMessageArrived);
-            }),
-            true,
-            'object_id'
+            })
         );
         worker.registerMessageQueue('s', true, 'object_id');
         return worker;
