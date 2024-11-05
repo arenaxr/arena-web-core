@@ -100,6 +100,7 @@ export default class ARENAUserAccount {
     static async refreshAuthToken(authType, mqttUsername, namespacedScene) {
         let params = `username=${mqttUsername}`;
         params += `&id_auth=${authType}`;
+        params += `&client=${'webBuild'}`;
         params += `&realm=${ARENADefaults ? ARENADefaults.realm : 'realm'}`;
         // only request single-scene specific perms when rendering scene
         // pages /scenes and /build should have general permissions for the user's scene objects
