@@ -209,7 +209,6 @@ window.ARENAAUTH = {
         const authParams = {
             username: mqttUsername,
             id_auth: authType,
-            userid: true,
             client: 'web',
         };
         if (ARENA.params.realm) {

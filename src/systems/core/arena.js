@@ -90,11 +90,13 @@ AFRAME.registerSystem('arena-scene', {
 
         // id tag including name is set from authentication service
         this.setIdTag(this.mqttToken.ids.userid);
+        this.userClient = this.mqttToken.ids.userclient;
 
         // Reuse object for topic parameters
         this.topicParams = {
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
+            userClient: this.userClient,
             idTag: this.idTag,
             userObj: this.idTag,
         };
@@ -224,7 +226,8 @@ AFRAME.registerSystem('arena-scene', {
             mqttToken: this.mqttToken.mqtt_token,
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
-            idTag: this.idTag,    
+            idTag: this.idTag,
+            userClient: this.userClient,
         });
         this.RuntimeManager.init();
     },
@@ -313,6 +316,7 @@ AFRAME.registerSystem('arena-scene', {
         const usersTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
+            userClient: this.userClient,
             idTag: this.idTag,
         });
         return ARENAAUTH.matchJWT(usersTopic, this.mqttToken.token_payload.publ);
@@ -330,6 +334,7 @@ AFRAME.registerSystem('arena-scene', {
         const writeTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
+            userClient: this.userClient,
             idTag: '+',
         });
         return ARENAAUTH.matchJWT(writeTopic, this.mqttToken.token_payload.publ);
@@ -348,6 +353,7 @@ AFRAME.registerSystem('arena-scene', {
         const chatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr({
             nameSpace: this.nameSpace,
             sceneName: this.sceneName,
+            userClient: this.userClient,
             idTag: this.idTag,
         });
         return ARENAAUTH.matchJWT(chatTopic, this.mqttToken.token_payload.publ);

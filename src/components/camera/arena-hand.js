@@ -72,6 +72,7 @@ AFRAME.registerComponent('arena-hand', {
         this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr({
             nameSpace: ARENA.nameSpace,
             sceneName: ARENA.sceneName,
+            userClient: ARENA.userClient,
         });
 
         el.addEventListener('controllerconnected', () => {
