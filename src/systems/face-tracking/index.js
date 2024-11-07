@@ -41,6 +41,7 @@ AFRAME.registerSystem('face-tracking', {
         const faceTopic = TOPICS.PUBLISH.SCENE_USER.formatStr({
             nameSpace: ARENA.nameSpace,
             sceneName: ARENA.sceneName,
+            userClient: ARENA.userClient,
             userObj: ARENA.faceName,
         });
 

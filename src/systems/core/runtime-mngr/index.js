@@ -86,7 +86,8 @@ export default class RuntimeMngr {
         realm = TOPICS.REALM,
         nameSpace = 'public',
         sceneName = 'default',
-        idTag = `${Math.floor(Math.random() * 10000000000 + 1000000000)}-anonymous-User`,
+        idTag = 'MissingAuthIdTag',
+        userClient = 'MissingAuthUserCLient',
         uuid = UUID.generate(),
         name = `rt-${(Math.random() + 1).toString(36).substring(2)}`,
         maxNmodules = 0, // TMP: cannot run any modules
@@ -120,13 +121,14 @@ export default class RuntimeMngr {
             nameSpace,
             rtUuid: uuid,
         });
-        // {nameSpace}/{sceneName}/p/{idTag}
+        // {nameSpace}/{sceneName}/p/{userClient}/{idTag}
         this.modulesTopicPub = TOPICS.PUBLISH.RT_MODULES.formatStr({
             nameSpace,
             sceneName,
+            userClient,
             idTag,
         });
-        // {nameSpace}/{sceneName}/p/+
+        // {nameSpace}/{sceneName}/p/+/+
         this.modulesTopicSub = TOPICS.SUBSCRIBE.RT_MODULES.formatStr({
             nameSpace,
             sceneName,

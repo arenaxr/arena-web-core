@@ -28,6 +28,7 @@ window.addEventListener('onauth', async (e) => {
 
     const username = e.detail.mqtt_username;
     const mqttToken = e.detail.mqtt_token;
+    const userClient = e.detail.ids.userclient;
 
     // Divs/textareas on the page
     const output = document.getElementById('output');
@@ -460,7 +461,7 @@ window.addEventListener('onauth', async (e) => {
                     updateLink();
                     localStorage.setItem('scene', sceneinput.value);
                     updateUrl();
-                    updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
+                    updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken, userClient);
                 }, 500); // refresh after a while, so that delete messages are processed
             }
         });
@@ -656,7 +657,7 @@ window.addEventListener('onauth', async (e) => {
         updateLink();
         localStorage.setItem('scene', sceneinput.value);
         updateUrl();
-        updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
+        updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken, userClient);
     });
 
     // Focus listener for scene
@@ -949,6 +950,7 @@ window.addEventListener('onauth', async (e) => {
         authState,
         mqttUsername: username,
         mqttToken,
+        userClient,
         exportSceneButton,
     });
 
@@ -1005,7 +1007,7 @@ window.addEventListener('onauth', async (e) => {
     reload();
     updateLink();
     updateUrl();
-    updatePublishControlsByToken(ns, s, mqttToken);
+    updatePublishControlsByToken(ns, s, mqttToken, userClient);
 
     Swal.close();
 });
@@ -1036,10 +1038,11 @@ Swal.fire({
  * @param {string} scenename
  * @param {string} mqttToken
  */
-function updatePublishControlsByToken(namespace, scenename, mqttToken) {
+function updatePublishControlsByToken(namespace, scenename, mqttToken, userClient) {
     const objectsTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
         nameSpace: namespace,
         sceneName: scenename,
+        userClient,
         objectId: '+',
     });
     const editor = ARENAAUTH.isUserSceneEditor(mqttToken, objectsTopic);

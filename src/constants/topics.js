@@ -12,8 +12,9 @@
  * ARENA pubsub topic variables
  * - nameSpace - namespace of the scene
  * - sceneName - name of the scene
- * - userName - name of the user per arena-auth (e.g. jdoe)
- * - idTag - username prefixed with a uuid (e.g. 1448081341_jdoe)
+ * - userClient - name of the user client per arena-auth (e.g. jdoe_1448081341_web)
+ * - idTag - username prefixed with a uuid (e.g. jdoe_1448081341)
+ * - userObj - idTag prefixed with camera_ (e.g. camera_jdoe_1448081341)
  */
 
 // TODO: handle this scriptImport somehow (which can't be done in parcel with a worker...)
@@ -32,8 +33,9 @@ const TOPICS = Object.freeze({
         NAMESPACE: 2,
         SCENENAME: 3,
         SCENE_MSGTYPE: 4,
-        UUID: 5,
-        TO_UID: 6,
+        USER_CLIENT: 5,
+        UUID: 6,
+        TO_UID: 7,
     },
     SCENE_MSGTYPES: {
         PRESENCE: 'x',
@@ -47,35 +49,35 @@ const TOPICS = Object.freeze({
     },
     SUBSCRIBE: {
         NETWORK:               '$NETWORK',
-        DEVICE:                `${REALM}/d/{deviceName}/#`, // All client placeholder
+        DEVICE:                `${REALM}/d/{nameSpace}/{deviceName}/#`, // All client placeholder
         RT_RUNTIME:            `${REALM}/g/{nameSpace}/p/{rtUuid}`,
-        RT_MODULES:            `${REALM}/s/{nameSpace}/{sceneName}/p/+`,
-        SCENE_PUBLIC:          `${REALM}/s/{nameSpace}/{sceneName}/+/+`,
-        SCENE_PRIVATE:         `${REALM}/s/{nameSpace}/{sceneName}/+/+/{idTag}/#`,
-        SCENE_RENDER_PUBLIC:   `${REALM}/s/{nameSpace}/{sceneName}/r/-`, // TODO: consolidate
-        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/-/{idTag}/#`, // TODO: consolidate
+        RT_MODULES:            `${REALM}/s/{nameSpace}/{sceneName}/p/+/+`,
+        SCENE_PUBLIC:          `${REALM}/s/{nameSpace}/{sceneName}/+/+/+`,
+        SCENE_PRIVATE:         `${REALM}/s/{nameSpace}/{sceneName}/+/+/+/{idTag}/#`,
+        SCENE_RENDER_PUBLIC:   `${REALM}/s/{nameSpace}/{sceneName}/r/+/-`, // TODO: consolidate
+        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/+/-/{idTag}/#`, // TODO: consolidate
     },
     PUBLISH: {
         NETWORK_LATENCY:       '$NETWORK/latency',
-        DEVICE:                `${REALM}/d/{deviceName}/{idTag}`,
+        DEVICE:                `${REALM}/d/{nameSpace}/{deviceName}/{idTag}`,
         RT_RUNTIME:            `${REALM}/g/{nameSpace}/p/{rtUuid}`,
-        RT_MODULES:            `${REALM}/s/{nameSpace}/{sceneName}/p/{idTag}`,
+        RT_MODULES:            `${REALM}/s/{nameSpace}/{sceneName}/p/{userClient}/{idTag}`,
         PROC_DBG:              `${REALM}/proc/debug/{uuid}`,
-        SCENE_PRESENCE:        `${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}`,
-        SCENE_PRESENCE_PRIVATE:`${REALM}/s/{nameSpace}/{sceneName}/x/{idTag}/{toUid}`,
-        SCENE_CHAT:            `${REALM}/s/{nameSpace}/{sceneName}/c/{idTag}`,
-        SCENE_CHAT_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/c/{idTag}/{toUid}`,
-        SCENE_USER:            `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}`,
-        SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{userObj}/{toUid}`, // Need to add face_ privs
-        SCENE_OBJECTS:         `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}`, // All client placeholder
-        SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{objectId}/{toUid}`,
-        SCENE_RENDER:          `${REALM}/s/{nameSpace}/{sceneName}/r/{idTag}`,
-        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/{idTag}/-`, // To avoid unpriv sub
-        SCENE_ENV:             `${REALM}/s/{nameSpace}/{sceneName}/e/{idTag}`,
-        SCENE_ENV_PRIVATE:     `${REALM}/s/{nameSpace}/{sceneName}/e/{idTag}/-`, // To avoid unpriv sub
-        SCENE_PROGRAM:         `${REALM}/s/{nameSpace}/{sceneName}/p/{idTag}`,
-        SCENE_PROGRAM_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/p/{idTag}/{toUid}`,
-        SCENE_DEBUG:           `${REALM}/s/{nameSpace}/{sceneName}/d/{idTag}/-`, // To avoid unpriv sub
+        SCENE_PRESENCE:        `${REALM}/s/{nameSpace}/{sceneName}/x/{userClient}/{idTag}`,
+        SCENE_PRESENCE_PRIVATE:`${REALM}/s/{nameSpace}/{sceneName}/x/{userClient}/{idTag}/{toUid}`,
+        SCENE_CHAT:            `${REALM}/s/{nameSpace}/{sceneName}/c/{userClient}/{idTag}`,
+        SCENE_CHAT_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/c/{userClient}/{idTag}/{toUid}`,
+        SCENE_USER:            `${REALM}/s/{nameSpace}/{sceneName}/u/{userClient}/{userObj}`,
+        SCENE_USER_PRIVATE:    `${REALM}/s/{nameSpace}/{sceneName}/u/{userClient}/{userObj}/{toUid}`, // Need to add face_ privs
+        SCENE_OBJECTS:         `${REALM}/s/{nameSpace}/{sceneName}/o/{userClient}/{objectId}`, // All client placeholder
+        SCENE_OBJECTS_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/o/{userClient}/{objectId}/{toUid}`,
+        SCENE_RENDER:          `${REALM}/s/{nameSpace}/{sceneName}/r/{userClient}/{idTag}`,
+        SCENE_RENDER_PRIVATE:  `${REALM}/s/{nameSpace}/{sceneName}/r/{userClient}/{idTag}/-`, // To avoid unpriv sub
+        SCENE_ENV:             `${REALM}/s/{nameSpace}/{sceneName}/e/{userClient}/{idTag}`,
+        SCENE_ENV_PRIVATE:     `${REALM}/s/{nameSpace}/{sceneName}/e/{userClient}/{idTag}/-`, // To avoid unpriv sub
+        SCENE_PROGRAM:         `${REALM}/s/{nameSpace}/{sceneName}/p/{userClient}/{idTag}`,
+        SCENE_PROGRAM_PRIVATE: `${REALM}/s/{nameSpace}/{sceneName}/p/{userClient}/{idTag}/{toUid}`,
+        SCENE_DEBUG:           `${REALM}/s/{nameSpace}/{sceneName}/d/{userClient}/{idTag}/-`, // To avoid unpriv sub
     },
 });
 

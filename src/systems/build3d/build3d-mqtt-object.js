@@ -289,6 +289,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                 TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
                     nameSpace: ARENA.nameSpace,
                     sceneName: ARENA.sceneName,
+                    userClient: ARENA.userClient,
                     object_id: msg.object_id,
                 }),
                 msg

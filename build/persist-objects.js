@@ -51,6 +51,7 @@ export async function init(settings) {
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
+        userClient: settings.userClient,
         exportSceneButton: settings.exportSceneButton,
     };
 
@@ -611,6 +612,7 @@ export function performActionArgObjList(action, scene, objList, json = true) {
         const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
             nameSpace: theNewScene.split('/')[0],
             sceneName: theNewScene.split('/')[1],
+            userClient: persist.userClient,
             objectId: obj.object_id,
         });
         console.info(`Publish [ ${topic}]: ${actionObj}`);
@@ -685,6 +687,7 @@ export async function addObject(obj, nameSpace, sceneName) {
     const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
         nameSpace,
         sceneName,
+        userClient: persist.userClient,
         objectId: obj.object_id,
     });
     console.info(`Publish [ ${topic}]: ${objJson}`);

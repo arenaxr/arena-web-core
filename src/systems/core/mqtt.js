@@ -40,7 +40,7 @@ AFRAME.registerSystem('arena-mqtt', {
         this.MQTTWorker = await this.initWorker();
 
         const mqttToken = ARENA.mqttToken.mqtt_token;
-        const { nameSpace, sceneName, idTag } = ARENA;
+        const { nameSpace, sceneName, userClient, idTag } = ARENA;
         // Do not pass functions in mqttClientOptions
         ARENA.Mqtt = this; // Restore old alias
         this.connect(
@@ -60,6 +60,7 @@ AFRAME.registerSystem('arena-mqtt', {
             TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
                 nameSpace,
                 sceneName,
+                userClient,
                 idTag,
             })
         );

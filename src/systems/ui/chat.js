@@ -88,6 +88,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.liveUsers = {};
 
         this.userId = this.arena.idTag;
+        this.userClient = this.arena.userClient;
         this.realm = ARENA.defaults.realm;
         this.displayName = ARENA.getDisplayName();
         this.nameSpace = this.arena.nameSpace;
@@ -98,6 +99,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const topicVars = {
             nameSpace: this.nameSpace,
             sceneName: this.scene,
+            userClient: this.userClient,
             idTag: this.userId,
         };
         this.publicChatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr(topicVars);

@@ -48,6 +48,7 @@ function publishUploadedFile(newObj) {
             TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
                 nameSpace: ARENA.nameSpace,
                 sceneName: ARENA.sceneName,
+                userClient: ARENA.userClient,
                 object_id: newObj.object_id,
             }),
             newObj
