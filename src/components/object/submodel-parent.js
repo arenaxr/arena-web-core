@@ -25,7 +25,9 @@ AFRAME.registerComponent('submodel-parent', {
             return;
         }
         const currentPos = new THREE.Vector3().copy(object3D.position);
+        const currentRot = new THREE.Euler().copy(object3D.rotation);
         parentSubObj.attach(object3D); // THREE.js will preserve world matrix at this point
         object3D.position.copy(currentPos);
+        object3D.rotation.copy(currentRot);
     },
 });
