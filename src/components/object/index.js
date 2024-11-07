@@ -24,6 +24,7 @@ import './landmark';
 import './material-extras';
 import './pcd-model';
 import './screenshare';
+import './submodel-parent';
 import './text-input';
 import './threejs-scene';
 import './ttl';

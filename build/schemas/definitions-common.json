@@ -643,6 +643,12 @@
             "title": "Sound",
             "type": "object"
         },
+        "submodel-parent": {
+            "title": "Submodel Parent",
+            "description": "When this object is parented to a hierarchical model, attaches to a named subcomponent of that model instead of the root position",
+            "type": "string",
+            "default": "",
+        },
         "textinput": {
             "title": "Text Input",
             "description": "Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires click-listener.",
