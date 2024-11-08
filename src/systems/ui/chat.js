@@ -428,9 +428,10 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {object} user - User object
      * @param {?boolean} merge - If true, merge user object with existing user
      * @param {?boolean} skipUserlist - If true, do not update user list
+     * @param {?boolean} silent - If true, do not popup notification for new user
      * @return {boolean} - True if user is a new addition
      */
-    upsertLiveUser(id, user, merge = false, skipUserlist = false) {
+    upsertLiveUser(id, user, merge = false, skipUserlist = false, silent = false) {
         let newUser = false;
         if (!this.liveUsers[id]) newUser = true;
 
@@ -440,7 +441,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             this.liveUsers[id] = { ...this.liveUsers[id], ...user };
         }
         this.liveUsers[id].ts = new Date().getTime();
-        if (newUser && !skipUserlist) this.populateUserList(this.liveUsers[id]);
+        if (newUser && !skipUserlist) this.populateUserList(this.liveUsers[id], silent);
         return newUser;
     },
 
@@ -458,7 +459,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 dn: user.dn,
                 type: this.liveUsers[user.id] ? UserType.ARENA : UserType.EXTERNAL,
             };
-            this.upsertLiveUser(user.id, userObj, true, true);
+            this.upsertLiveUser(user.id, userObj, true, true, true);
         });
         this.populateUserList();
     },
@@ -675,7 +676,9 @@ AFRAME.registerSystem('arena-chat-ui', {
                 }
             // NO break, fallthrough to update
             case 'update':
-                this.upsertLiveUser(msg.object_id, { dn: msg.dn, type: msg.type }, true);
+                if (!topicToUid) {
+                    this.upsertLiveUser(msg.object_id, { dn: msg.dn, type: msg.type }, true, false, true);
+                }
                 break;
             case 'leave':
                 // Explicity remove user object from the scene, as this new lastWill
@@ -786,8 +789,9 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Draw the contents of the Chat user list panel given its current state.
      * Adds a newUser if requested.
      * @param {Object} newUser The new user object to add.
+     * @param {?boolean} silent If true, do not display a notification for new users.
      */
-    populateUserList(newUser = undefined) {
+    populateUserList(newUser = undefined, silent = false) {
         const { el } = this;
 
         const { sceneEl } = el;
@@ -820,7 +824,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         this.nSceneUserslabel.textContent = nSceneUsers;
         this.usersDot.textContent = nSceneUsers < 100 ? nSceneUsers : '...';
-        if (newUser) {
+        if (newUser && !silent) {
             let msg = '';
             if (newUser.type !== UserType.SCREENSHARE) {
                 msg = `${newUser.dn}${newUser.type === UserType.EXTERNAL ? ' (external)' : ''} joined.`;
