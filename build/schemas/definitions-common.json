@@ -647,7 +647,7 @@
             "title": "Submodel Parent",
             "description": "When this object is parented to a hierarchical model, attaches to a named subcomponent of that model instead of the root position",
             "type": "string",
-            "default": "",
+            "default": ""
         },
         "textinput": {
             "title": "Text Input",
