@@ -1,5 +1,32 @@
 # Changelog
 
+## [2.0.0](https://github.com/arenaxr/arena-web-core/compare/v1.29.0...v2.0.0) (2024-11-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* Refactored topic structure for more granular flow and access ([#652](https://github.com/arenaxr/arena-web-core/issues/652))
+
+### Features
+
+* Refactored topic structure for more granular flow and access ([#652](https://github.com/arenaxr/arena-web-core/issues/652)) ([03b9705](https://github.com/arenaxr/arena-web-core/commit/03b9705d0e78566f2958f568614ad29f4e39bcf4))
+
+
+### Bug Fixes
+
+* **arena-user:** add missing hasAvatar field for outside accessors ([56cf44f](https://github.com/arenaxr/arena-web-core/commit/56cf44f6d7fea71852754ec164acf78fe4dd96ab))
+* **build:** add 'build' to mqtt client id ([fe2eb73](https://github.com/arenaxr/arena-web-core/commit/fe2eb73208d397125da705f98a4fd7a9cc5f58aa))
+* **build:** correct unknown object type display ([4caf6fe](https://github.com/arenaxr/arena-web-core/commit/4caf6fefbe1a5e2885f3b5afc9cadb36afbba781))
+* **build:** fixed typo obj.chanels -&gt; obj.channels ([8a4c1db](https://github.com/arenaxr/arena-web-core/commit/8a4c1dbec93dc1b87ff25fff4f1153ce8c80fee4))
+* **landmark:** patched race condition preventing lankmark ui display ([d95935c](https://github.com/arenaxr/arena-web-core/commit/d95935c5bb8fa8ff5bfe606502721399ec05784b))
+* **mqtt:** log subscribed - failures always, success if debug ([29f480a](https://github.com/arenaxr/arena-web-core/commit/29f480ac25577b5eb2522ebd0d01ecfb722be24f))
+* **mqtt:** require userClient in topic for all scene messages ([#670](https://github.com/arenaxr/arena-web-core/issues/670)) ([2c4fc6f](https://github.com/arenaxr/arena-web-core/commit/2c4fc6f9ec1fafa8038a3897b0361be4ebb6643a))
+* push-based mqtt message handler ([1c1d3fe](https://github.com/arenaxr/arena-web-core/commit/1c1d3fee7a7c617607eb176bfdae34d906cb0ebb))
+* **scene-options:** fixed incorrrect warning when missing clickableOnlyEvents option ([58cab4d](https://github.com/arenaxr/arena-web-core/commit/58cab4d0ec282fadd910070366a19c45526edc2d))
+* **scenes:** correct adding demoMode in URL builder ([1ad7211](https://github.com/arenaxr/arena-web-core/commit/1ad721199ee48ecc1dd85b763f0567128112831c))
+* **ttl:** update ttl component to alway apply updates ([4be0751](https://github.com/arenaxr/arena-web-core/commit/4be0751389ddb24447c81154583ba1b7df767bf5))
+* typo trailing comma in json ([30347f1](https://github.com/arenaxr/arena-web-core/commit/30347f15539a1a35fc53770bfca861c9c6f698ae))
+
 ## [1.29.0](https://github.com/arenaxr/arena-web-core/compare/v1.28.3...v1.29.0) (2024-09-02)
 
 
