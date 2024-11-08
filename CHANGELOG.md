@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/arenaxr/arena-web-core/compare/v2.0.0...v2.0.1) (2024-11-08)
+
+
+### Bug Fixes
+
+* **splat:** restore three.js to r164 in aframe 1.6.0, to regain splats ([2d2d20a](https://github.com/arenaxr/arena-web-core/commit/2d2d20a49db2e34bf2f02c84a8de7bad11fc9265))
+
 ## [2.0.0](https://github.com/arenaxr/arena-web-core/compare/v1.29.0...v2.0.0) (2024-11-08)
 
 
