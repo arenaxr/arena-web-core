@@ -63,6 +63,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         if (!data.enabled) return;
 
         this.upsertLiveUser = this.upsertLiveUser.bind(this);
+        this.jitsiConnected = false;
 
         ARENA.events.addMultiEventListener(
             [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.MQTT_SUBSCRIBED, ARENA_EVENTS.JITSI_LOADED],
@@ -462,6 +463,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             this.upsertLiveUser(user.id, userObj, true, true, true);
         });
         this.populateUserList();
+        this.jitsiConnected = true;
     },
 
     /**
@@ -471,11 +473,17 @@ AFRAME.registerSystem('arena-chat-ui', {
     onUserJitsiJoin(e) {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
-        this.upsertLiveUser(user.id, {
-            jid: user.jid,
-            dn: user.dn,
-            type: this.liveUsers[user.id] ? UserType.ARENA : UserType.EXTERNAL,
-        });
+        this.upsertLiveUser(
+            user.id,
+            {
+                jid: user.jid,
+                dn: user.dn,
+                type: this.liveUsers[user.id] ? UserType.ARENA : UserType.EXTERNAL,
+            },
+            true,
+            false,
+            !this.jitsiConnected
+        );
     },
 
     /**
