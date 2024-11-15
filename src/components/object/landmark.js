@@ -135,7 +135,7 @@ AFRAME.registerSystem('landmark', {
         if (chat && landmark.data.startingPosition === false) {
             // wait until ui is ready before changing elements
             const uiWait = window.setInterval(() => {
-                if (chat.ready) {
+                if (chat.isReady) {
                     clearInterval(uiWait);
                     chat.addLandmark(landmark);
                 }
@@ -153,7 +153,7 @@ AFRAME.registerSystem('landmark', {
         // TODO: fix loading order of chat and landmarks
         if (chat && landmark.data.startingPosition === false) {
             const uiWait = window.setInterval(() => {
-                if (chat.ready) {
+                if (chat.isReady) {
                     clearInterval(uiWait);
                     chat.removeLandmark(landmark);
                 }

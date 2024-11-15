@@ -412,6 +412,8 @@ AFRAME.registerSystem('arena-chat-ui', {
         sceneEl.addEventListener(JITSI_EVENTS.STATS_LOCAL, this.onJitsiStatsLocal);
         sceneEl.addEventListener(JITSI_EVENTS.STATS_REMOTE, this.onJitsiStatsRemote);
         sceneEl.addEventListener(JITSI_EVENTS.STATUS, this.onJitsiStatus);
+
+        this.isReady = true;
     },
 
     onNewSettings(e) {
