@@ -141,7 +141,8 @@ AFRAME.registerComponent('openvps', {
                 }
                 ARENA.debugXR('| Higher, relocalizing', false);
                 this.sessionMaxConfidence = response.serverConfidence;
-                this.solutionMatrix.fromArray(response.pose);
+                const localizationPose = this.transpose(response.pose).flat();
+                this.solutionMatrix.fromArray(localizationPose);
                 this.newRigMatrix.multiplyMatrices(this.solutionMatrix, this.currentCameraMatrixInverse);
                 rig.position.setFromMatrixPosition(this.newRigMatrix);
                 spinner.quaternion.setFromRotationMatrix(this.newRigMatrix);
@@ -163,5 +164,8 @@ AFRAME.registerComponent('openvps', {
         }
 
         return undefined;
+    },
+    transpose(matrix) {
+        return matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]));
     },
 });
