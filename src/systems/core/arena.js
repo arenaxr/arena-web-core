@@ -747,6 +747,18 @@ AFRAME.registerSystem('arena-scene', {
                     sceneEl.setAttribute('ar-hit-test-listener', { enabled: true });
                 }
 
+                const { enabled, imageUrl, meshUrl, interval } = sceneOptions.openvps || {};
+                if (enabled && (imageUrl || meshUrl)) {
+                    if (
+                        ARENAUtils.isMobile() ||
+                        ARENAUtils.isWebXRViewer() ||
+                        ARENAUtils.detectARHeadset() !== 'unknown'
+                    ) {
+                        sceneEl.setAttribute('openvps', { imageUrl, meshUrl, interval });
+                    }
+                    delete sceneOptions.openvps;
+                }
+
                 // deal with scene attribution
                 if (sceneOptions.attribution) {
                     const sceneAttr = document.createElement('a-entity');

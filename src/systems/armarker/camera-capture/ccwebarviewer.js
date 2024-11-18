@@ -15,8 +15,11 @@ import CVWorkerMsgs from '../worker-msgs';
 export default class WebARViewerCameraCapture {
     static instance = null;
 
-    /* buffer we process in the frames received  */
-    buffIndex = 0;
+    /* y buffer we process in the frames received  */
+    yBuffIndex = 0;
+
+    /* uv buffer we process in the frames received  */
+    uvBuffIndex = 1;
 
     /* last captured frame width */
     frameWidth;
@@ -37,6 +40,16 @@ export default class WebARViewerCameraCapture {
     /* worker to send images captured */
     cvWorker;
 
+    canvas;
+
+    offScreenImageData;
+
+    yByteArray;
+
+    uvByteArray;
+
+    colorCV = false;
+
     /**
      * Setup camera frame capture
      */
@@ -49,6 +62,7 @@ export default class WebARViewerCameraCapture {
 
         // WebXRViewer/WebARViewer deliver camera frames to 'processCV'
         window.processCV = this.processCV.bind(this);
+        this.updateOffscreenCanvas = this.updateOffscreenCanvas.bind(this);
 
         // For no obvious reason, parcel is optimizing away the import of Base64Binary, so we force include here...
         try {
@@ -139,8 +153,8 @@ export default class WebARViewerCameraCapture {
      * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
      */
     getCameraImagePixels(frame) {
-        // we expect the image at _buffers[this.buffIndex]
-        if (!frame._buffers[this.buffIndex]) {
+        // we expect the image at _buffers[this.yBuffIndex]
+        if (!frame._buffers[this.yBuffIndex]) {
             console.warn('No image buffer received.');
             return;
         }
@@ -148,11 +162,11 @@ export default class WebARViewerCameraCapture {
         if (
             this.frameGsPixels === undefined ||
             this.frameCamera === undefined ||
-            this.frameWidth !== frame._buffers[this.buffIndex].size.width ||
-            this.frameHeight !== frame._buffers[this.buffIndex].size.height
+            this.frameWidth !== frame._buffers[this.yBuffIndex].size.width ||
+            this.frameHeight !== frame._buffers[this.yBuffIndex].size.height
         ) {
-            this.frameWidth = frame._buffers[this.buffIndex].size.width;
-            this.frameHeight = frame._buffers[this.buffIndex].size.height;
+            this.frameWidth = frame._buffers[this.yBuffIndex].size.width;
+            this.frameHeight = frame._buffers[this.yBuffIndex].size.height;
             this.frameGsPixels = new Uint8Array(this.frameWidth * this.frameHeight); // grayscale (1 value per pixel)
 
             // update camera intrinsics
@@ -161,12 +175,15 @@ export default class WebARViewerCameraCapture {
 
         // frame is received as a YUV pixel buffer that is base64 encoded;
         // convert to a YUV Uint8Array and get grayscale pixels
-        const byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[this.buffIndex]._buffer);
-        const byteArrayView = new Uint8Array(byteArray);
-        // grayscale image is just the Y values (first this.frameWidth * this.frameHeight values)
-        for (let i = 0; i < this.frameWidth * this.frameHeight; i++) {
-            this.frameGsPixels[i] = byteArrayView[i];
+        const yArrayBuffer = Base64Binary.decodeArrayBuffer(frame._buffers[this.yBuffIndex]._buffer);
+        this.yByteArray = new Uint8Array(yArrayBuffer);
+        if (this.colorCV) {
+            // Update UV array if we need color
+            const uvArrayBuffer = Base64Binary.decodeArrayBuffer(frame._buffers[this.uvBuffIndex]._buffer);
+            this.uvByteArray = new Uint8Array(uvArrayBuffer);
         }
+        // grayscale image is just the Y values, copy over
+        this.frameGsPixels.set(this.yByteArray);
 
         // construct cam frame data to send to worker
         const camFrameMsg = {
@@ -204,5 +221,78 @@ export default class WebARViewerCameraCapture {
             // Skew factor in pixels
             gamma: 0,
         };
+    }
+
+    getOffscreenCanvas() {
+        if (!this.canvas) {
+            this.canvas = new OffscreenCanvas(this.frameWidth, this.frameHeight);
+            this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
+        }
+        return this.canvas;
+    }
+
+    updateOffscreenCanvas() {
+        const { yByteArray, uvByteArray, frameWidth, frameHeight } = this;
+        if (!yByteArray) return false;
+        const canvas = this.getOffscreenCanvas();
+        canvas.width = frameWidth;
+        canvas.height = frameHeight;
+
+        const ySize = frameWidth * frameHeight;
+        const rgbData = new Uint8ClampedArray(ySize * 4);
+
+        if (this.colorCV) {
+            // Convert yByteArray from YUV to RGB and set it to the canvas.
+            // Assuming we're working with YUV420p
+            const uvWidth = frameWidth >> 1;
+
+            for (let y = 0; y < frameHeight; y++) {
+                for (let x = 0; x < frameWidth; x++) {
+                    const xyIndex = y * frameWidth + x;
+
+                    // (y // 2) * (width // 2) + (x // 2);
+                    const uvIndex = ((y >> 1) * uvWidth + (x >> 1)) << 1; // Subsampled 4:2:0, but each UV is 2 bytes
+
+                    const yVal = yByteArray[xyIndex];
+                    const uVal = uvByteArray[uvIndex] - 128; // First byte is U
+                    const vVal = uvByteArray[uvIndex + 1] - 128; // Second byte is V
+
+                    // Ref: https://developer.apple.com/documentation/arkit/arkit_in_ios/displaying_an_ar_experience_with_metal#2891878
+                    /* (tranposed matrix)
+                    const float4x4 ycbcrToRGBTransform = float4x4(
+                        float4(+1.0000f, +1.0000f, +1.0000f, +0.0000f),
+                        float4(+0.0000f, -0.3441f, +1.7720f, +0.0000f),
+                        float4(+1.4020f, -0.7141f, +0.0000f, +0.0000f),
+                        float4(-0.7010f, +0.5291f, -0.8860f, +1.0000f)  // For some reason, this row is ignored
+                    );
+                     */
+                    const R = yVal + 1.402 * vVal;
+                    const G = yVal - 0.3441 * uVal - 0.7141 * vVal;
+                    const B = yVal + 1.772 * uVal;
+
+                    const rgbaIndex = xyIndex * 4;
+                    rgbData[rgbaIndex] = R;
+                    rgbData[rgbaIndex + 1] = G;
+                    rgbData[rgbaIndex + 2] = B;
+                    rgbData[rgbaIndex + 3] = 255; // Alpha always full
+                }
+            }
+        } else {
+            // Simple Y channel grayscale
+            for (let i = 0; i < ySize; i++) {
+                const y = yByteArray[i];
+                const rgbaIndex = i * 4;
+                rgbData[rgbaIndex] = y;
+                rgbData[rgbaIndex + 1] = y;
+                rgbData[rgbaIndex + 2] = y;
+                rgbData[rgbaIndex + 3] = 255;
+            }
+        }
+        if (this.offScreenImageData.width !== this.frameWidth || this.offScreenImageData.height !== this.frameHeight) {
+            this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
+        }
+        this.offScreenImageData.data.set(rgbData);
+        canvas.getContext('2d').putImageData(this.offScreenImageData, 0, 0);
+        return true;
     }
 }
