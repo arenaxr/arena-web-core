@@ -135,7 +135,7 @@ AFRAME.registerComponent('openvps', {
             .then(async (response) => {
                 const now = new Date();
                 ARENA.debugXR(`New vps solution ${now.toISOString()}, conf: ${response.serverConfidence}`);
-                if (response.confidence < this.sessionMaxConfidence) {
+                if (response.serverConfidence < this.sessionMaxConfidence) {
                     ARENA.debugXR('| Worse, ignoring', false);
                     return;
                 }
