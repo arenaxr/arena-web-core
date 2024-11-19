@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.1.0](https://github.com/arenaxr/arena-web-core/compare/v2.0.1...v2.1.0) (2024-11-19)
+
+
+### Features
+
+* add openvps component ([e133f98](https://github.com/arenaxr/arena-web-core/commit/e133f98704b06740d65f05ca869c543746b24964))
+
+
+### Bug Fixes
+
+* add missing await on res ([d33c916](https://github.com/arenaxr/arena-web-core/commit/d33c9166ed03481bba7bd96367b69fb866b5d030))
+* instantiate ImageData for offscreencanvas ([c101bc6](https://github.com/arenaxr/arena-web-core/commit/c101bc610ebdb1c99a4b31b031dd2abcc8318e70))
+* needOffscreenCanvas typo ([cdafdee](https://github.com/arenaxr/arena-web-core/commit/cdafdee069ebc14bdabf621a39c525bb7fa24725))
+* not formated topic in webxr sys ([5027d0d](https://github.com/arenaxr/arena-web-core/commit/5027d0d2b066fc390df0f1a191d65e6c1c2b8b4c))
+* program object topic ([6163e67](https://github.com/arenaxr/arena-web-core/commit/6163e6721cb4b01ed44fb6d4a24dd8882f16e516))
+* proper instantiate offscreencanvas ([dcdc47b](https://github.com/arenaxr/arena-web-core/commit/dcdc47bdd477cffdd4ba84906eff41c27daaf94a))
+* typo on response keys ([2359772](https://github.com/arenaxr/arena-web-core/commit/235977289951c35f3cda6d42ba7cb9fbad769bed))
+* typo prop ([39475f8](https://github.com/arenaxr/arena-web-core/commit/39475f89571c6bbae514af3d234efc1ea2003627))
+
 ## [2.0.1](https://github.com/arenaxr/arena-web-core/compare/v2.0.0...v2.0.1) (2024-11-08)
 
 
