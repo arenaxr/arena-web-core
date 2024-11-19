@@ -24,8 +24,6 @@ AFRAME.registerSystem('xr-env-publisher', {
             useRecords: false,
             useFloat32: true,
         });
-
-        this.pubTopic = TOPICS.PUBLISH.SCENE_ENV_PRIVATE.formatStr(ARENA.topicParams);
     },
     async webXRSessionStarted(xrSession) {
         if (xrSession === undefined) return;
@@ -33,7 +31,7 @@ AFRAME.registerSystem('xr-env-publisher', {
     },
     async onRAF(_time, frame) {
         const {
-            data: { publishMeshes, publishPlanes, publishTopicBase, onlyGlobalMesh },
+            data: { publishMeshes, publishPlanes, onlyGlobalMesh },
         } = this;
         if (
             // No mesh or plane support
@@ -60,7 +58,13 @@ AFRAME.registerSystem('xr-env-publisher', {
                         meshPose: Object.values(frame.getPose(mesh.meshSpace, xrRefSpace).transform.matrix),
                     });
                     ARENA.debugXR(`Packing and publishing ${mesh.semanticLabel}`);
-                    ARENA.Mqtt.publish(this.pubTopic, msg, undefined, undefined, true);
+                    ARENA.Mqtt.publish(
+                        TOPICS.PUBLISH.SCENE_ENV_PRIVATE.formatStr(ARENA.topicParams),
+                        msg,
+                        undefined,
+                        undefined,
+                        true
+                    );
                 });
             }
             if (publishPlanes) {
@@ -73,7 +77,13 @@ AFRAME.registerSystem('xr-env-publisher', {
                         planePose: frame.getPose(plane.planeSpace, xrRefSpace).transform.matrix,
                     });
                     ARENA.debugXR(`Packing and publishing ${plane.semanticLabel}`);
-                    ARENA.Mqtt.publish(this.pubTopic, msg, undefined, undefined, true);
+                    ARENA.Mqtt.publish(
+                        TOPICS.PUBLISH.SCENE_ENV_PRIVATE.formatStr(ARENA.topicParams),
+                        msg,
+                        undefined,
+                        undefined,
+                        true
+                    );
                 });
             }
         }
