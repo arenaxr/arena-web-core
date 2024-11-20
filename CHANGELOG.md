@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/arenaxr/arena-web-core/compare/v2.1.0...v2.1.1) (2024-11-20)
+
+
+### Bug Fixes
+
+* properly "categorically" ignore own msgs ([cb87581](https://github.com/arenaxr/arena-web-core/commit/cb87581a620deccc3d0d0f2a09e96e93997ae498))
+
 ## [2.1.0](https://github.com/arenaxr/arena-web-core/compare/v2.0.1...v2.1.0) (2024-11-19)
 
 
