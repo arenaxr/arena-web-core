@@ -170,21 +170,24 @@ AFRAME.registerSystem('arena-mqtt', {
             return;
         }
 
-        // Categorically ignore own messages
-        if (theMessage.object_id === ARENA.idTag) return;
-
         // Dispatch on scene message type (chat, object, presence, etc.)
         const sceneMsgType = topicSplit[TOPICS.TOKENS.SCENE_MSGTYPE];
         const topicToUid = topicSplit[TOPICS.TOKENS.TO_UID];
         const chatSystem = this.sceneEl.systems['arena-chat-ui'];
         switch (sceneMsgType) {
             case TOPICS.SCENE_MSGTYPES.PRESENCE:
+                // Categorically ignore own messages
+                if (theMessage.object_id === ARENA.idTag) return;
                 chatSystem?.onPresenceMessageArrived(theMessage, topicToUid);
                 break;
             case TOPICS.SCENE_MSGTYPES.CHAT:
+                // Categorically ignore own messages
+                if (theMessage.object_id === ARENA.idTag) return;
                 chatSystem?.onChatMessageArrived(theMessage, topicToUid);
                 break;
             case TOPICS.SCENE_MSGTYPES.USER:
+                // Categorically ignore own messages
+                if (theMessage.object_id === ARENA.idTag) return;
                 this.handleSceneUserMessage(theMessage, topicToUid, topicSplit);
                 break;
             case TOPICS.SCENE_MSGTYPES.OBJECTS:
