@@ -121,17 +121,8 @@
                         "y": 0
                     },
                     "description": "Texture offset to be used.",
-                    "properties": {
-                        "x": {
-                            "type": "number"
-                        },
-                        "y": {
-                            "type": "number"
-                        }
-                    },
-                    "required": ["x", "y"],
-                    "format": "grid",
-                    "type": "object"
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
                 },
                 "opacity": {
                     "default": 1,
@@ -161,17 +152,8 @@
                         "y": 1
                     },
                     "description": "How many times a texture (defined by src) repeats in the X and Y direction.",
-                    "properties": {
-                        "x": {
-                            "type": "number"
-                        },
-                        "y": {
-                            "type": "number"
-                        }
-                    },
-                    "required": ["x", "y"],
-                    "format": "grid",
-                    "type": "object"
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
                 },
                 "roughness": {
                     "default": 0,
@@ -275,6 +257,44 @@
             "description": "Disable retrieving the shared geometry object from the cache. (geometries only: box, circle, cone, ...).",
             "title": "Skip Cache",
             "type": "boolean"
+        }
+    },
+    "definitions": {
+        "vector2": {
+            "title": "Vector2",
+            "format": "grid",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y"],
+            "type": "object"
+        },
+        "vector3": {
+            "title": "Vector3",
+            "format": "grid",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "type": "object"
         }
     }
 }
