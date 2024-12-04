@@ -24,7 +24,7 @@
 
 // auth namespace
 window.ARENAAUTH = {
-    nonScenePaths: ['/scenes/', '/build/', '/programs/', '/network/', '/files/', '/dashboard/'],
+    nonScenePaths: ['scenes', 'build', 'programs', 'network', 'files', 'dashboard'],
     signInPath: `//${window.location.host}/user/v2/login`,
     signOutPath: `//${window.location.host}/user/v2/logout`,
     filestoreUploadSchema: {
@@ -216,8 +216,8 @@ window.ARENAAUTH = {
         }
 
         // only request single-scene specific perms when rendering scene
-        // pages /scenes and /build should have general permissions for the user's scene objects
-        if (!this.nonScenePaths.includes(window.location.pathname)) {
+        // other functional pages should have general permissions for the user's scene objects
+        if (!this.nonScenePaths.includes(window.location.pathname.split('/')[1])) {
             // handle full ARENA scene
             if (ARENA.sceneName) {
                 authParams.scene = ARENA.namespacedScene;
