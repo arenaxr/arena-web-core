@@ -6,7 +6,8 @@ import {
 	Int32BufferAttribute,
 	Loader,
 	Points,
-	PointsMaterial
+	PointsMaterial,
+	SRGBColorSpace
 } from 'three';
 
 class PCDLoader extends Loader {
@@ -127,15 +128,15 @@ class PCDLoader extends Loader {
 
 			// parse
 
-			PCDheader.version = /VERSION (.*)/i.exec( PCDheader.str );
-			PCDheader.fields = /FIELDS (.*)/i.exec( PCDheader.str );
-			PCDheader.size = /SIZE (.*)/i.exec( PCDheader.str );
-			PCDheader.type = /TYPE (.*)/i.exec( PCDheader.str );
-			PCDheader.count = /COUNT (.*)/i.exec( PCDheader.str );
-			PCDheader.width = /WIDTH (.*)/i.exec( PCDheader.str );
-			PCDheader.height = /HEIGHT (.*)/i.exec( PCDheader.str );
-			PCDheader.viewpoint = /VIEWPOINT (.*)/i.exec( PCDheader.str );
-			PCDheader.points = /POINTS (.*)/i.exec( PCDheader.str );
+			PCDheader.version = /^VERSION (.*)/im.exec( PCDheader.str );
+			PCDheader.fields = /^FIELDS (.*)/im.exec( PCDheader.str );
+			PCDheader.size = /^SIZE (.*)/im.exec( PCDheader.str );
+			PCDheader.type = /^TYPE (.*)/im.exec( PCDheader.str );
+			PCDheader.count = /^COUNT (.*)/im.exec( PCDheader.str );
+			PCDheader.width = /^WIDTH (.*)/im.exec( PCDheader.str );
+			PCDheader.height = /^HEIGHT (.*)/im.exec( PCDheader.str );
+			PCDheader.viewpoint = /^VIEWPOINT (.*)/im.exec( PCDheader.str );
+			PCDheader.points = /^POINTS (.*)/im.exec( PCDheader.str );
 
 			// evaluate
 
@@ -279,7 +280,7 @@ class PCDLoader extends Loader {
 					const g = ( ( rgb >> 8 ) & 0x0000ff ) / 255;
 					const b = ( ( rgb >> 0 ) & 0x0000ff ) / 255;
 
-					c.set( r, g, b ).convertSRGBToLinear();
+					c.setRGB( r, g, b, SRGBColorSpace );
 
 					color.push( c.r, c.g, c.b );
 
@@ -346,7 +347,7 @@ class PCDLoader extends Loader {
 					const g = dataview.getUint8( ( PCDheader.points * offset.rgb ) + PCDheader.size[ rgbIndex ] * i + 1 ) / 255.0;
 					const b = dataview.getUint8( ( PCDheader.points * offset.rgb ) + PCDheader.size[ rgbIndex ] * i + 0 ) / 255.0;
 
-					c.set( r, g, b ).convertSRGBToLinear();
+					c.setRGB( r, g, b, SRGBColorSpace );
 
 					color.push( c.r, c.g, c.b );
 
@@ -404,7 +405,7 @@ class PCDLoader extends Loader {
 					const g = dataview.getUint8( row + offset.rgb + 1 ) / 255.0;
 					const b = dataview.getUint8( row + offset.rgb + 0 ) / 255.0;
 
-					c.set( r, g, b ).convertSRGBToLinear();
+					c.setRGB( r, g, b, SRGBColorSpace );
 
 					color.push( c.r, c.g, c.b );
 
