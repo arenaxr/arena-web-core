@@ -649,7 +649,7 @@ window.onload = function authOnLoad() {
         const head = document.getElementsByTagName('head')[0];
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = 'static/vendor/sweetalert2.all.min.js';
+        script.src = '/static/vendor/sweetalert2.all.min.js';
         head.appendChild(script);
     }
 };
