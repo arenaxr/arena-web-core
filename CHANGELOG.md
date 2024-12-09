@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/arenaxr/arena-web-core/compare/v2.1.1...v2.1.2) (2024-12-09)
+
+
+### Bug Fixes
+
+* use parent path for dashboard iframe ([9de00ac](https://github.com/arenaxr/arena-web-core/commit/9de00ac1e8713fe1eb6c9b663dd9794f84731e35))
+
 ## [2.1.1](https://github.com/arenaxr/arena-web-core/compare/v2.1.0...v2.1.1) (2024-11-20)
 
 
