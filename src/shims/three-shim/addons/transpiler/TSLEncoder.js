@@ -1,4 +1,5 @@
-import * as THREE from 'three';
+import { REVISION } from 'three/webgpu';
+import * as TSL from 'three/tsl';
 
 import { VariableDeclaration, Accessor } from './AST.js';
 
@@ -43,7 +44,7 @@ const unaryLib = {
 	'--': 'decrement' // decrementBefore
 };
 
-const isPrimitive = ( value ) => /^(true|false|-?\d)/.test( value );
+const isPrimitive = ( value ) => /^(true|false|-?(\d|\.\d))/.test( value );
 
 class TSLEncoder {
 
@@ -68,7 +69,7 @@ class TSLEncoder {
 
 		name = name.split( '.' )[ 0 ];
 
-		if ( THREE[ name ] !== undefined && this.global.has( name ) === false && this._currentProperties[ name ] === undefined ) {
+		if ( TSL[ name ] !== undefined && this.global.has( name ) === false && this._currentProperties[ name ] === undefined ) {
 
 			this.imports.add( name );
 
@@ -158,6 +159,10 @@ class TSLEncoder {
 
 				this.addImport( opFn );
 
+			} else if ( opFn === '.' ) {
+
+				code = left + opFn + right;
+
 			} else {
 
 				code = left + '.' + opFn + '( ' + right + ' )';
@@ -192,7 +197,7 @@ class TSLEncoder {
 
 		} else if ( node.isAccessorElements ) {
 
-			code = node.property;
+			code = this.emitExpression( node.object );
 
 			for ( const element of node.elements ) {
 
@@ -248,7 +253,7 @@ class TSLEncoder {
 
 		} else if ( node.isUnary && node.expression.isNumber ) {
 
-			code = node.type + ' ' + node.expression.value;
+			code = node.expression.type + '( ' + node.type + ' ' + node.expression.value + ' )';
 
 		} else if ( node.isUnary ) {
 
@@ -322,9 +327,9 @@ class TSLEncoder {
 		const leftStr = this.emitExpression( node.left );
 		const rightStr = this.emitExpression( node.right );
 
-		this.addImport( 'cond' );
+		this.addImport( 'select' );
 
-		return `cond( ${ condStr }, ${ leftStr }, ${ rightStr } )`;
+		return `select( ${ condStr }, ${ leftStr }, ${ rightStr } )`;
 
 	}
 
@@ -349,7 +354,7 @@ ${ this.tab }} )`;
 
 				const elseCondStr = this.emitExpression( current.elseConditional.cond );
 
-				ifStr += `.elseif( ${ elseCondStr }, () => {
+				ifStr += `.ElseIf( ${ elseCondStr }, () => {
 
 ${ elseBodyStr }
 
@@ -357,7 +362,7 @@ ${ this.tab }} )`;
 
 			} else {
 
-				ifStr += `.else( () => {
+				ifStr += `.Else( () => {
 
 ${ elseBodyStr }
 
@@ -391,13 +396,13 @@ ${ this.tab }} )`;
 		const conditionParam = condition !== '<' ? `, condition: '${ condition }'` : '';
 		const updateParam = update !== '++' ? `, update: '${ update }'` : '';
 
-		let loopStr = `loop( { start: ${ start }, end: ${ end + nameParam + typeParam + conditionParam + updateParam } }, ( { ${ name } } ) => {\n\n`;
+		let loopStr = `Loop( { start: ${ start }, end: ${ end + nameParam + typeParam + conditionParam + updateParam } }, ( { ${ name } } ) => {\n\n`;
 
 		loopStr += this.emitBody( node.body ) + '\n\n';
 
 		loopStr += this.tab + '} )';
 
-		this.imports.add( 'loop' );
+		this.imports.add( 'Loop' );
 
 		return loopStr;
 
@@ -586,7 +591,7 @@ ${ this.tab }} )`;
 
 		const prefix = this.iife === false ? 'export ' : '';
 
-		let funcStr = `${ prefix }const ${ fnName } = /*#__PURE__*/ tslFn( (${ paramsStr }) => {
+		let funcStr = `${ prefix }const ${ fnName } = /*#__PURE__*/ Fn( (${ paramsStr }) => {
 
 ${ bodyStr }
 
@@ -608,7 +613,7 @@ ${ this.tab }} )`;
 
 		funcStr += ';\n';
 
-		this.imports.add( 'tslFn' );
+		this.imports.add( 'Fn' );
 
 		this.global.add( node.name );
 
@@ -690,7 +695,7 @@ ${ this.tab }} )`;
 		const imports = [ ...this.imports ];
 		const exports = [ ...this.global ];
 
-		let header = '// Three.js Transpiler r' + THREE.REVISION + '\n\n';
+		let header = '// Three.js Transpiler r' + REVISION + '\n\n';
 		let footer = '';
 
 		if ( this.iife ) {

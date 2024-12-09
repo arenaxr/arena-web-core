@@ -38,4 +38,4 @@ import './vendor/morphTarget'; // target and control a gltf model's morphTargets
 
 // Dynamic async imports (codesplit)
 import('webxr-polyfill'); // fallback for non-webXR browsers
-import('./vendor/aframe-spe-particles-component.min'); // particle system: https://github.com/arenaxr/aframe-spe-particles-component
+import('./vendor/aframe-spe-particles-component'); // particle system: https://github.com/arenaxr/aframe-spe-particles-component
