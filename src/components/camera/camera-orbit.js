@@ -9,6 +9,10 @@ AFRAME.registerComponent('camera-orbit', {
         rotateSpeed: { type: 'number', default: 1 },
     },
     init() {
+        if (!this.data.target) {
+            console.error('camera-orbit: target not defined');
+            return;
+        }
         this.setDistance = this.setDistance.bind(this);
         if (this.data.distance === -1) {
             // Automatically determine distance from target based on target's bounding box.
@@ -18,10 +22,12 @@ AFRAME.registerComponent('camera-orbit', {
             this.bbox.getSize(this.size);
             // If there is no primitive geometry, defer distance calc until model-loaded
             if (this.size.length() === 0) {
-                this.el.addEventListener('model-loaded', this.setDistance);
+                this.data.target.addEventListener('model-loaded', this.setDistance);
             } else {
-                this.attachCamera();
+                this.setDistance();
             }
+        } else {
+            this.attachCamera();
         }
     },
     setDistance() {
