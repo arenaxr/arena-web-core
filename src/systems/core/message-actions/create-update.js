@@ -192,23 +192,30 @@ export default class CreateUpdate {
                         cameraRigObj3D.position.set(position.x, position.y, position.z);
                     }
                     const { xrSession } = AFRAME.scenes[0];
-                    if (xrSession?.persistentAnchors) {
-                        /*
-                        Only add if persist anchor support, which implies a device (e.g. quest)
-                        that retains map of area. Otherwise, there is no guarantee that the device
-                        has any feature data of that location for this anchor
-                         */
-                        let rotQuat;
-                        const { armarker: arMarkerSys } = AFRAME.scenes[0].systems;
-                        if (!Object.hasOwn(rotation, 'w')) {
-                            rotQuat = new THREE.Quaternion();
-                            rotQuat.setFromEuler(cameraSpinnerObj3D.rotation);
-                        } else {
-                            rotQuat = rotation;
+                    if (xrSession) {
+                        // If we've been localized, don't allow teleport controls to mess with our position
+                        const leftHand = document.getElementById('leftHand');
+                        if (leftHand.components['blink-controls']) {
+                            leftHand.removeAttribute('blink-controls');
                         }
-                        xrSession.requestAnimationFrame((time, frame) => {
-                            arMarkerSys.setOriginAnchor({ position, rotation }, frame);
-                        });
+                        if (xrSession.persistentAnchors) {
+                            /*
+                            Only add if persist anchor support, which implies a device (e.g. quest)
+                            that retains map of area. Otherwise, there is no guarantee that the device
+                            has any feature data of that location for this anchor
+                             */
+                            let rotQuat;
+                            const { armarker: arMarkerSys } = AFRAME.scenes[0].systems;
+                            if (!Object.hasOwn(rotation, 'w')) {
+                                rotQuat = new THREE.Quaternion();
+                                rotQuat.setFromEuler(cameraSpinnerObj3D.rotation);
+                            } else {
+                                rotQuat = rotation;
+                            }
+                            xrSession.requestAnimationFrame((time, frame) => {
+                                arMarkerSys.setOriginAnchor({ position, rotation }, frame);
+                            });
+                        }
                     }
                 }
                 return;
