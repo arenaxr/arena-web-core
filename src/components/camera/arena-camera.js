@@ -55,9 +55,6 @@ AFRAME.registerComponent('arena-camera', {
         this.jitsi = sceneEl.systems['arena-jitsi'];
 
         this.lastPos = new THREE.Vector3();
-        this.camParent = new THREE.Matrix4();
-        this.cam = new THREE.Matrix4();
-        this.cpi = new THREE.Matrix4();
 
         // instantiate frustum objs
         this.frustum = new THREE.Frustum();
@@ -108,7 +105,12 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     publishPose(action = 'update') {
-        const { data, position, rotation } = this;
+        const { data } = this;
+        let { position, rotation } = this;
+        if (ARENA.params.orbit && this.el.sceneEl.components['camera-orbit']?.attached) {
+            position = this.el.sceneEl.camera.position;
+            rotation = this.el.sceneEl.camera.quaternion;
+        }
 
         if (!data.enabled) return;
 
@@ -193,15 +195,13 @@ AFRAME.registerComponent('arena-camera', {
 
         this.heartBeatCounter++;
 
-        rotation.setFromRotationMatrix(el.object3D.matrixWorld);
-        position.setFromMatrixPosition(el.object3D.matrixWorld);
-
-        this.camParent = el.object3D.parent.matrixWorld;
-        this.cam = el.object3D.matrixWorld;
-
-        this.cpi.copy(this.camParent).invert();
-        // this.cpi.getInverse(this.camParent);
-        this.cpi.multiply(this.cam);
+        if (ARENA.params.orbit && this.el.sceneEl.components['camera-orbit']?.attached) {
+            rotation.setFromRotationMatrix(this.el.sceneEl.camera.matrixWorld);
+            position.setFromMatrixPosition(this.el.sceneEl.camera.matrixWorld);
+        } else {
+            rotation.setFromRotationMatrix(el.object3D.matrixWorld);
+            position.setFromMatrixPosition(el.object3D.matrixWorld);
+        }
 
         const rotationCoords = ARENAUtils.rotToText(rotation);
         const positionCoords = ARENAUtils.coordsToText(position);
