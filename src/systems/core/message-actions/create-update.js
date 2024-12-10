@@ -217,6 +217,7 @@ export default class CreateUpdate {
                             });
                         }
                     }
+                    AFRAME.scenes[0].systems['arena-chat-ui'].relocalizedMsg();
                 }
                 return;
 
