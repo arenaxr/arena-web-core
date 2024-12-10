@@ -158,6 +158,9 @@ export default class CreateUpdate {
 
                 if (id === ARENA.params.camFollow) {
                     ARENAUtils.relocateUserCamera(entityEl.object3D.position, entityEl.object3D.rotation);
+                } else if (id === ARENA.params.orbit && action === ACTIONS.CREATE) {
+                    // set camera to orbit around this object
+                    entityEl.sceneEl.setAttribute('camera-orbit', { target: entityEl });
                 }
                 return;
 
