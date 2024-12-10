@@ -23,6 +23,7 @@ AFRAME.registerComponent('camera-orbit', {
             // If there is no primitive geometry, defer distance calc until model-loaded
             if (this.size.length() === 0) {
                 this.data.target.addEventListener('model-loaded', this.setDistance);
+                this.data.target.addEventListener('loaded', this.setDistance);
             } else {
                 this.setDistance();
             }
