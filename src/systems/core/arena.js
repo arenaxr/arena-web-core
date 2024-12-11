@@ -422,6 +422,9 @@ AFRAME.registerSystem('arena-scene', {
         const { landmark } = systems;
 
         ARENA.events.addEventListener(ARENA_EVENTS.STARTPOS_LOADED, () => {
+            if (ARENA.params.camFollow || ARENA.params.orbit) {
+                return; // defer to other starting movement
+            }
             // Fallthrough failure if startLastPos fails
             if (!this.startCoords && landmark) {
                 // Try to define starting position if the scene has startPosition objects

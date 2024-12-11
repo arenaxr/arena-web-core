@@ -39,8 +39,7 @@ AFRAME.registerComponent('camera-orbit', {
             const largestDimension = Math.max(this.size.x, this.size.y, this.size.z);
             const { camera } = AFRAME.scenes[0];
             const fovInRadians = THREE.MathUtils.degToRad(camera.fov);
-            const distance = largestDimension / 2 / Math.tan(fovInRadians / 2);
-            this.data.distance = distance / (window.innerWidth / window.innerHeight);
+            this.data.distance = largestDimension / 2 / Math.tan(fovInRadians / 2);
         }
         this.attachCamera();
     },
@@ -50,20 +49,34 @@ AFRAME.registerComponent('camera-orbit', {
             sceneEl,
         } = this.el;
 
-        this.controls = new OrbitControls(camera, sceneEl.renderer.domElement);
-        this.controls.enableDamping = true; // Smooth motion
-        this.controls.autoRotate = true; // Enable auto-rotation
-        this.controls.autoRotateSpeed = this.data.rotateSpeed; // Rotation speed
-
+        const targetPos0 = new THREE.Vector3();
         const targetPos = new THREE.Vector3();
-        targetPos.setFromMatrixPosition(this.data.target.object3D.matrixWorld);
 
-        this.controls.target.copy(targetPos);
+        if (this.bbox) {
+            this.bbox.getCenter(targetPos);
+        } else {
+            targetPos.setFromMatrixPosition(this.data.target.object3D.matrixWorld);
+        }
+
+        targetPos0.copy(targetPos);
 
         targetPos.y += this.size.y / 2; // Center on top of target
         targetPos.z += this.data.distance;
         camera.position.copy(targetPos);
+
+        const cameraEl = document.getElementById('my-camera');
+        cameraEl.object3D.position.set(0, 0, 0);
+        cameraEl.object3D.rotation.set(0, 0, 0);
+
+        cameraEl.object3D.updateMatrixWorld();
         camera.updateMatrixWorld();
+
+        this.controls = new OrbitControls(camera, sceneEl.renderer.domElement);
+        this.controls.enableDamping = true; // Smooth motion
+        this.controls.autoRotate = true; // Enable auto-rotation
+        this.controls.autoRotateSpeed = this.data.rotateSpeed; // Rotation speed
+        targetPos.setFromMatrixPosition(this.data.target.object3D.matrixWorld);
+        this.controls.target.copy(targetPos0);
 
         this.attached = true;
     },
