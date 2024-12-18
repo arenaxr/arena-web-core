@@ -52,6 +52,7 @@ AFRAME.registerComponent('webxr-device-manager', {
                 chatExpandBtn.click();
             }
             document.getElementById('env').setAttribute('visible', false);
+            ARENA.addDefaultLights(true);
             const arMarkerSys = sceneEl.systems.armarker;
             arMarkerSys.webXRSessionStarted(sceneEl.xrSession);
         }

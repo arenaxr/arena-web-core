@@ -832,21 +832,36 @@ AFRAME.registerSystem('arena-scene', {
             sceneRoot.appendChild(environment);
 
             // make default env have lights
-            const light = document.createElement('a-light');
-            light.id = 'ambient-light';
-            light.setAttribute('type', 'ambient');
-            light.setAttribute('color', '#363942');
-
-            const light1 = document.createElement('a-light');
-            light1.id = 'point-light';
-            light1.setAttribute('type', 'point');
-            light1.setAttribute('position', '-0.272 0.39 1.25');
-            light1.setAttribute('color', '#C2E6C7');
-
-            sceneRoot.appendChild(light);
-            sceneRoot.appendChild(light1);
+            this.addDefaultLights();
         }
         this.events.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
+    },
+
+    /**
+     * Add default lights to the scene
+     * @param {boolean} [ifNoNonEnv=false] - add lights only if no non-environment lights are present
+     */
+    addDefaultLights(ifNoNonEnv = false) {
+        const sceneRoot = document.getElementById('sceneRoot');
+        if (document.getElementById('ambient-light') && document.getElementById('point-light')) {
+            return; // already have default lights
+        }
+        if (ifNoNonEnv && document.querySelectorAll('[light]:not([class=environment])').length > 0) {
+            return; // already have non-environment lights
+        }
+        const light = document.createElement('a-light');
+        light.id = 'ambient-light';
+        light.setAttribute('type', 'ambient');
+        light.setAttribute('color', '#363942');
+
+        const light1 = document.createElement('a-light');
+        light1.id = 'point-light';
+        light1.setAttribute('type', 'point');
+        light1.setAttribute('position', '-0.272 0.39 1.25');
+        light1.setAttribute('color', '#C2E6C7');
+
+        sceneRoot.appendChild(light);
+        sceneRoot.appendChild(light1);
     },
 
     /**

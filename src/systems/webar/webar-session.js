@@ -23,6 +23,7 @@ AFRAME.registerComponent('arena-webar-session', {
         // hide environment and make scene transparent
         const env = document.getElementById('env');
         env.setAttribute('visible', false);
+        ARENA.addDefaultLights(true);
 
         // hide ar/vr buttons
         this.hideVRButtons();
