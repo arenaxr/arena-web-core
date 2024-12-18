@@ -64,6 +64,8 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         this.upsertLiveUser = this.upsertLiveUser.bind(this);
 
+        this.relocalizedMsg = this.relocalizedMsg.bind(this);
+
         ARENA.events.addMultiEventListener(
             [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.MQTT_SUBSCRIBED, ARENA_EVENTS.JITSI_LOADED],
             this.ready.bind(this)
@@ -1039,6 +1041,15 @@ AFRAME.registerSystem('arena-chat-ui', {
             object_id: this.userId,
             dn: this.displayName,
             ...msg,
+        });
+    },
+
+    relocalizedMsg(to = undefined) {
+        const dstTopic = to ? this.privatePresenceTopic.formatStr({ toUid: to }) : this.publicPresenceTopic;
+        this.mqttc.publish(dstTopic, {
+            object_id: this.userId,
+            dn: this.displayName,
+            action: 'relocalized',
         });
     },
 

@@ -435,6 +435,9 @@ export default class ARENAUtils {
                     }
                 }
             }
+            // If we've been localized, don't allow teleport controls to mess with our position
+            const leftHand = document.getElementById('leftHand');
+            leftHand.removeAttribute('blink-controls');
         } else {
             if (position) userCamera.object3D.position.set(position.x, position.y, position.z);
             if (rotation) {
@@ -460,6 +463,7 @@ export default class ARENAUtils {
                 }
             }
         }
+        AFRAME.scenes[0].systems['arena-chat-ui'].relocalizeMsg();
     }
 
     /**
