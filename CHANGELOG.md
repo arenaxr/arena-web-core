@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.2.0](https://github.com/arenaxr/arena-web-core/compare/v2.1.1...v2.2.0) (2025-01-06)
+
+
+### Features
+
+* add camera-orbit feature via urlparam ([a84b1d3](https://github.com/arenaxr/arena-web-core/commit/a84b1d354f065c79032f5c08e126b300b362c0d1))
+
+
+### Bug Fixes
+
+* disable teleport controls on xr relocalize ([5b0e03b](https://github.com/arenaxr/arena-web-core/commit/5b0e03b5b64677f3900ae109de0c5d43b78133fc)), closes [#679](https://github.com/arenaxr/arena-web-core/issues/679)
+* listen on correct entity ([11c64d4](https://github.com/arenaxr/arena-web-core/commit/11c64d4a73b6c2819af347442cf34ef78fce118b))
+* use parent path for dashboard iframe ([9de00ac](https://github.com/arenaxr/arena-web-core/commit/9de00ac1e8713fe1eb6c9b663dd9794f84731e35))
+
 ## [2.1.1](https://github.com/arenaxr/arena-web-core/compare/v2.1.0...v2.1.1) (2024-11-20)
 
 
