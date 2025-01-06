@@ -98,8 +98,8 @@ class LoadAlertTable {
  * @module model-progress
  */
 AFRAME.registerSystem('model-progress', {
-    ALERT_TIMEOUT: 4000,
-    ALERT_MAX_ROWS: 10,
+    ALERT_TIMEOUT: 500,
+    ALERT_MAX_ROWS: 1,
     FN_MAX_LENGTH: 50,
     schema: {},
     /**
