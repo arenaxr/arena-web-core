@@ -22,31 +22,25 @@
                     "enum": ["single", "client"],
                     "default": "client"
                 },
-                "file":{
-                    "type":"string",
-                    "title":"file",
-                    "description":"The path to a `.wasm` file (e.g. `counter.wasm`, `user1/counter.wasm`) in the ARENA filestore, starting from the location field indicated below. See location. Example: user1/py/counter/counter.py should have file: `counter.py` and location: `user1/py/counter`. Note that the runtime will download all files in parent folder (e.g. you can add a requirements.txt)",
-                    "examples":[
-                       "counter.wasm",
-                       "py/counter/counter.py"
-                    ]
-                 },
-                 "filename": {
+                "file": {
+                    "type": "string",
+                    "title": "file",
+                    "description": "The path to a `.wasm` file (e.g. `counter.wasm`, `user1/counter.wasm`) in the ARENA filestore, starting from the location field indicated below. See location. Example: user1/py/counter/counter.py should have file: `counter.py` and location: `user1/py/counter`. Note that the runtime will download all files in parent folder (e.g. you can add a requirements.txt)",
+                    "examples": ["counter.wasm", "py/counter/counter.py"]
+                },
+                "filename": {
                     "title": "DEPRECATED (filename)",
                     "type": "string",
                     "description": "DEPRECATED: data.filename is deprecated for type: program, use data.file and data.location instead.",
                     "deprecated": true
                 },
-                 "location":{
-                    "type":"string",
-                    "title":"File location",
-                    "description":"Filestore path starting at user home; Example: `user1/hello` for a program inside folder `hello` of user1. Should, at least be the user filesore home folder.",
+                "location": {
+                    "type": "string",
+                    "title": "File location",
+                    "description": "Filestore path starting at user home; Example: `user1/hello` for a program inside folder `hello` of user1. Should, at least be the user filesore home folder.",
                     "minLength": 3,
-                    "examples":[
-                       "user1/python-programs/program1",
-                       "user1/py/counter"
-                    ]
-                 },
+                    "examples": ["user1/python-programs/program1", "user1/py/counter"]
+                },
                 "filetype": {
                     "type": "string",
                     "description": "Type of the program (WA=WASM or PY=Python).",

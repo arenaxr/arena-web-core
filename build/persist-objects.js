@@ -796,7 +796,7 @@ export function pubProgramMsg(action, obj) {
             apis: obj.apis ? obj.apis : [],
         },
     });
-    console.log("publishing:", programTopic, programObj);
+    console.log('publishing:', programTopic, programObj);
     persist.mc.publish(programTopic, programObj);
 }
 

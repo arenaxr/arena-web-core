@@ -481,11 +481,7 @@
                     "description": "Set an OpenVPS server to localize by camera image on mobile devices"
                 }
             },
-            "required": [
-                "maxAVDist",
-                "physics",
-                "privateScene"
-            ],
+            "required": ["maxAVDist", "physics", "privateScene"],
             "title": "Scene Options",
             "type": "object",
             "description": "ARENA Scene Options."

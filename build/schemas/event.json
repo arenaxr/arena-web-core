@@ -39,7 +39,7 @@
                             "description": "DEPRECATED: data.position is deprecated for clientEvent, use data.targetPosition instead.",
                             "type": "object",
                             "deprecated": true
-                         },
+                        },
                         "clickPos": {
                             "title": "DEPRECATED (clickPos)",
                             "description": "DEPRECATED: data.clickPos is deprecated for clientEvent, use data.originPosition instead.",

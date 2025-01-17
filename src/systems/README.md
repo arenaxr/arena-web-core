@@ -33,13 +33,13 @@ source: 'url-link-to-model-website';
 title: 'Model Title';
 ```
 
--   [attribution-system](#module_attribution-system)
-    -   [registerComponent(el)](#exp_module_attribution-system--registerComponent) ⏏
-    -   [unregisterComponent(el)](#exp_module_attribution-system--unregisterComponent) ⏏
-    -   [getAttributionTable()](#exp_module_attribution-system--getAttributionTable) ⇒ <code>string</code> ⏏
-    -   [extractAttributionFromGltfAsset(el, gltfComponent)](#exp_module_attribution-system--extractAttributionFromGltfAsset) ⏏
-    -   [parseExtrasAttributes(extras)](#exp_module_attribution-system--parseExtrasAttributes) ⇒ <code>object</code> ⏏
-    -   [parseAttribute(extras, attribution, attribute)](#exp_module_attribution-system--parseAttribute) ⇒ <code>boolean</code> ⏏
+- [attribution-system](#module_attribution-system)
+    - [registerComponent(el)](#exp_module_attribution-system--registerComponent) ⏏
+    - [unregisterComponent(el)](#exp_module_attribution-system--unregisterComponent) ⏏
+    - [getAttributionTable()](#exp_module_attribution-system--getAttributionTable) ⇒ <code>string</code> ⏏
+    - [extractAttributionFromGltfAsset(el, gltfComponent)](#exp_module_attribution-system--extractAttributionFromGltfAsset) ⏏
+    - [parseExtrasAttributes(extras)](#exp_module_attribution-system--parseExtrasAttributes) ⇒ <code>object</code> ⏏
+    - [parseAttribute(extras, attribution, attribute)](#exp_module_attribution-system--parseAttribute) ⇒ <code>boolean</code> ⏏
 
 <a name="exp_module_attribution-system--registerComponent"></a>
 

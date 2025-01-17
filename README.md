@@ -16,8 +16,8 @@ The ARENA browser client uses a [publish/subscribe system](https://mqtt.org/) to
 
 The main ARENA documentation is here: [https://docs.arenaxr.org/](https://docs.arenaxr.org/).
 
--   [Quick Start for users](https://docs.arenaxr.org/content/overview/user-guide.html).
--   [Quick Start for developers](https://docs.arenaxr.org/content/overview/dev-guide.html).
+- [Quick Start for users](https://docs.arenaxr.org/content/overview/user-guide.html).
+- [Quick Start for developers](https://docs.arenaxr.org/content/overview/dev-guide.html).
 
 ## Installation
 

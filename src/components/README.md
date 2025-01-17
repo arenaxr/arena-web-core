@@ -214,7 +214,7 @@ Keep track of mouse events and publish corresponding events
 
 **Todo**
 
--   [ ] Consolidate event listeners (they are very similar)
+- [ ] Consolidate event listeners (they are very similar)
 
 <a name="module_collision-listener"></a>
 
@@ -294,7 +294,7 @@ Load scene from persistence.
 
 **Todo**
 
--   [ ] this component is currently not used and probably needs to be updated
+- [ ] this component is currently not used and probably needs to be updated
 
 <a name="module_material-extras"></a>
 

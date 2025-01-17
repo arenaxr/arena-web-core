@@ -1,7 +1,7 @@
-const FLOAT64_BYTE_SIZE = 8;      // A double (float64) takes 8 bytes (64 bits)
-const UINT32_BYTE_SIZE = 4;       // A Uint32 takes 4 bytes (32 bits)
-const ELEMENT_COUNT = 16;         // Number of elements in the camera pose matrix
-const UINT32_PER_FLOAT64 = 2;     // Each float64 corresponds to 2 Uint32 values
+const FLOAT64_BYTE_SIZE = 8; // A double (float64) takes 8 bytes (64 bits)
+const UINT32_BYTE_SIZE = 4; // A Uint32 takes 4 bytes (32 bits)
+const ELEMENT_COUNT = 16; // Number of elements in the camera pose matrix
+const UINT32_PER_FLOAT64 = 2; // Each float64 corresponds to 2 Uint32 values
 const TOTAL_UINT32_COUNT = ELEMENT_COUNT * UINT32_PER_FLOAT64 + UINT32_PER_FLOAT64; // Total Uint32 slots needed
 
 export default class RenderFusionUtils {
