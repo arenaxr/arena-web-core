@@ -137,6 +137,12 @@ export default class ARENAMqttConsole {
             };
 
             return {
+                time(label) {
+                    window.jsConsole.time(label);
+                },
+                timeEnd(label) {
+                    window.jsConsole.timeEnd(label);
+                },
                 log(...args) {
                     consoleLog(args, 'log');
                     mqttLog(args, 'log');
