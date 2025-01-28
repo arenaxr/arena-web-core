@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.1](https://github.com/arenaxr/arena-web-core/compare/v2.2.0...v2.2.1) (2025-01-28)
+
+
+### Bug Fixes
+
+* restore time/timeEnd console methods ([da15cf3](https://github.com/arenaxr/arena-web-core/commit/da15cf3d5988f397fae82a623d5fe2b717332679))
+* user notification of relocalization in relocateUserCamera ([6b7790b](https://github.com/arenaxr/arena-web-core/commit/6b7790bdb5a6f461c0acc2cf455a74d8b069b362))
+
 ## [2.2.0](https://github.com/arenaxr/arena-web-core/compare/v2.1.1...v2.2.0) (2025-01-06)
 
 
