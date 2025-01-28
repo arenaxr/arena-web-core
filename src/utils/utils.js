@@ -463,7 +463,7 @@ export default class ARENAUtils {
                 }
             }
         }
-        AFRAME.scenes[0].systems['arena-chat-ui'].relocalizeMsg();
+        AFRAME.scenes[0].systems['arena-chat-ui'].relocalizedMsg();
     }
 
     /**
