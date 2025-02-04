@@ -177,7 +177,7 @@ AFRAME.registerComponent('arena-camera', {
                 // update initial position of stats when opened
                 document.getElementById('pose-stats').textContent = `Position: ${ARENAUtils.coordsToText(
                     position
-                )}\r\nQ Rotation: ${ARENAUtils.rotToText(rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(
+                )}\r\nQ Rotation: ${ARENAUtils.rotToText(rotation)}\r\nEA Rotation: ${ARENAUtils.userSpinnerRotToEulerText(
                     rotation
                 )}`;
             }
@@ -231,7 +231,7 @@ AFRAME.registerComponent('arena-camera', {
             if (this.data.showStats) {
                 document.getElementById('pose-stats').textContent = `Position: ${ARENAUtils.coordsToText(
                     position
-                )}\r\nQ Rotation: ${ARENAUtils.rotToText(rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(
+                )}\r\nQ Rotation: ${ARENAUtils.rotToText(rotation)}\r\nEA Rotation: ${ARENAUtils.userSpinnerRotToEulerText(
                     rotation
                 )}`;
             }

@@ -178,12 +178,12 @@ export default class ARENAUtils {
      * @param {Object} c rotation in quaternions
      * @return {string} rotation as euler string
      */
-    static rotToEulerText(c) {
+    static userSpinnerRotToEulerText(c) {
         function rad2deg(radians) {
             return radians * (180 / Math.PI);
         }
 
-        const e = new THREE.Euler().setFromQuaternion(c);
+        const e = new THREE.Euler().setFromQuaternion(c, 'YXZ');
         return `${rad2deg(e.x).toFixed(3)}, ${rad2deg(e.y).toFixed(3)}, ${rad2deg(e.z).toFixed(3)}`;
     }
 
@@ -445,7 +445,7 @@ export default class ARENAUtils {
                 const userCamRotationObj = userCamera.object3D.rotation;
                 if (Object.hasOwn(rotation, 'w')) {
                     this.overrideQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
-                    this.overrideEuler.setFromQuaternion(this.overrideQuat);
+                    this.overrideEuler.setFromQuaternion(this.overrideQuat, 'YXZ');
                     if (lookComponent) {
                         // Modify look component axes separately
                         lookComponent.yawObject.rotation.y = this.overrideEuler.y;
