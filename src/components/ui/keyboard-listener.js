@@ -14,13 +14,12 @@ AFRAME.registerComponent('keyboard-listener', {
         this.onKeyUp = this.onKeyUp.bind(this);
     },
     addListeners() {
-        this.prevWASD = this.el.sceneEl.getAttribute('wasd-controls');
-        this.el.sceneEl.removeAttribute('wasd-controls');
+        document.getElementById('my-camera').setAttribute('wasd-controls', 'enabled', false);
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('keyup', this.onKeyUp);
     },
     removeListeners() {
-        this.el.sceneEl.setAttribute('wasd-controls', this.prevWASD);
+        document.getElementById('my-camera').setAttribute('wasd-controls', 'enabled', true);
         window.removeEventListener('keydown', this.onKeyDown);
         window.removeEventListener('keyup', this.onKeyUp);
     },
