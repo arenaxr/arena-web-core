@@ -143,13 +143,13 @@ export default class CreateUpdate {
                 // Private and program_id flags. Falsy values unset (undefined, null, 0, '')
                 if (message.private) {
                     entityEl.setAttribute('private', message.private);
-                } else if (!!message.private === false) {
+                } else if (message.private === false) {
                     entityEl.removeAttribute('private');
                 }
 
                 if (message.program_id) {
                     entityEl.setAttribute('program_id', message.program_id);
-                } else if (!!message.program_id === false) {
+                } else if (message.program_id === null) {
                     entityEl.removeAttribute('program_id');
                 }
 
