@@ -104,8 +104,8 @@ AFRAME.registerComponent('landmark', {
                 moveEl.components['look-controls'].pitchObject.rotation.x = this.el.object3D.rotation.x;
             }
             if (closestNode) {
-                moveEl.components['wasd-controls'].resetNav();
-                moveEl.components['press-and-move'].resetNav();
+                moveEl.components['wasd-controls']?.resetNav();
+                moveEl.components['press-and-move']?.resetNav();
             }
         }
     },

@@ -572,8 +572,12 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         const speedMod = Number(this.arena.speedModifier) || 1;
         if (speedMod) {
             // Set new initial speed if applicable
-            cameraEl.setAttribute('wasd-controls', { acceleration: 30 * speedMod });
-            cameraEl.setAttribute('press-and-move', { acceleration: 30 * speedMod });
+            if (cameraEl.components['wasd-controls']) {
+                cameraEl.setAttribute('wasd-controls', { acceleration: 30 * speedMod });
+            }
+            if (cameraEl.components['press-and-move']) {
+                cameraEl.setAttribute('press-and-move', { acceleration: 30 * speedMod });
+            }
         }
 
         if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
@@ -582,18 +586,30 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         if (this.speedState === SpeedState.MEDIUM) {
             // medium
             this.speedButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/speed-medium.png')";
-            cameraEl.setAttribute('wasd-controls', { acceleration: 30 * speedMod });
-            cameraEl.setAttribute('press-and-move', { acceleration: 30 * speedMod });
+            if (cameraEl.components['wasd-controls']) {
+                cameraEl.setAttribute('wasd-controls', { acceleration: 30 * speedMod });
+            }
+            if (cameraEl.components['press-and-move']) {
+                cameraEl.setAttribute('press-and-move', { acceleration: 30 * speedMod });
+            }
         } else if (this.speedState === SpeedState.FAST) {
             // fast
             this.speedButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/speed-fast.png')";
-            cameraEl.setAttribute('wasd-controls', { acceleration: 60 * speedMod });
-            cameraEl.setAttribute('press-and-move', { acceleration: 60 * speedMod });
+            if (cameraEl.components['wasd-controls']) {
+                cameraEl.setAttribute('wasd-controls', { acceleration: 60 * speedMod });
+            }
+            if (cameraEl.components['press-and-move']) {
+                cameraEl.setAttribute('press-and-move', { acceleration: 60 * speedMod });
+            }
         } else if (this.speedState === SpeedState.SLOW) {
             // slow
             this.speedButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/speed-slow.png')";
-            cameraEl.setAttribute('wasd-controls', { acceleration: 15 * speedMod });
-            cameraEl.setAttribute('press-and-move', { acceleration: 15 * speedMod });
+            if (cameraEl.components['wasd-controls']) {
+                cameraEl.setAttribute('wasd-controls', { acceleration: 15 * speedMod });
+            }
+            if (cameraEl.components['press-and-move']) {
+                cameraEl.setAttribute('press-and-move', { acceleration: 15 * speedMod });
+            }
         }
     },
 
@@ -611,13 +627,17 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.flyingButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/flying-on.png')";
         } else {
             // toggled off
-            cameraEl.components['wasd-controls'].resetNav();
-            cameraEl.components['press-and-move'].resetNav();
+            cameraEl.components['wasd-controls']?.resetNav();
+            cameraEl.components['press-and-move']?.resetNav();
             cameraEl.object3D.position.y = this.arena.defaults.camHeight;
             this.flyingButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/flying-off.png')";
         }
-        cameraEl.setAttribute('wasd-controls', { fly: this.flying });
-        cameraEl.setAttribute('press-and-move', { fly: this.flying });
+        if (cameraEl.components['wasd-controls']) {
+            cameraEl.setAttribute('wasd-controls', { fly: this.flying });
+        }
+        if (cameraEl.components['press-and-move']) {
+            cameraEl.setAttribute('press-and-move', { fly: this.flying });
+        }
     },
 
     onScreenshareButtonClick() {

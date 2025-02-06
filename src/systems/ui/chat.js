@@ -1147,8 +1147,8 @@ AFRAME.registerSystem('arena-chat-ui', {
         cameraEl.object3D.position.copy(toCam.object3D.position.clone()).add(direction.multiplyScalar(-distance));
         cameraEl.object3D.position.y = toCam.object3D.position.y;
         // Reset navMesh data
-        cameraEl.components['wasd-controls'].resetNav();
-        cameraEl.components['press-and-move'].resetNav();
+        cameraEl.components['wasd-controls']?.resetNav();
+        cameraEl.components['press-and-move']?.resetNav();
         // rotate our camera to face the other user
         cameraEl.components['look-controls'].yawObject.rotation.y = Math.atan2(
             cameraEl.object3D.position.x - toCam.object3D.position.x,
