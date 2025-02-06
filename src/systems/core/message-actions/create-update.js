@@ -148,9 +148,9 @@ export default class CreateUpdate {
                 }
 
                 if (message.program_id) {
-                    entityEl.setAttribute('program', message.program_id);
+                    entityEl.setAttribute('program_id', message.program_id);
                 } else if (!!message.program_id === false) {
-                    entityEl.removeAttribute('program');
+                    entityEl.removeAttribute('program_id');
                 }
 
                 // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
