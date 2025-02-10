@@ -439,6 +439,11 @@ export default class ARENAUtils {
             const leftHand = document.getElementById('leftHand');
             leftHand.removeAttribute('blink-controls');
         } else {
+            if (!position && !rotation && poseMatrix) {
+                position = new THREE.Vector3();
+                rotation = new THREE.Euler();
+                poseMatrix.decompose(position, rotation, new THREE.Vector3());
+            }
             if (position) userCamera.object3D.position.set(position.x, position.y, position.z);
             if (rotation) {
                 const lookComponent = userCamera.components['look-controls'];
