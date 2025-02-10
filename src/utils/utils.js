@@ -441,14 +441,14 @@ export default class ARENAUtils {
         } else {
             if (!position && !rotation && poseMatrix) {
                 position = new THREE.Vector3();
-                rotation = new THREE.Euler();
+                rotation = new THREE.Quaternion();
                 poseMatrix.decompose(position, rotation, new THREE.Vector3());
             }
             if (position) userCamera.object3D.position.set(position.x, position.y, position.z);
             if (rotation) {
                 const lookComponent = userCamera.components['look-controls'];
                 const userCamRotationObj = userCamera.object3D.rotation;
-                if (Object.hasOwn(rotation, 'w')) {
+                if ('w' in rotation) {
                     this.overrideQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
                     this.overrideEuler.setFromQuaternion(this.overrideQuat);
                     if (lookComponent) {
