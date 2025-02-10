@@ -46,12 +46,12 @@ export default class ARENAWebARUtils {
      * Adds the AR button for non-WebXR devices
      */
     static handleARButtonForNonWebXRMobile() {
-        if (ARENA.params.camFollow) {
-            // Assume that all controls should be relinquished
-            const camera = document.getElementById('my-camera');
-            camera.setAttribute('look-controls', 'enabled', false);
-            camera.setAttribute('wasd-controls', 'enabled', false);
-        }
+        // if (ARENA.params.camFollow) {
+        //     // Assume that all controls should be relinquished
+        //     const camera = document.getElementById('my-camera');
+        //     camera.setAttribute('look-controls', 'enabled', false);
+        //     camera.setAttribute('wasd-controls', 'enabled', false);
+        // }
 
         if (ARENAUtils.isWebXRViewer()) {
             return;
