@@ -404,6 +404,29 @@ export default class ARENAUtils {
 
     static overrideEuler = new THREE.Euler();
 
+    static twistQuat = new THREE.Quaternion();
+
+    static twistEuler = new THREE.Euler();
+
+    /*
+     * Decompose a quaternion into yaw and pitch, discarding roll
+     */
+    static decomposeYawPitch(q) {
+        if ('w' in q) {
+            this.twistQuat.set(0, q.y, 0, q.w);
+        } else {
+            // Passed in as a {x,y,z}, euler-like dict
+            this.twistEuler.set(q.x, q.y, q.z);
+            this.twistQuat.setFromEuler(this.twistEuler);
+            this.twistQuat.set(0, this.twistQuat.y, 0, this.twistQuat.w);
+        }
+        this.twistQuat.normalize();
+        const swing = this.twistQuat.clone().conjugate().multiply(q);
+        const yaw = 2 * Math.atan2(this.twistQuat.y, this.twistQuat.w);
+        const pitch = 2 * Math.atan2(swing.x, swing.w);
+        return { yaw, pitch };
+    }
+
     /**
      * Camera relocation, handles both desktop and XR session (requires rig and spinner offset)
      * @param {{x, y, z}} [position] - new  position
@@ -450,19 +473,22 @@ export default class ARENAUtils {
                 const userCamRotationObj = userCamera.object3D.rotation;
                 if ('w' in rotation) {
                     this.overrideQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
-                    this.overrideEuler.setFromQuaternion(this.overrideQuat);
                     if (lookComponent) {
+                        const { yaw, pitch } = this.decomposeYawPitch(this.overrideQuat);
                         // Modify look component axes separately
-                        lookComponent.yawObject.rotation.y = this.overrideEuler.y;
-                        lookComponent.pitchObject.rotation.x = this.overrideEuler.x;
+                        lookComponent.yawObject.rotation.y = yaw;
+                        lookComponent.pitchObject.rotation.x = pitch;
                         lookComponent.updateOrientation();
                     } else {
                         // Directly mod camera rotation
                         userCamRotationObj.setFromQuaternion(this.overrideQuat);
                     }
                 } else if (lookComponent) {
-                    lookComponent.yawObject.rotation.y = rotation.y;
-                    lookComponent.pitchObject.rotation.x = rotation.x;
+                    this.overrideEuler.set(rotation.x, rotation.y, rotation.z);
+                    const { yaw, pitch } = this.decomposeYawPitch(this.overrideEuler);
+                    lookComponent.yawObject.rotation.y = yaw;
+                    lookComponent.pitchObject.rotation.x = pitch;
+                    lookComponent.updateOrientation();
                 } else {
                     userCamRotationObj.copy(rotation);
                 }
