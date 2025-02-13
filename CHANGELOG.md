@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.2.2](https://github.com/arenaxr/arena-web-core/compare/v2.2.1...v2.2.2) (2025-02-13)
+
+
+### Bug Fixes
+
+* only remove private/program_id explicitly ([0264d9f](https://github.com/arenaxr/arena-web-core/commit/0264d9f869abe4ac86e0a53361ea8087c188bfac))
+* set/unset correct program_id attr ([71a8ce3](https://github.com/arenaxr/arena-web-core/commit/71a8ce3b5ff6352ef59e070016ca63363a3bc0a0))
+* use camFollow obj world pos ([94dc92a](https://github.com/arenaxr/arena-web-core/commit/94dc92a42778085e618b6b36450d4d5262913d54))
+
 ## [2.2.1](https://github.com/arenaxr/arena-web-core/compare/v2.2.0...v2.2.1) (2025-01-28)
 
 
