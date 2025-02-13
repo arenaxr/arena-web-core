@@ -22,6 +22,7 @@ import './impulse';
 import './jitsi-video';
 import './landmark';
 import './material-extras';
+import './model-container';
 import './pcd-model';
 import './screenshare';
 import './submodel-parent';

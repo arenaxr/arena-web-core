@@ -517,8 +517,13 @@ export default class CreateUpdate {
                     }
                     break;
                 case 'scale':
-                    // scale is set directly in the THREE.js object, for performance reasons
-                    entityEl.object3D.scale.set(value.x, value.y, value.z);
+                    if ('model-container' in entityEl.components) {
+                        // Defer to model-container component to handle sizing
+                        entityEl.components['model-container'].resize();
+                    } else {
+                        // scale is set directly in the THREE.js object, for performance reasons
+                        entityEl.object3D.scale.set(value.x, value.y, value.z);
+                    }
                     break;
                 case 'obj':
                 case 'mtl':
