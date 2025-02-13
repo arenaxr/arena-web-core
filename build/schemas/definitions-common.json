@@ -544,6 +544,34 @@
             "type": "object",
             "required": ["colorSpace", "gltfOpacity"]
         },
+        "model-container": {
+            "description": "Overrides absolute size for a 3D model. The model can be a glTF, glb, obj, or any other supported format. The model will be rescaled to fit to the sizes specified for each axes.",
+            "properties": {
+                "x": {
+                    "default": 1,
+                    "description": "Size of the model in the x-axis.",
+                    "type": "number"
+                },
+                "y": {
+                    "default": 1,
+                    "description": "Size of the model in the y-axis.",
+                    "type": "number"
+                },
+                "z": {
+                    "default": 1,
+                    "description": "Size of the model in the z-axis.",
+                    "type": "number"
+                },
+                "uniform": {
+                    "default": true,
+                    "description": "Whether to scale the model uniformly.",
+                    "type": "boolean"
+                }
+            },
+            "required": ["x", "y", "z", "uniform"],
+            "title": "Model Container",
+            "type": "object"
+        },
         "shadow": {
             "title": "Shadow",
             "description": "The shadow component enables shadows for an entity and its children. Adding the shadow component alone is not enough to display shadows in your scene. We must have at least one light with castShadow: true enabled.",
