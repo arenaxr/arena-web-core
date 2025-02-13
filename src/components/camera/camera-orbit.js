@@ -1,5 +1,8 @@
+/**
+ * @fileOverview A-Frame component to enable orbiting camera around a target object.
+ */
+
 import { OrbitControls } from 'three/addons/controls/OrbitControls';
-import { ARENAUtils } from '../../utils';
 
 AFRAME.registerComponent('camera-orbit', {
     schema: {
