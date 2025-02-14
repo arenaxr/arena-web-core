@@ -73,7 +73,7 @@ AFRAME.registerComponent('blip', {
 
         if (data.applyDescendants && dir === 'out') {
             const descendants = el.getElementsByTagName('*');
-            descendants.forEach((descendant) => {
+            for (let descendant of descendants) {
                 if (!descendant.object3D) return;
                 const descMeshTargets = [
                     ...descendant.object3D.getObjectsByProperty('isMesh', true),
