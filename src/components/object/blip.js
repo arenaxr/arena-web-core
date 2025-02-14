@@ -73,7 +73,8 @@ AFRAME.registerComponent('blip', {
 
         if (data.applyDescendants && dir === 'out') {
             const descendants = el.getElementsByTagName('*');
-            for (let descendant of descendants) {
+            // eslint-disable-next-line no-restricted-syntax
+            for (const descendant of descendants) {
                 if (!descendant.object3D) return;
                 const descMeshTargets = [
                     ...descendant.object3D.getObjectsByProperty('isMesh', true),
@@ -81,7 +82,7 @@ AFRAME.registerComponent('blip', {
                 ];
                 const descMatTargets = descMeshTargets.filter((matTarget) => matTarget.material);
                 addMatTargets.push(...descMatTargets);
-            });
+            }
             matTargets.push(...addMatTargets);
         }
 
