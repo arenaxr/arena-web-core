@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.3](https://github.com/arenaxr/arena-web-core/compare/v2.2.2...v2.2.3) (2025-02-14)
+
+
+### Bug Fixes
+
+* iterator of HTML collection in blip cleanup ([028182e](https://github.com/arenaxr/arena-web-core/commit/028182e82fce8fa1269dfd289aa09347c45ca976))
+* typo and ignore eslint w/ `for of` ([aaa0d1e](https://github.com/arenaxr/arena-web-core/commit/aaa0d1eb08260606543ece5a5d5d6386f18ab54d))
+
 ## [2.2.2](https://github.com/arenaxr/arena-web-core/compare/v2.2.1...v2.2.2) (2025-02-13)
 
 
