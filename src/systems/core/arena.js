@@ -712,8 +712,10 @@ AFRAME.registerSystem('arena-scene', {
         const { renderer } = sceneEl;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
 
+        // always include the default environment, users can remove in scene-options.env-presets.active=false if desired
         const environment = document.createElement('a-entity');
         environment.id = 'env';
+        environment.setAttribute('environment', true); // always ensure the component is added
 
         if (sceneData) {
             const options = sceneData.attributes;
@@ -794,10 +796,12 @@ AFRAME.registerSystem('arena-scene', {
             }
 
             const envPresets = options['env-presets'];
-            Object.entries(envPresets).forEach(([attribute, value]) => {
-                environment.setAttribute('environment', attribute, value);
-            });
-            sceneRoot.appendChild(environment);
+            if (envPresets) {
+                // update default environment with specific requests
+                Object.entries(envPresets).forEach(([attribute, value]) => {
+                    environment.setAttribute('environment', attribute, value);
+                });
+            }
 
             const rendererSettings = options['renderer-settings'];
             if (rendererSettings) {
@@ -822,18 +826,12 @@ AFRAME.registerSystem('arena-scene', {
                     });
                 });
             }
-        } else {
-            environment.setAttribute('environment', 'preset', 'default');
-            environment.setAttribute('environment', 'seed', 3);
-            environment.setAttribute('environment', 'flatShading', true);
-            environment.setAttribute('environment', 'groundTexture', 'squares');
-            environment.setAttribute('environment', 'grid', 'none');
-            environment.setAttribute('environment', 'fog', 0);
-            sceneRoot.appendChild(environment);
-
-            // make default env have lights
-            this.addDefaultLights();
         }
+
+        // include desired environment, and make default env have lights
+        sceneRoot.appendChild(environment);
+        this.addDefaultLights();
+
         this.events.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
     },
 

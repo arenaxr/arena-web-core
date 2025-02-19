@@ -223,14 +223,19 @@ export default class CreateUpdate {
 
             case 'scene-options':
                 // update env-presets section in real-time
-                const environmentOld = document.getElementById('env');
-                const environment = document.createElement('a-entity');
-                environment.id = 'env';
                 const envPresets = message.data['env-presets'];
-                Object.entries(envPresets).forEach(([attribute, value]) => {
-                    environment.setAttribute('environment', attribute, value);
-                });
-                environmentOld.parentNode.replaceChild(environment, environmentOld);
+                if (envPresets) {
+                    let environment = document.getElementById('env');
+                    if (!environment) {
+                        environment = document.createElement('a-entity');
+                        environment.id = 'env';
+                        environment.setAttribute('environment', true); // always ensure the component is added
+                        sceneRoot.appendChild(environment);
+                    }
+                    Object.entries(envPresets).forEach(([attribute, value]) => {
+                        environment.setAttribute('environment', attribute, value);
+                    });
+                }
                 return;
 
             case 'face-features':
