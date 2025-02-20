@@ -406,7 +406,7 @@
                 },
                 "physics": {
                     "default": false,
-                    "description": "If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `impulse`, `collision-listener`.",
+                    "description": "If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `static-body`, `impulse`, `collision-listener`.",
                     "title": "Physics System",
                     "type": "boolean"
                 },

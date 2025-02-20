@@ -20,7 +20,7 @@
                                 "angle": {
                                     "title": "angle (spot)",
                                     "type": "number",
-                                    "description": "Maximum extent of spot light from its direction (in degrees). Requires type:spot.",
+                                    "description": "Maximum extent of spot light from its direction (in degrees). Requires `type: spot`.",
                                     "default": 60
                                 },
                                 "castShadow": {
@@ -39,13 +39,13 @@
                                 "decay": {
                                     "title": "decay (point and spot)",
                                     "type": "number",
-                                    "description": "Amount the light dims along the distance of the light. Requires type:point or type:spot.",
+                                    "description": "Amount the light dims along the distance of the light. Requires `type: point` or `spot`.",
                                     "default": 1
                                 },
                                 "distance": {
                                     "title": "distance (point and spot)",
                                     "type": "number",
-                                    "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. Requires type:point or type:spot.",
+                                    "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. Requires `type: point` or `spot`.",
                                     "default": 0
                                 },
                                 "envMap": {
@@ -59,7 +59,7 @@
                                     "type": "string",
                                     "format": "color",
                                     "default": "#ffffff",
-                                    "description": "Light color from below. Requires type:hemisphere."
+                                    "description": "Light color from below. Requires `type: hemisphere`."
                                 },
                                 "intensity": {
                                     "title": "intensity",
@@ -76,7 +76,7 @@
                                 "penumbra": {
                                     "title": "penumbra (spot)",
                                     "type": "number",
-                                    "description": "Percent of the spotlight cone that is attenuated due to penumbra. Requires type:spot.",
+                                    "description": "Percent of the spotlight cone that is attenuated due to penumbra. Requires `type: spot`.",
                                     "default": 0
                                 },
                                 "shadowBias": {
@@ -88,7 +88,7 @@
                                 "shadowCameraBottom": {
                                     "title": "shadowCameraBottom (castShadow=true)",
                                     "type": "number",
-                                    "description": "Bottom plane of shadow camera frustum. Requires type:directional.",
+                                    "description": "Bottom plane of shadow camera frustum. Requires `type: directional`.",
                                     "default": -5
                                 },
                                 "shadowCameraFar": {
@@ -100,13 +100,13 @@
                                 "shadowCameraFov": {
                                     "title": "shadowCameraFov (castShadow=true)",
                                     "type": "number",
-                                    "description": "Shadow camera's FOV. Requires type:point or spot.",
+                                    "description": "Shadow camera's FOV. Requires `type: point` or `spot`.",
                                     "default": 50
                                 },
                                 "shadowCameraLeft": {
                                     "title": "shadowCameraBottom (castShadow=true)",
                                     "type": "number",
-                                    "description": "Left plane of shadow camera frustum. Requires type:directional.",
+                                    "description": "Left plane of shadow camera frustum. Requires `type: directional`.",
                                     "default": -5
                                 },
                                 "shadowCameraNear": {
@@ -118,13 +118,13 @@
                                 "shadowCameraRight": {
                                     "title": "shadowCameraRight (castShadow=true)",
                                     "type": "number",
-                                    "description": "Right plane of shadow camera frustum. Requires type:directional.",
+                                    "description": "Right plane of shadow camera frustum. Requires `type: directional`.",
                                     "default": 5
                                 },
                                 "shadowCameraTop": {
                                     "title": "shadowCameraTop (castShadow=true)",
                                     "type": "number",
-                                    "description": "Top plane of shadow camera frustum. Requires type:directional.",
+                                    "description": "Top plane of shadow camera frustum. Requires `type: directional`.",
                                     "default": 5
                                 },
                                 "shadowCameraVisible": {
@@ -154,7 +154,7 @@
                                 "target": {
                                     "title": "target (spot)",
                                     "type": "string",
-                                    "description": "Id of element the spot should point to. Set to null to transform spotlight by orientation, pointing to it's -Z axis. Requires type:spot.",
+                                    "description": "Id of element the spot should point to. Set to null to transform spotlight by orientation, pointing to it's -Z axis. Requires `type: spot`.",
                                     "default": null
                                 },
                                 "type": {

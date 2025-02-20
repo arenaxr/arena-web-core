@@ -15,12 +15,12 @@
                         },
                         "target": {
                             "type": "string",
-                            "description": "Look at target object_id or position. Requires object_type: look-at",
+                            "description": "Look at target object_id or position. Requires `object_type: look-at`.",
                             "default": null
                         },
                         "landmarkObj": {
                             "type": "string",
-                            "description": "Teleport to the same id as the target object. Requires object_type: teleport-to-landmark",
+                            "description": "Teleport to the same id as the target object. Requires `object_type: teleport-to-landmark`.",
                             "default": null
                         }
                     }

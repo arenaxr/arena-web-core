@@ -58,7 +58,7 @@
                 },
                 "combine": {
                     "default": "mix",
-                    "description": "How the environment map mixes with the material. Requires shader: phong.",
+                    "description": "How the environment map mixes with the material. Requires `shader: phong`.",
                     "enum": ["mix", "add", "multiply"],
                     "type": "string"
                 },
@@ -79,13 +79,13 @@
                 },
                 "emissive": {
                     "default": "#000000",
-                    "description": "The color of the emissive lighting component. Used to make objects produce light even without other lighting in the scene. Requires shader: standard or phong",
+                    "description": "The color of the emissive lighting component. Used to make objects produce light even without other lighting in the scene. Requires `shader: standard` or `phong`.",
                     "format": "color",
                     "type": "string"
                 },
                 "emissiveIntensity": {
                     "default": 1,
-                    "description": "Intensity of the emissive lighting component. Requires shader: standard or phong",
+                    "description": "Intensity of the emissive lighting component. Requires `shader: standard` or `phong`.",
                     "type": "number"
                 },
                 "flatShading": {
@@ -100,14 +100,14 @@
                 },
                 "height": {
                     "default": 256,
-                    "description": "Height of video (in pixels), if defining a video texture. Requires shader: standard or flat.",
+                    "description": "Height of video (in pixels), if defining a video texture. Requires `shader: standard` or `flat`.",
                     "type": "integer"
                 },
                 "metalness": {
                     "default": 0,
                     "minimum": 0,
                     "maximum": 1,
-                    "description": "How metallic the material is from 0 to 1. Requires shader: standard.",
+                    "description": "How metallic the material is from 0 to 1. Requires `shader: standard`.",
                     "type": "number"
                 },
                 "npot": {
@@ -133,17 +133,16 @@
                 },
                 "reflectivity": {
                     "default": 0.9,
-                    "description": "How much the environment map affects the surface. Requires shader: phong.",
+                    "description": "How much the environment map affects the surface. Requires `shader: phong`.",
                     "type": "number"
                 },
                 "refract": {
                     "default": false,
-                    "description": "Whether the defined envMap should refract. Requires shader: phong.",
+                    "description": "Whether the defined envMap should refract. Requires `shader: phong`.",
                     "type": "boolean"
                 },
                 "refractionRatio": {
                     "default": 0.98,
-                    "description": "1/refractive index of the material. Requires shader: phong.",
                     "type": "number"
                 },
                 "repeat": {
@@ -159,7 +158,7 @@
                     "default": 0,
                     "minimum": 0,
                     "maximum": 1,
-                    "description": "How rough the material is from 0 to 1. A rougher material will scatter reflected light in more directions than a smooth material. Requires shader: standard.",
+                    "description": "How rough the material is from 0 to 1. A rougher material will scatter reflected light in more directions than a smooth material. Requires `shader: standard`.",
                     "type": "number"
                 },
                 "shader": {
@@ -170,7 +169,7 @@
                 },
                 "shininess": {
                     "default": 30,
-                    "description": "How shiny the specular highlight is; a higher value gives a sharper highlight. Requires shader: phong.",
+                    "description": "How shiny the specular highlight is; a higher value gives a sharper highlight. Requires `shader: phong`.",
                     "type": "number"
                 },
                 "side": {
@@ -181,7 +180,7 @@
                 },
                 "specular": {
                     "default": "#111111",
-                    "description": "This defines how shiny the material is and the color of its shine. Requires shader: phong.",
+                    "description": "This defines how shiny the material is and the color of its shine. Requires `shader: phong`.",
                     "format": "color",
                     "type": "string"
                 },
@@ -192,7 +191,7 @@
                 },
                 "toneMapped": {
                     "default": true,
-                    "description": "Whether to ignore toneMapping, set to false you are using renderer.toneMapping and an element should appear to emit light. Requires shader: flat.",
+                    "description": "Whether to ignore toneMapping, set to false you are using renderer.toneMapping and an element should appear to emit light. Requires `shader: flat`.",
                     "type": "boolean"
                 },
                 "transparent": {
@@ -212,7 +211,7 @@
                 },
                 "width": {
                     "default": 512,
-                    "description": "Width of video (in pixels), if defining a video texture. Requires shader: standard or flat.",
+                    "description": "Width of video (in pixels), if defining a video texture. Requires `shader: standard` or `flat`.",
                     "type": "integer"
                 },
                 "wireframe": {
@@ -230,7 +229,7 @@
             "type": "object"
         },
         "multisrc": {
-            "description": "Define multiple visual sources applied to an object.",
+            "description": "Define multiple visual sources applied to an object. Requires `material` attribute.",
             "properties": {
                 "srcs": {
                     "description": "A comma-delimited list if URIs, e.g. 'side1.png, side2.png, side3.png, side4.png, side5.png, side6.png' (required).",

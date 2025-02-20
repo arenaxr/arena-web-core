@@ -242,7 +242,7 @@
             "required": ["dynamic"]
         },
         "collision-listener": {
-            "description": "Name of the collision-listener, default can be empty string. Collisions trigger click events.",
+            "description": "Name of the collision-listener, default can be empty string. Collisions trigger click events. Requires `scene-options: physics`.",
             "title": "Collision Listener (legacy)",
             "type": "string"
         },
@@ -287,7 +287,7 @@
             "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
         "static-body": {
-            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
+            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions. Requires `scene-options: physics`.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
             "properties": {
                 "shape": {
                     "default": "auto",
@@ -299,11 +299,11 @@
                     "default": "y",
                     "enum": ["x", "y", "z"],
                     "type": "string",
-                    "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
+                    "description": "Override default axis of bounding cylinder. Requires `shape: cylinder`."
                 },
                 "sphereRadius": {
                     "type": "number",
-                    "description": "Override default radius of bounding sphere. Requires shape:sphere. NaN by default."
+                    "description": "Override default radius of bounding sphere. Requires `shape: sphere`. NaN by default."
                 },
                 "type": {
                     "default": "static",
@@ -316,7 +316,7 @@
             "type": "object"
         },
         "dynamic-body": {
-            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
+            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled. Requires `scene-options: physics`.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
             "properties": {
                 "mass": {
                     "default": 5,
@@ -344,11 +344,11 @@
                     "default": "y",
                     "enum": ["x", "y", "z"],
                     "type": "string",
-                    "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
+                    "description": "Override default axis of bounding cylinder. Requires `shape: cylinder`."
                 },
                 "sphereRadius": {
                     "type": "number",
-                    "description": "Override default radius of bounding sphere. Requires shape:sphere. NaN by default."
+                    "description": "Override default radius of bounding sphere. Requires `shape: sphere`. NaN by default."
                 },
                 "type": {
                     "default": "dynamic",
@@ -361,7 +361,7 @@
             "type": "object"
         },
         "goto-landmark": {
-            "description": "Teleports user to the landmark with the given name. Requires click-listener.",
+            "description": "Teleports user to the landmark with the given name. Requires `click-listener` attribute.",
             "properties": {
                 "on": {
                     "default": "mousedown",
@@ -380,7 +380,7 @@
             "type": "object"
         },
         "goto-url": {
-            "description": "Load new URL when object is clicked. Requires click-listener.",
+            "description": "Load new URL when object is clicked. Requires `click-listener` attribute.",
             "properties": {
                 "dest": {
                     "description": "Where to open the URL.",
@@ -430,7 +430,7 @@
             "enum": [true]
         },
         "impulse": {
-            "description": "Apply an impulse to an object to set it in motion. This happens in conjunction with an event. Requires click-listener and physics.",
+            "description": "Apply an impulse to an object to set it in motion. This happens in conjunction with an event. Requires `click-listener` attribute and `scene-options: physics`.",
             "properties": {
                 "force": {
                     "description": "Impulse vector.",
@@ -504,7 +504,7 @@
             "required": ["label", "randomRadiusMin", "randomRadiusMax", "lookAtLandmark"]
         },
         "material-extras": {
-            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order.\n\nThe properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>THREE.js Material</a>.",
+            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. Requires `material` attribute.\n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>THREE.js Material</a>.",
             "properties": {
                 "overrideSrc": {
                     "type": "string",
@@ -673,13 +673,13 @@
         },
         "submodel-parent": {
             "title": "Submodel Parent",
-            "description": "When this object is parented to a hierarchical model, attaches to a named subcomponent of that model instead of the root position",
+            "description": "When this object is parented to a hierarchical model, it attaches to a named sub-component of that model instead of the root position. Requires `parent` attribute.",
             "type": "string",
             "default": ""
         },
         "textinput": {
             "title": "Text Input",
-            "description": "Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires click-listener.",
+            "description": "Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires `click-listener` attribute.",
             "type": "object",
             "properties": {
                 "on": {
