@@ -20,7 +20,6 @@ import {
  * Loads geometry with uv and materials basic properties with texture support.
  *
  * @class TDSLoader
- * @constructor
  */
 
 class TDSLoader extends Loader {
@@ -398,7 +397,7 @@ class TDSLoader extends Loader {
 
 			} else if ( next.id === MESH_MATRIX ) {
 
-				this.debugMessage( '   Tranformation Matrix (TODO)' );
+				this.debugMessage( '   Transformation Matrix (TODO)' );
 
 				const values = [];
 				for ( let i = 0; i < 12; i ++ ) {

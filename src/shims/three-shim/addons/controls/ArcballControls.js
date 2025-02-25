@@ -70,14 +70,18 @@ const _offset = new Vector3();
 const _gizmoMatrixStateTemp = new Matrix4();
 const _cameraMatrixStateTemp = new Matrix4();
 const _scalePointTemp = new Vector3();
-/**
- *
- * @param {Camera} camera Virtual camera used in the scene
- * @param {HTMLElement} domElement Renderer's dom element
- * @param {Scene} scene The scene to be rendered
- */
+
+const _EPS = 0.000001;
+
+
 class ArcballControls extends Controls {
 
+	/**
+	 *
+	 * @param {Camera} camera Virtual camera used in the scene
+	 * @param {HTMLElement?} [domElement=null] Renderer's dom element
+	 * @param {Scene?} [scene=null] The scene to be rendered
+	 */
 	constructor( camera, domElement = null, scene = null ) {
 
 		super( camera, domElement );
@@ -1100,9 +1104,9 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Set a new mouse action by specifying the operation to be performed and a mouse/key combination. In case of conflict, replaces the existing one
-	 * @param {String} operation The operation to be performed ('PAN', 'ROTATE', 'ZOOM', 'FOV)
-	 * @param {*} mouse A mouse button (0, 1, 2) or 'WHEEL' for wheel notches
-	 * @param {*} key The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
+	 * @param {'PAN'|'ROTATE'|'ZOOM'|'FOV'} operation The operation to be performed ('PAN', 'ROTATE', 'ZOOM', 'FOV')
+	 * @param {0|1|2|'WHEEL'} mouse A mouse button (0, 1, 2) or 'WHEEL' for wheel notches
+	 * @param {'CTRL'|'SHIFT'|null} [key=null] The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
 	 * @returns {Boolean} True if the mouse action has been successfully added, false otherwise
 	 */
 	setMouseAction( operation, mouse, key = null ) {
@@ -1181,9 +1185,9 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Remove a mouse action by specifying its mouse/key combination
-	 * @param {*} mouse A mouse button (0, 1, 2) or 'WHEEL' for wheel notches
-	 * @param {*} key The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
-	 * @returns {Boolean} True if the operation has been succesfully removed, false otherwise
+	 * @param {0|1|2|'WHEEL'} mouse A mouse button (0, 1, 2) or 'WHEEL' for wheel notches
+	 * @param {'CTRL'|'SHIFT'|null} key The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
+	 * @returns {Boolean} True if the operation has been successfully removed, false otherwise
 	 */
 	unsetMouseAction( mouse, key = null ) {
 
@@ -1204,9 +1208,9 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Return the operation associated to a mouse/keyboard combination
-	 * @param {*} mouse A mouse button (0, 1, 2) or 'WHEEL' for wheel notches
-	 * @param {*} key The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
-	 * @returns The operation if it has been found, null otherwise
+	 * @param {0|1|2|'WHEEL'} mouse Mouse button index (0, 1, 2) or 'WHEEL' for wheel notches
+	 * @param {'CTRL'|'SHIFT'|null} key Keyboard modifier
+	 * @returns {'PAN'|'ROTATE'|'ZOOM'|'FOV'|null} The operation if it has been found, null otherwise
 	 */
 	getOpFromAction( mouse, key ) {
 
@@ -1244,9 +1248,9 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Get the operation associated to mouse and key combination and returns the corresponding FSA state
-	 * @param {Number} mouse Mouse button
-	 * @param {String} key Keyboard modifier
-	 * @returns The FSA state obtained from the operation associated to mouse/keyboard combination
+	 * @param {0|1|2} mouse Mouse button index (0, 1, 2)
+	 * @param {'CTRL'|'SHIFT'|null} key Keyboard modifier
+	 * @returns {STATE?} The FSA state obtained from the operation associated to mouse/keyboard combination
 	 */
 	getOpStateFromAction( mouse, key ) {
 
@@ -1402,10 +1406,12 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Calculate the angular speed
+	 *
 	 * @param {Number} p0 Position at t0
 	 * @param {Number} p1 Position at t1
 	 * @param {Number} t0 Initial time in milliseconds
 	 * @param {Number} t1 Ending time in milliseconds
+	 * @returns {Number}
 	 */
 	calculateAngularSpeed( p0, p1, t0, t1 ) {
 
@@ -1450,7 +1456,7 @@ class ArcballControls extends Controls {
 	}
 
 	/**
-	 * Calculate the trackball radius so that gizmo's diamater will be 2/3 of the minimum side of the camera frustum
+	 * Calculate the trackball radius so that gizmo's diameter will be 2/3 of the minimum side of the camera frustum
 	 * @param {Camera} camera
 	 * @returns {Number} The trackball radius
 	 */
@@ -1476,7 +1482,7 @@ class ArcballControls extends Controls {
 	 * Focus operation consist of positioning the point of interest in front of the camera and a slightly zoom in
 	 * @param {Vector3} point The point of interest
 	 * @param {Number} size Scale factor
-	 * @param {Number} amount Amount of operation to be completed (used for focus animations, default is complete full operation)
+	 * @param {Number} [amount=1] Amount of operation to be completed (used for focus animations, default is complete full operation)
 	 */
 	focus( point, size, amount = 1 ) {
 
@@ -1627,8 +1633,9 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Calculate the cursor position in NDC
-	 * @param {number} x Cursor horizontal coordinate within the canvas
-	 * @param {number} y Cursor vertical coordinate within the canvas
+	 *
+	 * @param {number} cursorX Cursor horizontal coordinate within the canvas
+	 * @param {number} cursorY Cursor vertical coordinate within the canvas
 	 * @param {HTMLElement} canvas The canvas where the renderer draws its output
 	 * @returns {Vector2} Cursor normalized position inside the canvas
 	 */
@@ -1643,8 +1650,9 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Calculate the cursor position inside the canvas x/y coordinates with the origin being in the center of the canvas
-	 * @param {Number} x Cursor horizontal coordinate within the canvas
-	 * @param {Number} y Cursor vertical coordinate within the canvas
+	 *
+	 * @param {Number} cursorX Cursor horizontal coordinate within the canvas
+	 * @param {Number} cursorY Cursor vertical coordinate within the canvas
 	 * @param {HTMLElement} canvas The canvas where the renderer draws its output
 	 * @returns {Vector2} Cursor position inside the canvas
 	 */
@@ -1713,7 +1721,7 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Set gizmos radius factor and redraws gizmos
-	 * @param {Float} value Value of radius factor
+	 * @param {Number} value Value of radius factor
 	 */
 	setTbRadius( value ) {
 
@@ -1940,9 +1948,11 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Perform pan operation moving camera between two points
+	 *
 	 * @param {Vector3} p0 Initial point
 	 * @param {Vector3} p1 Ending point
-	 * @param {Boolean} adjust If movement should be adjusted considering camera distance (Perspective only)
+	 * @param {Boolean} [adjust=false] If movement should be adjusted considering camera distance (Perspective only)
+	 * @returns {Object}
 	 */
 	pan( p0, p1, adjust = false ) {
 
@@ -2219,7 +2229,7 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Set camera fov
-	 * @param {Number} value fov to be setted
+	 * @param {Number} value fov to be set
 	 */
 	setFov( value ) {
 
@@ -2234,8 +2244,9 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Set values in transformation object
-	 * @param {Matrix4} camera Transformation to be applied to the camera
-	 * @param {Matrix4} gizmos Transformation to be applied to gizmos
+	 *
+	 * @param {Matrix4} [camera=null] Transformation to be applied to the camera
+	 * @param {Matrix4} [gizmos=null] Transformation to be applied to gizmos
 	 */
 	setTransformationMatrices( camera = null, gizmos = null ) {
 
@@ -2279,9 +2290,10 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Rotate camera around its direction axis passing by a given point by a given angle
+	 *
 	 * @param {Vector3} point The point where the rotation axis is passing trough
 	 * @param {Number} angle Angle in radians
-	 * @returns The computed transormation matix
+	 * @returns {Object} The computed transformation matrix
 	 */
 	zRotate( point, angle ) {
 
@@ -2313,9 +2325,10 @@ class ArcballControls extends Controls {
 
 	/**
 	 * Unproject the cursor on the 3D object surface
+	 *
 	 * @param {Vector2} cursor Cursor coordinates in NDC
 	 * @param {Camera} camera Virtual camera
-	 * @returns {Vector3} The point of intersection with the model, if exist, null otherwise
+	 * @returns {Vector3?} The point of intersection with the model, if exist, null otherwise
 	 */
 	unprojectOnObj( cursor, camera ) {
 
@@ -2476,7 +2489,7 @@ class ArcballControls extends Controls {
 	 * @param {Number} cursorX Cursor horizontal coordinate on screen
 	 * @param {Number} cursorY Cursor vertical coordinate on screen
 	 * @param {HTMLElement} canvas The canvas where the renderer draws its output
-	 * @param {Boolean} initialDistance If initial distance between camera and gizmos should be used for calculations instead of current (Perspective only)
+	 * @param {Boolean} [initialDistance=false] If initial distance between camera and gizmos should be used for calculations instead of current (Perspective only)
 	 * @returns {Vector3} The unprojected point on the trackball plane
 	 */
 	unprojectOnTbPlane( camera, cursorX, cursorY, canvas, initialDistance = false ) {
@@ -2576,7 +2589,7 @@ class ArcballControls extends Controls {
 	/**
 	 * Update the trackball FSA
 	 * @param {STATE} newState New state of the FSA
-	 * @param {Boolean} updateMatrices If matriices state should be updated
+	 * @param {Boolean} updateMatrices If matrices state should be updated
 	 */
 	updateTbState( newState, updateMatrices ) {
 
@@ -2590,8 +2603,6 @@ class ArcballControls extends Controls {
 	}
 
 	update() {
-
-		const EPS = 0.000001;
 
 		if ( this.target.equals( this._currentTarget ) === false ) {
 
@@ -2618,7 +2629,7 @@ class ArcballControls extends Controls {
 			//check distance
 			const distance = this.object.position.distanceTo( this._gizmos.position );
 
-			if ( distance > this.maxDistance + EPS || distance < this.minDistance - EPS ) {
+			if ( distance > this.maxDistance + _EPS || distance < this.minDistance - _EPS ) {
 
 				const newDistance = MathUtils.clamp( distance, this.minDistance, this.maxDistance );
 				this.applyTransformMatrix( this.scale( newDistance / distance, this._gizmos.position ) );
@@ -2637,7 +2648,7 @@ class ArcballControls extends Controls {
 			const oldRadius = this._tbRadius;
 			this._tbRadius = this.calculateTbRadius( this.object );
 
-			if ( oldRadius < this._tbRadius - EPS || oldRadius > this._tbRadius + EPS ) {
+			if ( oldRadius < this._tbRadius - _EPS || oldRadius > this._tbRadius + _EPS ) {
 
 				const scale = ( this._gizmos.scale.x + this._gizmos.scale.y + this._gizmos.scale.z ) / 3;
 				const newRadius = this._tbRadius / scale;

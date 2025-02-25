@@ -12,13 +12,15 @@ import {
 /**
  * This class has been made to hold a slice of a volume data
  * @class
- * @param   {Volume} volume    The associated volume
- * @param   {number}       [index=0] The index of the slice
- * @param   {string}       [axis='z']      For now only 'x', 'y' or 'z' but later it will change to a normal vector
  * @see Volume
  */
 class VolumeSlice {
 
+	/**
+ 	 * @param {Volume} volume     The associated volume
+ 	 * @param {number} [index=0]  The index of the slice
+ 	 * @param {string} [axis='z'] For now only 'x', 'y' or 'z' but later it will change to a normal vector
+	 */
 	constructor( volume, index, axis ) {
 
 		const slice = this;
@@ -103,7 +105,7 @@ class VolumeSlice {
 	}
 
 	/**
-	 * @member {Function} repaint Refresh the texture and the geometry if geometryNeedsUpdate is set to true
+	 * Refresh the texture and the geometry if geometryNeedsUpdate is set to true
 	 * @memberof VolumeSlice
 	 */
 	repaint() {
@@ -189,7 +191,7 @@ class VolumeSlice {
 	}
 
 	/**
-	 * @member {Function} Refresh the geometry according to axis and index
+	 * Refresh the geometry according to axis and index
 	 * @see Volume.extractPerpendicularPlane
 	 * @memberof VolumeSlice
 	 */

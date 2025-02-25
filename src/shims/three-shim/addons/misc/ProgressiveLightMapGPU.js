@@ -15,12 +15,13 @@ import { potpack } from '../libs/potpack.module.js';
  * This should begin accumulating lightmaps which apply to
  * your objects, so you can start jittering lighting to achieve
  * the texture-space effect you're looking for.
- *
- * @param {WebGPURenderer} renderer An instance of WebGPURenderer.
- * @param {number} resolution The side-long dimension of you total lightmap.
  */
 class ProgressiveLightMap {
 
+	/**
+	 * @param {WebGPURenderer} renderer An instance of WebGPURenderer.
+	 * @param {number} [resolution=1024] The side-long dimension of you total lightmap.
+	 */
 	constructor( renderer, resolution = 1024 ) {
 
 		this.renderer = renderer;
@@ -50,7 +51,7 @@ class ProgressiveLightMap {
 
 		this._uvMat = new MeshPhongNodeMaterial();
 		this._uvMat.vertexNode = vec4( sub( uvNode, vec2( 0.5 ) ).mul( 2 ), 1, 1 );
-		this._uvMat.outputNode = vec4( mix( this._previousShadowMap.uv( uv( 1 ) ), output, float( 1 ).div( this._averagingWindow ) ) );
+		this._uvMat.outputNode = vec4( mix( this._previousShadowMap.sample( uv( 1 ) ), output, float( 1 ).div( this._averagingWindow ) ) );
 
 	}
 
@@ -229,7 +230,7 @@ class ProgressiveLightMap {
 		if ( this._labelMesh === null ) {
 
 			const labelMaterial = new NodeMaterial();
-			labelMaterial.colorNode = texture( this._progressiveLightMap1.texture ).uv( uv().flipY() );
+			labelMaterial.colorNode = texture( this._progressiveLightMap1.texture ).sample( uv().flipY() );
 			labelMaterial.side = DoubleSide;
 
 			const labelGeometry = new PlaneGeometry( 100, 100 );
@@ -267,14 +268,14 @@ class ProgressiveLightMap {
 		const pixelOffset = float( 0.5 ).div( float( this.resolution ) ).toVar();
 
 		const color = add(
-			this._previousShadowMap.uv( uvNode.add( vec2( pixelOffset, 0 ) ) ),
-			this._previousShadowMap.uv( uvNode.add( vec2( 0, pixelOffset ) ) ),
-			this._previousShadowMap.uv( uvNode.add( vec2( 0, pixelOffset.negate() ) ) ),
-			this._previousShadowMap.uv( uvNode.add( vec2( pixelOffset.negate(), 0 ) ) ),
-			this._previousShadowMap.uv( uvNode.add( vec2( pixelOffset, pixelOffset ) ) ),
-			this._previousShadowMap.uv( uvNode.add( vec2( pixelOffset.negate(), pixelOffset ) ) ),
-			this._previousShadowMap.uv( uvNode.add( vec2( pixelOffset, pixelOffset.negate() ) ) ),
-			this._previousShadowMap.uv( uvNode.add( vec2( pixelOffset.negate(), pixelOffset.negate() ) ) ),
+			this._previousShadowMap.sample( uvNode.add( vec2( pixelOffset, 0 ) ) ),
+			this._previousShadowMap.sample( uvNode.add( vec2( 0, pixelOffset ) ) ),
+			this._previousShadowMap.sample( uvNode.add( vec2( 0, pixelOffset.negate() ) ) ),
+			this._previousShadowMap.sample( uvNode.add( vec2( pixelOffset.negate(), 0 ) ) ),
+			this._previousShadowMap.sample( uvNode.add( vec2( pixelOffset, pixelOffset ) ) ),
+			this._previousShadowMap.sample( uvNode.add( vec2( pixelOffset.negate(), pixelOffset ) ) ),
+			this._previousShadowMap.sample( uvNode.add( vec2( pixelOffset, pixelOffset.negate() ) ) ),
+			this._previousShadowMap.sample( uvNode.add( vec2( pixelOffset.negate(), pixelOffset.negate() ) ) ),
 		).div( 8 );
 
 		blurMaterial.fragmentNode = color;
