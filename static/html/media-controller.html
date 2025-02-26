@@ -1,0 +1,28 @@
+<div id="media-controller" class="fixed-bottom d-flex justify-content-between align-items-center bg-white opacity-90 rounded-3 shadow-sm mx-auto mb-2 p-2">
+  <button id="restart-button" class="btn btn-primary rounded-circle mx-2 p-1" title="Restart">
+    <i class="fas fa-undo"></i>
+  </button>
+  <button id="play-pause-button" class="btn btn-primary rounded-circle mx-2 p-1" title="Play/Pause">
+    <i class="fas fa-play" id="play-icon"></i>
+    <i class="fas fa-pause" id="pause-icon" style="display: none;"></i>
+  </button>
+  <div class="d-flex align-items-center flex-grow-1 mx-2">
+    <input type="range" id="progress-bar" class="flex-grow-1 me-3" min="0" max="100" value="0" step="1" title="Playback Progress" list="markers">
+    <datalist id="markers">
+      <option value="0"></option>
+      <option value="10"></option>
+      <option value="20"></option>
+      <option value="30"></option>
+      <option value="40"></option>
+      <option value="50"></option>
+      <option value="60"></option>
+      <option value="70"></option>
+      <option value="80"></option>
+      <option value="90"></option>
+      <option value="100"></option>
+    </datalist>
+    <div class="time-display">
+      <span id="current-time">0:00</span> / <span id="total-duration">1:40</span>
+    </div>
+  </div>
+</div>
