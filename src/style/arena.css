@@ -679,3 +679,23 @@
 [id^='NotiflixNotifyWrap'] > div.nx-with-icon {
     padding: 16px !important;
 }
+
+#media-controller {
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75%;
+    height: 60px;
+    z-index: 1000; /* Ensure the bar is above other content */
+    button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    input[type="range"] {
+        height: 40px;
+    }
+    .time-display {
+        font-size: 20px;
+        color: #333333;
+    }
+}
