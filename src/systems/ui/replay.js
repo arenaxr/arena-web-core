@@ -1,7 +1,7 @@
 AFRAME.registerSystem('replay-ui', {
     schema: {
         htmlSrc: { type: 'string', default: 'static/html/media-controller.html' },
-        totalDuration: { type: 'number', default: 100 },
+        totalDuration: { type: 'number', default: 123 },
     },
     async init() {
         // TODO: dynamically load this, for now just always display
@@ -20,53 +20,77 @@ AFRAME.registerSystem('replay-ui', {
         this.pauseIcon = document.getElementById('pause-icon');
         this.progressBar = document.getElementById('progress-bar');
         this.currentTimeDisplay = document.getElementById('current-time');
+        this.totalDurationDisplay = document.getElementById('total-duration');
 
         this.isPlaying = false;
         this.currentTime = 0;
 
         this.setupListeners();
-        this.updateTimeDisplay = this.updateTimeDisplay.bind(this);
+        this.updateCurrentTimeDisplay = this.updateCurrentTimeDisplay.bind(this);
+        this.updatePlayIcon = this.updatePlayIcon.bind(this);
     },
-    updateTimeDisplay(time) {
+    update(oldData) {
+        if (oldData?.totalDuration !== this.data.totalDuration) {
+            this.updateTotalDurationDisplay(this.data.totalDuration);
+        }
+    },
+    updateTotalDurationDisplay() {
+        const minutes = Math.floor(this.data.totalDuration / 60);
+        const seconds = Math.floor(this.data.totalDuration % 60)
+            .toString()
+            .padStart(2, '0');
+        this.totalDurationDisplay.textContent = `${minutes}:${seconds}`;
+    },
+    updateCurrentTimeDisplay(time) {
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60)
             .toString()
             .padStart(2, '0');
         this.currentTimeDisplay.textContent = `${minutes}:${seconds}`;
-        this.progressBar.value = time;
+        this.progressBar.value = Math.round((time * 100) / this.data.totalDuration);
+    },
+    updatePlayIcon() {
+        if (this.isPlaying) {
+            this.playIcon.style.display = 'none';
+            this.pauseIcon.style.display = 'block';
+        } else {
+            this.playIcon.style.display = 'block';
+            this.pauseIcon.style.display = 'none';
+        }
     },
     setupListeners() {
         this.playPauseButton.addEventListener('click', () => {
             if (this.isPlaying) {
                 clearInterval(this.intervalId);
-                this.playIcon.style.display = 'block';
-                this.pauseIcon.style.display = 'none';
             } else {
+                if (this.currentTime >= this.data.totalDuration) {
+                    this.currentTime = 0;
+                }
                 this.intervalId = setInterval(() => {
                     if (this.currentTime < this.data.totalDuration) {
                         this.currentTime++;
-                        this.updateTimeDisplay(this.currentTime);
+                        this.updateCurrentTimeDisplay(this.currentTime);
                     } else {
                         clearInterval(this.intervalId);
+                        this.isPlaying = false;
+                        this.updatePlayIcon();
                     }
                 }, 1000);
-                this.playIcon.style.display = 'none';
-                this.pauseIcon.style.display = 'block';
             }
             this.isPlaying = !this.isPlaying;
+            this.updatePlayIcon();
         });
         this.restartButton.addEventListener('click', () => {
             clearInterval(this.intervalId);
             this.currentTime = 0;
-            this.updateTimeDisplay(this.currentTime);
+            this.updateCurrentTimeDisplay(this.currentTime);
             this.isPlaying = false;
-            this.playIcon.style.display = 'block';
-            this.pauseIcon.style.display = 'none';
+            this.updatePlayIcon();
         });
 
         this.progressBar.addEventListener('input', (event) => {
             this.currentTime = parseInt(event.target.value, 10);
-            this.updateTimeDisplay(this.currentTime);
+            this.updateCurrentTimeDisplay(this.currentTime);
         });
     },
 });
