@@ -27,14 +27,18 @@ AFRAME.registerSystem('replay-ui', {
 
         this.setupListeners();
         this.updateCurrentTimeDisplay = this.updateCurrentTimeDisplay.bind(this);
+        this.updateTotalDurationDisplay = this.updateTotalDurationDisplay.bind(this);
         this.updatePlayIcon = this.updatePlayIcon.bind(this);
+
+        this.updateTotalDurationDisplay();
     },
     update(oldData) {
-        if (oldData?.totalDuration !== this.data.totalDuration) {
-            this.updateTotalDurationDisplay(this.data.totalDuration);
+        if (oldData.totalDuration !== this.data.totalDuration) {
+            this.updateTotalDurationDisplay();
         }
     },
     updateTotalDurationDisplay() {
+        if (!this.totalDurationDisplay) return;
         const minutes = Math.floor(this.data.totalDuration / 60);
         const seconds = Math.floor(this.data.totalDuration % 60)
             .toString()
