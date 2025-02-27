@@ -26,7 +26,7 @@ AFRAME.registerSystem('replay-ui', {
         this.currentTime = 0;
 
         this.setupListeners();
-        this.updateCurrentTimeDisplay = this.updateCurrentTimeDisplay.bind(this);
+        this.setCurrentTime = this.setCurrentTime.bind(this);
         this.updateTotalDurationDisplay = this.updateTotalDurationDisplay.bind(this);
         this.updatePlayIcon = this.updatePlayIcon.bind(this);
 
@@ -45,7 +45,8 @@ AFRAME.registerSystem('replay-ui', {
             .padStart(2, '0');
         this.totalDurationDisplay.textContent = `${minutes}:${seconds}`;
     },
-    updateCurrentTimeDisplay(time) {
+    setCurrentTime(time) {
+        this.currentTime = time;
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60)
             .toString()
@@ -68,12 +69,11 @@ AFRAME.registerSystem('replay-ui', {
                 clearInterval(this.intervalId);
             } else {
                 if (this.currentTime >= this.data.totalDuration) {
-                    this.currentTime = 0;
+                    this.setCurrentTime(0);
                 }
                 this.intervalId = setInterval(() => {
                     if (this.currentTime < this.data.totalDuration) {
-                        this.currentTime++;
-                        this.updateCurrentTimeDisplay(this.currentTime);
+                        this.setCurrentTime(this.currentTime + 1);
                     } else {
                         clearInterval(this.intervalId);
                         this.isPlaying = false;
@@ -86,15 +86,12 @@ AFRAME.registerSystem('replay-ui', {
         });
         this.restartButton.addEventListener('click', () => {
             clearInterval(this.intervalId);
-            this.currentTime = 0;
-            this.updateCurrentTimeDisplay(this.currentTime);
+            this.setCurrentTime(0);
             this.isPlaying = false;
             this.updatePlayIcon();
         });
-
         this.progressBar.addEventListener('input', (event) => {
-            this.currentTime = parseInt(event.target.value, 10);
-            this.updateCurrentTimeDisplay(this.currentTime);
+            this.setCurrentTime(Math.round(parseInt(event.target.value, 10) * (this.data.totalDuration / 100)));
         });
     },
 });
