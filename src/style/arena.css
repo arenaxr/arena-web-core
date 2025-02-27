@@ -690,7 +690,7 @@
 #media-controller {
     left: 50%;
     transform: translateX(-50%);
-    width: 75%;
+    width: 50%;
     height: 60px;
     z-index: 1000; /* Ensure the bar is above other content */
     button {
