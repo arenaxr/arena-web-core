@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.4](https://github.com/arenaxr/arena-web-core/compare/v2.2.3...v2.2.4) (2025-03-03)
+
+
+### Bug Fixes
+
+* **environment:** corrected edge cases with empty env-presets, update defaults ([49ea3fd](https://github.com/arenaxr/arena-web-core/commit/49ea3fd1e6f31d420a09f9294f33353375807fa0))
+
 ## [2.2.3](https://github.com/arenaxr/arena-web-core/compare/v2.2.2...v2.2.3) (2025-02-14)
 
 
