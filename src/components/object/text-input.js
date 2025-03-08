@@ -53,6 +53,7 @@ AFRAME.registerComponent('textinput', {
                 cancelButtonText: 'Cancel',
                 confirmButtonText: 'Send',
                 reverseButtons: true,
+                target: '#overlay',
             }).then((result) => {
                 if (!result.value) return;
                 const text = result.value.substring(0, 140);
