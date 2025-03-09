@@ -35,42 +35,48 @@ AFRAME.registerComponent('textinput', {
 
     multiple: true,
 
-    update() {
+    init() {
         const { data, el } = this;
+        this.onEvtCallback = this.onEvtCallback.bind(this);
+        el.addEventListener(data.on, this.onEvtCallback);
+    },
 
+    onEvtCallback() {
+        const { data, el } = this;
         const { topicParams } = ARENA;
         const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+        Swal.fire({
+            title: data.title.substring(0, 140),
+            input: 'textarea',
+            inputLabel: data.label.substring(0, 140),
+            inputPlaceholder: data.placeholder.substring(0, 140),
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Send',
+            reverseButtons: true,
+            target: '#overlay',
+            position: 'ontouchstart' in window || navigator.maxTouchPoints > 0 ? 'top' : 'center',
+        }).then((result) => {
+            if (!result.value) return;
+            const text = result.value.substring(0, 140);
 
-        el.addEventListener(data.on, function onEvtCallback() {
-            Swal.fire({
-                title: data.title.substring(0, 140),
-                input: 'textarea',
-                inputLabel: data.label.substring(0, 140),
-                inputPlaceholder: data.placeholder.substring(0, 140),
-                showCancelButton: true,
-                cancelButtonText: 'Cancel',
-                confirmButtonText: 'Send',
-                reverseButtons: true,
-                target: '#overlay',
-                position: 'ontouchstart' in window || navigator.maxTouchPoints > 0 ? 'top' : 'center',
-            }).then((result) => {
-                if (!result.value) return;
-                const text = result.value.substring(0, 140);
-
-                const thisMsg = {
-                    object_id: ARENA.idTag,
-                    action: 'clientEvent',
-                    type: 'textinput',
-                    data: {
-                        target: this.id,
-                        text,
-                    },
-                };
-                // publishing events attached to user id objects allows sculpting security
-                ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
-            });
+            const thisMsg = {
+                object_id: ARENA.idTag,
+                action: 'clientEvent',
+                type: 'textinput',
+                data: {
+                    target: this.id,
+                    text,
+                },
+            };
+            // publishing events attached to user id objects allows sculpting security
+            ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
         });
+    },
+    remove() {
+        const { data, el } = this;
+        el.removeEventListener(data.on, this.onEvtCallback);
     },
 });
