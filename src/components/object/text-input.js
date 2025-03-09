@@ -54,6 +54,7 @@ AFRAME.registerComponent('textinput', {
                 confirmButtonText: 'Send',
                 reverseButtons: true,
                 target: '#overlay',
+                position: 'ontouchstart' in window || navigator.maxTouchPoints > 0 ? 'top' : 'center',
             }).then((result) => {
                 if (!result.value) return;
                 const text = result.value.substring(0, 140);
