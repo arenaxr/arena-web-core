@@ -27,6 +27,11 @@ AFRAME.registerComponent('webxr-device-manager', {
         this.cameraSpinner = document.getElementById('cameraSpinner');
         this.lHand = document.getElementById('leftHand');
         this.rHand = document.getElementById('rightHand');
+
+        // Prevent XR select event from firing when overlay is interacted with
+        document.querySelector('#overlay').addEventListener('beforexrselect', (ev) => {
+            ev.preventDefault();
+        });
     },
 
     onWebXREnterVR() {
