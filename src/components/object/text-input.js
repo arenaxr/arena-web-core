@@ -41,7 +41,10 @@ AFRAME.registerComponent('textinput', {
         el.addEventListener(data.on, this.onEvtCallback);
     },
 
-    onEvtCallback() {
+    onEvtCallback(evt) {
+        // Maybe too late? but the only clientEvent that should occur is actual text, not mouse/touch events
+        evt.preventDefault(evt);
+        evt.stopPropagation();
         const { data, el } = this;
         const { topicParams } = ARENA;
         const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
