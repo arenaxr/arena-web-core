@@ -683,3 +683,6 @@
 #overlay {
     z-index: 999999;
 }
+#overlay .swal2-popup {
+    margin-top: 15px !important;
+}
