@@ -63,6 +63,7 @@ AFRAME.registerComponent('textinput', {
             confirmButtonText: 'Send',
             reverseButtons: true,
             target: '#overlay',
+            allowOutsideClick: false, // Chrome cancels out instantly otherwise
             position: 'ontouchstart' in window || navigator.maxTouchPoints > 0 ? 'top' : 'center',
         }).then((result) => {
             if (!result.value) return;
