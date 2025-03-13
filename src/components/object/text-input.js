@@ -31,6 +31,10 @@ AFRAME.registerComponent('textinput', {
         placeholder: {
             default: 'Type here',
         },
+        inputType: {
+            default: 'text',
+            type: 'string',
+        },
     },
 
     multiple: true,
@@ -52,11 +56,10 @@ AFRAME.registerComponent('textinput', {
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
         Swal.fire({
             title: data.title.substring(0, 140),
-            input: 'textarea',
+            input: data.inputType,
             inputLabel: data.label.substring(0, 140),
             inputPlaceholder: data.placeholder.substring(0, 140),
             showCancelButton: true,
-            cancelButtonText: 'Cancel',
             confirmButtonText: 'Send',
             reverseButtons: true,
             target: '#overlay',
