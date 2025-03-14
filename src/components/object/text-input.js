@@ -55,7 +55,7 @@ AFRAME.registerComponent('textinput', {
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
         Swal.fire({
-            title: data.title.substring(0, 140),
+            titleText: data.title.substring(0, 140),
             input: data.inputType,
             inputLabel: data.label.substring(0, 140),
             inputPlaceholder: data.placeholder.substring(0, 140),
