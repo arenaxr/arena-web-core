@@ -717,6 +717,30 @@
                     "default": "Type here",
                     "description": "Text input place holder.",
                     "type": "string"
+                },
+                "inputType": {
+                    "default": "text",
+                    "description": "Type of HTML form input",
+                    "enum": [
+                        "text",
+                        "email",
+                        "password",
+                        "number",
+                        "tel",
+                        "range",
+                        "textarea",
+                        "search",
+                        "url",
+                        "select",
+                        "radio",
+                        "checkbox",
+                        "date",
+                        "datetime-local",
+                        "time",
+                        "week",
+                        "month"
+                    ],
+                    "type": "string"
                 }
             },
             "required": ["on", "title", "label", "placeholder"]

@@ -679,3 +679,10 @@
 [id^='NotiflixNotifyWrap'] > div.nx-with-icon {
     padding: 16px !important;
 }
+
+#overlay {
+    z-index: 999999;
+}
+#overlay .swal2-popup {
+    margin-top: 15px !important;
+}
