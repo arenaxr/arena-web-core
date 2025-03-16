@@ -704,18 +704,18 @@
                     "type": "string"
                 },
                 "title": {
-                    "default": "Text Input",
+                    "default": "",
                     "description": "The prompt title (optional).",
                     "type": "string"
                 },
                 "label": {
-                    "default": "Label for put input (max is 140 characters, optional).",
-                    "description": "Text prompt label",
+                    "default": "",
+                    "description": "Label for input (max 140 characters, optional).",
                     "type": "string"
                 },
                 "placeholder": {
-                    "default": "Type here",
-                    "description": "Text input place holder (optional).",
+                    "default": "",
+                    "description": "Text input placeholder (optional).",
                     "type": "string"
                 },
                 "inputType": {
@@ -755,7 +755,7 @@
                     }
                 }
             },
-            "required": ["on", "title", "placeholder"]
+            "required": ["on", "title"]
         },
         "url": {
             "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
