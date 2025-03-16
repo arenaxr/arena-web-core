@@ -705,17 +705,17 @@
                 },
                 "title": {
                     "default": "Text Input",
-                    "description": "The prompt title.",
+                    "description": "The prompt title (optional).",
                     "type": "string"
                 },
                 "label": {
-                    "default": "Input text below (max is 140 characters).",
+                    "default": "Label for put input (max is 140 characters, optional).",
                     "description": "Text prompt label",
                     "type": "string"
                 },
                 "placeholder": {
                     "default": "Type here",
-                    "description": "Text input place holder.",
+                    "description": "Text input place holder (optional).",
                     "type": "string"
                 },
                 "inputType": {
@@ -729,7 +729,6 @@
                         "tel",
                         "range",
                         "textarea",
-                        "search",
                         "url",
                         "select",
                         "radio",
@@ -741,9 +740,22 @@
                         "month"
                     ],
                     "type": "string"
+                },
+                "inputValue": {
+                    "default": "",
+                    "description": "Input field initial value. Select type will be selected value, for checkbox will be checked state",
+                    "type": "string"
+                },
+                "inputOptions": {
+                    "default": [],
+                    "description": "Array of options for select or radio input types",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             },
-            "required": ["on", "title", "label", "placeholder"]
+            "required": ["on", "title", "placeholder"]
         },
         "url": {
             "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",

@@ -35,6 +35,14 @@ AFRAME.registerComponent('textinput', {
             default: 'text',
             type: 'string',
         },
+        inputValue: {
+            default: '',
+            type: 'string',
+        },
+        inputOptions: {
+            default: [],
+            type: 'array',
+        },
     },
 
     multiple: true,
@@ -65,6 +73,8 @@ AFRAME.registerComponent('textinput', {
             target: '#overlay',
             allowOutsideClick: false, // Chrome cancels out instantly otherwise
             position: 'ontouchstart' in window || navigator.maxTouchPoints > 0 ? 'top' : 'center',
+            inputValue: data.inputValue,
+            inputOptions: Object.fromEntries(data.inputOptions.map((opt) => [opt, opt])),
         }).then((result) => {
             if (!result.value) return;
             const text = result.value.substring(0, 140);
