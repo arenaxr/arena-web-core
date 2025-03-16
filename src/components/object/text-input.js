@@ -23,13 +23,16 @@ AFRAME.registerComponent('textinput', {
             default: 'mousedown',
         },
         title: {
-            default: 'Text Input',
+            default: '',
+            type: 'string',
         },
         label: {
-            default: 'Input text below (max is 140 characters)',
+            default: '',
+            type: 'string',
         },
         placeholder: {
-            default: 'Type here',
+            default: '',
+            type: 'string',
         },
         inputType: {
             default: 'text',
