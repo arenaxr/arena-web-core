@@ -87,7 +87,7 @@ AFRAME.registerComponent('textinput', {
                 action: 'clientEvent',
                 type: 'textinput',
                 data: {
-                    target: this.id,
+                    target: this.el.id,
                     text,
                 },
             };
