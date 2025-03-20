@@ -730,16 +730,19 @@ AFRAME.registerSystem('arena-scene', {
                 // process special handling of scene-options properties...
 
                 if (sceneOptions.physics ?? false) {
-                    // physics system, build with cannon-js: https://github.com/c-frame/aframe-physics-system
-                    import('../vendor/aframe-physics-system.min').then(() => {
-                        const physicsWait = setInterval(() => {
-                            // wait for physics system and static-body component to be registered, needs 15-30 ms
-                            if (AFRAME.components['static-body']) {
-                                clearInterval(physicsWait);
-                                document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
-                                this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
-                            }
-                        }, 10);
+                    // physx physics system, https://github.com/c-frame/physx
+                    sceneEl.addEventListener('componentregistered', (evt) => {
+                        if (evt.detail.name !== 'physx-contact-sound') return; // Wait for last physx component loaded
+                        sceneEl.setAttribute('physx', {
+                            autoLoad: true,
+                            wasmUrl: './static/vendor/physx.release.wasm',
+                        });
+                        this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
+                        // document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
+                        // TODO: Remove all usages of groundplane entirely?
+                    });
+                    import('../vendor/physx.min').then(() => {
+                        // Move to componentregistered event
                     });
                 }
 
