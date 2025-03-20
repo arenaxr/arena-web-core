@@ -740,7 +740,8 @@ AFRAME.registerSystem('arena-scene', {
                         this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
                     });
                     import('../vendor/physx.min').then(() => {
-                        // Move to componentregistered event
+                        import('../../components/vendor/physx/grab');
+                        import('../../components/vendor/physx/force-pushable');
                     });
                 }
 

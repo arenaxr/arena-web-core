@@ -543,6 +543,30 @@
             "title": "PhysX Joint Driver",
             "type": "object"
         },
+        "physx-force-pushable": {
+            "description": "Makes a physx-body object pushable by the user. Requires `click-listener` attribute.",
+            "title": "PhysX Pushable",
+            "properties": {
+                "on": {
+                    "default": "mousedown",
+                    "description": "Event to listen 'on'.",
+                    "enum": ["mousedown", "mouseup"],
+                    "type": "string"
+                },
+                "force": {
+                    "default": 10,
+                    "type": "number",
+                    "description": "Force to apply to the object."
+                }
+            },
+            "required": ["force"]
+        },
+        "physx-grab": {
+            "description": "Makes a physx-body object grabbable by the user",
+            "title": "PhysX Grab",
+            "type": "boolean",
+            "default": true
+        },
         "goto-landmark": {
             "description": "Teleports user to the landmark with the given name. Requires `click-listener` attribute.",
             "properties": {
