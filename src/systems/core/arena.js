@@ -738,8 +738,6 @@ AFRAME.registerSystem('arena-scene', {
                             wasmUrl: './static/vendor/physx.release.wasm',
                         });
                         this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
-                        // document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
-                        // TODO: Remove all usages of groundplane entirely?
                     });
                     import('../vendor/physx.min').then(() => {
                         // Move to componentregistered event
