@@ -286,8 +286,20 @@
             },
             "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
+        "dynamic-body": {
+            "title": "DEPRECATED (dynamic-body)",
+            "description": "DEPRECATED: data.dynamic-body is deprecated, use data.physx-body instead.",
+            "type": "object",
+            "deprecated": true
+        },
+        "static-body": {
+            "title": "DEPRECATED (static-body)",
+            "description": "DEPRECATED: data.static-body is deprecated, use data.physx-body instead.",
+            "type": "object",
+            "deprecated": true
+        },
         "physx-body": {
-            "description": "Turns an entity into a PhysX rigid body. This is the main component for creating physics objects. There are 3 types of rigid bodies: dynamic objects that have physics simulated on them, static objects that cannot move, and kinematic objects that can be moved programmatically but not by simulation. Requires appropriate scene setup.",
+            "description": "Turns an entity into a PhysX rigid body. This is the main component for creating physics objects. There are 3 types of rigid bodies: dynamic objects that have physics simulated on them, static objects that cannot move, and kinematic objects that can be moved programmatically but not by simulation. Requires `scene-options: physics`.",
             "properties": {
                 "type": {
                     "default": "dynamic",
@@ -330,7 +342,7 @@
             "type": "object"
         },
         "physx-material": {
-            "description": "Controls physics properties for individual shapes or rigid bodies. Can be set on an entity with physx-body or on shapes contained within it.",
+            "description": "Controls physics properties for individual shapes or rigid bodies. Can be set on an entity with physx-body or on shapes contained within it. Requires `scene-options: physics`.",
             "properties": {
                 "staticFriction": {
                     "default": 0.2,
@@ -385,7 +397,7 @@
             "type": "object"
         },
         "physx-joint": {
-            "description": "Creates a PhysX joint between an ancestor rigid body and a target rigid body. Position and rotation of the entity will be used to create the corresponding joint.",
+            "description": "Creates a PhysX joint between an ancestor rigid body and a target rigid body. Position and rotation of the entity will be used to create the corresponding joint. Requires `scene-options: physics`.",
             "properties": {
                 "type": {
                     "default": "Spherical",
@@ -427,7 +439,7 @@
             "type": "object"
         },
         "physx-joint-constraint": {
-            "description": "Adds a constraint to a physx-joint. Supported joints are D6, Revolute and Prismatic. Can only be used on an entity with the physx-joint component.",
+            "description": "Adds a constraint to a physx-joint. Supported joints are D6, Revolute and Prismatic. Can only be used on an entity with the physx-joint component. Requires `scene-options: physics`.",
             "properties": {
                 "lockedAxes": {
                     "default": [],
@@ -489,7 +501,7 @@
             "type": "object"
         },
         "physx-joint-driver": {
-            "description": "Creates a driver which exerts force to return the joint to the initial position with the given velocity characteristics. Can only be used on an entity with a physx-joint component. Currently only supports D6 joint type.",
+            "description": "Creates a driver which exerts force to return the joint to the initial position with the given velocity characteristics. Can only be used on an entity with a physx-joint component. Currently only supports D6 joint type. Requires `scene-options: physics`.",
             "properties": {
                 "axes": {
                     "default": [],
@@ -544,7 +556,7 @@
             "type": "object"
         },
         "physx-force-pushable": {
-            "description": "Makes a physx-body object pushable by the user. Requires `click-listener` attribute.",
+            "description": "Makes a physx-body object pushable by the user. Requires `click-listener` attribute. Requires `scene-options: physics`.",
             "title": "PhysX Pushable",
             "properties": {
                 "on": {
@@ -562,7 +574,7 @@
             "required": ["force"]
         },
         "physx-grab": {
-            "description": "Makes a physx-body object grabbable by the user",
+            "description": "Makes a physx-body object grabbable by the user. Requires `scene-options: physics`.",
             "title": "PhysX Grab",
             "type": "boolean",
             "default": true
@@ -637,29 +649,10 @@
             "enum": [true]
         },
         "impulse": {
-            "description": "Apply an impulse to an object to set it in motion. This happens in conjunction with an event. Requires `click-listener` attribute and `scene-options: physics`.",
-            "properties": {
-                "force": {
-                    "description": "Impulse vector.",
-                    "default": { "x": 1, "y": 1, "z": 1 },
-                    "format": "grid",
-                    "$ref": "#/definitions/vector3"
-                },
-                "on": {
-                    "description": "Event to listen 'on'.",
-                    "default": "mousedown",
-                    "enum": ["mousedown", "mouseup"],
-                    "type": "string"
-                },
-                "position": {
-                    "description": "World position.",
-                    "default": { "x": 1, "y": 1, "z": 1 },
-                    "format": "grid",
-                    "$ref": "#/definitions/vector3"
-                }
-            },
-            "title": "Impulse",
-            "type": "object"
+            "title": "DEPRECATED (impulse)",
+            "description": "DEPRECATED: data.impulse is deprecated, use data.physx-force-pushable instead.",
+            "type": "object",
+            "deprecated": true
         },
         "landmark": {
             "title": "Landmark",
