@@ -406,8 +406,8 @@
                 },
                 "physics": {
                     "default": false,
-                    "description": "If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `static-body`, `impulse`, `collision-listener`.",
-                    "title": "Physics System",
+                    "description": "If true, will load the physx physics system. Required for all physx-* components",
+                    "title": "Clientside Physics System",
                     "type": "boolean"
                 },
                 "ar-hit-test": {
