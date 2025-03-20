@@ -73,6 +73,7 @@
                             material="opacity: 0.1"
                             box-collider="collideNonVisible:true"
                             box-collision-publisher
+                            physx-body="type: kinematic"
                         >
                             <a-entity
                                 cursor="rayOrigin: mouse"
@@ -89,6 +90,7 @@
                             laser-controls="hand:left"
                             blink-controls="cameraRig: #cameraRig; collisionEntities: [nav-mesh]; teleportOrigin: #my-camera"
                             raycaster="objects: [click-listener],[click-listener-local]; enabled: false"
+                            physx-body="type: kinematic"
                         ></a-entity>
                         <a-entity
                             id="rightHand"
@@ -98,6 +100,7 @@
                             arena-hand="hand:right"
                             laser-controls="hand:right"
                             raycaster="objects: [click-listener],[click-listener-local]; enabled: false"
+                            physx-body="type: kinematic"
                         ></a-entity>
                     </a-entity>
                 </a-entity>
