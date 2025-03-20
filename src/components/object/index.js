@@ -18,7 +18,6 @@ import './collision-listener';
 import './gltf-lod';
 import './goto-url';
 import './show-hide-on-enter-vr';
-import './impulse';
 import './jitsi-video';
 import './landmark';
 import './material-extras';
