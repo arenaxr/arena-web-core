@@ -729,13 +729,15 @@ AFRAME.registerSystem('arena-scene', {
 
                 // process special handling of scene-options properties...
 
-                if (sceneOptions.physics ?? false) {
+                if (sceneOptions.physics?.enabled) {
+                    delete sceneOptions.physics.enabled;
                     // physx physics system, https://github.com/c-frame/physx
                     sceneEl.addEventListener('componentregistered', (evt) => {
                         if (evt.detail.name !== 'physx-contact-sound') return; // Wait for last physx component loaded
                         sceneEl.setAttribute('physx', {
                             autoLoad: true,
                             wasmUrl: './static/vendor/physx.release.wasm',
+                            ...sceneOptions.physics,
                         });
                         this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
                     });
