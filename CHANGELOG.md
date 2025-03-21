@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.5](https://github.com/arenaxr/arena-web-core/compare/v2.2.4...v2.2.5) (2025-03-21)
+
+
+### Bug Fixes
+
+* add deprecated warnings from aframe-physics-system ([d1defb5](https://github.com/arenaxr/arena-web-core/commit/d1defb5378f1231d80fb24737cb9a53df4f89570))
+* correctly ref textinput target obj ([29453fe](https://github.com/arenaxr/arena-web-core/commit/29453fe2e188f1d3ed6f3e3b8e635bb9530a0316))
+
 ## [2.2.4](https://github.com/arenaxr/arena-web-core/compare/v2.2.3...v2.2.4) (2025-03-03)
 
 
