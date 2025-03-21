@@ -274,8 +274,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
                 const env = document.getElementById('env');
                 env.setAttribute('visible', false);
-                const groundPlane = document.getElementById('groundPlane');
-                groundPlane.setAttribute('visible', false);
 
                 this.checkStats();
             })
@@ -326,8 +324,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
         const env = document.getElementById('env');
         env.setAttribute('visible', true);
-        const groundPlane = document.getElementById('groundPlane');
-        groundPlane.setAttribute('visible', true);
 
         // this.compositor.unbind();
         this.compositor.disable();

@@ -286,79 +286,298 @@
             },
             "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
-        "static-body": {
-            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions. Requires `scene-options: physics`.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
-            "properties": {
-                "shape": {
-                    "default": "auto",
-                    "type": "string",
-                    "enum": ["auto", "box", "cylinder", "sphere", "hull", "none"],
-                    "description": "Body components will attempt to find an appropriate CANNON.js shape to fit your model. When defining an object you may choose a shape or leave the default, auto. Select a shape carefully, as there are performance implications with different choices."
-                },
-                "cylinderAxis": {
-                    "default": "y",
-                    "enum": ["x", "y", "z"],
-                    "type": "string",
-                    "description": "Override default axis of bounding cylinder. Requires `shape: cylinder`."
-                },
-                "sphereRadius": {
-                    "type": "number",
-                    "description": "Override default radius of bounding sphere. Requires `shape: sphere`. NaN by default."
-                },
-                "type": {
-                    "default": "static",
-                    "enum": ["dynamic", "static"],
-                    "type": "string",
-                    "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
-                }
-            },
-            "title": "Physics Static Body",
-            "type": "object"
-        },
         "dynamic-body": {
-            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled. Requires `scene-options: physics`.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
+            "title": "DEPRECATED (dynamic-body)",
+            "description": "DEPRECATED: data.dynamic-body is deprecated, use data.physx-body instead.",
+            "type": "object",
+            "deprecated": true
+        },
+        "static-body": {
+            "title": "DEPRECATED (static-body)",
+            "description": "DEPRECATED: data.static-body is deprecated, use data.physx-body instead.",
+            "type": "object",
+            "deprecated": true
+        },
+        "physx-body": {
+            "description": "Turns an entity into a PhysX rigid body. This is the main component for creating physics objects. There are 3 types of rigid bodies: dynamic objects that have physics simulated on them, static objects that cannot move, and kinematic objects that can be moved programmatically but not by simulation. Requires `scene-options: physics`.",
             "properties": {
-                "mass": {
-                    "default": 5,
-                    "exclusiveMinimum": 0,
-                    "type": "number",
-                    "description": "Simulated mass of the object, > 0."
-                },
-                "linearDamping": {
-                    "default": 0.01,
-                    "type": "number",
-                    "description": "Resistance to movement."
-                },
-                "angularDamping": {
-                    "default": 0.01,
-                    "type": "number",
-                    "description": "Resistance to rotation."
-                },
-                "shape": {
-                    "default": "auto",
-                    "type": "string",
-                    "enum": ["auto", "box", "cylinder", "sphere", "hull", "none"],
-                    "description": "Body components will attempt to find an appropriate CANNON.js shape to fit your model. When defining an object you may choose a shape or leave the default, auto. Select a shape carefully, as there are performance implications with different choices."
-                },
-                "cylinderAxis": {
-                    "default": "y",
-                    "enum": ["x", "y", "z"],
-                    "type": "string",
-                    "description": "Override default axis of bounding cylinder. Requires `shape: cylinder`."
-                },
-                "sphereRadius": {
-                    "type": "number",
-                    "description": "Override default radius of bounding sphere. Requires `shape: sphere`. NaN by default."
-                },
                 "type": {
                     "default": "dynamic",
-                    "enum": ["dynamic", "static"],
                     "type": "string",
-                    "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
+                    "enum": ["dynamic", "static", "kinematic"],
+                    "description": "Type of the rigid body to create. Dynamic can be moved by physics, Static cannot be moved, Kinematic can be moved programmatically."
+                },
+                "mass": {
+                    "default": 1,
+                    "type": "number",
+                    "description": "Total mass of the body."
+                },
+                "angularDamping": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "If > 0, will set the rigid body's angular damping to reduce rotation over time."
+                },
+                "linearDamping": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "If > 0, will set the rigid body's linear damping to reduce movement over time."
+                },
+                "emitCollisionEvents": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If set to true, it will emit 'contactbegin' and 'contactend' events when collisions occur."
+                },
+                "highPrecision": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If set to true, the object will receive extra attention by the simulation engine (at a performance cost)."
+                },
+                "shapeOffset": {
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "$ref": "#/definitions/vector3",
+                    "description": "Offset applied to generated collision shapes."
                 }
             },
-            "title": "Physics Dynamic Body",
+            "title": "PhysX Body",
             "type": "object"
+        },
+        "physx-material": {
+            "description": "Controls physics properties for individual shapes or rigid bodies. Can be set on an entity with physx-body or on shapes contained within it. Requires `scene-options: physics`.",
+            "properties": {
+                "staticFriction": {
+                    "default": 0.2,
+                    "type": "number",
+                    "description": "Static friction applied when objects are not moving relative to each other."
+                },
+                "dynamicFriction": {
+                    "default": 0.2,
+                    "type": "number",
+                    "description": "Dynamic friction applied when objects are moving relative to each other."
+                },
+                "restitution": {
+                    "default": 0.2,
+                    "type": "number",
+                    "description": "Restitution, or 'bounciness' of the material."
+                },
+                "density": {
+                    "type": "number",
+                    "description": "Density for the shape. If specified for all shapes in a rigid body, mass properties will be automatically calculated based on densities."
+                },
+                "collisionLayers": {
+                    "default": [1],
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "description": "Which collision layers this shape is present on."
+                },
+                "collidesWithLayers": {
+                    "default": [1, 2, 3, 4],
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "description": "Array containing all layers that this shape should collide with."
+                },
+                "collisionGroup": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "If greater than 0, this shape will not collide with any other shape with the same collisionGroup value."
+                },
+                "contactOffset": {
+                    "type": "string",
+                    "description": "If >= 0, sets the PhysX contact offset, indicating how far away from the shape simulation contact events should begin."
+                },
+                "restOffset": {
+                    "type": "string",
+                    "description": "If >= 0, sets the PhysX rest offset."
+                }
+            },
+            "title": "PhysX Material",
+            "type": "object"
+        },
+        "physx-joint": {
+            "description": "Creates a PhysX joint between an ancestor rigid body and a target rigid body. Position and rotation of the entity will be used to create the corresponding joint. Requires `scene-options: physics`.",
+            "properties": {
+                "type": {
+                    "default": "Spherical",
+                    "type": "string",
+                    "enum": ["Spherical", "Fixed", "Revolute", "Prismatic", "D6"],
+                    "description": "Rigid body joint type to use. Each type has different movement constraints."
+                },
+                "target": {
+                    "type": "string",
+                    "description": "Target object selector. Must be an entity having the physx-body component. If not specified, joins to the initial position in the world."
+                },
+                "breakForce": {
+                    "default": { "x": -1, "y": -1 },
+                    "$ref": "#/definitions/vector2",
+                    "description": "Force needed to break the constraint. First component is linear force, second is angular force in degrees. Set both components >= 0 to enable."
+                },
+                "removeElOnBreak": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If true, removes the entity containing this component when the joint is broken."
+                },
+                "collideWithTarget": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If false, collision will be disabled between the rigid body containing the joint and the target rigid body."
+                },
+                "softFixed": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "When used with a D6 type, sets up a 'soft' fixed joint. E.g., for grabbing things."
+                },
+                "projectionTolerance": {
+                    "default": { "x": -1, "y": -1 },
+                    "$ref": "#/definitions/vector2",
+                    "description": "Kinematic projection, which forces joint back into alignment when the solver fails. First component is linear tolerance in meters, second is angular tolerance in degrees."
+                }
+            },
+            "title": "PhysX Joint",
+            "type": "object"
+        },
+        "physx-joint-constraint": {
+            "description": "Adds a constraint to a physx-joint. Supported joints are D6, Revolute and Prismatic. Can only be used on an entity with the physx-joint component. Requires `scene-options: physics`.",
+            "properties": {
+                "lockedAxes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "[D6] Which axes are explicitly locked by this constraint and can't be moved at all. Should be some combination of x, y, z, twist, swing."
+                },
+                "constrainedAxes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "[D6] Which axes are constrained by this constraint. These axes can be moved within the set limits. Should be some combination of x, y, z, twist, swing."
+                },
+                "freeAxes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "[D6] Which axes are explicitly freed by this constraint. These axes will not obey any limits set here. Should be some combination of x, y, z, twist, swing."
+                },
+                "linearLimit": {
+                    "$ref": "#/definitions/vector2",
+                    "description": "[D6, Prismatic] Limit on linear movement. Only affects x, y, and z axes. First component is the minimum allowed position."
+                },
+                "angularLimit": {
+                    "$ref": "#/definitions/vector2",
+                    "description": "[Revolute] Limit on angular movement in degrees. First component is the minimum allowed angle, second is the maximum."
+                },
+                "limitCone": {
+                    "$ref": "#/definitions/vector2",
+                    "description": "[D6] Two angles in degrees specifying a cone in which the joint is allowed to swing, like a pendulum."
+                },
+                "twistLimit": {
+                    "$ref": "#/definitions/vector2",
+                    "description": "[D6] Minimum and maximum angles in degrees that the joint is allowed to twist."
+                },
+                "damping": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "[All] Spring damping for soft constraints."
+                },
+                "restitution": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "[All] Spring restitution for soft constraints."
+                },
+                "stiffness": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "[All] If greater than 0, will make this joint a soft constraint, and use a spring force model."
+                }
+            },
+            "title": "PhysX Joint Constraint",
+            "type": "object"
+        },
+        "physx-joint-driver": {
+            "description": "Creates a driver which exerts force to return the joint to the initial position with the given velocity characteristics. Can only be used on an entity with a physx-joint component. Currently only supports D6 joint type. Requires `scene-options: physics`.",
+            "properties": {
+                "axes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Which axes the joint should operate on. Should be some combination of x, y, z, twist, swing."
+                },
+                "stiffness": {
+                    "default": 1,
+                    "type": "number",
+                    "description": "How stiff the drive should be."
+                },
+                "damping": {
+                    "default": 1,
+                    "type": "number",
+                    "description": "Damping to apply to the drive."
+                },
+                "forceLimit": {
+                    "default": 3.4028234663852886e+38,
+                    "type": "number",
+                    "description": "Maximum amount of force used to get to the target position."
+                },
+                "useAcceleration": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "If true, will operate directly on body acceleration rather than on force."
+                },
+                "linearVelocity": {
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "$ref": "#/definitions/vector3",
+                    "description": "Target linear velocity relative to the joint."
+                },
+                "angularVelocity": {
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "$ref": "#/definitions/vector3",
+                    "description": "Target angular velocity relative to the joint."
+                },
+                "lockOtherAxes": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If true, will automatically lock axes which are not being driven."
+                },
+                "slerpRotation": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "If true, uses SLERP rotation mode. If false, will use SWING mode."
+                }
+            },
+            "title": "PhysX Joint Driver",
+            "type": "object"
+        },
+        "physx-force-pushable": {
+            "description": "Makes a physx-body object pushable by the user. Requires `click-listener` attribute. Requires `scene-options: physics`.",
+            "title": "PhysX Pushable",
+            "properties": {
+                "on": {
+                    "default": "mousedown",
+                    "description": "Event to listen 'on'.",
+                    "enum": ["mousedown", "mouseup"],
+                    "type": "string"
+                },
+                "force": {
+                    "default": 10,
+                    "type": "number",
+                    "description": "Force to apply to the object."
+                }
+            },
+            "required": ["force"]
+        },
+        "physx-grab": {
+            "description": "Makes a physx-body object grabbable by the user. Requires `scene-options: physics`.",
+            "title": "PhysX Grab",
+            "type": "boolean",
+            "default": true
         },
         "goto-landmark": {
             "description": "Teleports user to the landmark with the given name. Requires `click-listener` attribute.",
@@ -430,29 +649,10 @@
             "enum": [true]
         },
         "impulse": {
-            "description": "Apply an impulse to an object to set it in motion. This happens in conjunction with an event. Requires `click-listener` attribute and `scene-options: physics`.",
-            "properties": {
-                "force": {
-                    "description": "Impulse vector.",
-                    "default": { "x": 1, "y": 1, "z": 1 },
-                    "format": "grid",
-                    "$ref": "#/definitions/vector3"
-                },
-                "on": {
-                    "description": "Event to listen 'on'.",
-                    "default": "mousedown",
-                    "enum": ["mousedown", "mouseup"],
-                    "type": "string"
-                },
-                "position": {
-                    "description": "World position.",
-                    "default": { "x": 1, "y": 1, "z": 1 },
-                    "format": "grid",
-                    "$ref": "#/definitions/vector3"
-                }
-            },
-            "title": "Impulse",
-            "type": "object"
+            "title": "DEPRECATED (impulse)",
+            "description": "DEPRECATED: data.impulse is deprecated, use data.physx-force-pushable instead.",
+            "type": "object",
+            "deprecated": true
         },
         "landmark": {
             "title": "Landmark",

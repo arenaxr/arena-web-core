@@ -729,17 +729,21 @@ AFRAME.registerSystem('arena-scene', {
 
                 // process special handling of scene-options properties...
 
-                if (sceneOptions.physics ?? false) {
-                    // physics system, build with cannon-js: https://github.com/c-frame/aframe-physics-system
-                    import('../vendor/aframe-physics-system.min').then(() => {
-                        const physicsWait = setInterval(() => {
-                            // wait for physics system and static-body component to be registered, needs 15-30 ms
-                            if (AFRAME.components['static-body']) {
-                                clearInterval(physicsWait);
-                                document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
-                                this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
-                            }
-                        }, 10);
+                if (sceneOptions.physics?.enabled) {
+                    delete sceneOptions.physics.enabled;
+                    // physx physics system, https://github.com/c-frame/physx
+                    sceneEl.addEventListener('componentregistered', (evt) => {
+                        if (evt.detail.name !== 'physx-contact-sound') return; // Wait for last physx component loaded
+                        sceneEl.setAttribute('physx', {
+                            autoLoad: true,
+                            wasmUrl: './static/vendor/physx.release.wasm',
+                            ...sceneOptions.physics,
+                        });
+                        this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
+                    });
+                    import('../vendor/physx.min').then(() => {
+                        import('../../components/vendor/physx/grab');
+                        import('../../components/vendor/physx/force-pushable');
                     });
                 }
 

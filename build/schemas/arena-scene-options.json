@@ -405,10 +405,84 @@
                     "type": "number"
                 },
                 "physics": {
-                    "default": false,
-                    "description": "If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `static-body`, `impulse`, `collision-listener`.",
-                    "title": "Physics System",
-                    "type": "boolean"
+                    "properties": {
+                        "enabled": {
+                            "default": false,
+                            "description": "Set true to load",
+                            "title": "Enabled",
+                            "type": "boolean"
+                        },
+                        "delay": {
+                            "default": 5000,
+                            "description": "Amount of time in ms to wait after loading before starting the physics. Can be useful if there is still some things loading or initializing elsewhere in the scene",
+                            "title": "Physics Simulation Startup Delay",
+                            "type": "number"
+                        },
+                        "useDefaultScene": {
+                            "default": true,
+                            "description": "If true, sets up a default scene with a ground plane and bounding cylinder.",
+                            "title": "Use Default Physics Scene",
+                            "type": "boolean"
+                        },
+                        "throttle": {
+                            "default": 10,
+                            "description": "Throttle for running the physics simulation. On complex scenes, you can increase this to avoid dropping video frames",
+                            "title": "Physics Throttle Rate",
+                            "type": "number"
+                        },
+                        "speed": {
+                            "default": 1,
+                            "description": "Simulation speed multiplier. Increase or decrease to speed up or slow down simulation time",
+                            "title": "Physics Simulation Speed",
+                            "type": "number"
+                        },
+                        "groundCollisionLayers": {
+                            "default": [2],
+                            "description": "Which collision layers the ground belongs to",
+                            "title": "Ground Collision Layers",
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "enum": [1,2,3,4]
+                            }
+                        },
+                        "groundCollisionMask": {
+                            "default": [1,2,3,4],
+                            "description": "Which collision layers will collide with the ground",
+                            "title": "Ground Collision Mask",
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "enum": [1,2,3,4]
+                            }
+                        },
+                        "gravity": {
+                            "$ref": "#/definitions/vector3",
+                            "format": "grid",
+                            "default": {
+                                "x": 0,
+                                "y": -9.8,
+                                "z": 0
+                            },
+                            "description": "Gravity vector in m/s^2",
+                            "title": "Gravity",
+                            "type": "object"
+                        },
+                        "stats": {
+                            "default": [],
+                            "description": "Where to output performance stats:, panel, console, events (or some combination)",
+                            "title": "Physics Stats",
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": ["console", "events", "panel"]
+                            }
+                        }
+                    },
+                    "required": ["enabled"],
+                    "title": "Physics Settings",
+                    "type": "object",
+                    "description": "Clientside PhysX-based physics system. Required for all physx-* components"
                 },
                 "ar-hit-test": {
                     "properties": {

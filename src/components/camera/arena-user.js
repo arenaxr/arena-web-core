@@ -147,7 +147,7 @@ AFRAME.registerComponent('arena-user', {
         this.headModel.setAttribute('scale', '1 1 1');
         this.headModel.setAttribute('gltf-model', data.headModelPath);
         this.headModel.setAttribute('attribution', 'extractAssetExtras', true);
-        this.headModel.setAttribute('dynamic-body', 'type', 'static');
+        this.headModel.setAttribute('physx-body', 'type', 'kinematic');
 
         el.appendChild(this.headText);
         el.appendChild(this.headModel);
