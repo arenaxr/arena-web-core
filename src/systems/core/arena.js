@@ -734,6 +734,14 @@ AFRAME.registerSystem('arena-scene', {
                     // physx physics system, https://github.com/c-frame/physx
                     sceneEl.addEventListener('componentregistered', (evt) => {
                         if (evt.detail.name !== 'physx-contact-sound') return; // Wait for last physx component loaded
+                        const leftHand = document.getElementById('leftHand');
+                        const rightHand = document.getElementById('rightHand');
+                        leftHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
+                        leftHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
+                        leftHand.setAttribute('physx-grab');
+                        rightHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
+                        rightHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
+                        rightHand.setAttribute('physx-grab');
                         sceneEl.setAttribute('physx', {
                             autoLoad: true,
                             wasmUrl: './static/vendor/physx.release.wasm',

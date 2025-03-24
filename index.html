@@ -89,9 +89,6 @@
                             laser-controls="hand:left"
                             blink-controls="cameraRig: #cameraRig; collisionEntities: [nav-mesh]; teleportOrigin: #my-camera"
                             raycaster="objects: [click-listener],[click-listener-local]; enabled: false"
-                            physx-body="type: kinematic; emitCollisionEvents: true"
-                            physx-grab
-                            geometry="primitive: sphere; radius: 0.02"
                         ></a-entity>
                         <a-entity
                             id="rightHand"
@@ -101,10 +98,7 @@
                             arena-hand="hand:right"
                             laser-controls="hand:right"
                             raycaster="objects: [click-listener],[click-listener-local]; enabled: false"
-                            physx-body="type: kinematic; emitCollisionEvents: true"
-                            physx-grab
-                            geometry="primitive: sphere; radius: 0.02"
-                        ></a-entity>
+                          ></a-entity>
                     </a-entity>
                 </a-entity>
             </a-entity>

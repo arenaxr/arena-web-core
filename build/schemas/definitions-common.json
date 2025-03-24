@@ -575,7 +575,7 @@
         },
         "physx-grabbable": {
             "description": "Makes a physx-body object grabbable by the user's hands. Requires `scene-options: physics`.",
-            "title": "PhysX Grab",
+            "title": "PhysX Grabbable",
             "type": "boolean",
             "default": true
         },
