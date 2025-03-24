@@ -1,15 +1,15 @@
 /**
  * Grab component.
- * 
+ *
  * Based on an original component by Don McCurdy in aframe-physics-system
- * 
+ *
  * Copyright (c) 2016 Don McCurdy
  */
 
 AFRAME.registerComponent('physx-grab', {
   init: function () {
 
-    // If a state of "grabbed" is set on a physx-body entity, 
+    // If a state of "grabbed" is set on a physx-body entity,
     // the entity is automatically transformed into a kinematic entity.
     // To avoid triggering this (we want to grab using constraints, and leave the
     // body as dynamic), we use a non-clashing name for the state we set on the entity when
@@ -68,7 +68,10 @@ AFRAME.registerComponent('physx-grab', {
     // If the element is already grabbed (it could be grabbed by another controller).
     // If the hand is not grabbing the element does not stick.
     // If we're already grabbing something you can't grab again.
-    if (!hitEl || hitEl.is(this.GRABBED_STATE) || !this.grabbing || this.hitEl) { return; }
+    if (!hitEl || hitEl.getAttribute("physx-grabbable") === null ||
+      hitEl.is(this.GRABBED_STATE) || !this.grabbing || this.hitEl) {
+      return;
+    }
     hitEl.addState(this.GRABBED_STATE);
     this.hitEl = hitEl;
 
@@ -79,7 +82,7 @@ AFRAME.registerComponent('physx-grab', {
 
     this.removeJoint()
 
-    this.joint = document.createElement('a-entity') 
+    this.joint = document.createElement('a-entity')
     this.joint.setAttribute("physx-joint", `type: Fixed; target: #${target.id}`)
 
     el.appendChild(this.joint)

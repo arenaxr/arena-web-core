@@ -69,7 +69,7 @@
                             mouse-cursor
                             press-and-move="constrainToNavMesh:true"
                             wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true"
-                            geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25"
+                            geometry="primitive: sphere; radius: 0.05"
                             material="opacity: 0.1"
                             box-collider="collideNonVisible:true"
                             box-collision-publisher
@@ -89,7 +89,9 @@
                             laser-controls="hand:left"
                             blink-controls="cameraRig: #cameraRig; collisionEntities: [nav-mesh]; teleportOrigin: #my-camera"
                             raycaster="objects: [click-listener],[click-listener-local]; enabled: false"
-                            physx-body="type: kinematic"
+                            physx-body="type: kinematic; emitCollisionEvents: true"
+                            physx-grab
+                            geometry="primitive: sphere; radius: 0.02"
                         ></a-entity>
                         <a-entity
                             id="rightHand"
@@ -99,7 +101,9 @@
                             arena-hand="hand:right"
                             laser-controls="hand:right"
                             raycaster="objects: [click-listener],[click-listener-local]; enabled: false"
-                            physx-body="type: kinematic"
+                            physx-body="type: kinematic; emitCollisionEvents: true"
+                            physx-grab
+                            geometry="primitive: sphere; radius: 0.02"
                         ></a-entity>
                     </a-entity>
                 </a-entity>
