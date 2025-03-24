@@ -732,22 +732,25 @@ AFRAME.registerSystem('arena-scene', {
                 if (sceneOptions.physics?.enabled) {
                     delete sceneOptions.physics.enabled;
                     // physx physics system, https://github.com/c-frame/physx
+                    const leftHand = document.getElementById('leftHand');
+                    const rightHand = document.getElementById('rightHand');
                     sceneEl.addEventListener('componentregistered', (evt) => {
-                        if (evt.detail.name !== 'physx-contact-sound') return; // Wait for last physx component loaded
-                        const leftHand = document.getElementById('leftHand');
-                        const rightHand = document.getElementById('rightHand');
-                        leftHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
-                        leftHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
-                        leftHand.setAttribute('physx-grab', true);
-                        rightHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
-                        rightHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
-                        rightHand.setAttribute('physx-grab', true);
-                        sceneEl.setAttribute('physx', {
-                            autoLoad: true,
-                            wasmUrl: './static/vendor/physx.release.wasm',
-                            ...sceneOptions.physics,
-                        });
-                        this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
+                        if (evt.detail.name === 'physx-contact-sound') {
+                            // Wait for last physx main component loaded
+                            sceneEl.setAttribute('physx', {
+                                autoLoad: true,
+                                wasmUrl: './static/vendor/physx.release.wasm',
+                                ...sceneOptions.physics,
+                            });
+                            leftHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
+                            leftHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
+                            rightHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
+                            rightHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
+                            this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
+                        } else if (evt.detail.name === 'physx-grab') {
+                            leftHand.setAttribute('physx-grab', true);
+                            rightHand.setAttribute('physx-grab', true);
+                        }
                     });
                     import('../vendor/physx.min').then(() => {
                         import('../../components/vendor/physx/grab');
