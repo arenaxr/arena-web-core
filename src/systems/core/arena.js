@@ -738,10 +738,10 @@ AFRAME.registerSystem('arena-scene', {
                         const rightHand = document.getElementById('rightHand');
                         leftHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
                         leftHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
-                        leftHand.setAttribute('physx-grab');
+                        leftHand.setAttribute('physx-grab', true);
                         rightHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
                         rightHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
-                        rightHand.setAttribute('physx-grab');
+                        rightHand.setAttribute('physx-grab', true);
                         sceneEl.setAttribute('physx', {
                             autoLoad: true,
                             wasmUrl: './static/vendor/physx.release.wasm',
