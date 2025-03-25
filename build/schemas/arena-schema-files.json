@@ -62,7 +62,7 @@
     "gaussian_splatting": {
         "description": "Load 3D Gaussian Splat.",
         "file": "schemas/gaussian_splatting.json",
-        "title": "3D Gaussian Splat"
+        "title": "Gaussian Splat"
     },
     "image": {
         "description": "Display an image on a plane.",
