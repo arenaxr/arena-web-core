@@ -50,7 +50,7 @@
                             "$ref": "./schemas/definitions-common.json#/properties"
                         }
                     ],
-                    "title": "3D Gaussian Splat",
+                    "title": "Gaussian Splat",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "gaussian_splatting"
