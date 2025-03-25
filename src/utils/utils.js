@@ -541,6 +541,22 @@ export default class ARENAUtils {
     static round5(num) {
         return Math.round(num * 100000) / 100000;
     }
+
+    static worldPosA = new THREE.Vector3();
+
+    static worldPosB = new THREE.Vector3();
+
+    /**
+     * Returns the distance between two objects in world space
+     * @param elA element a
+     * @param elB element b
+     * @returns {number} euclidean distance
+     */
+    static distanceWorld(elA, elB) {
+        elA.object3D.getWorldPosition(this.worldPosA);
+        elB.object3D.getWorldPosition(this.worldPosB);
+        return this.worldPosA.distanceTo(this.worldPosB);
+    }
 }
 
 // eslint-disable-next-line no-extend-native
