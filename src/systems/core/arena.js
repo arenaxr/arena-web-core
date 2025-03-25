@@ -744,8 +744,10 @@ AFRAME.registerSystem('arena-scene', {
                             });
                             leftHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
                             leftHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
+                            leftHand.setAttribute('physx-material', { restitution: 0 });
                             rightHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
                             rightHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
+                            rightHand.setAttribute('physx-material', { restitution: 0 });
                             this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
                         } else if (evt.detail.name === 'physx-grab') {
                             leftHand.setAttribute('physx-grab', { proximity: 0.1 });
