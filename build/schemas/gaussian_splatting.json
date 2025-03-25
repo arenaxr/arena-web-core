@@ -18,7 +18,7 @@
                                     "enum": ["gaussian_splatting"]
                                 },
                                 "src": {
-                                    "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
+                                    "description": "Url of the .ply or .splat file. Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
                                     "format": "uri",
                                     "title": "Url",
                                     "type": "string"
