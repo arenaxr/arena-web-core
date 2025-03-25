@@ -6,6 +6,8 @@
  * Copyright (c) 2016 Don McCurdy
  */
 
+const GRABBED_STATE = 'grabbed-dynamic'
+
 AFRAME.registerComponent('physx-grab', {
   init: function () {
 
@@ -14,10 +16,11 @@ AFRAME.registerComponent('physx-grab', {
     // To avoid triggering this (we want to grab using constraints, and leave the
     // body as dynamic), we use a non-clashing name for the state we set on the entity when
     // grabbing it.
-    this.GRABBED_STATE = 'grabbed-dynamic';
 
     this.grabbing = false;
-    this.hitEl =      /** @type {AFRAME.Element}    */ null;
+    this.grabEl =      /** @type {AFRAME.Element}    */ null;
+    // Also track last grabbable el hit
+    this.lastHitEl =   /** @type {AFRAME.Element}    */ null;
 
     // Bind event handlers
     this.onHit = this.onHit.bind(this);
@@ -29,6 +32,7 @@ AFRAME.registerComponent('physx-grab', {
   play: function () {
     var el = this.el;
     el.addEventListener('contactbegin', this.onHit);
+    el.addEventListener('contactend', this.onHitEnd);
     el.addEventListener('gripdown', this.onGripClose);
     el.addEventListener('gripup', this.onGripOpen);
     el.addEventListener('trackpaddown', this.onGripClose);
@@ -40,6 +44,7 @@ AFRAME.registerComponent('physx-grab', {
   pause: function () {
     var el = this.el;
     el.removeEventListener('contactbegin', this.onHit);
+    el.removeEventListener('contactend', this.onHitEnd);
     el.removeEventListener('gripdown', this.onGripClose);
     el.removeEventListener('gripup', this.onGripOpen);
     el.removeEventListener('trackpaddown', this.onGripClose);
@@ -50,36 +55,56 @@ AFRAME.registerComponent('physx-grab', {
 
   onGripClose: function (evt) {
     this.grabbing = true;
+    // Allow grab to start while contact is maintained
+    if (this.lastHitEl) {
+      this.startGrab(this.lastHitEl, evt.target);
+    }
   },
 
-  onGripOpen: function (evt) {
-    var hitEl = this.hitEl;
+  // This does not remove ability to re-grab while collision has not ended;
+  // when jointed on grab, the object should still be colliding with hand
+  onGripOpen: function (_evt) {
+    const { grabEl } = this;
     this.grabbing = false;
-    if (!hitEl) { return; }
-    hitEl.removeState(this.GRABBED_STATE);
+    if (!grabEl) { return; }
+    grabEl.removeState(GRABBED_STATE);
 
-    this.hitEl = undefined;
+    this.grabEl = undefined;
 
     this.removeJoint()
   },
 
   onHit: function (evt) {
-    var hitEl = evt.detail.otherComponent?.el;
+    const hitEl = evt.detail.otherComponent?.el;
     // If the element is already grabbed (it could be grabbed by another controller).
     // If the hand is not grabbing the element does not stick.
     // If we're already grabbing something you can't grab again.
-    if (!hitEl || hitEl.getAttribute("physx-grabbable") === null ||
-      hitEl.is(this.GRABBED_STATE) || !this.grabbing || this.hitEl) {
+    if (!hitEl || hitEl.getAttribute("physx-grabbable") === null || hitEl.is(GRABBED_STATE) || this.grabEl) {
       return;
     }
-    hitEl.addState(this.GRABBED_STATE);
-    this.hitEl = hitEl;
+    if (!this.grabbing) {
+      // Intuitively, hand might not start grabbing until after a collision, track this obj
+      this.lastHitEl = hitEl;
+      return;
+    }
 
-    this.addJoint(hitEl, evt.target)
+    this.startGrab(hitEl, evt.target)
+  },
+
+  // Might be called from hit or from grip close
+  startGrab(grabEl, grabberEl) {
+    grabEl.addState(GRABBED_STATE);
+    this.grabEl = grabEl;
+
+    this.addJoint(grabEl, grabberEl)
+  },
+
+  onHitEnd: function (_evt) {
+    // TODO: Add proximity threshold after hit ends due to bounces off kinematic hand collider?
+    this.lastHitEl = undefined;
   },
 
   addJoint(el, target) {
-
     this.removeJoint()
 
     this.joint = document.createElement('a-entity')
@@ -89,7 +114,6 @@ AFRAME.registerComponent('physx-grab', {
   },
 
   removeJoint() {
-
     if (!this.joint) return
     this.joint.parentElement.removeChild(this.joint)
     this.joint = null
