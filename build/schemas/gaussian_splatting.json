@@ -1,5 +1,5 @@
 {
-    "title": "3D Gaussian Splat",
+    "title": "Gaussian Splat",
     "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering.\n\nMore information: <a href='https://github.com/quadjr/aframe-gaussian-splatting'>A-Frame Gaussian Splatting</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
