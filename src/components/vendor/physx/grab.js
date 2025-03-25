@@ -5,12 +5,16 @@
  *
  * Copyright (c) 2016 Don McCurdy
  */
+import { ARENAUtils } from '../../../utils';
 
 const GRABBED_STATE = 'grabbed-dynamic';
 
 AFRAME.registerComponent('physx-grab', {
+    schema: {
+        // If not 0, last grabbed object will be re-grabbed if it's within this distance
+        proximity: { default: 0, type: 'number' }
+    },
     init: function() {
-
         // If a state of "grabbed" is set on a physx-body entity,
         // the entity is automatically transformed into a kinematic entity.
         // To avoid triggering this (we want to grab using constraints, and leave the
@@ -24,9 +28,9 @@ AFRAME.registerComponent('physx-grab', {
 
         // Bind event handlers
         this.onHit = this.onHit.bind(this);
+        this.onHitEnd = this.onHitEnd.bind(this);
         this.onGripOpen = this.onGripOpen.bind(this);
         this.onGripClose = this.onGripClose.bind(this);
-
     },
 
     play: function() {
@@ -55,8 +59,22 @@ AFRAME.registerComponent('physx-grab', {
 
     onGripClose: function(evt) {
         this.grabbing = true;
-        // Allow grab to start while contact is maintained
+        /*
+          Allow grab to start while proximity is still valid. We don't perform an intermediate check
+          between hit and grip close, so it is possible object leaves then returns to proximity
+          without
+        */
         if (this.lastHitEl) {
+            if (this.data.proximity > 0) {
+                // lastHitEl would not have been unset on hitEnd
+                const distance = ARENAUtils.distanceWorld(evt.target, this.lastHitEl);
+                if (distance > this.data.proximity) {
+                    // Out of proximity, invalidate lastHitEl
+                    this.lastHitEl = undefined;
+                    return;
+                }
+                // Otherwise (still or back within proximity), fall through to startGrab
+            }
             this.startGrab(this.lastHitEl, evt.target);
         }
     },
@@ -102,8 +120,10 @@ AFRAME.registerComponent('physx-grab', {
     },
 
     onHitEnd: function(_evt) {
-        // TODO: Add proximity threshold after hit ends due to bounces off kinematic hand collider?
-        this.lastHitEl = undefined;
+        // Immediately unset if we have no proximity allowance
+        if (this.data.proximity === 0) {
+            this.lastHitEl = undefined;
+        }
     },
 
     addJoint(el, target) {

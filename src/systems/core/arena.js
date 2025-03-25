@@ -748,8 +748,8 @@ AFRAME.registerSystem('arena-scene', {
                             rightHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
                             this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
                         } else if (evt.detail.name === 'physx-grab') {
-                            leftHand.setAttribute('physx-grab', true);
-                            rightHand.setAttribute('physx-grab', true);
+                            leftHand.setAttribute('physx-grab', { proximity: 0.1 });
+                            rightHand.setAttribute('physx-grab', { proximity: 0.1 });
                         }
                     });
                     import('../vendor/physx.min').then(() => {
