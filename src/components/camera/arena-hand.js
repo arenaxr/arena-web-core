@@ -49,6 +49,12 @@ AFRAME.registerComponent('arena-hand', {
     dependencies: ['laser-controls'],
 
     init() {
+        const { data } = this;
+
+        // capitalize hand type
+        data.hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
+        this.name = data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
         this.lastPose = '';
@@ -63,11 +69,6 @@ AFRAME.registerComponent('arena-hand', {
         const { sceneEl } = el;
 
         this.mqtt = sceneEl.systems['arena-mqtt'];
-
-        // capitalize hand type
-        data.hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
-
-        this.name = data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
 
         this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr({
             nameSpace: ARENA.nameSpace,

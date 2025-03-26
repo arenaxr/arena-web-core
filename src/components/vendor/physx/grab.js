@@ -17,6 +17,7 @@ AFRAME.registerComponent('physx-grab', {
         // distance (combined) from the last contact point by more than this value
         proximity: { default: 0, type: 'number' }
     },
+    dependencies: ['arena-hand'],
     init: function() {
         // If a state of "grabbed" is set on a physx-body entity,
         // the entity is automatically transformed into a kinematic entity.
@@ -39,6 +40,11 @@ AFRAME.registerComponent('physx-grab', {
         this.onGripClose = this.onGripClose.bind(this);
 
         this.object_id = this.el.components['arena-hand'].name;
+
+        this.topicParams = {
+            ...ARENA.topicParams,
+            userObj: this.object_id,
+        };
     },
 
     play: function() {
@@ -116,15 +122,17 @@ AFRAME.registerComponent('physx-grab', {
 
     // Might be called from hit or from grip close
     startGrab(grabEl) {
+        const { topicParams } = this;
+
         grabEl.addState(GRABBED_STATE);
         this.grabEl = grabEl;
 
         this.addJoint(grabEl, this.el);
 
         // Broadcast event
-        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
-        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(ARENA.topicParams);
-        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(ARENA.topicParams);
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
         this.el.object3D.getWorldPosition(posVect3);
         const handPos = {
@@ -154,7 +162,7 @@ AFRAME.registerComponent('physx-grab', {
     },
 
     stopGrab: function() {
-        const { grabEl } = this;
+        const { grabEl, topicParams } = this;
         if (!grabEl) {
             return;
         }
@@ -163,9 +171,9 @@ AFRAME.registerComponent('physx-grab', {
         this.removeJoint();
 
         // Broadcast event
-        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
-        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(ARENA.topicParams);
-        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(ARENA.topicParams);
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
         this.el.object3D.getWorldPosition(posVect3);
         const handPos = {
