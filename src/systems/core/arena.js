@@ -750,8 +750,8 @@ AFRAME.registerSystem('arena-scene', {
                             rightHand.setAttribute('physx-material', { restitution: 0 });
                             this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
                         } else if (evt.detail.name === 'physx-grab') {
-                            leftHand.setAttribute('physx-grab', { proximity: 0.15 });
-                            rightHand.setAttribute('physx-grab', { proximity: 0.15 });
+                            leftHand.setAttribute('physx-grab', { proximity: 0.25 });
+                            rightHand.setAttribute('physx-grab', { proximity: 0.25 });
                         }
                     });
                     import('../vendor/physx.min').then(() => {
