@@ -6,6 +6,7 @@
  * Copyright (c) 2016 Don McCurdy
  */
 import { ARENAUtils } from '../../../utils';
+import { TOPICS } from '../../constants';
 
 const GRABBED_STATE = 'grabbed-dynamic';
 const posVect3 = new THREE.Vector3(); // Reusable vector for worldPosition calcs
@@ -36,6 +37,8 @@ AFRAME.registerComponent('physx-grab', {
         this.onHitEnd = this.onHitEnd.bind(this);
         this.onGripOpen = this.onGripOpen.bind(this);
         this.onGripClose = this.onGripClose.bind(this);
+
+        this.object_id = this.el.components['arena-hand'].name;
     },
 
     play: function() {
@@ -89,17 +92,9 @@ AFRAME.registerComponent('physx-grab', {
 
     // This does not remove ability to re-grab while collision has not ended;
     // when jointed on grab, the object should still be colliding with hand
-    onGripOpen: function(_evt) {
-        const { grabEl } = this;
+    onGripOpen: function(evt) {
         this.grabbing = false;
-        if (!grabEl) {
-            return;
-        }
-        grabEl.removeState(GRABBED_STATE);
-
-        this.grabEl = undefined;
-
-        this.removeJoint();
+        this.stopGrab(evt.target);
     },
 
     onHit: function(evt) {
@@ -125,6 +120,80 @@ AFRAME.registerComponent('physx-grab', {
         this.grabEl = grabEl;
 
         this.addJoint(grabEl, grabberEl);
+
+        // Broadcast event
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+
+        grabberEl.object3D.getWorldPosition(posVect3);
+        const handPos = {
+            x: ARENAUtils.round3(posVect3),
+            y: ARENAUtils.round3(posVect3),
+            z: ARENAUtils.round3(posVect3),
+        }
+        grabEl.object3D.getWorldQuaternion(posVect3);
+        const targetPos = {
+            x: ARENAUtils.round3(posVect3),
+            y: ARENAUtils.round3(posVect3),
+            z: ARENAUtils.round3(posVect3),
+        }
+
+        const thisMsg = {
+            object_id: this.object_id,
+            action: 'clientEvent',
+            type: 'physx-grab',
+            data: {
+                action: 'grab-start',
+                target: grabEl.id,
+                position: handPos,
+                targetPos: targetPos,
+            },
+        };
+        ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
+    },
+
+    stopGrab: function(grabberEl) {
+        const { grabEl } = this;
+        if (!grabEl) {
+            return;
+        }
+        grabEl.removeState(GRABBED_STATE);
+
+        this.removeJoint();
+
+        // Broadcast event
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+
+        grabberEl.object3D.getWorldPosition(posVect3);
+        const handPos = {
+            x: ARENAUtils.round3(posVect3),
+            y: ARENAUtils.round3(posVect3),
+            z: ARENAUtils.round3(posVect3),
+        }
+        grabEl.object3D.getWorldQuaternion(posVect3);
+        const targetPos = {
+            x: ARENAUtils.round3(posVect3),
+            y: ARENAUtils.round3(posVect3),
+            z: ARENAUtils.round3(posVect3),
+        }
+
+        const thisMsg = {
+            object_id: this.object_id,
+            action: 'clientEvent',
+            type: 'physx-grab',
+            data: {
+                action: 'grab-end',
+                target: grabEl.id,
+                position: handPos,
+                targetPos: targetPos,
+            },
+        };
+        ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
+
+        this.grabEl = undefined;
     },
 
     onHitEnd: function(evt) {
