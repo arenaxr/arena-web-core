@@ -25,7 +25,9 @@ AFRAME.registerComponent('physx-grab', {
 
         this.grabbing = false;
         this.grabEl =      /** @type {AFRAME.Element}    */ null;
-        // Also track last grabbable el hit
+        // Track all currently hitting els (can be multiple)
+        this.hitEls =   [];
+        // Also track last hit el for proximity check if no other contacts
         this.lastHitEl =   /** @type {AFRAME.Element}    */ null;
         this.lastHitPos = new THREE.Vector3();
 
@@ -62,25 +64,25 @@ AFRAME.registerComponent('physx-grab', {
 
     onGripClose: function(evt) {
         this.grabbing = true;
-        /*
-          Allow grab to start while proximity is still valid. We don't perform an intermediate check
-          between hit and grip close, so it is possible object leaves then returns to proximity
-          without
-        */
-        if (this.lastHitEl) {
-            if (this.data.proximity > 0) {
-                // lastHitEl would not have been unset on hitEnd
-                evt.target.object3D.getWorldPosition(posVect3);
-                let proxDist = posVect3.distanceTo(this.lastHitPos); // Hand deviation from last hit
-                this.lastHitEl.object3D.getWorldPosition(posVect3);
-                proxDist += posVect3.distanceTo(this.lastHitPos); // Object deviation from last hit
-                if (proxDist > this.data.proximity) {
-                    // Combined distances out of proximity, invalidate lastHitEl
-                    this.lastHitEl = undefined;
-                    return;
-                }
-                // Otherwise (still or back within proximity), fall through to startGrab
+
+        // Grab last hit object if we have any still in contact
+        if (this.hitEls.length > 0) {
+            this.startGrab(this.hitEls.at(-1), evt.target);
+            return;
+        }
+
+        // No contacting hits, but we have a lastHitEl and proximity allowance
+        if (this.data.proximity > 0 && this.lastHitEl) {
+            evt.target.object3D.getWorldPosition(posVect3);
+            let proxDist = posVect3.distanceTo(this.lastHitPos); // Hand deviation from last hit
+            this.lastHitEl.object3D.getWorldPosition(posVect3);
+            proxDist += posVect3.distanceTo(this.lastHitPos); // Object deviation from last hit
+            if (proxDist > this.data.proximity) {
+                // Combined distances out of proximity, invalidate lastHitEl
+                this.lastHitEl = undefined;
+                return;
             }
+            // Otherwise (still or back within proximity), grab lastHitEl
             this.startGrab(this.lastHitEl, evt.target);
         }
     },
@@ -110,7 +112,7 @@ AFRAME.registerComponent('physx-grab', {
         }
         if (!this.grabbing) {
             // Intuitively, hand might not start grabbing until after a collision, track this obj
-            this.lastHitEl = hitEl;
+            this.hitEls.push(hitEl);
             return;
         }
 
@@ -126,14 +128,16 @@ AFRAME.registerComponent('physx-grab', {
     },
 
     onHitEnd: function(evt) {
-        // Immediately unset if we have no proximity allowance
-        if (this.data.proximity === 0) {
-            this.lastHitEl = undefined;
-        } else {
-            // Track where collision ended as focal point to evaluate proximity
-            if (evt.target) {
-                evt.target.object3D.getWorldPosition(this.lastHitPos);
-            }
+        const unhitEl = evt.detail.otherComponent?.el;
+        const index = this.hitEls.indexOf(unhitEl);
+        if (index > -1) {
+            this.hitEls.splice(index, 1);
+        }
+
+        // If we are allowing proximity grab, track last hit object
+        if (this.data.proximity > 0 && evt.target) {
+            this.lastHitEl = unhitEl;
+            evt.target.object3D.getWorldPosition(this.lastHitPos);
         }
     },
 
