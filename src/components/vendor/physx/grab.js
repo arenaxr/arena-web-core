@@ -8,10 +8,12 @@
 import { ARENAUtils } from '../../../utils';
 
 const GRABBED_STATE = 'grabbed-dynamic';
+const posVect3 = new THREE.Vector3(); // Reusable vector for worldPosition calcs
 
 AFRAME.registerComponent('physx-grab', {
     schema: {
-        // If not 0, last grabbed object will be re-grabbed if it's within this distance
+        // If not 0, last grabbed object will be re-grabbed if both hand and object have not deviated in
+        // distance (combined) from the last contact point by more than this value
         proximity: { default: 0, type: 'number' }
     },
     init: function() {
@@ -25,6 +27,7 @@ AFRAME.registerComponent('physx-grab', {
         this.grabEl =      /** @type {AFRAME.Element}    */ null;
         // Also track last grabbable el hit
         this.lastHitEl =   /** @type {AFRAME.Element}    */ null;
+        this.lastHitPos = new THREE.Vector3();
 
         // Bind event handlers
         this.onHit = this.onHit.bind(this);
@@ -67,9 +70,12 @@ AFRAME.registerComponent('physx-grab', {
         if (this.lastHitEl) {
             if (this.data.proximity > 0) {
                 // lastHitEl would not have been unset on hitEnd
-                const distance = ARENAUtils.distanceWorld(evt.target, this.lastHitEl);
-                if (distance > this.data.proximity) {
-                    // Out of proximity, invalidate lastHitEl
+                evt.target.object3D.getWorldPosition(posVect3);
+                let proxDist = posVect3.distanceTo(this.lastHitPos); // Hand deviation from last hit
+                this.lastHitEl.object3D.getWorldPosition(posVect3);
+                proxDist += posVect3.distanceTo(this.lastHitPos); // Object deviation from last hit
+                if (proxDist > this.data.proximity) {
+                    // Combined distances out of proximity, invalidate lastHitEl
                     this.lastHitEl = undefined;
                     return;
                 }
@@ -119,10 +125,15 @@ AFRAME.registerComponent('physx-grab', {
         this.addJoint(grabEl, grabberEl);
     },
 
-    onHitEnd: function(_evt) {
+    onHitEnd: function(evt) {
         // Immediately unset if we have no proximity allowance
         if (this.data.proximity === 0) {
             this.lastHitEl = undefined;
+        } else {
+            // Track where collision ended as focal point to evaluate proximity
+            if (evt.target) {
+                evt.target.object3D.getWorldPosition(this.lastHitPos);
+            }
         }
     },
 
