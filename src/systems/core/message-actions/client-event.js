@@ -96,6 +96,23 @@ export default class ClientEvent {
                     entityEl.components.sound.stopSound();
                 }
                 break;
+            case 'physx-grab':
+                if (ARENA.sceneEl.systems.physx) {
+                    if (message.action === 'grab-start') {
+                        entityEl.components['physx-remote-grabber']?.startGrab(
+                            data.target,
+                            data.position,
+                            data.targetPosition
+                        );
+                    } else if (message.action === 'grab-end') {
+                        entityEl.components['physx-remote-grabber']?.stopGrab(
+                            data.target,
+                            data.position,
+                            data.targetPosition
+                        );
+                    }
+                }
+                break;
             default: // handle others here like mouseenter / mouseleave
                 break;
         }

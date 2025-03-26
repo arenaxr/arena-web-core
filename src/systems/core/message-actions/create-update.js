@@ -362,12 +362,20 @@ export default class CreateUpdate {
                 break;
             case 'handLeft':
             case 'handRight':
-                const newAttributes = {
+                let newAttributes = {
                     position: data.position,
                     rotation: data.rotation,
                     'gltf-model': data.url,
                     // TODO: Add support new component for arena-other-user-hand for grab handling
                 };
+                if (ARENA.sceneEl.systems.physx) {
+                    newAttributes = {
+                        'physx-body': { type: 'kinematic' },
+                        'physx-remote-grabber': true,
+                        'physx-material': { restitution: 0 },
+                        ...newAttributes,
+                    };
+                }
                 if (data.scale !== undefined) {
                     newAttributes.scale = data.scale;
                 }
