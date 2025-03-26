@@ -128,15 +128,15 @@ AFRAME.registerComponent('physx-grab', {
 
         this.el.object3D.getWorldPosition(posVect3);
         const handPos = {
-            x: ARENAUtils.round3(posVect3),
-            y: ARENAUtils.round3(posVect3),
-            z: ARENAUtils.round3(posVect3),
+            x: ARENAUtils.round3(posVect3.x),
+            y: ARENAUtils.round3(posVect3.y),
+            z: ARENAUtils.round3(posVect3.z),
         }
         grabEl.object3D.getWorldPosition(posVect3);
         const targetPos = {
-            x: ARENAUtils.round3(posVect3),
-            y: ARENAUtils.round3(posVect3),
-            z: ARENAUtils.round3(posVect3),
+            x: ARENAUtils.round3(posVect3.x),
+            y: ARENAUtils.round3(posVect3.y),
+            z: ARENAUtils.round3(posVect3.z),
         }
 
         const thisMsg = {
@@ -169,15 +169,15 @@ AFRAME.registerComponent('physx-grab', {
 
         this.el.object3D.getWorldPosition(posVect3);
         const handPos = {
-            x: ARENAUtils.round3(posVect3),
-            y: ARENAUtils.round3(posVect3),
-            z: ARENAUtils.round3(posVect3),
+            x: ARENAUtils.round3(posVect3.x),
+            y: ARENAUtils.round3(posVect3.y),
+            z: ARENAUtils.round3(posVect3.z),
         }
         grabEl.object3D.getWorldPosition(posVect3);
         const targetPos = {
-            x: ARENAUtils.round3(posVect3),
-            y: ARENAUtils.round3(posVect3),
-            z: ARENAUtils.round3(posVect3),
+            x: ARENAUtils.round3(posVect3.x),
+            y: ARENAUtils.round3(posVect3.y),
+            z: ARENAUtils.round3(posVect3.z),
         }
 
         const thisMsg = {
