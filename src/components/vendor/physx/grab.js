@@ -150,7 +150,7 @@ AFRAME.registerComponent('physx-grab', {
                 targetPosition: targetPos,
             },
         };
-        ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
+        ARENAUtils.publishClientEvent(grabEl, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
     },
 
     stopGrab: function() {
@@ -191,7 +191,7 @@ AFRAME.registerComponent('physx-grab', {
                 targetPosition: targetPos,
             },
         };
-        ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
+        ARENAUtils.publishClientEvent(grabEl, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
 
         this.grabEl = undefined;
     },
