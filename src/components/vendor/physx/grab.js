@@ -122,9 +122,9 @@ AFRAME.registerComponent('physx-grab', {
         this.addJoint(grabEl, this.el);
 
         // Broadcast event
-        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
-        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
-        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(ARENA.topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(ARENA.topicParams);
 
         this.el.object3D.getWorldPosition(posVect3);
         const handPos = {
@@ -163,9 +163,9 @@ AFRAME.registerComponent('physx-grab', {
         this.removeJoint();
 
         // Broadcast event
-        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
-        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
-        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(ARENA.topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(ARENA.topicParams);
 
         this.el.object3D.getWorldPosition(posVect3);
         const handPos = {
