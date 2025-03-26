@@ -132,7 +132,7 @@ AFRAME.registerComponent('physx-grab', {
             y: ARENAUtils.round3(posVect3),
             z: ARENAUtils.round3(posVect3),
         }
-        grabEl.object3D.getWorldQuaternion(posVect3);
+        grabEl.object3D.getWorldPosition(posVect3);
         const targetPos = {
             x: ARENAUtils.round3(posVect3),
             y: ARENAUtils.round3(posVect3),
@@ -173,7 +173,7 @@ AFRAME.registerComponent('physx-grab', {
             y: ARENAUtils.round3(posVect3),
             z: ARENAUtils.round3(posVect3),
         }
-        grabEl.object3D.getWorldQuaternion(posVect3);
+        grabEl.object3D.getWorldPosition(posVect3);
         const targetPos = {
             x: ARENAUtils.round3(posVect3),
             y: ARENAUtils.round3(posVect3),
