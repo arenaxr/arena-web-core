@@ -264,15 +264,19 @@ AFRAME.registerComponent("physx-remote-grabber", {
         // Force position sync
         if (pos) {
             el.object3D.position.set(pos.x, pos.y, pos.z);
+            el.object3D.updateMatrixWorld();
         }
         if (targetPos) {
             target.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
+            target.object3D.updateMatrixWorld();
         }
 
         this.joint = document.createElement("a-entity");
         this.joint.setAttribute("physx-joint", `type: Fixed; target: #${el.id}`);
 
         target.appendChild(this.joint);
+
+        this.grabEl = target;
     },
 
     stopGrab(pos, posTarget) {
@@ -283,9 +287,11 @@ AFRAME.registerComponent("physx-remote-grabber", {
         // Force position sync
         if (pos) {
             el.object3D.position.set(pos.x, pos.y, pos.z);
+            el.object3D.updateMatrixWorld();
         }
         if (posTarget) {
             grabEl.object3D.position.set(posTarget.x, posTarget.y, posTarget.z);
+            grabEl.object3D.updateMatrixWorld();
         }
 
         grabEl.removeState(GRABBED_STATE);
