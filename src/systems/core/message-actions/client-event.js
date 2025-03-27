@@ -98,20 +98,12 @@ export default class ClientEvent {
                 break;
             case 'physx-grabstart':
                 if (AFRAME.scenes[0].systems.physx) {
-                    entityEl.components['physx-remote-grabber']?.startGrab(
-                        data.target,
-                        data.position,
-                        data.targetPosition
-                    );
+                    entityEl.components['physx-remote-grabber']?.startGrab(data.target, data.pose, data.targetPose);
                 }
                 break;
             case 'physx-grabend':
                 if (AFRAME.scenes[0].systems.physx) {
-                    entityEl.components['physx-remote-grabber']?.stopGrab(
-                        data.target,
-                        data.position,
-                        data.targetPosition
-                    );
+                    entityEl.components['physx-remote-grabber']?.stopGrab(data.target, data.pose, data.targetPose);
                 }
                 break;
             default: // handle others here like mouseenter / mouseleave
