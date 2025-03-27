@@ -19,6 +19,8 @@ AFRAME.registerComponent('physx-grab', {
     },
     dependencies: ['arena-hand'],
     init: function() {
+        const { el } = this;
+
         // If a state of "grabbed" is set on a physx-body entity,
         // the entity is automatically transformed into a kinematic entity.
         // To avoid triggering this (we want to grab using constraints, and leave the
@@ -39,7 +41,7 @@ AFRAME.registerComponent('physx-grab', {
         this.onGripOpen = this.onGripOpen.bind(this);
         this.onGripClose = this.onGripClose.bind(this);
 
-        const handSide = this.el.components['arena-hand'].data.hand;
+        const handSide = el.components['arena-hand'].data.hand;
         this.object_id = (handSide === 'left') ? `handLeft_${ARENA.idTag}` : `handLeft_${ARENA.idTag}`;
 
         this.topicParams = {
@@ -73,27 +75,29 @@ AFRAME.registerComponent('physx-grab', {
     },
 
     onGripClose: function(evt) {
+        const { hitEls, data, lastHitEl, lastHitPos } = this;
+
         this.grabbing = true;
 
         // Grab last hit object if we have any still in contact
-        if (this.hitEls.length > 0) {
-            this.startGrab(this.hitEls.at(-1), evt.target);
+        if (hitEls.length > 0) {
+            this.startGrab(hitEls.at(-1), evt.target);
             return;
         }
 
         // No contacting hits, but we have a lastHitEl and proximity allowance
-        if (this.data.proximity > 0 && this.lastHitEl) {
+        if (data.proximity > 0 && lastHitEl) {
             evt.target.object3D.getWorldPosition(posVect3);
-            let proxDist = posVect3.distanceTo(this.lastHitPos); // Hand deviation from last hit
-            this.lastHitEl.object3D.getWorldPosition(posVect3);
-            proxDist += posVect3.distanceTo(this.lastHitPos); // Object deviation from last hit
-            if (proxDist > this.data.proximity) {
+            let proxDist = posVect3.distanceTo(lastHitPos); // Hand deviation from last hit
+            lastHitEl.object3D.getWorldPosition(posVect3);
+            proxDist += posVect3.distanceTo(lastHitPos); // Object deviation from last hit
+            if (proxDist > data.proximity) {
                 // Combined distances out of proximity, invalidate lastHitEl
                 this.lastHitEl = undefined;
                 return;
             }
             // Otherwise (still or back within proximity), grab lastHitEl
-            this.startGrab(this.lastHitEl, evt.target);
+            this.startGrab(lastHitEl, evt.target);
         }
     },
 
@@ -105,6 +109,8 @@ AFRAME.registerComponent('physx-grab', {
     },
 
     onHit: function(evt) {
+        const { grabbing, hitEls } = this;
+
         const hitEl = evt.detail.otherComponent?.el;
         // If the element is already grabbed (it could be grabbed by another controller).
         // If the hand is not grabbing the element does not stick.
@@ -112,9 +118,9 @@ AFRAME.registerComponent('physx-grab', {
         if (!hitEl || hitEl.getAttribute('physx-grabbable') === null || hitEl.is(GRABBED_STATE) || this.grabEl) {
             return;
         }
-        if (!this.grabbing) {
+        if (!grabbing) {
             // Intuitively, hand might not start grabbing until after a collision, track this obj
-            this.hitEls.push(hitEl);
+            hitEls.push(hitEl);
             return;
         }
 
@@ -123,19 +129,19 @@ AFRAME.registerComponent('physx-grab', {
 
     // Might be called from hit or from grip close
     startGrab(grabEl) {
-        const { topicParams } = this;
+        const { el, object_id, topicParams } = this;
 
         grabEl.addState(GRABBED_STATE);
         this.grabEl = grabEl;
 
-        this.addJoint(grabEl, this.el);
+        this.addJoint(grabEl, el);
 
         // Broadcast event
         const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
-        this.el.object3D.getWorldPosition(posVect3);
+        el.object3D.getWorldPosition(posVect3);
         const handPos = {
             x: ARENAUtils.round3(posVect3.x),
             y: ARENAUtils.round3(posVect3.y),
@@ -149,7 +155,7 @@ AFRAME.registerComponent('physx-grab', {
         }
 
         const thisMsg = {
-            object_id: this.object_id,
+            object_id: object_id,
             action: 'clientEvent',
             type: 'physx-grab',
             data: {
@@ -163,7 +169,7 @@ AFRAME.registerComponent('physx-grab', {
     },
 
     stopGrab: function() {
-        const { grabEl, topicParams } = this;
+        const { el, grabEl, object_id, topicParams } = this;
         if (!grabEl) {
             return;
         }
@@ -176,7 +182,7 @@ AFRAME.registerComponent('physx-grab', {
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
-        this.el.object3D.getWorldPosition(posVect3);
+        el.object3D.getWorldPosition(posVect3);
         const handPos = {
             x: ARENAUtils.round3(posVect3.x),
             y: ARENAUtils.round3(posVect3.y),
@@ -190,7 +196,7 @@ AFRAME.registerComponent('physx-grab', {
         }
 
         const thisMsg = {
-            object_id: this.object_id,
+            object_id: object_id,
             action: 'clientEvent',
             type: 'physx-grab',
             data: {
@@ -206,16 +212,18 @@ AFRAME.registerComponent('physx-grab', {
     },
 
     onHitEnd: function(evt) {
+        const { hitEls, lastHitPos } = this;
+
         const unhitEl = evt.detail.otherComponent?.el;
-        const index = this.hitEls.indexOf(unhitEl);
+        const index = hitEls.indexOf(unhitEl);
         if (index > -1) {
-            this.hitEls.splice(index, 1);
+            hitEls.splice(index, 1);
         }
 
         // If we are allowing proximity grab, track last hit object
         if (this.data.proximity > 0 && evt.target) {
             this.lastHitEl = unhitEl;
-            evt.target.object3D.getWorldPosition(this.lastHitPos);
+            evt.target.object3D.getWorldPosition(lastHitPos);
         }
     },
 
@@ -246,6 +254,8 @@ AFRAME.registerComponent("physx-remote-grabber", {
     },
 
     startGrab(targetId, pos, targetPos) {
+        const { el } = this;
+
         const target = document.getElementById(targetId);
         if (!target) return;
 
@@ -255,33 +265,35 @@ AFRAME.registerComponent("physx-remote-grabber", {
 
         // Force position sync
         if (pos) {
-            this.el.object3D.position.set(pos.x, pos.y, pos.z);
+            el.object3D.position.set(pos.x, pos.y, pos.z);
         }
         if (targetPos) {
             target.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
         }
 
         this.joint = document.createElement("a-entity");
-        this.joint.setAttribute("physx-joint", `type: Fixed; target: #${this.el.id}`);
+        this.joint.setAttribute("physx-joint", `type: Fixed; target: #${el.id}`);
 
         target.appendChild(this.joint);
     },
 
     stopGrab(pos, posTarget) {
-        if (!this.grabEl) return;
+        const { grabEl, el, joint } = this;
+
+        if (!grabEl) return;
 
         // Force position sync
         if (pos) {
-            this.el.object3D.position.set(pos.x, pos.y, pos.z);
+            el.object3D.position.set(pos.x, pos.y, pos.z);
         }
         if (posTarget) {
-            this.grabEl.object3D.position.set(posTarget.x, posTarget.y, posTarget.z);
+            grabEl.object3D.position.set(posTarget.x, posTarget.y, posTarget.z);
         }
 
-        this.grabEl.removeState(GRABBED_STATE);
+        grabEl.removeState(GRABBED_STATE);
 
-        if (!this.joint) return;
-        this.joint.parentElement.removeChild(this.joint);
+        if (!joint) return;
+        joint.parentElement.removeChild(joint);
         this.joint = null;
     }
 });
