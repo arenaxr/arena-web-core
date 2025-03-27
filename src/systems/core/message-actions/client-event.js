@@ -97,7 +97,7 @@ export default class ClientEvent {
                 }
                 break;
             case 'physx-grab':
-                if (ARENA.sceneEl.systems.physx) {
+                if (AFRAME.scenes[0].systems.physx) {
                     if (message.action === 'grab-start') {
                         entityEl.components['physx-remote-grabber']?.startGrab(
                             data.target,
