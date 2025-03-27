@@ -41,8 +41,8 @@ AFRAME.registerComponent('physx-grab', {
         this.onGripOpen = this.onGripOpen.bind(this);
         this.onGripClose = this.onGripClose.bind(this);
 
-        const handSide = el.components['arena-hand'].data.hand;
-        this.object_id = (handSide === 'left') ? `handLeft_${ARENA.idTag}` : `handLeft_${ARENA.idTag}`;
+        const handSide = el.components['arena-hand'].data.hand.toUpperCase();
+        this.object_id = (handSide === 'LEFT') ? `handLeft_${ARENA.idTag}` : `handLeft_${ARENA.idTag}`;
 
         this.topicParams = {
             ...ARENA.topicParams,
