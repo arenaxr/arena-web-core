@@ -25,12 +25,12 @@ import './renderfusion/remote-render';
 import 'aframe-environment-component'; // pretty environments
 import 'aframe-blink-controls'; // Controller teleport
 import '@c-frame/aframe-particle-system-component'; // particle system environment
-import 'aframe-gaussian-splatting-component';
 
 // NPM import overrides
 import './vendor/animation-mixer'; // Override animation mixer
 
 // direct file imports
+import './vendor/aframe-gaussian-splatting-component.min'; // npm has this package as 0.0.19, but we use a more recent build at https://github.com/quadjr/aframe-gaussian-splatting
 import './vendor/aframe-look-at-component.min'; // Look at component https://github.com/supermedium/superframe#readme
 import './vendor/aframe-multisrc-component'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
 import './vendor/transparent-occlude'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
