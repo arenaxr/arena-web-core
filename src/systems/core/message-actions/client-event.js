@@ -96,21 +96,22 @@ export default class ClientEvent {
                     entityEl.components.sound.stopSound();
                 }
                 break;
-            case 'physx-grab':
+            case 'physx-grabstart':
                 if (AFRAME.scenes[0].systems.physx) {
-                    if (message.action === 'grab-start') {
-                        entityEl.components['physx-remote-grabber']?.startGrab(
-                            data.target,
-                            data.position,
-                            data.targetPosition
-                        );
-                    } else if (message.action === 'grab-end') {
-                        entityEl.components['physx-remote-grabber']?.stopGrab(
-                            data.target,
-                            data.position,
-                            data.targetPosition
-                        );
-                    }
+                    entityEl.components['physx-remote-grabber']?.startGrab(
+                        data.target,
+                        data.position,
+                        data.targetPosition
+                    );
+                }
+                break;
+            case 'physx-grabend':
+                if (AFRAME.scenes[0].systems.physx) {
+                    entityEl.components['physx-remote-grabber']?.stopGrab(
+                        data.target,
+                        data.position,
+                        data.targetPosition
+                    );
                 }
                 break;
             default: // handle others here like mouseenter / mouseleave

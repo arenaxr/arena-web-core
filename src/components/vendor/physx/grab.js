@@ -157,9 +157,8 @@ AFRAME.registerComponent('physx-grab', {
         const thisMsg = {
             object_id: object_id,
             action: 'clientEvent',
-            type: 'physx-grab',
+            type: 'physx-grabstart',
             data: {
-                action: 'grab-start',
                 target: grabEl.id,
                 position: handPos,
                 targetPosition: targetPos,
@@ -198,9 +197,8 @@ AFRAME.registerComponent('physx-grab', {
         const thisMsg = {
             object_id: object_id,
             action: 'clientEvent',
-            type: 'physx-grab',
+            type: 'physx-grabend',
             data: {
-                action: 'grab-end',
                 target: grabEl.id,
                 position: handPos,
                 targetPosition: targetPos,
