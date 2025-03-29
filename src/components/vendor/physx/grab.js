@@ -300,10 +300,16 @@ AFRAME.registerComponent("physx-remote-grabber", {
         const { position: pos, rotation: rot } = pose;
         const { position: targetPos, rotation: targetRot } = targetPose;
         if (pos) el.object3D.position.set(pos.x, pos.y, pos.z);
-        if (rot) el.object3D.rotation.set(rot.x, rot.y, rot.z, rot.w);
+        if (rot) {
+            rotQuat.set(rot.x, rot.y, rot.z, rot.w);
+            el.object3D.rotation.setFromQuaternion(rotQuat);
+        }
         el.object3D.updateMatrixWorld();
         if (targetPos) target.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
-        if (targetRot) target.object3D.rotation.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
+        if (targetRot){
+            rotQuat.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
+            target.object3D.rotation.setFromQuaternion(rotQuat);
+        }
         target.object3D.updateMatrixWorld();
 
         this.joint = document.createElement("a-entity");
@@ -323,10 +329,16 @@ AFRAME.registerComponent("physx-remote-grabber", {
         const { position: pos, rotation: rot } = pose;
         const { position: targetPos, rotation: targetRot } = targetPose;
         if (pos) el.object3D.position.set(pos.x, pos.y, pos.z);
-        if (rot) el.object3D.rotation.set(rot.x, rot.y, rot.z, rot.w);
+        if (rot) {
+            rotQuat.set(rot.x, rot.y, rot.z, rot.w);
+            el.object3D.rotation.setFromQuaternion(rotQuat);
+        }
         el.object3D.updateMatrixWorld();
         if (targetPos) grabEl.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
-        if (targetRot) grabEl.object3D.rotation.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
+        if (targetRot){
+            rotQuat.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
+            target.object3D.rotation.setFromQuaternion(rotQuat);
+        }
        grabEl.object3D.updateMatrixWorld();
 
         grabEl.removeState(GRABBED_STATE);
