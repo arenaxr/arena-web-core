@@ -810,6 +810,16 @@ AFRAME.registerSystem('arena-scene', {
                     // unusual case: clickableOnlyEvents = true by default, add warning...
                     this.health.addError('scene-options.allObjectsClickable');
                 }
+
+                if (sceneOptions.originMarker) {
+                    const originMarker = document.createElement('a-entity');
+                    originMarker.setAttribute('gltf-model', './static/models/origin_marker.glb');
+                    originMarker.setAttribute('id', 'scene_default_originMarker');
+                    originMarker.object3D.position.set(0, 0.01, 0);
+                    originMarker.object3D.rotation.set(-Math.PI / 2, 0, 0);
+                    originMarker.object3D.scale.set(0.15, 0.15, 0.15);
+                    sceneRoot.appendChild(originMarker);
+                }
             }
 
             const envPresets = options['env-presets'];

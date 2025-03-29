@@ -289,6 +289,12 @@
         },
         "scene-options": {
             "properties": {
+                "originMarker": {
+                    "default": true,
+                    "description": "Include a default 15cm x 15cm AprilTag marker 0 at the origin of the scene.",
+                    "title": "Include Origin Marker",
+                    "type": "boolean"
+                },
                 "clickableOnlyEvents": {
                     "default": true,
                     "description": "True = publish only mouse events for objects with click-listeners; False = all objects publish mouse events.",
@@ -555,7 +561,7 @@
                     "description": "Set an OpenVPS server to localize by camera image on mobile devices"
                 }
             },
-            "required": ["maxAVDist", "physics", "privateScene"],
+            "required": ["maxAVDist", "physics", "originMarker","privateScene"],
             "title": "Scene Options",
             "type": "object",
             "description": "ARENA Scene Options."
