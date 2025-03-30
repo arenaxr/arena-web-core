@@ -35,11 +35,14 @@ export default class ClientEvent {
             return;
         }
 
-        const point = new THREE.Vector3(
-            parseFloat(data.targetPosition.x),
-            parseFloat(data.targetPosition.y),
-            parseFloat(data.targetPosition.z)
-        );
+        let point;
+        if (data.targetPosition) {
+            point = new THREE.Vector3(
+                parseFloat(data.targetPosition.x),
+                parseFloat(data.targetPosition.y),
+                parseFloat(data.targetPosition.z)
+            );
+        }
 
         switch (message.type) {
             case 'collision':
