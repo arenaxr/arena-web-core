@@ -277,14 +277,24 @@ export default class CreateUpdate {
         // TODO: using components (e.g. for image, ...) that handle these would allow to remove most of the
         // special cases
         let isGeometry = false;
+        let newAttributes;
         switch (type) {
             case 'camera':
                 // Only set permitted camera attributes, return
-                this.setEntityAttributes(entityEl, {
+                newAttributes = {
                     position: data.position,
                     rotation: data.rotation,
                     'arena-user': data['arena-user'],
-                });
+                };
+                if (ARENA.sceneEl.systems.physx) {
+                    newAttributes = {
+                        // 'physx-body': { type: 'kinematic' },
+                        // 'physx-material': { restitution: 0 },
+                        'physx-remote-pusher': true,
+                        ...newAttributes,
+                    };
+                }
+                this.setEntityAttributes(entityEl, newAttributes);
                 // Merge-update live users, but don't repopulate userlist
                 AFRAME.scenes[0].systems.chat?.upsertLiveUser(message.id, { dn: data['arena-user'].displayName }, true);
                 return true;
@@ -362,7 +372,7 @@ export default class CreateUpdate {
                 break;
             case 'handLeft':
             case 'handRight':
-                let newAttributes = {
+                newAttributes = {
                     position: data.position,
                     rotation: data.rotation,
                     'gltf-model': data.url,
@@ -372,6 +382,7 @@ export default class CreateUpdate {
                     newAttributes = {
                         'physx-body': { type: 'kinematic' },
                         'physx-remote-grabber': true,
+                        'physx-remote-pusher': true,
                         'physx-material': { restitution: 0 },
                         ...newAttributes,
                     };

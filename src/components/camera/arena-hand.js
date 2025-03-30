@@ -85,6 +85,7 @@ AFRAME.registerComponent('arena-hand', {
                 data: {
                     object_type: `hand${data.hand}`,
                     position: { x: 0, y: -1, z: 0 },
+                    rotation: { x: 0, y: 0, z: 0, w: 1 },
                     url: this.getControllerURL(),
                     dep: ARENA.idTag,
                 },

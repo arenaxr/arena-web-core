@@ -106,6 +106,17 @@ export default class ClientEvent {
                     entityEl.components['physx-remote-grabber']?.stopGrab(data.target, data.pose, data.targetPose);
                 }
                 break;
+            case 'physx-push':
+                if (AFRAME.scenes[0].systems.physx) {
+                    entityEl.components['physx-remote-pusher']?.emitPush(
+                        data.target,
+                        data.targetPose,
+                        data.impulse,
+                        data.point,
+                        data.sourcePose
+                    );
+                }
+                break;
             default: // handle others here like mouseenter / mouseleave
                 break;
         }

@@ -10,6 +10,13 @@
  *
  * Requires: physx
  */
+
+import { ARENAUtils } from '../../../utils';
+import { TOPICS } from '../../../constants';
+
+const posVect3 = new THREE.Vector3(); // Reusable vector for worldPosition calcs
+const rotQuat = new THREE.Quaternion(); // Reusable quaternion for worldQuaternion calcs
+
 AFRAME.registerComponent('physx-force-pushable', {
     schema: {
         force: { default: 10 },
@@ -17,13 +24,17 @@ AFRAME.registerComponent('physx-force-pushable', {
     },
     init: function() {
 
-        this.pStart = new THREE.Vector3();
-        this.sourceEl = this.el.sceneEl.querySelector('[camera]');
         this.forcePushPhysX = this.forcePushPhysX.bind(this);
 
         this.sourcePosition = new THREE.Vector3();
         this.force = new THREE.Vector3();
         this.pos = new THREE.Vector3();
+
+        this.object_ids = {
+            leftHand: `handLeft_${ARENA.idTag}`,
+            rightHand: `handRight_${ARENA.idTag}`,
+            "mouse-cursor": ARENA.idTag,
+        }
     },
 
     play() {
@@ -35,6 +46,9 @@ AFRAME.registerComponent('physx-force-pushable', {
     },
 
     forcePushPhysX: function(e) {
+        // Can be a hand
+        const sourceEl = e.detail.cursorEl;
+        const object_id = this.object_ids[sourceEl.id];
 
         const el = this.el;
         if (!el.components['physx-body']) return;
@@ -45,7 +59,7 @@ AFRAME.registerComponent('physx-force-pushable', {
         const source = this.sourcePosition;
 
         // WebXR requires care getting camera position https://github.com/mrdoob/three.js/issues/18448
-        source.setFromMatrixPosition(this.sourceEl.object3D.matrixWorld);
+        source.setFromMatrixPosition(sourceEl.object3D.matrixWorld);
 
         el.object3D.getWorldPosition(force);
         force.sub(source);
@@ -62,5 +76,118 @@ AFRAME.registerComponent('physx-force-pushable', {
         el.object3D.worldToLocal(pos);
 
         body.addImpulseAtLocalPos(force, pos);
+
+        sourceEl.object3D.getWorldPosition(posVect3);
+        sourceEl.object3D.getWorldQuaternion(rotQuat);
+        const sourcePose = {
+            position: {
+                x: ARENAUtils.round3(posVect3.x),
+                y: ARENAUtils.round3(posVect3.y),
+                z: ARENAUtils.round3(posVect3.z)
+            },
+            rotation: {
+                x: ARENAUtils.round3(rotQuat.x),
+                y: ARENAUtils.round3(rotQuat.y),
+                z: ARENAUtils.round3(rotQuat.z),
+                w: ARENAUtils.round3(rotQuat.w)
+            }
+        };
+
+        el.object3D.getWorldPosition(posVect3);
+        el.object3D.getWorldQuaternion(rotQuat);
+        const targetPose = {
+            position: {
+                x: ARENAUtils.round3(posVect3.x),
+                y: ARENAUtils.round3(posVect3.y),
+                z: ARENAUtils.round3(posVect3.z)
+            },
+            rotation: {
+                x: ARENAUtils.round3(rotQuat.x),
+                y: ARENAUtils.round3(rotQuat.y),
+                z: ARENAUtils.round3(rotQuat.z),
+                w: ARENAUtils.round3(rotQuat.w)
+            }
+        };
+
+        const msg = {
+            object_id,
+            action: 'clientEvent',
+            type: 'physx-push',
+            data: {
+                impulse: {
+                    x: ARENAUtils.round3(force.x),
+                    y: ARENAUtils.round3(force.y),
+                    z: ARENAUtils.round3(force.z)
+                },
+                point: {
+                    x: ARENAUtils.round3(pos.x),
+                    y: ARENAUtils.round3(pos.y),
+                    z: ARENAUtils.round3(pos.z)
+                },
+                sourcePose: sourcePose,
+                targetPose: targetPose,
+                target: this.el.id,
+            }
+        };
+        const topicParams = {
+            ...ARENA.topicParams,
+            userObj: object_id
+        }
+
+        const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+        ARENAUtils.publishClientEvent(el, msg, topicBase, topicBasePrivate, topicBasePrivateProg);
+    }
+});
+
+
+const impulseVect3 = new THREE.Vector3(); // Reusable vector for force calcs
+
+AFRAME.registerComponent("physx-remote-pusher", {
+    init() {
+        this.emitPush = this.emitPush.bind(this);
+    },
+
+    /**
+     * emitPush
+     * @param {string} targetId - The id of the target object to push.
+     * @param {Object} targetPose - The pose of the target object prior to push.
+     * @param {Object} impulse - The impulse vector {x, y, z}.
+     * @param {Object} point - The world point at which to apply the impulse {x, y, z}.
+     * @param {Object} _sourcePose - The pose of the source (pusher), including position and rotation.
+     */
+    emitPush: function(targetId, targetPose, impulse, point, _sourcePose) {
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        if (targetPose) {
+            if (targetPose.position) {
+                target.object3D.position.set(
+                    targetPose.position.x,
+                    targetPose.position.y,
+                    targetPose.position.z
+                );
+            }
+            if (targetPose.rotation) {
+                rotQuat.set(
+                    targetPose.rotation.x,
+                    targetPose.rotation.y,
+                    targetPose.rotation.z,
+                    targetPose.rotation.w
+                );
+                target.object3D.rotation.setFromQuaternion(rotQuat);
+            }
+            target.object3D.updateMatrixWorld();
+        }
+
+        if (!target.components['physx-body']) return;
+        const body = target.components['physx-body'].rigidBody;
+        if (!body) return;
+
+        // These are already in local coordinates
+        posVect3.set(point.x, point.y, point.z);
+        impulseVect3.set(impulse.x, impulse.y, impulse.z);
+        body.addImpulseAtLocalPos(impulseVect3, posVect3);
     }
 });
