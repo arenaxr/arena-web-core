@@ -299,20 +299,36 @@ AFRAME.registerComponent("physx-remote-grabber", {
         this.stopGrab(); // Clear out any old grab
 
         // Force pose sync
-        const { position: pos, rotation: rot } = pose;
-        const { position: targetPos, rotation: targetRot } = targetPose;
-        if (pos) el.object3D.position.set(pos.x, pos.y, pos.z);
-        if (rot) {
-            rotQuat.set(rot.x, rot.y, rot.z, rot.w);
-            el.object3D.rotation.setFromQuaternion(rotQuat);
+        if (pose) {
+            const { position: pos, rotation: rot } = pose;
+            if (pos) el.object3D.position.set(pos.x, pos.y, pos.z);
+            if (rot) {
+                rotQuat.set(rot.x, rot.y, rot.z, rot.w);
+                el.object3D.rotation.setFromQuaternion(rotQuat);
+            }
+            el.object3D.updateMatrixWorld();
         }
-        el.object3D.updateMatrixWorld();
-        if (targetPos) target.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
-        if (targetRot){
-            rotQuat.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
-            target.object3D.rotation.setFromQuaternion(rotQuat);
+        if (targetPose) {
+            const { position: targetPos, rotation: targetRot } = targetPose;
+            // Need to override simulation pose for dynamic body
+            if (!target.components['physx-body']) return;
+            const body = target.components['physx-body'].rigidBody;
+            if (!body) return;
+
+            const physxPose = body.getGlobalPose()
+            if (targetPos) {
+                physxPose.translation.x = targetPos.x;
+                physxPose.translation.y = targetPos.y;
+                physxPose.translation.z = targetPos.z;
+            }
+            if (targetRot) {
+                physxPose.rotation.x = targetRot.x;
+                physxPose.rotation.y = targetRot.y;
+                physxPose.rotation.z = targetRot.z;
+                physxPose.rotation.w = targetRot.w;
+            }
+            body.setGlobalPose(physxPose, true);
         }
-        target.object3D.updateMatrixWorld();
 
         this.joint = document.createElement("a-entity");
         this.joint.setAttribute("physx-joint", `type: Fixed; target: #${el.id}`);
@@ -328,20 +344,36 @@ AFRAME.registerComponent("physx-remote-grabber", {
         if (!grabEl) return;
 
         // Force pose sync
-        const { position: pos, rotation: rot } = pose;
-        const { position: targetPos, rotation: targetRot } = targetPose;
-        if (pos) el.object3D.position.set(pos.x, pos.y, pos.z);
-        if (rot) {
-            rotQuat.set(rot.x, rot.y, rot.z, rot.w);
-            el.object3D.rotation.setFromQuaternion(rotQuat);
+        if (pose) {
+            const { position: pos, rotation: rot } = pose;
+            if (pos) el.object3D.position.set(pos.x, pos.y, pos.z);
+            if (rot) {
+                rotQuat.set(rot.x, rot.y, rot.z, rot.w);
+                el.object3D.rotation.setFromQuaternion(rotQuat);
+            }
+            el.object3D.updateMatrixWorld();
         }
-        el.object3D.updateMatrixWorld();
-        if (targetPos) grabEl.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
-        if (targetRot){
-            rotQuat.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
-            grabEl.object3D.rotation.setFromQuaternion(rotQuat);
+        if (targetPose) {
+            const { position: targetPos, rotation: targetRot } = targetPose;
+            // Need to override simulation pose for dynamic body
+            if (!grabEl.components['physx-body']) return;
+            const body = grabEl.components['physx-body'].rigidBody;
+            if (!body) return;
+
+            const physxPose = body.getGlobalPose()
+            if (targetPos) {
+                physxPose.translation.x = targetPos.x;
+                physxPose.translation.y = targetPos.y;
+                physxPose.translation.z = targetPos.z;
+            }
+            if (targetRot) {
+                physxPose.rotation.x = targetRot.x;
+                physxPose.rotation.y = targetRot.y;
+                physxPose.rotation.z = targetRot.z;
+                physxPose.rotation.w = targetRot.w;
+            }
+            body.setGlobalPose(physxPose, true);
         }
-        grabEl.object3D.updateMatrixWorld();
 
         grabEl.removeState(GRABBED_STATE);
 

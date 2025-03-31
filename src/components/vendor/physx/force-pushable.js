@@ -167,16 +167,23 @@ AFRAME.registerComponent("physx-remote-pusher", {
         const body = target.components['physx-body'].rigidBody;
         if (!body) return;
 
-        const { position: targetPos, rotation: targetRot } = targetPose;
-
-        if (targetPos) {
-            target.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
+        if (targetPose) {
+            const { position: targetPos, rotation: targetRot } = targetPose;
+            // Need to override simulation pose for dynamic body
+            const physxPose = body.getGlobalPose()
+            if (targetPos) {
+                physxPose.translation.x = targetPos.x;
+                physxPose.translation.y = targetPos.y;
+                physxPose.translation.z = targetPos.z;
+            }
+            if (targetRot) {
+                physxPose.rotation.x = targetRot.x;
+                physxPose.rotation.y = targetRot.y;
+                physxPose.rotation.z = targetRot.z;
+                physxPose.rotation.w = targetRot.w;
+            }
+            body.setGlobalPose(physxPose, true);
         }
-        if (targetRot) {
-            rotQuat.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
-            target.object3D.rotation.setFromQuaternion(rotQuat);
-        }
-        target.object3D.updateMatrixWorld();
 
         // These are already in local coordinates
         posVect3.set(point.x, point.y, point.z);
