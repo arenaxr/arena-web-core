@@ -156,20 +156,19 @@ AFRAME.registerComponent('physx-grab', {
                 w: ARENAUtils.round3(rotQuat.w),
             }
         }
-        // Send and receive local pose
-        const grabElPos = grabEl.object3D.position;
-        const grabElRot = grabEl.object3D.quaternion;
+        grabEl.object3D.getWorldPosition(posVect3);
+        grabEl.object3D.getWorldQuaternion(rotQuat);
         const targetPose = {
             position: {
-                x: ARENAUtils.round3(grabElPos.x),
-                y: ARENAUtils.round3(grabElPos.y),
-                z: ARENAUtils.round3(grabElPos.z),
+                x: ARENAUtils.round3(posVect3.x),
+                y: ARENAUtils.round3(posVect3.y),
+                z: ARENAUtils.round3(posVect3.z),
             },
             rotation: {
-                x: ARENAUtils.round3(grabElRot.x),
-                y: ARENAUtils.round3(grabElRot.y),
-                z: ARENAUtils.round3(grabElRot.z),
-                w: ARENAUtils.round3(grabElRot.w),
+                x: ARENAUtils.round3(rotQuat.x),
+                y: ARENAUtils.round3(rotQuat.y),
+                z: ARENAUtils.round3(rotQuat.z),
+                w: ARENAUtils.round3(rotQuat.w),
             }
         }
         const thisMsg = {

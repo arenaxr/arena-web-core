@@ -95,19 +95,19 @@ AFRAME.registerComponent('physx-force-pushable', {
         };
 
         // Use local coords for target obj
-        const targetPos = el.object3D.position;
-        const targetRot = el.object3D.quaternion;
+        el.object3D.getWorldPosition(posVect3);
+        el.object3D.getWorldQuaternion(rotQuat);
         const targetPose = {
             position: {
-                x: ARENAUtils.round3(targetPos.x),
-                y: ARENAUtils.round3(targetPos.y),
-                z: ARENAUtils.round3(targetPos.z)
+                x: ARENAUtils.round3(posVect3.x),
+                y: ARENAUtils.round3(posVect3.y),
+                z: ARENAUtils.round3(posVect3.z)
             },
             rotation: {
-                x: ARENAUtils.round3(targetRot.x),
-                y: ARENAUtils.round3(targetRot.y),
-                z: ARENAUtils.round3(targetRot.z),
-                w: ARENAUtils.round3(targetRot.w)
+                x: ARENAUtils.round3(rotQuat.x),
+                y: ARENAUtils.round3(rotQuat.y),
+                z: ARENAUtils.round3(rotQuat.z),
+                w: ARENAUtils.round3(rotQuat.w)
             }
         };
 
