@@ -31,7 +31,7 @@ AFRAME.registerComponent('physx-grab', {
         this.grabbing = false;
         this.grabEl =      /** @type {AFRAME.Element}    */ null;
         // Track all currently hitting els (can be multiple)
-        this.hitEls =   [];
+        this.hitEls = [];
         // Also track last hit el for proximity check if no other contacts
         this.lastHitEl =   /** @type {AFRAME.Element}    */ null;
         this.lastHitPos = new THREE.Vector3();
@@ -46,7 +46,7 @@ AFRAME.registerComponent('physx-grab', {
 
         this.topicParams = {
             ...ARENA.topicParams,
-            userObj: this.object_id,
+            userObj: this.object_id
         };
     },
 
@@ -147,30 +147,30 @@ AFRAME.registerComponent('physx-grab', {
             position: {
                 x: ARENAUtils.round3(posVect3.x),
                 y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z),
+                z: ARENAUtils.round3(posVect3.z)
             },
             rotation: {
                 x: ARENAUtils.round3(rotQuat.x),
                 y: ARENAUtils.round3(rotQuat.y),
                 z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w),
+                w: ARENAUtils.round3(rotQuat.w)
             }
-        }
+        };
         grabEl.object3D.getWorldPosition(posVect3);
         grabEl.object3D.getWorldQuaternion(rotQuat);
         const targetPose = {
             position: {
                 x: ARENAUtils.round3(posVect3.x),
                 y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z),
+                z: ARENAUtils.round3(posVect3.z)
             },
             rotation: {
                 x: ARENAUtils.round3(rotQuat.x),
                 y: ARENAUtils.round3(rotQuat.y),
                 z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w),
+                w: ARENAUtils.round3(rotQuat.w)
             }
-        }
+        };
         const thisMsg = {
             object_id: object_id,
             action: 'clientEvent',
@@ -178,8 +178,8 @@ AFRAME.registerComponent('physx-grab', {
             data: {
                 target: grabEl.id,
                 pose: handPose,
-                targetPose: targetPose,
-            },
+                targetPose: targetPose
+            }
         };
         ARENAUtils.publishClientEvent(grabEl, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
     },
@@ -205,30 +205,30 @@ AFRAME.registerComponent('physx-grab', {
             position: {
                 x: ARENAUtils.round3(posVect3.x),
                 y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z),
+                z: ARENAUtils.round3(posVect3.z)
             },
             rotation: {
                 x: ARENAUtils.round3(rotQuat.x),
                 y: ARENAUtils.round3(rotQuat.y),
                 z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w),
+                w: ARENAUtils.round3(rotQuat.w)
             }
-        }
+        };
         grabEl.object3D.getWorldPosition(posVect3);
         grabEl.object3D.getWorldQuaternion(rotQuat);
         const targetPose = {
             position: {
                 x: ARENAUtils.round3(posVect3.x),
                 y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z),
+                z: ARENAUtils.round3(posVect3.z)
             },
             rotation: {
                 x: ARENAUtils.round3(rotQuat.x),
                 y: ARENAUtils.round3(rotQuat.y),
                 z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w),
+                w: ARENAUtils.round3(rotQuat.w)
             }
-        }
+        };
 
         const thisMsg = {
             object_id: object_id,
@@ -237,8 +237,8 @@ AFRAME.registerComponent('physx-grab', {
             data: {
                 target: grabEl.id,
                 pose: handPose,
-                targetPose: targetPose,
-            },
+                targetPose: targetPose
+            }
         };
         ARENAUtils.publishClientEvent(grabEl, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
 
@@ -279,12 +279,13 @@ AFRAME.registerComponent('physx-grab', {
     }
 });
 
-AFRAME.registerComponent("physx-remote-grabber", {
+AFRAME.registerComponent('physx-remote-grabber', {
     init() {
         this.startGrab = this.startGrab.bind(this);
         this.stopGrab = this.stopGrab.bind(this);
 
         this.grabEl =      /** @type {AFRAME.Element}    */ null;
+        this.parentQuat = new THREE.Quaternion();
     },
 
     startGrab(targetId, pose, targetPose) {
@@ -314,7 +315,18 @@ AFRAME.registerComponent("physx-remote-grabber", {
             const body = target.components['physx-body'].rigidBody;
             if (!body) return;
 
-            const physxPose = body.getGlobalPose()
+            // Set object3d as well as physx body, the former is referenced for the joint attachment
+            posVect3.set(targetPos.x, targetPos.y, targetPos.z);
+            rotQuat.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
+            if (target.parentEl.id !== 'sceneRoot') {
+                target.parentEl.object3D.worldToLocal(posVect3);
+                target.parentEl.object3D.getWorldQuaternion(this.parentQuat);
+                rotQuat.premultiply(this.parentQuat.invert());
+            }
+            target.object3D.position.copy(posVect3);
+            target.object3D.rotation.setFromQuaternion(rotQuat);
+
+            const physxPose = body.getGlobalPose();
             if (targetPos) {
                 physxPose.translation.x = targetPos.x;
                 physxPose.translation.y = targetPos.y;
@@ -329,8 +341,8 @@ AFRAME.registerComponent("physx-remote-grabber", {
             body.setGlobalPose(physxPose, true);
         }
 
-        this.joint = document.createElement("a-entity");
-        this.joint.setAttribute("physx-joint", `type: Fixed; target: #${el.id}`);
+        this.joint = document.createElement('a-entity');
+        this.joint.setAttribute('physx-joint', `type: Fixed; target: #${el.id}`);
 
         target.appendChild(this.joint);
 
@@ -359,7 +371,7 @@ AFRAME.registerComponent("physx-remote-grabber", {
             const body = grabEl.components['physx-body'].rigidBody;
             if (!body) return;
 
-            const physxPose = body.getGlobalPose()
+            const physxPose = body.getGlobalPose();
             if (targetPos) {
                 physxPose.translation.x = targetPos.x;
                 physxPose.translation.y = targetPos.y;

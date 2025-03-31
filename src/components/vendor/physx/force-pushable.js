@@ -33,8 +33,8 @@ AFRAME.registerComponent('physx-force-pushable', {
         this.object_ids = {
             leftHand: `handLeft_${ARENA.idTag}`,
             rightHand: `handRight_${ARENA.idTag}`,
-            "mouse-cursor": ARENA.idTag,
-        }
+            'mouse-cursor': ARENA.idTag
+        };
     },
 
     play() {
@@ -128,13 +128,13 @@ AFRAME.registerComponent('physx-force-pushable', {
                 },
                 sourcePose: sourcePose,
                 targetPose: targetPose,
-                target: this.el.id,
+                target: this.el.id
             }
         };
         const topicParams = {
             ...ARENA.topicParams,
             userObj: object_id
-        }
+        };
 
         const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
@@ -146,7 +146,7 @@ AFRAME.registerComponent('physx-force-pushable', {
 
 const impulseVect3 = new THREE.Vector3(); // Reusable vector for force calcs
 
-AFRAME.registerComponent("physx-remote-pusher", {
+AFRAME.registerComponent('physx-remote-pusher', {
     init() {
         this.emitPush = this.emitPush.bind(this);
     },
@@ -170,7 +170,7 @@ AFRAME.registerComponent("physx-remote-pusher", {
         if (targetPose) {
             const { position: targetPos, rotation: targetRot } = targetPose;
             // Need to override simulation pose for dynamic body
-            const physxPose = body.getGlobalPose()
+            const physxPose = body.getGlobalPose();
             if (targetPos) {
                 physxPose.translation.x = targetPos.x;
                 physxPose.translation.y = targetPos.y;
