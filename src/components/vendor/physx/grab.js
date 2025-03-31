@@ -156,19 +156,20 @@ AFRAME.registerComponent('physx-grab', {
                 w: ARENAUtils.round3(rotQuat.w),
             }
         }
-        grabEl.object3D.getWorldPosition(posVect3);
-        grabEl.object3D.getWorldQuaternion(rotQuat);
+        // Send and receive local pose
+        const grabElPos = grabEl.object3D.position;
+        const grabElRot = grabEl.object3D.quaternion;
         const targetPose = {
             position: {
-                x: ARENAUtils.round3(posVect3.x),
-                y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z),
+                x: ARENAUtils.round3(grabElPos.x),
+                y: ARENAUtils.round3(grabElPos.y),
+                z: ARENAUtils.round3(grabElPos.z),
             },
             rotation: {
-                x: ARENAUtils.round3(rotQuat.x),
-                y: ARENAUtils.round3(rotQuat.y),
-                z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w),
+                x: ARENAUtils.round3(grabElRot.x),
+                y: ARENAUtils.round3(grabElRot.y),
+                z: ARENAUtils.round3(grabElRot.z),
+                w: ARENAUtils.round3(grabElRot.w),
             }
         }
         const thisMsg = {
@@ -198,6 +199,7 @@ AFRAME.registerComponent('physx-grab', {
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
+        // Hands are in worldspace
         el.object3D.getWorldPosition(posVect3);
         el.object3D.getWorldQuaternion(rotQuat);
         const handPose = {
@@ -320,7 +322,7 @@ AFRAME.registerComponent("physx-remote-grabber", {
         this.grabEl = target;
     },
 
-    stopGrab(pose, poseTarget) {
+    stopGrab(pose, targetPose) {
         const { grabEl, el, joint } = this;
 
         if (!grabEl) return;
@@ -337,9 +339,9 @@ AFRAME.registerComponent("physx-remote-grabber", {
         if (targetPos) grabEl.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
         if (targetRot){
             rotQuat.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
-            target.object3D.rotation.setFromQuaternion(rotQuat);
+            grabEl.object3D.rotation.setFromQuaternion(rotQuat);
         }
-       grabEl.object3D.updateMatrixWorld();
+        grabEl.object3D.updateMatrixWorld();
 
         grabEl.removeState(GRABBED_STATE);
 

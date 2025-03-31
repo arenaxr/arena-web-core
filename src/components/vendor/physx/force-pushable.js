@@ -77,6 +77,7 @@ AFRAME.registerComponent('physx-force-pushable', {
 
         body.addImpulseAtLocalPos(force, pos);
 
+        // User client source should be always in world coordinates
         sourceEl.object3D.getWorldPosition(posVect3);
         sourceEl.object3D.getWorldQuaternion(rotQuat);
         const sourcePose = {
@@ -93,19 +94,20 @@ AFRAME.registerComponent('physx-force-pushable', {
             }
         };
 
-        el.object3D.getWorldPosition(posVect3);
-        el.object3D.getWorldQuaternion(rotQuat);
+        // Use local coords for target obj
+        const targetPos = el.object3D.position;
+        const targetRot = el.object3D.quaternion;
         const targetPose = {
             position: {
-                x: ARENAUtils.round3(posVect3.x),
-                y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z)
+                x: ARENAUtils.round3(targetPos.x),
+                y: ARENAUtils.round3(targetPos.y),
+                z: ARENAUtils.round3(targetPos.z)
             },
             rotation: {
-                x: ARENAUtils.round3(rotQuat.x),
-                y: ARENAUtils.round3(rotQuat.y),
-                z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w)
+                x: ARENAUtils.round3(targetRot.x),
+                y: ARENAUtils.round3(targetRot.y),
+                z: ARENAUtils.round3(targetRot.z),
+                w: ARENAUtils.round3(targetRot.w)
             }
         };
 
@@ -161,29 +163,20 @@ AFRAME.registerComponent("physx-remote-pusher", {
         const target = document.getElementById(targetId);
         if (!target) return;
 
-        if (targetPose) {
-            if (targetPose.position) {
-                target.object3D.position.set(
-                    targetPose.position.x,
-                    targetPose.position.y,
-                    targetPose.position.z
-                );
-            }
-            if (targetPose.rotation) {
-                rotQuat.set(
-                    targetPose.rotation.x,
-                    targetPose.rotation.y,
-                    targetPose.rotation.z,
-                    targetPose.rotation.w
-                );
-                target.object3D.rotation.setFromQuaternion(rotQuat);
-            }
-            target.object3D.updateMatrixWorld();
-        }
-
         if (!target.components['physx-body']) return;
         const body = target.components['physx-body'].rigidBody;
         if (!body) return;
+
+        const { position: targetPos, rotation: targetRot } = targetPose;
+
+        if (targetPos) {
+            target.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
+        }
+        if (targetRot) {
+            rotQuat.set(targetRot.x, targetRot.y, targetRot.z, targetRot.w);
+            target.object3D.rotation.setFromQuaternion(rotQuat);
+        }
+        target.object3D.updateMatrixWorld();
 
         // These are already in local coordinates
         posVect3.set(point.x, point.y, point.z);
