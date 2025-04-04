@@ -78,7 +78,7 @@ AFRAME.registerSystem('arena-mqtt', {
                 ],
                 mqttHostURI: this.mqttHostURI,
                 idTag,
-                dbg: ARENA.defaults.devInstance,
+                dbg: Boolean(ARENA.params.debug), // deterministic truthy/falsy boolean
             },
             proxy(this.mqttHealthCheck.bind(this)),
             proxy(() => {

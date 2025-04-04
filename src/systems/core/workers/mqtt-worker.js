@@ -237,7 +237,7 @@ class MQTTWorker {
                         this.onSubscribed();
                         this.subCount = 0;
                     }
-                    if (this.config.dbg === true) console.log(`Subscribe success to: ${topic}`);
+                    if (this.config.dbg === true) console.debug(`Subscribe success to: ${topic}`);
                 },
                 onFailure: () => {
                     console.error(`Subscribe FAILED to: ${topic}`);

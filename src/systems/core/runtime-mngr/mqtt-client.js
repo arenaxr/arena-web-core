@@ -82,7 +82,7 @@ export default class MqttClient {
     subscribe(topic) {
         const logOptions = {
             onSuccess: () => {
-                if (this.settings.dbg === true) console.log(`Subscribe success to: ${topic}`);
+                if (this.settings.dbg === true) console.debug(`Subscribe success to: ${topic}`);
             },
             onFailure: () => {
                 console.error(`Subscribe FAILED to: ${topic}`);
@@ -96,7 +96,7 @@ export default class MqttClient {
     }
 
     async publish(topic, payload, qos = 0, retained = false) {
-        if (this.settings.dbg) {
+        if (this.settings.dbg === true) {
             console.debug(`publish ${topic}: ${payload}`);
         }
         this.mqttc.send(topic, payload, qos, retained);
@@ -106,7 +106,7 @@ export default class MqttClient {
      * Callback; Called when a message arrives
      */
     onMessageArrived(message) {
-        if (this.settings.dbg) {
+        if (this.settings.dbg === true) {
             console.debug(`Mqtt Msg [${message.destinationName}]: ${message.payloadString}`);
         }
 

@@ -938,6 +938,11 @@ window.addEventListener('onauth', async (e) => {
 
     arenaHostLbl.value = hostData.host;
 
+    const url = new URL(window.location.href);
+    const sceneParam = url.searchParams.get('scene');
+    const focusObjectId = url.searchParams.get('objectId');
+    const debug = Boolean(url.searchParams.get('debug')); // deterministic truthy/falsy boolean
+
     // start persist object mngr
     PersistObjects.init({
         persistUri: hostData.persist_uri,
@@ -952,6 +957,7 @@ window.addEventListener('onauth', async (e) => {
         mqttToken,
         userClient,
         exportSceneButton,
+        dbg: debug,
     });
 
     // load default objects, convert to mqtt wire format
@@ -972,9 +978,6 @@ window.addEventListener('onauth', async (e) => {
     namespaceinput.value = username; // default to user namespace
 
     // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
-    const url = new URL(window.location.href);
-    const sceneParam = url.searchParams.get('scene');
-    const focusObjectId = url.searchParams.get('objectId');
     let ns;
     let s;
     if (sceneParam) {

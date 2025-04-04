@@ -58,7 +58,7 @@ export default class MQTTSignaling {
     subscribe(topic) {
         const logOptions = {
             onSuccess: () => {
-                if (this.dbg === true) console.log(`Subscribe success to: ${topic}`);
+                if (this.dbg === true) console.debug(`Subscribe success to: ${topic}`);
             },
             onFailure: () => {
                 console.error(`Subscribe FAILED to: ${topic}`);

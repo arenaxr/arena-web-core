@@ -133,14 +133,16 @@ export default class RuntimeMngr {
             nameSpace,
             sceneName,
         });
-        console.info('runtimeTopicPub:', this.runtimeTopicPub);
-        console.info('runtimeTopicSub:', this.runtimeTopicSub);
-        console.info('modulesTopicPub:', this.modulesTopicPub);
-        console.info('modulesTopicSub:', this.modulesTopicSub);
         this.regTimeoutSeconds = regTimeoutSeconds;
         this.onInitCallback = onInitCallback;
         this.fsLocation = fsLocation;
         this.debug = debug;
+        if (this.debug === true) {
+            console.debug('runtimeTopicPub:', this.runtimeTopicPub);
+            console.debug('runtimeTopicSub:', this.runtimeTopicSub);
+            console.debug('modulesTopicPub:', this.modulesTopicPub);
+            console.debug('modulesTopicSub:', this.modulesTopicSub);
+        }
 
         this.modules = [];
         this.pendingModulesArgs = [];
@@ -148,7 +150,7 @@ export default class RuntimeMngr {
         this.isRegistered = false;
         this.reloading = false;
 
-        // instanciate runtime messages factory
+        // instantiate runtime messages factory
         this.rtMsgs = new RuntimeMsgs(this);
 
         // create a last will message (delete runtime)
@@ -208,7 +210,7 @@ export default class RuntimeMngr {
             willMessage: rtMngr.lastWillStringMsg,
             willMessageTopic: rtMngr.runtimeTopicPub,
             userid: rtMngr.name,
-            dbg: ARENA.defaults.devInstance,
+            dbg: rtMngr.debug,
         });
 
         await this.mc.connect();
@@ -229,7 +231,7 @@ export default class RuntimeMngr {
     register() {
         if (this.isRegistered === true) return;
 
-        if (this.debug === true) console.info('Runtime-Mngr: Registering...');
+        if (this.debug === true) console.debug('Runtime-Mngr: Registering...');
 
         const regMsg = this.rtMsgs.registerRuntime();
         this.regRequestUuid = regMsg.object_id; // save message uuid for confirmation
@@ -252,7 +254,7 @@ export default class RuntimeMngr {
             return;
         }
 
-        if (this.debug === true) console.info('Runtime-Mngr: rcv msg', msg);
+        if (this.debug === true) console.debug('Runtime-Mngr: rcv msg', msg);
 
         if (this.isRegistered === false) {
             // response from orchestrator
@@ -294,7 +296,7 @@ export default class RuntimeMngr {
             const rtMngr = this;
             this.pendingModulesArgs.forEach((args) => {
                 if (rtMngr.debug === true) {
-                    console.info('Runtime-Mngr: Starting module', args.persistObj);
+                    console.debug('Runtime-Mngr: Starting module', args.persistObj);
                 }
                 rtMngr.createModuleFromPersist(args.persistObj, args.replaceVars);
             });
@@ -342,7 +344,7 @@ export default class RuntimeMngr {
             return;
         }
 
-        // instanciate create module message
+        // instantiate create module message
         const modCreateMsg = this.rtMsgs.createModuleFromPersistObj(persistObj, replaceVars);
 
         // save this module data to delete before exit
@@ -369,7 +371,7 @@ export default class RuntimeMngr {
         this.modules.forEach((saved) => {
             if (saved.isClientInstantiate || all === true) {
                 const modDelMsg = this.rtMsgs.deleteModule(saved.moduleCreateMsg.data);
-                if (this.debug === true) console.info('Sending delete module request:', modDelMsg);
+                if (this.debug === true) console.debug('Sending delete module request:', modDelMsg);
                 this.mc.publish(this.modulesTopicPub, JSON.stringify(modDelMsg));
             }
         });
@@ -386,7 +388,7 @@ export default class RuntimeMngr {
         console.info(`Runtime-Mngr: Restart(all=${all})`, this.modules);
         this.modules.forEach((saved) => {
             if (saved.isClientInstantiate || all === true) {
-                if (this.debug === true) console.info('Sending create module request:', saved.moduleCreateMsg);
+                if (this.debug === true) console.debug('Sending create module request:', saved.moduleCreateMsg);
                 this.mc.publish(this.modulesTopicPub, JSON.stringify(saved.moduleCreateMsg));
             }
         });

@@ -41,7 +41,7 @@ export default class MqttClient {
 
     async connect() {
         if (this.settings.uri) {
-            if (this.settings.dbg === true) console.log('Connecting [uri]: ', this.settings.uri);
+            if (this.settings.dbg === true) console.debug('Connecting [uri]: ', this.settings.uri);
             // init Paho client connection
             this.mqttc = new Paho.Client(this.settings.uri, this.settings.clientid);
         } else {
@@ -108,7 +108,7 @@ export default class MqttClient {
      * Callback; Called when the client loses its connection
      */
     onConnectionLost(responseObject) {
-        if (this.settings.dbg === true) console.log('Mqtt client disconnected...');
+        if (this.settings.dbg === true) console.debug('Mqtt client disconnected...');
 
         if (responseObject.errorCode !== 0) {
             if (this.settings.dbg === true) console.error(`Mqtt ERROR: ${responseObject.errorMessage}\n`);
@@ -120,21 +120,21 @@ export default class MqttClient {
      */
     onMessageArrived(message) {
         if (this.settings.dbg === true)
-            console.log(`Mqtt Msg [${message.destinationName}]: ${message.payloadString}\n`);
+            console.debug(`Mqtt Msg [${message.destinationName}]: ${message.payloadString}\n`);
 
         if (this.settings.onMessageCallback !== undefined) this.settings.onMessageCallback(message);
     }
 
     publish(topic, payload) {
         if (typeof payload !== 'string') payload = JSON.stringify(payload);
-        if (this.settings.dbg === true) console.log(`Publishing (${topic}):${payload}`);
+        if (this.settings.dbg === true) console.debug(`Publishing (${topic}):${payload}`);
         this.mqttc.send(topic, payload, 0, false);
     }
 
     subscribe(topic) {
         const logOptions = {
             onSuccess: () => {
-                if (this.settings.dbg === true) console.log(`Subscribe success to: ${topic}`);
+                if (this.settings.dbg === true) console.debug(`Subscribe success to: ${topic}`);
             },
             onFailure: () => {
                 console.error(`Subscribe FAILED to: ${topic}`);

@@ -53,6 +53,7 @@ export async function init(settings) {
         mqttToken: settings.mqttToken,
         userClient: settings.userClient,
         exportSceneButton: settings.exportSceneButton,
+        dbg: settings.dbg,
     };
 
     persist.currentSceneObjs = [];
@@ -737,7 +738,7 @@ export function mqttReconnect(settings = undefined) {
         onConnectionLost: onMqttConnectionLost,
         mqtt_username: settings.mqttUsername,
         mqtt_token: settings.mqttToken,
-        dbg: ARENA.defaults.devInstance,
+        dbg: settings.dbg,
     });
 
     try {

@@ -228,6 +228,7 @@ AFRAME.registerSystem('arena-scene', {
             sceneName: this.sceneName,
             idTag: this.idTag,
             userClient: this.userClient,
+            debug: Boolean(ARENA.params.debug), // deterministic truthy/falsy boolean
         });
         this.RuntimeManager.init();
     },
