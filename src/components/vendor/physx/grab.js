@@ -18,7 +18,6 @@ AFRAME.registerComponent('physx-grab', {
         // distance (combined) from the last contact point by more than this value
         proximity: { default: 0, type: 'number' }
     },
-    dependencies: ['arena-hand'],
     init: function() {
         const { el } = this;
 
