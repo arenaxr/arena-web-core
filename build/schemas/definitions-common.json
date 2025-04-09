@@ -558,6 +558,7 @@
         "physx-force-pushable": {
             "description": "Makes a physx-body object pushable by the user. Requires `click-listener` attribute. Requires `scene-options: physics`.",
             "title": "PhysX Pushable",
+            "type": "object",
             "properties": {
                 "on": {
                     "default": "mousedown",
