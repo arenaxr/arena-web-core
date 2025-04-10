@@ -3,6 +3,9 @@
     "description": "Loads a 3D model and material using a Wavefront (.OBJ) file and a .MTL file.\n\nSee guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {

@@ -257,43 +257,5 @@
             "title": "Skip Cache",
             "type": "boolean"
         }
-    },
-    "definitions": {
-        "vector2": {
-            "title": "Vector2",
-            "format": "grid",
-            "properties": {
-                "x": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "y": {
-                    "default": 0,
-                    "type": "number"
-                }
-            },
-            "required": ["x", "y"],
-            "type": "object"
-        },
-        "vector3": {
-            "title": "Vector3",
-            "format": "grid",
-            "properties": {
-                "x": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "y": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "z": {
-                    "default": 0,
-                    "type": "number"
-                }
-            },
-            "required": ["x", "y", "z"],
-            "type": "object"
-        }
     }
 }

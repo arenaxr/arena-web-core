@@ -3,6 +3,9 @@
     "description": "ARENAUI element which displays text and optionally an image.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {

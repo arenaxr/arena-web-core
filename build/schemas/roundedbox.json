@@ -3,6 +3,9 @@
     "description": "Rounded Box Geometry.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {

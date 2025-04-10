@@ -3,6 +3,9 @@
     "description": "Draw a line that can have a custom width.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {

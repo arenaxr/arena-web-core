@@ -3,6 +3,9 @@
     "description": "Entities are the base of all objects in the scene. Entities are containers into which components can be attached.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {

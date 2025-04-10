@@ -316,22 +316,7 @@
                     "minItems": 1,
                     "maxItems": 10,
                     "items": {
-                        "type": "object",
-                        "title": "Head Models",
-                        "properties": {
-                            "name": {
-                                "title": "Head Model Name",
-                                "type": "string",
-                                "description": "A head model name for the selection GUI."
-                            },
-                            "url": {
-                                "title": "Head Model URL",
-                                "type": "string",
-                                "format": "uri",
-                                "description": "The head model GLTF URL. You must scale and rotate your source GLTFs appropriately."
-                            }
-                        },
-                        "required": ["name", "url"]
+                        "$ref": "#/definitions/head-model"
                     }
                 },
                 "jitsiHost": {
@@ -411,160 +396,186 @@
                     "type": "number"
                 },
                 "physics": {
-                    "properties": {
-                        "enabled": {
-                            "default": false,
-                            "description": "Set true to load",
-                            "title": "Enabled",
-                            "type": "boolean"
-                        },
-                        "delay": {
-                            "default": 5000,
-                            "description": "Amount of time in ms to wait after loading before starting the physics. Can be useful if there is still some things loading or initializing elsewhere in the scene",
-                            "title": "Physics Simulation Startup Delay",
-                            "type": "number"
-                        },
-                        "useDefaultScene": {
-                            "default": true,
-                            "description": "If true, sets up a default scene with a ground plane and bounding cylinder.",
-                            "title": "Use Default Physics Scene",
-                            "type": "boolean"
-                        },
-                        "throttle": {
-                            "default": 10,
-                            "description": "Throttle for running the physics simulation. On complex scenes, you can increase this to avoid dropping video frames",
-                            "title": "Physics Throttle Rate",
-                            "type": "number"
-                        },
-                        "speed": {
-                            "default": 1,
-                            "description": "Simulation speed multiplier. Increase or decrease to speed up or slow down simulation time",
-                            "title": "Physics Simulation Speed",
-                            "type": "number"
-                        },
-                        "groundCollisionLayers": {
-                            "default": [2],
-                            "description": "Which collision layers the ground belongs to",
-                            "title": "Ground Collision Layers",
-                            "type": "array",
-                            "items": {
-                                "type": "number",
-                                "enum": [1,2,3,4]
-                            }
-                        },
-                        "groundCollisionMask": {
-                            "default": [1,2,3,4],
-                            "description": "Which collision layers will collide with the ground",
-                            "title": "Ground Collision Mask",
-                            "type": "array",
-                            "items": {
-                                "type": "number",
-                                "enum": [1,2,3,4]
-                            }
-                        },
-                        "gravity": {
-                            "$ref": "#/definitions/vector3",
-                            "format": "grid",
-                            "default": {
-                                "x": 0,
-                                "y": -9.8,
-                                "z": 0
-                            },
-                            "description": "Gravity vector in m/s^2",
-                            "title": "Gravity",
-                            "type": "object"
-                        },
-                        "stats": {
-                            "default": [],
-                            "description": "Where to output performance stats:, panel, console, events (or some combination)",
-                            "title": "Physics Stats",
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "enum": ["console", "events", "panel"]
-                            }
-                        }
-                    },
-                    "required": ["enabled"],
-                    "title": "Physics Settings",
-                    "type": "object",
-                    "description": "Clientside PhysX-based physics system. Required for all physx-* components"
+                    "$ref": "#/definitions/physics"
                 },
                 "ar-hit-test": {
-                    "properties": {
-                        "enabled": {
-                            "default": true,
-                            "description": "Whether to do hit-testing or not.",
-                            "type": "boolean"
-                        },
-                        "src": {
-                            "default": "static/images/reticle-gray.png",
-                            "type": "string",
-                            "format": "uri",
-                            "description": "Image to use for the reticle."
-                        },
-                        "type": {
-                            "default": "footprint",
-                            "description": "Footprint is the shape of the model.",
-                            "enum": ["footprint", "map"],
-                            "type": "string"
-                        },
-                        "footprintDepth": {
-                            "default": 0.1,
-                            "description": "Amount of the model used for the footprint, 1 is full height.",
-                            "type": "number"
-                        },
-                        "mapSize": {
-                            "default": "0.5 0.5",
-                            "description": "If no target is set then this is the size of the map.",
-                            "type": "string"
-                        }
-                    },
-                    "required": ["enabled", "src"],
-                    "title": "AR Hit Test Settings",
-                    "type": "object",
-                    "description": "A-Frame AR Hit Test Settings.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>AR Hit Test</a> component."
+                    "$ref": "#/definitions/ar-hit-test"
                 },
                 "openvps": {
-                    "properties": {
-                        "enabled": {
-                            "default": false,
-                            "description": "Whether to use OpenVPS.",
-                            "type": "boolean"
-                        },
-                        "imageUrl": {
-                            "default": "",
-                            "description": "URL of the OpenVPS image matching service.",
-                            "type": "string",
-                            "format": "uri"
-                        },
-                        "meshUrl": {
-                            "default": "",
-                            "description": "URL of the OpenVPS mesh matching service.",
-                            "type": "string",
-                            "format": "uri"
-                        },
-                        "interval": {
-                            "default": 5000,
-                            "description": "Interval in milliseconds to query the OpenVPS server.",
-                            "type": "number"
-                        },
-                        "imgQuality": {
-                            "default": 0.8,
-                            "description": "Image quality to use for camera image compression",
-                            "type": "number"
-                        }
-                    },
-                    "required": ["enabled"],
-                    "title": "OpenVPS Settings",
-                    "type": "object",
-                    "description": "Set an OpenVPS server to localize by camera image on mobile devices"
+                    "$ref": "#/definitions/openvps"
                 }
             },
             "required": ["maxAVDist", "physics", "originMarker","privateScene"],
             "title": "Scene Options",
             "type": "object",
             "description": "ARENA Scene Options."
+        },
+        "head-model": {
+            "type": "object",
+            "title": "Head Model",
+            "properties": {
+                "name": {
+                    "title": "Head Model Name",
+                    "type": "string",
+                    "description": "A head model name for the selection GUI."
+                },
+                "url": {
+                    "title": "Head Model URL",
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The head model GLTF URL. You must scale and rotate your source GLTFs appropriately."
+                }
+            },
+            "required": ["name", "url"]
+        },
+        "physics": {
+            "properties": {
+                "enabled": {
+                    "default": false,
+                    "description": "Set true to load",
+                    "title": "Enabled",
+                    "type": "boolean"
+                },
+                "delay": {
+                    "default": 5000,
+                    "description": "Amount of time in ms to wait after loading before starting the physics. Can be useful if there is still some things loading or initializing elsewhere in the scene",
+                    "title": "Physics Simulation Startup Delay",
+                    "type": "number"
+                },
+                "useDefaultScene": {
+                    "default": true,
+                    "description": "If true, sets up a default scene with a ground plane and bounding cylinder.",
+                    "title": "Use Default Physics Scene",
+                    "type": "boolean"
+                },
+                "throttle": {
+                    "default": 10,
+                    "description": "Throttle for running the physics simulation. On complex scenes, you can increase this to avoid dropping video frames",
+                    "title": "Physics Throttle Rate",
+                    "type": "number"
+                },
+                "speed": {
+                    "default": 1,
+                    "description": "Simulation speed multiplier. Increase or decrease to speed up or slow down simulation time",
+                    "title": "Physics Simulation Speed",
+                    "type": "number"
+                },
+                "groundCollisionLayers": {
+                    "default": [2],
+                    "description": "Which collision layers the ground belongs to",
+                    "title": "Ground Collision Layers",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "enum": [1,2,3,4]
+                    }
+                },
+                "groundCollisionMask": {
+                    "default": [1,2,3,4],
+                    "description": "Which collision layers will collide with the ground",
+                    "title": "Ground Collision Mask",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "enum": [1,2,3,4]
+                    }
+                },
+                "gravity": {
+                    "$ref": "#/definitions/vector3",
+                    "format": "grid",
+                    "default": {
+                        "x": 0,
+                        "y": -9.8,
+                        "z": 0
+                    },
+                    "description": "Gravity vector in m/s^2",
+                    "title": "Gravity"
+                },
+                "stats": {
+                    "default": [],
+                    "description": "Where to output performance stats:, panel, console, events (or some combination)",
+                    "title": "Physics Stats",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["console", "events", "panel"]
+                    }
+                }
+            },
+            "required": ["enabled"],
+            "title": "Physics Settings",
+            "type": "object",
+            "description": "Clientside PhysX-based physics system. Required for all physx-* components"
+        },
+        "ar-hit-test": {
+            "properties": {
+                "enabled": {
+                    "default": true,
+                    "description": "Whether to do hit-testing or not.",
+                    "type": "boolean"
+                },
+                "src": {
+                    "default": "static/images/reticle-gray.png",
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Image to use for the reticle."
+                },
+                "type": {
+                    "default": "footprint",
+                    "description": "Footprint is the shape of the model.",
+                    "enum": ["footprint", "map"],
+                    "type": "string"
+                },
+                "footprintDepth": {
+                    "default": 0.1,
+                    "description": "Amount of the model used for the footprint, 1 is full height.",
+                    "type": "number"
+                },
+                "mapSize": {
+                    "default": "0.5 0.5",
+                    "description": "If no target is set then this is the size of the map.",
+                    "type": "string"
+                }
+            },
+            "required": ["enabled", "src"],
+            "title": "AR Hit Test Settings",
+            "type": "object",
+            "description": "A-Frame AR Hit Test Settings.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>AR Hit Test</a> component."
+        },
+        "openvps": {
+            "properties": {
+                "enabled": {
+                    "default": false,
+                    "description": "Whether to use OpenVPS.",
+                    "type": "boolean"
+                },
+                "imageUrl": {
+                    "default": "",
+                    "description": "URL of the OpenVPS image matching service.",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "meshUrl": {
+                    "default": "",
+                    "description": "URL of the OpenVPS mesh matching service.",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "interval": {
+                    "default": 5000,
+                    "description": "Interval in milliseconds to query the OpenVPS server.",
+                    "type": "number"
+                },
+                "imgQuality": {
+                    "default": 0.8,
+                    "description": "Image quality to use for camera image compression",
+                    "type": "number"
+                }
+            },
+            "required": ["enabled"],
+            "title": "OpenVPS Settings",
+            "type": "object",
+            "description": "Set an OpenVPS server to localize by camera image on mobile devices"
         },
         "post-processing": {
             "properties": {
@@ -768,26 +779,6 @@
             "title": "Post-Processing Effects",
             "type": "object",
             "description": "These effects are enabled in desktop and XR views."
-        },
-        "vector3": {
-            "title": "Vector3",
-            "format": "grid",
-            "properties": {
-                "x": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "y": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "z": {
-                    "default": 0,
-                    "type": "number"
-                }
-            },
-            "required": ["x", "y", "z"],
-            "type": "object"
         }
     },
     "format": "grid",

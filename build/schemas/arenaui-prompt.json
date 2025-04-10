@@ -3,6 +3,9 @@
     "description": "ARENAUI element which displays prompt with button actions.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {

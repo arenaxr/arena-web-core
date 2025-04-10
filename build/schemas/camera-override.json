@@ -56,8 +56,7 @@
             "enum": ["camera-override"]
         },
         "data": {
-            "$ref": "#/definitions/camera-override",
-            "description": "Object data payload; Camera Override config data"
+            "$ref": "#/definitions/camera-override"
         }
     },
     "required": ["object_id", "action", "persist", "type", "data"]

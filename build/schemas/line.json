@@ -3,6 +3,9 @@
     "description": "Draw a line.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {
@@ -76,27 +79,5 @@
             }
         }
     ],
-    "required": ["object_id", "action", "type", "data", "persist"],
-    "definitions": {
-        "vector3": {
-            "title": "Vector3",
-            "format": "grid",
-            "properties": {
-                "x": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "y": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "z": {
-                    "default": 0,
-                    "type": "number"
-                }
-            },
-            "required": ["x", "y", "z"],
-            "type": "object"
-        }
-    }
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

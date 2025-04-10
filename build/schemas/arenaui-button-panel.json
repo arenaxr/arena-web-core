@@ -3,6 +3,9 @@
     "description": "ARENAUI element which displays a vertical or horizontal panel of buttons.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {

@@ -84,126 +84,132 @@
                     "description": "Channels describe files representing access to IO from pubsub and client sockets (possibly more in the future; currently only supported for WASM programs).",
                     "uniqueItems": false,
                     "items": {
-                        "type": "object",
-                        "title": "Channels",
-                        "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Folder visible by the program."
-                            },
-                            "type": {
-                                "type": "string",
-                                "description": "Pubsub or client socket.",
-                                "enum": ["pubsub", "client"],
-                                "default": "pubsub"
-                            },
-                            "mode": {
-                                "type": "string",
-                                "description": "Access mode.",
-                                "enum": ["r", "w", "rw"]
-                            },
-                            "params": {
-                                "type": "object",
-                                "title": "Parameters",
-                                "description": "Type (i.e. pubsub/client)-specific parameters.",
-                                "properties": {
-                                    "topic": {
-                                        "type": "string",
-                                        "description": "Pubsub topic (pubsub)."
-                                    },
-                                    "host": {
-                                        "type": "string",
-                                        "description": "Destination host address (client socket; ignored for now)."
-                                    },
-                                    "port": {
-                                        "type": "number",
-                                        "description": "Destination port (client socket; ignored for now)."
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "required": ["path", "type", "mode"],
-                    "default": [
-                        {
-                            "path": "/ch/${scene}",
-                            "type": "pubsub",
-                            "mode": "rw",
-                            "params": {
-                                "topic": "realm/s/${scene}/${namespace}"
-                            }
-                        }
-                    ]
+                        "$ref": "#/definitions/channels"
+                    }
                 },
                 "run_info": {
+                    "$ref": "#/definitions/run_info"
+                }
+            },
+            "required": ["name", "file", "location", "filetype", "instantiate", "parent", "env"]
+        },
+        "channels": {
+            "type": "object",
+            "title": "Channels",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Folder visible by the program."
+                },
+                "type": {
+                    "type": "string",
+                    "description": "Pubsub or client socket.",
+                    "enum": ["pubsub", "client"],
+                    "default": "pubsub"
+                },
+                "mode": {
+                    "type": "string",
+                    "description": "Access mode.",
+                    "enum": ["r", "w", "rw"]
+                },
+                "params": {
                     "type": "object",
-                    "title": "Execution info",
-                    "description": "Program execution info, added at runtime.",
+                    "title": "Parameters",
+                    "description": "Type (i.e. pubsub/client)-specific parameters.",
                     "properties": {
-                        "web_host": {
+                        "topic": {
                             "type": "string",
-                            "description": "ARENA web host."
+                            "description": "Pubsub topic (pubsub)."
                         },
-                        "namespace": {
+                        "host": {
                             "type": "string",
-                            "description": "ARENA namespace."
+                            "description": "Destination host address (client socket; ignored for now)."
                         },
-                        "scene": {
-                            "type": "string",
-                            "description": "ARENA scene."
-                        },
-                        "realm": {
-                            "type": "string",
-                            "description": "ARENA realm."
-                        },
-                        "filename": {
-                            "type": "string",
-                            "description": "Executable filename."
-                        },
-                        "args": {
-                            "type": "string",
-                            "description": "Command line arguments."
-                        },
-                        "env": {
-                            "type": "string",
-                            "description": "Value of ARENA-py environment variables."
-                        },
-                        "create_time": {
-                            "type": "string",
-                            "description": "Program creation time."
-                        },
-                        "last_active_time": {
-                            "type": "string",
-                            "description": "Program last publish/receive time."
-                        },
-                        "last_pub_time": {
-                            "type": "string",
-                            "description": "Program last publish time."
-                        },
-                        "pub_msgs": {
-                            "type": "integer",
-                            "description": "Number of published messages."
-                        },
-                        "pub_msgs_per_sec": {
+                        "port": {
                             "type": "number",
-                            "description": "Published messages per second avg."
-                        },
-                        "rcv_msgs": {
-                            "type": "integer",
-                            "description": "Number of received messages."
-                        },
-                        "rcv_msgs_per_sec": {
-                            "type": "number",
-                            "description": "Received messages per second avg."
-                        },
-                        "last_rcv_time": {
-                            "type": "string",
-                            "description": "Last message receive time."
+                            "description": "Destination port (client socket; ignored for now)."
                         }
                     }
                 }
             },
-            "required": ["name", "file", "location", "filetype", "instantiate", "parent", "env"]
+            "required": ["path", "type", "mode"],
+            "default": [
+                {
+                    "path": "/ch/${scene}",
+                    "type": "pubsub",
+                    "mode": "rw",
+                    "params": {
+                        "topic": "realm/s/${scene}/${namespace}"
+                    }
+                }
+            ]
+        },
+        "run_info": {
+            "type": "object",
+            "title": "Execution info",
+            "description": "Program execution info, added at runtime.",
+            "properties": {
+                "web_host": {
+                    "type": "string",
+                    "description": "ARENA web host."
+                },
+                "namespace": {
+                    "type": "string",
+                    "description": "ARENA namespace."
+                },
+                "scene": {
+                    "type": "string",
+                    "description": "ARENA scene."
+                },
+                "realm": {
+                    "type": "string",
+                    "description": "ARENA realm."
+                },
+                "filename": {
+                    "type": "string",
+                    "description": "Executable filename."
+                },
+                "args": {
+                    "type": "string",
+                    "description": "Command line arguments."
+                },
+                "env": {
+                    "type": "string",
+                    "description": "Value of ARENA-py environment variables."
+                },
+                "create_time": {
+                    "type": "string",
+                    "description": "Program creation time."
+                },
+                "last_active_time": {
+                    "type": "string",
+                    "description": "Program last publish/receive time."
+                },
+                "last_pub_time": {
+                    "type": "string",
+                    "description": "Program last publish time."
+                },
+                "pub_msgs": {
+                    "type": "integer",
+                    "description": "Number of published messages."
+                },
+                "pub_msgs_per_sec": {
+                    "type": "number",
+                    "description": "Published messages per second avg."
+                },
+                "rcv_msgs": {
+                    "type": "integer",
+                    "description": "Number of received messages."
+                },
+                "rcv_msgs_per_sec": {
+                    "type": "number",
+                    "description": "Received messages per second avg."
+                },
+                "last_rcv_time": {
+                    "type": "string",
+                    "description": "Last message receive time."
+                }
+            }
         }
     },
     "type": "object",
@@ -232,8 +238,7 @@
             "enum": ["program"]
         },
         "data": {
-            "$ref": "#/definitions/program",
-            "description": "Object data payload; Program config data"
+            "$ref": "#/definitions/program"
         }
     },
     "required": ["object_id", "action", "persist", "type", "data"]

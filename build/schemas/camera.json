@@ -3,6 +3,9 @@
     "description": "Camera is the pose and arena-user component data representing a user avatar.",
     "allOf": [
         {
+            "$ref": "./schemas/definitions-dft.json#/definitions"
+        },
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {
