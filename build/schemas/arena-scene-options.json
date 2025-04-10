@@ -471,8 +471,7 @@
                                 "z": 0
                             },
                             "description": "Gravity vector in m/s^2",
-                            "title": "Gravity",
-                            "type": "object"
+                            "title": "Gravity"
                         },
                         "stats": {
                             "default": [],
