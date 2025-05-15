@@ -1,8 +1,7 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-var __webpack_exports__ = {};
 
-;// CONCATENATED MODULE: ./modules/e2ee/crypto-utils.js
+;// ./modules/e2ee/crypto-utils.js
 /**
  * Derives a set of keys from the master key.
  * @param {CryptoKey} material - master key to derive from
@@ -41,7 +40,7 @@ async function ratchet(material) {
     const textEncoder = new TextEncoder();
 
     // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveBits
-    return crypto.subtle.deriveBits({
+    return await crypto.subtle.deriveBits({
         name: 'HKDF',
         salt: textEncoder.encode('JFrameRatchetKey'),
         hash: 'SHA-256',
@@ -58,12 +57,11 @@ async function ratchet(material) {
  */
 async function importKey(keyBytes) {
     // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey
-    return crypto.subtle.importKey('raw', keyBytes, 'HKDF', false, [ 'deriveBits', 'deriveKey' ]);
+    return await crypto.subtle.importKey('raw', keyBytes, 'HKDF', false, [ 'deriveBits', 'deriveKey' ]);
 }
 
-;// CONCATENATED MODULE: ./modules/e2ee/Context.js
+;// ./modules/e2ee/Context.js
 /* eslint-disable no-bitwise */
-/* global BigInt */
 
 
 
@@ -113,6 +111,16 @@ class Context {
         this._sendCounts = new Map();
 
         this._sharedKey = sharedKey;
+
+        this._enabled = false;
+    }
+
+    /**
+     * Enables or disables the E2EE context. When disabled packets are passed through.
+     * @param {boolean} enabled True if E2EE is enabled, false otherwise.
+     */
+    setEnabled(enabled) {
+        this._enabled = enabled;
     }
 
     /**
@@ -150,8 +158,6 @@ class Context {
         }
 
         this._cryptoKeyRing[this._currentKeyIndex] = keys;
-
-        this._sendCount = BigInt(0); // eslint-disable-line new-cap
     }
 
     /**
@@ -177,12 +183,17 @@ class Context {
      * 9) Enqueue the encrypted frame for sending.
      */
     encodeFunction(encodedFrame, controller) {
-        const keyIndex = this._currentKeyIndex;
+        if (!this._enabled) {
+            return controller.enqueue(encodedFrame);
+        }
 
-        if (this._cryptoKeyRing[keyIndex]) {
+        const keyIndex = this._currentKeyIndex;
+        const currentKey = this._cryptoKeyRing[keyIndex];
+
+        if (currentKey) {
             const iv = this._makeIV(encodedFrame.getMetadata().synchronizationSource, encodedFrame.timestamp);
 
-            // Thіs is not encrypted and contains the VP8 payload descriptor or the Opus TOC byte.
+            // This is not encrypted and contains the VP8 payload descriptor or the Opus TOC byte.
             const frameHeader = new Uint8Array(encodedFrame.data, 0, UNENCRYPTED_BYTES[encodedFrame.type]);
 
             // Frame trailer contains the R|IV_LENGTH and key index
@@ -203,7 +214,7 @@ class Context {
                 name: ENCRYPTION_ALGORITHM,
                 iv,
                 additionalData: new Uint8Array(encodedFrame.data, 0, frameHeader.byteLength)
-            }, this._cryptoKeyRing[keyIndex].encryptionKey, new Uint8Array(encodedFrame.data,
+            }, currentKey.encryptionKey, new Uint8Array(encodedFrame.data,
                 UNENCRYPTED_BYTES[encodedFrame.type]))
             .then(cipherText => {
                 const newData = new ArrayBuffer(frameHeader.byteLength + cipherText.byteLength
@@ -229,12 +240,6 @@ class Context {
                 // We are not enqueuing the frame here on purpose.
             });
         }
-
-        /* NOTE WELL:
-         * This will send unencrypted data (only protected by DTLS transport encryption) when no key is configured.
-         * This is ok for demo purposes but should not be done once this becomes more relied upon.
-         */
-        controller.enqueue(encodedFrame);
     }
 
     /**
@@ -244,11 +249,14 @@ class Context {
      * @param {TransformStreamDefaultController} controller - TransportStreamController.
      */
     async decodeFunction(encodedFrame, controller) {
+        if (!this._enabled) {
+            return controller.enqueue(encodedFrame);
+        }
+
         const data = new Uint8Array(encodedFrame.data);
         const keyIndex = data[encodedFrame.data.byteLength - 1];
 
         if (this._cryptoKeyRing[keyIndex]) {
-
             const decodedFrame = await this._decryptFrame(
                 encodedFrame,
                 keyIndex);
@@ -392,8 +400,7 @@ class Context {
     }
 }
 
-;// CONCATENATED MODULE: ./modules/e2ee/Worker.js
-/* global TransformStream */
+;// ./modules/e2ee/Worker.js
 /* eslint-disable no-bitwise */
 
 // Worker for E2EE/Insertable streams.
@@ -403,6 +410,8 @@ class Context {
 const contexts = new Map(); // Map participant id => context
 
 let sharedContext;
+
+let enabled = false;
 
 /**
  * Retrieves the participant {@code Context}, creating it if necessary.
@@ -416,7 +425,10 @@ function getParticipantContext(participantId) {
     }
 
     if (!contexts.has(participantId)) {
-        contexts.set(participantId, new Context());
+        const context = new Context();
+
+        context.setEnabled(enabled);
+        contexts.set(participantId, context);
     }
 
     return contexts.get(participantId);
@@ -445,7 +457,7 @@ function handleTransform(context, operation, readableStream, writableStream) {
     }
 }
 
-onmessage = async event => {
+onmessage = event => {
     const { operation } = event.data;
 
     if (operation === 'initialize') {
@@ -459,6 +471,9 @@ onmessage = async event => {
         const context = getParticipantContext(participantId);
 
         handleTransform(context, operation, readableStream, writableStream);
+    } else if (operation === 'setEnabled') {
+        enabled = event.data.enabled;
+        contexts.forEach(context => context.setEnabled(enabled));
     } else if (operation === 'setKey') {
         const { participantId, key, keyIndex } = event.data;
         const context = getParticipantContext(participantId);
