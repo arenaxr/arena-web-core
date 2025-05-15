@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.2.5](https://github.com/arenaxr/arena-web-core/compare/v2.2.4...v2.2.5) (2025-05-15)
+
+
+### Bug Fixes
+
+* add deprecated warnings from aframe-physics-system ([d1defb5](https://github.com/arenaxr/arena-web-core/commit/d1defb5378f1231d80fb24737cb9a53df4f89570))
+* correctly ref textinput target obj ([29453fe](https://github.com/arenaxr/arena-web-core/commit/29453fe2e188f1d3ed6f3e3b8e635bb9530a0316))
+* **debug:** made all mqtt debug log consistant with  url param ([a167114](https://github.com/arenaxr/arena-web-core/commit/a167114e56a7f036daed5f59be15a1520259b9e1))
+* **gaussian_splatting:** update splat component to use cutoutEntity ([5c3b01a](https://github.com/arenaxr/arena-web-core/commit/5c3b01a38b52ecd5734194eb5b191ee507cc38b9))
+* object3d rotation is euler ([0f013e3](https://github.com/arenaxr/arena-web-core/commit/0f013e3d0cac59aee11450429127f9d7884aca6e))
+* physx-grab use, add physx-grabbable ([93c0ed4](https://github.com/arenaxr/arena-web-core/commit/93c0ed4d9141133e41a8404c114c29919e8930e4))
+
+
+### Reverts
+
+* 73cd3e70 arena-hand.js ([072641a](https://github.com/arenaxr/arena-web-core/commit/072641a0f439bd15ceba795a4123fa29a9510fbc))
+* c95445a2 - we set worldpose in physx ([e828115](https://github.com/arenaxr/arena-web-core/commit/e828115bc1267d0cde889bdf65ba2aad61325719))
+
 ## [2.2.4](https://github.com/arenaxr/arena-web-core/compare/v2.2.3...v2.2.4) (2025-03-03)
 
 
