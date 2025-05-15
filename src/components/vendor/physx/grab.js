@@ -140,36 +140,9 @@ AFRAME.registerComponent('physx-grab', {
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
-        el.object3D.getWorldPosition(posVect3);
-        el.object3D.getWorldQuaternion(rotQuat);
-        const handPose = {
-            position: {
-                x: ARENAUtils.round3(posVect3.x),
-                y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z)
-            },
-            rotation: {
-                x: ARENAUtils.round3(rotQuat.x),
-                y: ARENAUtils.round3(rotQuat.y),
-                z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w)
-            }
-        };
-        grabEl.object3D.getWorldPosition(posVect3);
-        grabEl.object3D.getWorldQuaternion(rotQuat);
-        const targetPose = {
-            position: {
-                x: ARENAUtils.round3(posVect3.x),
-                y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z)
-            },
-            rotation: {
-                x: ARENAUtils.round3(rotQuat.x),
-                y: ARENAUtils.round3(rotQuat.y),
-                z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w)
-            }
-        };
+        const handPose = ARENAUtils.getPose(el);
+        const targetPose = ARENAUtils.getPose(grabEl);
+        // We don't care about velocities
         const thisMsg = {
             object_id: object_id,
             action: 'clientEvent',
@@ -198,37 +171,8 @@ AFRAME.registerComponent('physx-grab', {
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
         // Hands are in worldspace
-        el.object3D.getWorldPosition(posVect3);
-        el.object3D.getWorldQuaternion(rotQuat);
-        const handPose = {
-            position: {
-                x: ARENAUtils.round3(posVect3.x),
-                y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z)
-            },
-            rotation: {
-                x: ARENAUtils.round3(rotQuat.x),
-                y: ARENAUtils.round3(rotQuat.y),
-                z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w)
-            }
-        };
-        grabEl.object3D.getWorldPosition(posVect3);
-        grabEl.object3D.getWorldQuaternion(rotQuat);
-        const targetPose = {
-            position: {
-                x: ARENAUtils.round3(posVect3.x),
-                y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z)
-            },
-            rotation: {
-                x: ARENAUtils.round3(rotQuat.x),
-                y: ARENAUtils.round3(rotQuat.y),
-                z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w)
-            }
-        };
-
+        const handPose = ARENAUtils.getPose(el);
+        const targetPose = ARENAUtils.getPose(grabEl);
         const thisMsg = {
             object_id: object_id,
             action: 'clientEvent',

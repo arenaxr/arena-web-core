@@ -557,6 +557,66 @@ export default class ARENAUtils {
         elB.object3D.getWorldPosition(this.worldPosB);
         return this.worldPosA.distanceTo(this.worldPosB);
     }
+
+    static posVect3 = new THREE.Vector3();
+
+    static rotQuat = new THREE.Quaternion();
+
+    /**
+     * Extracts pose of an element with reused vector3 and quaternion, rounded for mqtt publishing
+     * @param el - AFRAME element with an object3d
+     */
+    static getPose(el) {
+        if (!el?.object3D) {
+            return null;
+        }
+        el.object3D.getWorldPosition(this.posVect3);
+        el.object3D.getWorldQuaternion(this.rotQuat);
+        return {
+            position: {
+                x: ARENAUtils.round3(this.posVect3.x),
+                y: ARENAUtils.round3(this.posVect3.y),
+                z: ARENAUtils.round3(this.posVect3.z),
+            },
+            rotation: {
+                x: ARENAUtils.round3(this.rotQuat.x),
+                y: ARENAUtils.round3(this.rotQuat.y),
+                z: ARENAUtils.round3(this.rotQuat.z),
+                w: ARENAUtils.round3(this.rotQuat.w),
+            },
+        };
+    }
+
+    /**
+     * Extracts pose and velocities from a PhysX body el for MQTT publishing. Use threejs pose to save on wasm calls
+     * but still need PhysX velocity for the linear and angular velocities.
+     * @param body
+     * @return {Null|Object} pose and velocities
+     */
+    static getPhysXBodyData(el) {
+        const body = el?.components['physx-body']?.rigidBody;
+        if (!body) {
+            return null;
+        }
+        const { posVect3, rotQuat } = this;
+        const linVel = body.getLinearVelocity();
+        const angVel = body.getAngularVelocity();
+        return {
+            pose: this.getPose(el),
+            velocities: {
+                linear: {
+                    x: ARENAUtils.round3(linVel.x),
+                    y: ARENAUtils.round3(linVel.y),
+                    z: ARENAUtils.round3(linVel.z),
+                },
+                angular: {
+                    x: ARENAUtils.round3(angVel.x),
+                    y: ARENAUtils.round3(angVel.y),
+                    z: ARENAUtils.round3(angVel.z),
+                },
+            },
+        };
+    }
 }
 
 // eslint-disable-next-line no-extend-native

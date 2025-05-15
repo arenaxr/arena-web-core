@@ -78,38 +78,8 @@ AFRAME.registerComponent('physx-force-pushable', {
         body.addImpulseAtLocalPos(force, pos);
 
         // User client source should be always in world coordinates
-        sourceEl.object3D.getWorldPosition(posVect3);
-        sourceEl.object3D.getWorldQuaternion(rotQuat);
-        const sourcePose = {
-            position: {
-                x: ARENAUtils.round3(posVect3.x),
-                y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z)
-            },
-            rotation: {
-                x: ARENAUtils.round3(rotQuat.x),
-                y: ARENAUtils.round3(rotQuat.y),
-                z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w)
-            }
-        };
-
-        // Use local coords for target obj
-        el.object3D.getWorldPosition(posVect3);
-        el.object3D.getWorldQuaternion(rotQuat);
-        const targetPose = {
-            position: {
-                x: ARENAUtils.round3(posVect3.x),
-                y: ARENAUtils.round3(posVect3.y),
-                z: ARENAUtils.round3(posVect3.z)
-            },
-            rotation: {
-                x: ARENAUtils.round3(rotQuat.x),
-                y: ARENAUtils.round3(rotQuat.y),
-                z: ARENAUtils.round3(rotQuat.z),
-                w: ARENAUtils.round3(rotQuat.w)
-            }
-        };
+        const sourcePose = ARENAUtils.getPose(sourceEl);
+        const targetBodyData = ARENAUtils.getPhysXBodyData(el);
 
         const msg = {
             object_id,
@@ -126,8 +96,8 @@ AFRAME.registerComponent('physx-force-pushable', {
                     y: ARENAUtils.round3(pos.y),
                     z: ARENAUtils.round3(pos.z)
                 },
-                sourcePose: sourcePose,
-                targetPose: targetPose,
+                sourcePose,
+                targetBodyData,
                 target: this.el.id
             }
         };
@@ -154,12 +124,12 @@ AFRAME.registerComponent('physx-remote-pusher', {
     /**
      * emitPush
      * @param {string} targetId - The id of the target object to push.
-     * @param {Object} targetPose - The pose of the target object prior to push.
+     * @param {Object} targetBodyData - The pose and velocities of the target object prior to push.
      * @param {Object} impulse - The impulse vector {x, y, z}.
      * @param {Object} point - The world point at which to apply the impulse {x, y, z}.
      * @param {Object} _sourcePose - The pose of the source (pusher), including position and rotation.
      */
-    emitPush: function(targetId, targetPose, impulse, point, _sourcePose) {
+    emitPush: function(targetId, targetBodyData, impulse, point, _sourcePose) {
         const target = document.getElementById(targetId);
         if (!target) return;
 
@@ -167,22 +137,28 @@ AFRAME.registerComponent('physx-remote-pusher', {
         const body = target.components['physx-body'].rigidBody;
         if (!body) return;
 
-        if (targetPose) {
-            const { position: targetPos, rotation: targetRot } = targetPose;
+        if (targetBodyData) {
+            const { pose: { position, rotation }, velocities: { linear,  angular } } = targetBodyData;
             // Need to override simulation pose for dynamic body
             const physxPose = body.getGlobalPose();
-            if (targetPos) {
-                physxPose.translation.x = targetPos.x;
-                physxPose.translation.y = targetPos.y;
-                physxPose.translation.z = targetPos.z;
+            if (position) {
+                physxPose.translation.x = position.x;
+                physxPose.translation.y = position.y;
+                physxPose.translation.z = position.z;
             }
-            if (targetRot) {
-                physxPose.rotation.x = targetRot.x;
-                physxPose.rotation.y = targetRot.y;
-                physxPose.rotation.z = targetRot.z;
-                physxPose.rotation.w = targetRot.w;
+            if (rotation) {
+                physxPose.rotation.x = rotation.x;
+                physxPose.rotation.y = rotation.y;
+                physxPose.rotation.z = rotation.z;
+                physxPose.rotation.w = rotation.w;
             }
             body.setGlobalPose(physxPose, true);
+            if (linear) {
+                body.setLinearVelocity(linear, true);
+            }
+            if (angular) {
+                body.setAngularVelocity(angular, true);
+            }
         }
 
         // These are already in local coordinates

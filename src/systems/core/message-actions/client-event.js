@@ -113,7 +113,7 @@ export default class ClientEvent {
                 if (AFRAME.scenes[0].systems.physx) {
                     entityEl.components['physx-remote-pusher']?.emitPush(
                         data.target,
-                        data.targetPose,
+                        data.targetBodyData,
                         data.impulse,
                         data.point,
                         data.sourcePose
