@@ -392,7 +392,7 @@ AFRAME.registerComponent('arena-user', {
         const { el } = this;
         const jistiAudio = document.getElementById(this.audioID);
         if (jistiAudio) {
-            jistiAudio.srcObject.getTracks().forEach((t) => {
+            jistiAudio.srcObject?.getTracks().forEach((t) => {
                 t.enabled = false;
             });
         }
@@ -402,7 +402,7 @@ AFRAME.registerComponent('arena-user', {
     unmuteAudio() {
         const jistiAudio = document.getElementById(this.audioID);
         if (jistiAudio) {
-            jistiAudio.srcObject.getTracks().forEach((t) => {
+            jistiAudio.srcObject?.getTracks().forEach((t) => {
                 t.enabled = true;
             });
         }
@@ -412,7 +412,7 @@ AFRAME.registerComponent('arena-user', {
         const jistiVideo = document.getElementById(this.videoID);
         if (jistiVideo) {
             if (!jistiVideo.paused) jistiVideo.pause();
-            jistiVideo.srcObject.getTracks().forEach((t) => {
+            jistiVideo.srcObject?.getTracks().forEach((t) => {
                 t.enabled = false;
             });
         }
@@ -422,7 +422,7 @@ AFRAME.registerComponent('arena-user', {
         const jistiVideo = document.getElementById(this.videoID);
         if (jistiVideo) {
             if (jistiVideo.paused) jistiVideo.play();
-            jistiVideo.srcObject.getTracks().forEach((t) => {
+            jistiVideo.srcObject?.getTracks().forEach((t) => {
                 t.enabled = true;
             });
         }
