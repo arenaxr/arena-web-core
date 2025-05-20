@@ -58,8 +58,6 @@ AFRAME.registerComponent('webxr-device-manager', {
             }
             document.getElementById('env').setAttribute('visible', false);
             ARENA.addDefaultLights(true);
-            const arMarkerSys = sceneEl.systems.armarker;
-            arMarkerSys.webXRSessionStarted(sceneEl.xrSession);
         }
     },
 
