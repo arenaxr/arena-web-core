@@ -20,6 +20,6 @@ import './postprocessing'; // post-processing
 import './renderfusion'; // renderfusion
 import './webar';
 import './webxr'; // special handler for webxr devices
-import './armarker';
+import './cv';
 import './build3d';
 import './scene';
