@@ -9,10 +9,10 @@
 // ARENA version from automated scripts
 import ARENA_VERSION_MSG from './arena-version';
 
-import './aframe-mods'; // AFRAME modifications
 import './systems'; // custom AFRAME systems
 import './geometries'; // custom AFRAME geometries
 import './components'; // custom AFRAME components
+import './aframe-mods'; // AFRAME modifications, always last, cuz patches...
 
 console.info(ARENA_VERSION_MSG);
 
