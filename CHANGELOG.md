@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.6](https://github.com/arenaxr/arena-web-core/compare/v2.2.5...v2.2.6) (2025-08-19)
+
+
+### Bug Fixes
+
+* **gaussian:** monkeypatch splat fetch load progress. Fixes [#699](https://github.com/arenaxr/arena-web-core/issues/699) ([49b2633](https://github.com/arenaxr/arena-web-core/commit/49b2633fcbd70a430ae805a0fb6948eea2db47e6))
+
 ## [2.2.5](https://github.com/arenaxr/arena-web-core/compare/v2.2.4...v2.2.5) (2025-05-15)
 
 
