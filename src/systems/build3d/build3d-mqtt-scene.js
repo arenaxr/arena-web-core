@@ -59,31 +59,23 @@ function publishUploadedFile(newObj) {
 }
 
 async function handleComponentUploadAction(selectedEntity, componentName) {
-    const oldObj = {
-        object_id: selectedEntity.id,
-        action: 'update',
-        type: 'object',
-        persist: true,
-        data: {}, // preliminary
-    };
+    const objid = selectedEntity.id;
+    let objtype = componentName;
     // merge only, leave as much of original wire format as possible, including object_type
     const srcs = ARENAAUTH.filestoreUploadSchema[componentName];
     if (srcs[0]) {
         if (srcs[0].startsWith(`${componentName}.`)) {
             // sub-component, test for geometry, if needed
-            oldObj.data[componentName] = {};
             if ('geometry' in selectedEntity.components) {
-                oldObj.data.object_type = selectedEntity.components.geometry.primitive;
+                objtype = selectedEntity.components.geometry.primitive;
             }
-        } else {
-            // high-level wire object component
-            oldObj.data.object_type = componentName;
         }
     }
     const newObj = await ARENAAUTH.uploadFileStoreDialog(
+        ARENA.nameSpace,
         ARENA.sceneName,
-        oldObj.data.object_type,
-        oldObj,
+        objid,
+        objtype,
         publishUploadedFile
     );
 }

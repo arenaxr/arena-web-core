@@ -407,7 +407,7 @@ window.addEventListener('onauth', async (e) => {
         if (newObj) {
             // publish to mqtt
             const scene = `${namespaceinput.value}/${sceneinput.value}`;
-            PersistObjects.performActionArgObjList('update', scene, [newObj], false);
+            PersistObjects.performActionArgObjList(newObj.action, scene, [newObj], false);
             setTimeout(async () => {
                 await PersistObjects.populateObjectList(
                     `${namespaceinput.value}/${sceneinput.value}`,
@@ -425,8 +425,14 @@ window.addEventListener('onauth', async (e) => {
 
     // switch image/model
     uploadFilestoreButton.addEventListener('click', async () => {
-        const oldObj = JSON.parse(output.value);
-        await ARENAAUTH.uploadFileStoreDialog(sceneinput.value, oldObj.data.object_type, oldObj, publishUploadedFile);
+        const jsonObj = JSON.parse(output.value);
+        await ARENAAUTH.uploadFileStoreDialog(
+            namespaceinput.value,
+            sceneinput.value,
+            jsonObj.object_id,
+            jsonObj.data.object_type,
+            publishUploadedFile
+        );
     });
 
     openAddSceneButton.addEventListener('click', async () => {
@@ -686,7 +692,7 @@ window.addEventListener('onauth', async (e) => {
     objFilterSel.addEventListener('click', async () => {
         objTypeFilter[objFilterSel.value] = !objTypeFilter[objFilterSel.value];
         const opt = objFilterSel.namedItem(`objfilter_${objFilterSel.value}`);
-        const text = (objTypeFilter[objFilterSel.value] ? 'Hide' : 'Show') + opt.textContent.substring(4);
+        const text = `${objTypeFilter[objFilterSel.value] ? 'Hide' : 'Show'}${opt.textContent.substring(4)}`;
         opt.textContent = text;
         await PersistObjects.populateObjectList(
             `${namespaceinput.value}/${sceneinput.value}`,
@@ -813,7 +819,7 @@ window.addEventListener('onauth', async (e) => {
         for (const [key, value] of Object.entries(objTypeFilter)) {
             objTypeFilter[key] = showHide; // true = show
             const opt = objFilterSel.namedItem(`objfilter_${key}`);
-            const text = (showHide ? 'Hide' : 'Show') + opt.textContent.substring(4);
+            const text = `${showHide ? 'Hide' : 'Show'}${opt.textContent.substring(4)}`;
             opt.textContent = text;
         }
         await PersistObjects.populateObjectList(

@@ -318,11 +318,13 @@ window.ARENAAUTH = {
     },
     /**
      * Long chain of upload dialogs and fetch calls to select and upload a file for the object, returning the updated wire format.
+     * @param {string} namespacedScene
      * @param {string} sceneName
+     * @param {string} objid
      * @param {string} objtype
-     * @param {Object} oldObj
+     * @param {callback} onFileUpload
      */
-    async uploadFileStoreDialog(sceneName, objtype, oldObj, onFileUpload) {
+    async uploadFileStoreDialog(namespacedName, sceneName, objid, objtype, onFileUpload) {
         let newObj;
 
         function formatUploadHtmlOptions() {
@@ -336,7 +338,7 @@ window.ARENAAUTH = {
             let first = true;
             Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((type) => {
                 // look for object types, look for components
-                if (type === objtype || type in oldObj.data) {
+                if (type === objtype) {
                     ARENAAUTH.filestoreUploadSchema[type].forEach((element) => {
                         const prop = `data.${element}`;
                         htmlopt.push(`<input type="radio" id="radioAttr-${prop}" name="radioAttr" value="${prop}" ${first ? 'checked' : ''}>
@@ -350,11 +352,26 @@ window.ARENAAUTH = {
             return `${htmlopt.join('')}`;
         }
 
-        function updateWireFormat(safeFilename, fullDestUrlAttr, storeExtPath, hideinar) {
-            const obj = oldObj;
-            if (obj.object_id === '') {
-                obj.object_id = safeFilename;
+        async function updateWireFormat(safeFilename, fullDestUrlAttr, storeExtPath, hideinar) {
+            let objexists = false;
+            const newobjid = !objid ? safeFilename : objid;
+            const persistUri = `${location.protocol}//${ARENADefaults.persistHost}${ARENADefaults.persistPath}`;
+            try {
+                const persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
+                const data = await fetch(`${persistUri}${namespacedName}/${sceneName}/${newobjid}`, persistOpt);
+                const sceneObjs = await data.json();
+                objexists = !!sceneObjs && sceneObjs.length > 0;
+            } catch (err) {
+                console.error(err);
+                return undefined;
             }
+            const obj = {
+                object_id: newobjid,
+                action: objexists ? 'update' : 'create',
+                type: 'object',
+                persist: true,
+                data: { object_type: objtype },
+            };
             // place url nested in wire format
             const elems = fullDestUrlAttr.split('.');
             if (elems.length === 3) {
