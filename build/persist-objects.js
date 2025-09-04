@@ -186,14 +186,8 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         if (type_order(a.type) > type_order(b.type)) {
             return 1;
         }
-        // then by object_id
-        if (a.object_id < b.object_id) {
-            return -1;
-        }
-        if (a.object_id > b.object_id) {
-            return 1;
-        }
-        return 0;
+        // then by object_id, case insensitive
+        return a.object_id.localeCompare(b.object_id, 'en', { sensitivity: 'base' });
     });
 
     // console.log(sceneobjs);
