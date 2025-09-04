@@ -408,6 +408,14 @@ window.ARENAAUTH = {
             focusConfirm: false,
             showCancelButton: true,
             showLoaderOnConfirm: true,
+            inputValidator: (inputfn) =>
+                new Promise((resolve) => {
+                    if (inputfn) {
+                        resolve();
+                    } else {
+                        resolve(`${objtype} file not selected!`);
+                    }
+                }),
             preConfirm: async (resultFileOpen) => {
                 const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
                 const safeFilename = fn.replace(/(\W+)/gi, '-');
