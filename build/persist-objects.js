@@ -861,7 +861,3 @@ export function populateProgramInstanceList() {
 
     programList.style.visibility = 'visible';
 }
-
-export function hideProgramInstanceList() {
-    programList.style.visibility = 'hidden';
-}

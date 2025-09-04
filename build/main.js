@@ -218,11 +218,9 @@ window.addEventListener('onauth', async (e) => {
             });
         });
 
-        // if program, show program instances
+        // if program, update program instances
         if (currentEditObj.type === 'program') {
             PersistObjects.populateProgramInstanceList();
-        } else {
-            PersistObjects.hideProgramInstanceList();
         }
     };
 
