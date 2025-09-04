@@ -142,7 +142,7 @@ export async function fetchSceneObjects(scene) {
     let sceneObjs;
     try {
         const persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
-        const data = await fetch(persist.persistUri + scene, persistOpt);
+        const data = await fetch(`${persist.persistUri}${scene}`, persistOpt);
         if (!data) {
             throw 'Could not fetch data';
         }
@@ -408,11 +408,7 @@ export async function populateNamespaceList(nsInput, nsList) {
     }
     let sceneObjs;
     try {
-        const persistOpt = ARENADefaults.disallowJWT
-            ? {}
-            : {
-                  credentials: 'include',
-              };
+        const persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
         const data = await fetch(`${persist.persistUri}public/!allscenes`, persistOpt);
         if (!data) {
             throw 'Could not fetch data';
