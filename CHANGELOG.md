@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.2.6](https://github.com/arenaxr/arena-web-core/compare/v2.2.5...v2.2.6) (2025-09-04)
+
+
+### Bug Fixes
+
+* **build:** added filename validation before uploading models ([f2f0b82](https://github.com/arenaxr/arena-web-core/commit/f2f0b82935bf212c339d7cc4c04310b953a4f569))
+* **build:** fixed failure to persist new models on button upload ([6774120](https://github.com/arenaxr/arena-web-core/commit/6774120e95bd8edc90d3739f26a767b9cfac467b))
+* **build:** removed unused/crashing program list hide ([ad36c2d](https://github.com/arenaxr/arena-web-core/commit/ad36c2db671eb1930344bcfd4145aafd89c1d70f))
+* **build:** sort object list case-insensitive ([477aab9](https://github.com/arenaxr/arena-web-core/commit/477aab97f1b7c3951f803b1bcd8c3476167e65c3))
+* **gaussian:** monkeypatch splat fetch load progress. Fixes [#699](https://github.com/arenaxr/arena-web-core/issues/699) ([49b2633](https://github.com/arenaxr/arena-web-core/commit/49b2633fcbd70a430ae805a0fb6948eea2db47e6))
+
 ## [2.2.5](https://github.com/arenaxr/arena-web-core/compare/v2.2.4...v2.2.5) (2025-05-15)
 
 
