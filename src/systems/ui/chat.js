@@ -8,10 +8,9 @@
 
 /* global ARENAAUTH, $ */
 
-import * as linkify from 'linkifyjs';
 import linkifyHtml from 'linkify-html';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES, TOPICS } from '../../constants';
+import { ARENA_EVENTS, EVENT_SOURCES, JITSI_EVENTS, TOPICS } from '../../constants';
 import { Delete } from '../core/message-actions';
 
 const UserType = Object.freeze({
