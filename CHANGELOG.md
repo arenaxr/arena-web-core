@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.7](https://github.com/arenaxr/arena-web-core/compare/v2.2.6...v2.2.7) (2025-09-11)
+
+
+### Bug Fixes
+
+* **chat:** upgrade linkifyjs deps ([988139e](https://github.com/arenaxr/arena-web-core/commit/988139eac635407ed81d345f6227f58c2e531fae))
+
 ## [2.2.6](https://github.com/arenaxr/arena-web-core/compare/v2.2.5...v2.2.6) (2025-09-04)
 
 
