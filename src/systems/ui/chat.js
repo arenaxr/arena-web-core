@@ -8,8 +8,8 @@
 
 /* global ARENAAUTH, $ */
 
-import 'linkifyjs';
-import 'linkifyjs/string';
+import * as linkify from 'linkifyjs';
+import linkifyHtml from 'linkify-html';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES, TOPICS } from '../../constants';
 import { Delete } from '../core/message-actions';
@@ -771,11 +771,11 @@ AFRAME.registerSystem('arena-chat-ui', {
         let displayMsg;
         if (msg.match(regex) != null) {
             // no new tab if we have a link to an arena scene
-            displayMsg = msg.linkify({
+            displayMsg = linkifyHtml(msg, {
                 target: '_parent',
             });
         } else {
-            displayMsg = msg.linkify({
+            displayMsg = linkifyHtml(msg, {
                 target: '_blank',
             });
         }
