@@ -50,7 +50,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^5.0.1",
-    "jsdoc": "^3.6.6",
+    "jsdoc": "^4.0.4",
     "jsdoc-to-markdown": "^7.0.1",
     "parcel": "^2.14.0",
     "parcel-resolver-ignore": "^2.0.0",
