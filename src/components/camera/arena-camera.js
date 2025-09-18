@@ -67,6 +67,14 @@ AFRAME.registerComponent('arena-camera', {
         this.presenceEl = document.getElementById('presenceSelect');
         this.headModelPathEl = document.getElementById('headModelPathSelect');
 
+        // default is reverse of aframe's default - we want to "drag world to pan"
+        if (localStorage.getItem('prefReverseMouseDrag'))
+            el.setAttribute(
+                'look-controls',
+                'reverseMouseDrag',
+                !(localStorage.getItem('prefReverseMouseDrag') === 'true')
+            );
+
         this.heartBeatCounter = 0;
 
         this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);

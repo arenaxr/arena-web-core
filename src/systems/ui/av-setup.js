@@ -126,6 +126,9 @@ AFRAME.registerSystem('arena-av-setup', {
         if (localStorage.getItem('prefPresenceIdx')) {
             this.presenceSelect.value = localStorage.getItem('prefPresenceIdx');
         }
+        if (localStorage.getItem('prefReverseMouseDrag')) {
+            this.reverseMouseDragCheckbox.checked = localStorage.getItem('prefReverseMouseDrag') === 'true';
+        }
         this.detectDevices(undefined, true);
     },
 
@@ -180,6 +183,7 @@ AFRAME.registerSystem('arena-av-setup', {
             // default is reverse of aframe's default - we want to "drag world to pan"
             const camera = document.getElementById('my-camera');
             camera.setAttribute('look-controls', 'reverseMouseDrag', !this.reverseMouseDragCheckbox.checked);
+            localStorage.setItem('prefReverseMouseDrag', this.reverseMouseDragCheckbox.checked);
 
             // Stop audio and video preview
             if (this.videoElement.srcObject) {
