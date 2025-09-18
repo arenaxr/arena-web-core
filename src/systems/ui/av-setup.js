@@ -74,6 +74,7 @@ AFRAME.registerSystem('arena-av-setup', {
         this.testAudioOutBtn = document.getElementById('playTestAudioOutBtn');
         this.testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
         this.micMeter = document.getElementById('micMeter');
+        this.presenceSelect = document.getElementById('presenceSelect');
         this.headModelPathSelect = document.getElementById('headModelPathSelect');
 
         this.reverseMouseDragCheckbox = document.getElementById('reverseMouseDragCheckbox');
@@ -122,6 +123,9 @@ AFRAME.registerSystem('arena-av-setup', {
             this.displayName.value = localStorage.getItem('display_name');
             // this.displayName.focus();
         }
+        if (localStorage.getItem('prefPresenceIdx')) {
+            this.presenceSelect.value = localStorage.getItem('prefPresenceIdx');
+        }
         this.detectDevices(undefined, true);
     },
 
@@ -154,8 +158,9 @@ AFRAME.registerSystem('arena-av-setup', {
 
         this.redetectAVBtn.addEventListener('click', this.detectDevices);
         this.enterSceneBtn.addEventListener('click', () => {
-            // Stash preferred devices
             localStorage.setItem('display_name', this.displayName.value);
+            localStorage.setItem('prefPresenceIdx', this.presenceSelect.value);
+            // Stash preferred devices
             localStorage.setItem('prefAudioInput', this.audioInSelect.value);
             localStorage.setItem('prefVideoInput', this.videoSelect.value);
             localStorage.setItem('prefAudioOutput', this.audioOutSelect.value);
