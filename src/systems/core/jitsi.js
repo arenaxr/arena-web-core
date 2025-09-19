@@ -799,7 +799,9 @@ AFRAME.registerSystem('arena-jitsi', {
                 }
             })
             .catch((err) => {
-                this.initialized = false;
+                // TODO (mwfarb): is this generic catch causing arena-camera to remove JitsiId from mqtt pub?
+                // err = gum.unsupported_resolution: Video resolution is not supported:
+                // this.initialized = false;
                 console.warn(err);
             });
     },

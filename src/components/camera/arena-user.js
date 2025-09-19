@@ -453,11 +453,11 @@ AFRAME.registerComponent('arena-user', {
     },
 
     getActualResolution(distance, winHeight) {
-        // Option 1: videosphere W/H/D is panoRadius x 2
-        // Option 2: video cube W x H x D is 0.6m x 0.4m x 0.6m
+        // Option 1: video cube W x H x D is 0.6m x 0.4m x 0.6m
+        // Option 2: portal W x H x D is 0.9m x 1.5m x 0.02m
         const fov = 80;
-        const videoHeightMeters = this.data.pano ? this.panoRadius * 3 : 0.4;
-        const videoDepthMeters = this.data.pano ? this.panoRadius * 2 : 0.6;
+        const videoHeightMeters = this.data.presence !== 'Portal' ? 0.4 : 1.5;
+        const videoDepthMeters = this.data.presence !== 'Portal' ? 0.6 : 0.02;
         const actualDist = distance - (this.data.pano ? 0 : videoDepthMeters / 2);
         const frustumHeightAtVideo = 2 * actualDist * Math.tan((fov * 0.5 * Math.PI) / 180);
         const videoRatio2Window = videoHeightMeters / frustumHeightAtVideo;
@@ -559,8 +559,7 @@ AFRAME.registerComponent('arena-user', {
                 }
             }
             if (data.pano) {
-                const resolution = this.getActualResolution(this.distance, window.innerHeight);
-                this.evaluateRemoteResolution(resolution);
+                this.evaluateRemoteResolution(1920);
             } else if (inFieldOfView === false) {
                 this.muteVideo();
                 this.evaluateRemoteResolution(0);
