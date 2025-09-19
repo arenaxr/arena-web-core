@@ -64,8 +64,6 @@ AFRAME.registerComponent('arena-camera', {
         this.lastPose = '';
         this.videoDefaultResolutionSet = false;
 
-        this.headModelPathEl = document.getElementById('headModelPathSelect');
-
         // default is reverse of aframe's default - we want to "drag world to pan"
         if (localStorage.getItem('prefReverseMouseDrag'))
             el.setAttribute(
@@ -144,8 +142,8 @@ AFRAME.registerComponent('arena-camera', {
                 'arena-user': arenaUser,
             },
         };
-        if (localStorage.getItem('prefPresenceIdx')) {
-            arenaUser.presence = localStorage.getItem('prefPresenceIdx');
+        if (localStorage.getItem('prefPresence')) {
+            arenaUser.presence = localStorage.getItem('prefPresence');
         }
 
         if (this.jitsi.initialized) {
@@ -159,11 +157,14 @@ AFRAME.registerComponent('arena-camera', {
             arenaUser.hasAvatar = faceTracker.isRunning();
         }
 
-        if (this.headModelPathEl) {
-            arenaUser.headModelPath = this.headModelPathEl.value;
-        } else {
-            arenaUser.headModelPath = ARENA.defaults.headModelPath;
-            this.headModelPathEl = document.getElementById('headModelPathSelect');
+        if (ARENA.sceneHeadModels) {
+            const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+            const sceneHeadModelPath = sceneHist[ARENA.namespacedScene]?.headModelPath;
+            if (sceneHeadModelPath !== undefined) {
+                arenaUser.headModelPath = sceneHeadModelPath;
+            }
+        } else if (localStorage.getItem('prefHeadModelPath')) {
+            arenaUser.headModelPath = localStorage.getItem('prefHeadModelPath');
         }
 
         // extra timestamp info at end for debugging

@@ -86,21 +86,18 @@ AFRAME.registerSystem('arena-av-setup', {
         this.videoElement.classList.add('flip-video');
         this.videoElement.style.borderRadius = '10px';
 
-        let headModelPathIdx = 0;
         if (ARENA.sceneHeadModels) {
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-            const sceneHeadModelPathIdx = sceneHist[ARENA.namespacedScene]?.headModelPathIdx;
-            if (this.sceneHeadModelPathIdx !== undefined) {
-                headModelPathIdx = sceneHeadModelPathIdx;
+            const sceneHeadModelPath = sceneHist[ARENA.namespacedScene]?.headModelPath;
+            if (sceneHeadModelPath !== undefined) {
+                this.headModelPathSelect.value = sceneHeadModelPath;
             } else if (this.headModelPathSelect.selectedIndex === 0) {
                 // if default ARENA head used, replace with default scene head
-                headModelPathIdx = this.headModelPathSelect.length;
+                this.headModelPathSelect.value = ARENA.sceneHeadModels[0].url;
             }
-        } else if (localStorage.getItem('headModelPathIdx')) {
-            headModelPathIdx = localStorage.getItem('headModelPathIdx');
+        } else if (localStorage.getItem('prefHeadModelPath')) {
+            this.headModelPathSelect.value = localStorage.getItem('prefHeadModelPath');
         }
-        this.headModelPathSelect.selectedIndex =
-            headModelPathIdx < this.headModelPathSelect.length ? headModelPathIdx : 0;
     },
 
     show(callback) {
@@ -123,8 +120,8 @@ AFRAME.registerSystem('arena-av-setup', {
             this.displayName.value = localStorage.getItem('display_name');
             // this.displayName.focus();
         }
-        if (localStorage.getItem('prefPresenceIdx')) {
-            this.presenceSelect.value = localStorage.getItem('prefPresenceIdx');
+        if (localStorage.getItem('prefPresence')) {
+            this.presenceSelect.value = localStorage.getItem('prefPresence');
         }
         if (localStorage.getItem('prefReverseMouseDrag')) {
             this.reverseMouseDragCheckbox.checked = localStorage.getItem('prefReverseMouseDrag') === 'true';
@@ -162,7 +159,7 @@ AFRAME.registerSystem('arena-av-setup', {
         this.redetectAVBtn.addEventListener('click', this.detectDevices);
         this.enterSceneBtn.addEventListener('click', () => {
             localStorage.setItem('display_name', this.displayName.value);
-            localStorage.setItem('prefPresenceIdx', this.presenceSelect.value);
+            localStorage.setItem('prefPresence', this.presenceSelect.value);
             // Stash preferred devices
             localStorage.setItem('prefAudioInput', this.audioInSelect.value);
             localStorage.setItem('prefVideoInput', this.videoSelect.value);
@@ -173,11 +170,11 @@ AFRAME.registerSystem('arena-av-setup', {
                 const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
                 sceneHist[ARENA.namespacedScene] = {
                     ...sceneHist[ARENA.namespacedScene],
-                    headModelPathIdx: this.headModelPathSelect.selectedIndex,
+                    headModelPath: this.headModelPathSelect.value,
                 };
                 localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
             } else {
-                localStorage.setItem('headModelPathIdx', this.headModelPathSelect.selectedIndex);
+                localStorage.setItem('prefHeadModelPath', this.headModelPathSelect.value);
             }
 
             // default is reverse of aframe's default - we want to "drag world to pan"

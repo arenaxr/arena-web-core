@@ -902,17 +902,15 @@ AFRAME.registerSystem('arena-scene', {
             opt.text = `${head.name} (scene-options)`;
             headModelPathSelect.add(opt, null);
         });
-        let headModelPathIdx = 0;
         const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-        const sceneHeadModelPathIdx = sceneHist[this.namespacedScene]?.headModelPathIdx;
-        if (sceneHeadModelPathIdx !== undefined) {
-            headModelPathIdx = sceneHeadModelPathIdx;
+        const sceneHeadModelPath = sceneHist[this.namespacedScene]?.headModelPath;
+        if (sceneHeadModelPath !== undefined) {
+            headModelPathSelect.value = sceneHeadModelPath;
         } else if (headModelPathSelect.selectedIndex === 0) {
             // if default ARENA head used, replace with default scene head
-            headModelPathIdx = defaultHeadsLen;
-        } else if (localStorage.getItem('headModelPathIdx')) {
-            headModelPathIdx = localStorage.getItem('headModelPathIdx');
+            headModelPathSelect.value = sceneHeads[0].url;
+        } else if (localStorage.getItem('prefHeadModelPath')) {
+            headModelPathSelect.value = localStorage.getItem('prefHeadModelPath');
         }
-        headModelPathSelect.selectedIndex = headModelPathIdx < headModelPathSelect.length ? headModelPathIdx : 0;
     },
 });
