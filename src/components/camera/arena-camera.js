@@ -64,7 +64,6 @@ AFRAME.registerComponent('arena-camera', {
         this.lastPose = '';
         this.videoDefaultResolutionSet = false;
 
-        this.presenceEl = document.getElementById('presenceSelect');
         this.headModelPathEl = document.getElementById('headModelPathSelect');
 
         // default is reverse of aframe's default - we want to "drag world to pan"
@@ -145,10 +144,8 @@ AFRAME.registerComponent('arena-camera', {
                 'arena-user': arenaUser,
             },
         };
-        if (this.presenceEl) {
-            arenaUser.presence = this.presenceEl.value;
-        } else {
-            this.presenceEl = document.getElementById('presenceSelect');
+        if (localStorage.getItem('prefPresenceIdx')) {
+            arenaUser.presence = localStorage.getItem('prefPresenceIdx');
         }
 
         if (this.jitsi.initialized) {
