@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.7](https://github.com/arenaxr/arena-web-core/compare/v2.2.6...v2.2.7) (2025-09-19)
+
+
+### Bug Fixes
+
+* **a/v,arena-camera:** simplify head model load/save, avoid uninit load ([aacdb16](https://github.com/arenaxr/arena-web-core/commit/aacdb16b8e851745fe10368b122b9e1b5230f7b0))
+* **a/v:** added persisted user setting for reverse mouse drag ([dfcaaa5](https://github.com/arenaxr/arena-web-core/commit/dfcaaa5d16eeaf86e6e82b5206e28841684cba7d))
+* **a/v:** fixed unsaved presense type on A/V Setup ([3b63e6d](https://github.com/arenaxr/arena-web-core/commit/3b63e6da6c2fe1346395934946b3b018548ac020))
+* **arena-camera:** prevent arena-camera reading uninit presense from a/v setup ([9333f99](https://github.com/arenaxr/arena-web-core/commit/9333f99991d73754faf6db48d3a2b15d7979ec69))
+* **chat:** upgrade linkifyjs deps ([988139e](https://github.com/arenaxr/arena-web-core/commit/988139eac635407ed81d345f6227f58c2e531fae))
+* **jitsi:** temporarily prevent premature 360 video losing jitsiId ([490f599](https://github.com/arenaxr/arena-web-core/commit/490f5994c2f3e74fba7fe31d327ab7d4ba3adb05))
+
 ## [2.2.6](https://github.com/arenaxr/arena-web-core/compare/v2.2.5...v2.2.6) (2025-09-04)
 
 
