@@ -291,7 +291,8 @@ AFRAME.registerComponent('arena-user', {
             el.appendChild(videoCubeDark);
             this.videoCubeDark = videoCubeDark;
         } else {
-            videoCube.setAttribute('scale', '0.9 1.5 0.02');
+            videoCube.setAttribute('scale', '1.5 0.9 0.02');
+            videoCube.setAttribute('rotation', '0 0 -90');
         }
 
         el.appendChild(videoCube);
@@ -456,7 +457,7 @@ AFRAME.registerComponent('arena-user', {
         // Option 1: video cube W x H x D is 0.6m x 0.4m x 0.6m
         // Option 2: portal W x H x D is 0.9m x 1.5m x 0.02m
         const fov = 80;
-        const videoHeightMeters = this.data.presence !== 'Portal' ? 0.4 : 1.5;
+        const videoHeightMeters = this.data.presence !== 'Portal' ? 0.4 : 0.9;
         const videoDepthMeters = this.data.presence !== 'Portal' ? 0.6 : 0.02;
         const actualDist = distance - (this.data.pano ? 0 : videoDepthMeters / 2);
         const frustumHeightAtVideo = 2 * actualDist * Math.tan((fov * 0.5 * Math.PI) / 180);
@@ -487,13 +488,13 @@ AFRAME.registerComponent('arena-user', {
                 case 'Standard':
                     this.headText.setAttribute('visible', true);
                     this.headModel.setAttribute('visible', true);
-                    this.headText.setAttribute('position', '0 0.45 0.05');
+                    this.headText.setAttribute('position', `0 ${0.4 + 0.05} ${0.1 / 2}`);
                     // redraw mic
                     this.removeMicrophone();
                     this.drawMicrophone();
                     break;
                 case 'Portal':
-                    this.headText.setAttribute('position', '0 1.7 0.05');
+                    this.headText.setAttribute('position', `0 ${0.9 + 0.05} ${0.02 / 2}`);
                     // redraw mic
                     this.removeMicrophone();
                     this.drawMicrophone();
