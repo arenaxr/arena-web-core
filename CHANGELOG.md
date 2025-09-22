@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.8](https://github.com/arenaxr/arena-web-core/compare/v2.2.7...v2.2.8) (2025-09-22)
+
+
+### Bug Fixes
+
+* **arena-user,jitsi:** recenter icons and rotate 2d video portal preview ([3b0676e](https://github.com/arenaxr/arena-web-core/commit/3b0676e6fa380dd3e07829da9f620148f40c7169))
+* **arena-user:** rotate default portal presence 90 deg right ([bb0517a](https://github.com/arenaxr/arena-web-core/commit/bb0517a0cdd77e4dc90648fbc65129c6dbca56ad))
+
 ## [2.2.7](https://github.com/arenaxr/arena-web-core/compare/v2.2.6...v2.2.7) (2025-09-19)
 
 
