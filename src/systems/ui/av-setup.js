@@ -77,6 +77,7 @@ AFRAME.registerSystem('arena-av-setup', {
         this.presenceSelect = document.getElementById('presenceSelect');
         this.headModelPathSelect = document.getElementById('headModelPathSelect');
 
+        this.reverseRenderCanvasCheckbox = document.getElementById('reverseRenderCanvasCheckbox');
         this.reverseMouseDragCheckbox = document.getElementById('reverseMouseDragCheckbox');
         this.displayName = document.getElementById('displayName-input');
         this.enterSceneBtn = document.getElementById('enterSceneAVBtn');
@@ -91,6 +92,17 @@ AFRAME.registerSystem('arena-av-setup', {
             this.videoElement.classList.add('flip-video-portal');
         }
         this.videoElement.style.borderRadius = '10px';
+
+        const canvas = document.querySelector('a-scene').querySelector('canvas');
+        if (localStorage.getItem('prefReverseRenderCanvas') === 'true') {
+            if (canvas.classList) {
+                canvas.classList.remove('a-canvas-normal');
+                canvas.classList.add('a-canvas-flip');
+            }
+        } else if (canvas.classList) {
+            canvas.classList.remove('a-canvas-flip');
+            canvas.classList.add('a-canvas-normal');
+        }
 
         if (ARENA.sceneHeadModels) {
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
@@ -128,6 +140,9 @@ AFRAME.registerSystem('arena-av-setup', {
         }
         if (localStorage.getItem('prefPresence')) {
             this.presenceSelect.value = localStorage.getItem('prefPresence');
+        }
+        if (localStorage.getItem('prefReverseRenderCanvas')) {
+            this.reverseRenderCanvasCheckbox.checked = localStorage.getItem('prefReverseRenderCanvas') === 'true';
         }
         if (localStorage.getItem('prefReverseMouseDrag')) {
             this.reverseMouseDragCheckbox.checked = localStorage.getItem('prefReverseMouseDrag') === 'true';
@@ -182,6 +197,18 @@ AFRAME.registerSystem('arena-av-setup', {
             } else {
                 localStorage.setItem('prefHeadModelPath', this.headModelPathSelect.value);
             }
+
+            const canvas = document.querySelector('a-scene').querySelector('canvas');
+            if (this.reverseRenderCanvasCheckbox.checked) {
+                if (canvas.classList) {
+                    canvas.classList.remove('a-canvas-normal');
+                    canvas.classList.add('a-canvas-flip');
+                }
+            } else if (canvas.classList) {
+                canvas.classList.remove('a-canvas-flip');
+                canvas.classList.add('a-canvas-normal');
+            }
+            localStorage.setItem('prefReverseRenderCanvas', this.reverseRenderCanvasCheckbox.checked);
 
             // default is reverse of aframe's default - we want to "drag world to pan"
             const camera = document.getElementById('my-camera');

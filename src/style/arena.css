@@ -20,6 +20,20 @@
     z-index: 9999;
 }
 
+.a-canvas-normal {
+    transform: scale(1, 1);
+    -moz-transform: scale(1, 1); /* Firefox */
+    -webkit-transform: scale(1, 1); /* Safari and Chrome */
+    -o-transform: scale(1, 1); /* Opera */
+}
+
+.a-canvas-flip {
+    transform: scale(-1, 1);
+    -moz-transform: scale(-1, 1); /* Firefox */
+    -webkit-transform: scale(-1, 1); /* Safari and Chrome */
+    -o-transform: scale(-1, 1); /* Opera */
+}
+
 .flip-video {
     transform: scale(-1, 1);
     -moz-transform: scale(-1, 1); /* Firefox */
