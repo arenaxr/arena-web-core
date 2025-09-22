@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.4",
-    "@parcel/babel-plugin-transform-runtime": "^2.14.0",
+    "@parcel/babel-plugin-transform-runtime": "^2.16.0",
     "@parcel/babel-preset-env": "^2.14.0",
     "@parcel/transformer-glsl": "^2.14.0",
     "buffer": "^6.0.3",
