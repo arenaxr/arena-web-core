@@ -83,7 +83,13 @@ AFRAME.registerSystem('arena-av-setup', {
         this.redetectAVBtn = document.getElementById('redetectAVBtn');
 
         // style video element
-        this.videoElement.classList.add('flip-video');
+        if (this.presenceSelect.value !== 'Portal') {
+            this.videoElement.classList.remove('flip-video-portal');
+            this.videoElement.classList.add('flip-video');
+        } else {
+            this.videoElement.classList.remove('flip-video');
+            this.videoElement.classList.add('flip-video-portal');
+        }
         this.videoElement.style.borderRadius = '10px';
 
         if (ARENA.sceneHeadModels) {

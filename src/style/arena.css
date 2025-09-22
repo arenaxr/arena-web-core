@@ -27,6 +27,13 @@
     -o-transform: scale(-1, 1); /* Opera */
 }
 
+.flip-video-portal {
+    transform: scale(-1, 1) rotate(-90deg);
+    -moz-transform: scale(-1, 1) rotate(-90deg); /* Firefox */
+    -webkit-transform: scale(-1, 1) rotate(-90deg); /* Safari and Chrome */
+    -o-transform: scale(-1, 1) rotate(-90deg); /* Opera */
+}
+
 .arena-button {
     background: rgba(0, 0, 0, 0) 50% 50% no-repeat;
     border: 0;

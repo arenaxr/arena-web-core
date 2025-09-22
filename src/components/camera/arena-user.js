@@ -201,9 +201,9 @@ AFRAME.registerComponent('arena-user', {
         micIconEl.setAttribute('material', 'shader', 'flat');
         micIconEl.setAttribute('scale', '0.2 0.2 0.2');
         if (data.presence !== 'Portal') {
-            micIconEl.setAttribute('position', '0 0.3 0.045');
+            micIconEl.setAttribute('position', `0 ${0.4 / 2 + 0.1} 0`);
         } else {
-            micIconEl.setAttribute('position', '-0.75 1.25 -0.035');
+            micIconEl.setAttribute('position', `0 ${1.5 / 2 + 0.1} 0`);
         }
         micIconEl.setAttribute('src', 'url(src/systems/ui/images/audio-off.png)');
         this.micIconEl = micIconEl;
@@ -233,9 +233,9 @@ AFRAME.registerComponent('arena-user', {
         qualIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
         qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
         if (data.presence !== 'Portal') {
-            qualIconEl.setAttribute('position', `${0 - 0.2} 0.3 0.045`);
+            qualIconEl.setAttribute('position', `${0 - 0.2} ${0.4 / 2 + 0.1} 0`);
         } else {
-            qualIconEl.setAttribute('position', `${-0.75 - 0.2}-0.75 1.25 -0.035`);
+            qualIconEl.setAttribute('position', `${0 - 0.2} ${1.5 / 2 + 0.1} 0`);
         }
         qualIconEl.setAttribute('src', this.getQualityIcon(data.jitsiQuality)); // update signal
         this.qualIconEl = qualIconEl;
@@ -292,7 +292,7 @@ AFRAME.registerComponent('arena-user', {
             this.videoCubeDark = videoCubeDark;
         } else {
             videoCube.setAttribute('scale', '1.5 0.9 0.02');
-            videoCube.setAttribute('rotation', '0 0 -90');
+            videoCube.setAttribute('rotation', '0 0 -90'); // TODO (mwfarb): resolve back video upside down
         }
 
         el.appendChild(videoCube);
@@ -488,13 +488,13 @@ AFRAME.registerComponent('arena-user', {
                 case 'Standard':
                     this.headText.setAttribute('visible', true);
                     this.headModel.setAttribute('visible', true);
-                    this.headText.setAttribute('position', `0 ${0.4 + 0.05} ${0.1 / 2}`);
+                    this.headText.setAttribute('position', `0 ${0.4 / 2 + 0.25} 0`);
                     // redraw mic
                     this.removeMicrophone();
                     this.drawMicrophone();
                     break;
                 case 'Portal':
-                    this.headText.setAttribute('position', `0 ${0.9 + 0.05} ${0.02 / 2}`);
+                    this.headText.setAttribute('position', `0 ${1.5 / 2 + 0.25} 0`);
                     // redraw mic
                     this.removeMicrophone();
                     this.drawMicrophone();

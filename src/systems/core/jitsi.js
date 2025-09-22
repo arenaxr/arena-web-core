@@ -814,7 +814,13 @@ AFRAME.registerSystem('arena-jitsi', {
 
         // video window for jitsi
         this.jitsiVideoElem = document.getElementById('cornerVideo');
-        this.jitsiVideoElem.classList.add('flip-video');
+        if (localStorage.getItem('prefPresence') !== 'Portal') {
+            this.jitsiVideoElem.classList.remove('flip-video-portal');
+            this.jitsiVideoElem.classList.add('flip-video');
+        } else {
+            this.jitsiVideoElem.classList.remove('flip-video');
+            this.jitsiVideoElem.classList.add('flip-video-portal');
+        }
         this.jitsiVideoElem.classList.add('arena-corner-video');
         this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
         this.jitsiVideoElem.style.display = 'none';
