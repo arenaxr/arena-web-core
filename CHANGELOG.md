@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.0](https://github.com/arenaxr/arena-web-core/compare/v2.2.8...v2.3.0) (2025-09-24)
+
+
+### Features
+
+* **a/v setup:** add mirror flipped 3d scene option ([d5c6b37](https://github.com/arenaxr/arena-web-core/commit/d5c6b378d9653a2bcfc3dc32223a13d235a8bc4f))
+
+
+### Bug Fixes
+
+* **chat:** check mqtt client, bug when camFollow for persist object ([a04eb6b](https://github.com/arenaxr/arena-web-core/commit/a04eb6b27e5f19049bcba3f16818b096de916ba6))
+* **renderfusion:** don't load renderfusion on mobile/headset, unless url forceRenderFusion=1 ([c1deb87](https://github.com/arenaxr/arena-web-core/commit/c1deb87638f9881e838b43f4a38082b0f08a807e))
+* **renderfusion:** remove renderfusion from build3d ([4ecdc66](https://github.com/arenaxr/arena-web-core/commit/4ecdc664bd2a4d53fe15fe951f741ebab5ae2741))
+
 ## [2.2.8](https://github.com/arenaxr/arena-web-core/compare/v2.2.7...v2.2.8) (2025-09-22)
 
 
