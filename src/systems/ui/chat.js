@@ -1036,7 +1036,7 @@ AFRAME.registerSystem('arena-chat-ui', {
      */
     presenceMsg(msg = {}, to = undefined) {
         const dstTopic = to ? this.privatePresenceTopic.formatStr({ toUid: to }) : this.publicPresenceTopic;
-        this.mqttc.publish(dstTopic, {
+        this.mqttc?.publish(dstTopic, {
             object_id: this.userId,
             dn: this.displayName,
             ...msg,
@@ -1045,7 +1045,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     relocalizedMsg(to = undefined) {
         const dstTopic = to ? this.privatePresenceTopic.formatStr({ toUid: to }) : this.publicPresenceTopic;
-        this.mqttc.publish(dstTopic, {
+        this.mqttc?.publish(dstTopic, {
             object_id: this.userId,
             dn: this.displayName,
             action: 'relocalized',
