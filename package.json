@@ -47,7 +47,7 @@
     "buffer": "^6.0.3",
     "eslint": "^8.42.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^5.0.1",
     "jsdoc": "^4.0.4",
