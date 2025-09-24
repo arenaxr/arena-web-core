@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/arenaxr/arena-web-core/compare/v2.3.0...v2.3.1) (2025-09-24)
+
+
+### Bug Fixes
+
+* force release-please update ([d17640e](https://github.com/arenaxr/arena-web-core/commit/d17640eef9c89a7a5189b5f31d934e6a439176df))
+
 ## [2.3.0](https://github.com/arenaxr/arena-web-core/compare/v2.2.8...v2.3.0) (2025-09-24)
 
 
