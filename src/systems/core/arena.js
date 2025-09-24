@@ -266,8 +266,6 @@ AFRAME.registerSystem('arena-scene', {
         // setup webar session
         ARENAWebARUtils.handleARButtonForNonWebXRMobile();
 
-        console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
-
         const immersiveStartup = this.params.armode !== 'undefined' || this.params.vrmode !== 'undefined';
         // TODO: set this in scene options so content creators tune this
         const disableRenderFusion = this.params.disableRenderFusion !== undefined;
@@ -287,6 +285,7 @@ AFRAME.registerSystem('arena-scene', {
                 });
             }
         }
+        console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
         this.events.emit(ARENA_EVENTS.ARENA_LOADED, true);
     },
 
