@@ -272,7 +272,9 @@ AFRAME.registerSystem('arena-scene', {
         const immersiveStartup = typeof this.params.armode !== 'undefined' || typeof this.params.vrmode !== 'undefined';
         const capableRenderFusionDevice =
             !AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isTablet() && !AFRAME.utils.device.isMobileVR();
-        const allowRenderFusion = this.params.forceRenderFusion || (capableRenderFusionDevice && !immersiveStartup);
+        const allowRenderFusion =
+            this.params.forceRenderFusion ||
+            (capableRenderFusionDevice && !immersiveStartup && !this.isBuild3dEnabled());
         if (allowRenderFusion) sceneEl.setAttribute('arena-hybrid-render-client', true);
         sceneEl.addEventListener('enter-vr', () => {
             if (allowRenderFusion) sceneEl.removeAttribute('arena-hybrid-render-client');
