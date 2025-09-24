@@ -268,21 +268,25 @@ AFRAME.registerSystem('arena-scene', {
 
         console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
 
-        // add renderfusion when not mobile or requested
-        const immersiveStartup = typeof this.params.armode !== 'undefined' || typeof this.params.vrmode !== 'undefined';
-        const capableRenderFusionDevice =
-            !AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isTablet() && !AFRAME.utils.device.isMobileVR();
+        const immersiveStartup = this.params.armode !== 'undefined' || this.params.vrmode !== 'undefined';
+        // TODO: set this in scene options so content creators tune this
+        const disableRenderFusion = this.params.disableRenderFusion !== undefined;
+        const disableRenderFusionXR = this.params.disableRenderFusionVR !== undefined;
         const allowRenderFusion =
-            this.params.forceRenderFusion ||
-            (capableRenderFusionDevice && !immersiveStartup && !this.isBuild3dEnabled());
-        if (allowRenderFusion) sceneEl.setAttribute('arena-hybrid-render-client', true);
-        sceneEl.addEventListener('enter-vr', () => {
-            if (allowRenderFusion) sceneEl.removeAttribute('arena-hybrid-render-client');
-        });
-        sceneEl.addEventListener('exit-vr', () => {
-            if (allowRenderFusion) sceneEl.setAttribute('arena-hybrid-render-client', true);
-        });
-
+            !this.isBuild3dEnabled() && // Never allow with build 3d
+            !disableRenderFusion && // Explicit disable
+            !(disableRenderFusionXR && immersiveStartup); // Auto-enter immersive, don't bother attaching in first place
+        if (allowRenderFusion) {
+            sceneEl.setAttribute('arena-hybrid-render-client', true);
+            if (disableRenderFusionXR) {
+                sceneEl.addEventListener('enter-vr', () => {
+                    sceneEl.removeAttribute('arena-hybrid-render-client');
+                });
+                sceneEl.addEventListener('exit-vr', () => {
+                    sceneEl.setAttribute('arena-hybrid-render-client', true);
+                });
+            }
+        }
         this.events.emit(ARENA_EVENTS.ARENA_LOADED, true);
     },
 
