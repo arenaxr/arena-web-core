@@ -102,7 +102,7 @@ export default class WebRTCStatsLogger {
                 info(`E2E Latency: ${stat.latency} ms`);
             }
 
-            this.signaler.sendStats(stat);
+            this.signaler.sendStats(stat); // TODO (elu2): causing some disconnects for renderfusion when heartbeats not high enough
         });
 
         this.lastReport = report;
