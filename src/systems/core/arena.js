@@ -255,6 +255,7 @@ AFRAME.registerSystem('arena-scene', {
             sceneEl.enterVR();
         }
 
+        // add build3d
         if (this.isBuild3dEnabled()) {
             sceneEl.setAttribute('build3d-mqtt-scene', true);
             sceneEl.setAttribute('debug', true);
@@ -266,6 +267,19 @@ AFRAME.registerSystem('arena-scene', {
         ARENAWebARUtils.handleARButtonForNonWebXRMobile();
 
         console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
+
+        // add renderfusion when not mobile or requested
+        const immersiveStartup = typeof this.params.armode !== 'undefined' || typeof this.params.vrmode !== 'undefined';
+        const capableRenderFusionDevice =
+            !AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isTablet() && !AFRAME.utils.device.isMobileVR();
+        const allowRenderFusion = this.params.forceRenderFusion || (capableRenderFusionDevice && !immersiveStartup);
+        if (allowRenderFusion) sceneEl.setAttribute('arena-hybrid-render-client', true);
+        sceneEl.addEventListener('enter-vr', () => {
+            if (allowRenderFusion) sceneEl.removeAttribute('arena-hybrid-render-client');
+        });
+        sceneEl.addEventListener('exit-vr', () => {
+            if (allowRenderFusion) sceneEl.setAttribute('arena-hybrid-render-client', true);
+        });
 
         this.events.emit(ARENA_EVENTS.ARENA_LOADED, true);
     },
