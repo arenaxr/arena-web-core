@@ -45,7 +45,7 @@
     "@parcel/babel-preset-env": "^2.16.0",
     "@parcel/transformer-glsl": "^2.16.0",
     "buffer": "^6.0.3",
-    "eslint": "^8.42.0",
+    "eslint": "^9.36.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.27.5",
