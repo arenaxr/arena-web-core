@@ -268,7 +268,12 @@ AFRAME.registerComponent('arena-user', {
         const { data } = this;
 
         // attach video to head
-        const videoCube = document.createElement('a-box');
+        let videoCube;
+        if (data.presence !== 'Portal') {
+            videoCube = document.createElement('a-box');
+        } else {
+            videoCube = document.createElement('a-plane');
+        }
         videoCube.setAttribute('id', `video-cube-${this.videoID}`);
         videoCube.setAttribute('position', '0 0 0');
         videoCube.setAttribute('material', 'shader', 'flat');
@@ -291,8 +296,9 @@ AFRAME.registerComponent('arena-user', {
             el.appendChild(videoCubeDark);
             this.videoCubeDark = videoCubeDark;
         } else {
-            videoCube.setAttribute('scale', '1.5 0.9 0.02');
-            videoCube.setAttribute('rotation', '0 0 -90'); // TODO (mwfarb): resolve back video upside down
+            videoCube.setAttribute('material', 'side', 'double');
+            videoCube.setAttribute('scale', '1.5 0.9 0');
+            videoCube.setAttribute('rotation', '0 0 90');
         }
 
         el.appendChild(videoCube);
@@ -455,10 +461,10 @@ AFRAME.registerComponent('arena-user', {
 
     getActualResolution(distance, winHeight) {
         // Option 1: video cube W x H x D is 0.6m x 0.4m x 0.6m
-        // Option 2: portal W x H x D is 0.9m x 1.5m x 0.02m
+        // Option 2: portal W x H x D is 0.9m x 1.5m x 0m
         const fov = 80;
         const videoHeightMeters = this.data.presence !== 'Portal' ? 0.4 : 0.9;
-        const videoDepthMeters = this.data.presence !== 'Portal' ? 0.6 : 0.02;
+        const videoDepthMeters = this.data.presence !== 'Portal' ? 0.6 : 0;
         const actualDist = distance - (this.data.pano ? 0 : videoDepthMeters / 2);
         const frustumHeightAtVideo = 2 * actualDist * Math.tan((fov * 0.5 * Math.PI) / 180);
         const videoRatio2Window = videoHeightMeters / frustumHeightAtVideo;

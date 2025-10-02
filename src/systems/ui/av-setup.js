@@ -84,23 +84,18 @@ AFRAME.registerSystem('arena-av-setup', {
         this.redetectAVBtn = document.getElementById('redetectAVBtn');
 
         // style video element
-        if (this.presenceSelect.value !== 'Portal') {
-            this.videoElement.classList.remove('flip-video-portal');
+        if (localStorage.getItem('prefPresence') !== 'Portal') {
             this.videoElement.classList.add('flip-video');
         } else {
-            this.videoElement.classList.remove('flip-video');
             this.videoElement.classList.add('flip-video-portal');
         }
         this.videoElement.style.borderRadius = '10px';
 
+        // style the a-frame canvas
         const canvas = document.querySelector('a-scene').querySelector('canvas');
         if (localStorage.getItem('prefReverseRenderCanvas') === 'true') {
-            if (canvas.classList) {
-                canvas.classList.remove('a-canvas-normal');
-                canvas.classList.add('a-canvas-flip');
-            }
-        } else if (canvas.classList) {
-            canvas.classList.remove('a-canvas-flip');
+            canvas.classList.add('a-canvas-flip');
+        } else {
             canvas.classList.add('a-canvas-normal');
         }
 
@@ -176,6 +171,15 @@ AFRAME.registerSystem('arena-av-setup', {
         this.testAudioOutBtn.addEventListener('ended', () => {
             this.testAudioOutIcon.setAttribute('class', 'fas fa-volume-off');
         });
+        this.presenceSelect.onchange = () => {
+            if (this.presenceSelect.value !== 'Portal') {
+                this.videoElement.classList.remove('flip-video-portal');
+                this.videoElement.classList.add('flip-video');
+            } else {
+                this.videoElement.classList.remove('flip-video');
+                this.videoElement.classList.add('flip-video-portal');
+            }
+        };
 
         this.redetectAVBtn.addEventListener('click', this.detectDevices);
         this.enterSceneBtn.addEventListener('click', () => {
@@ -198,6 +202,7 @@ AFRAME.registerSystem('arena-av-setup', {
                 localStorage.setItem('prefHeadModelPath', this.headModelPathSelect.value);
             }
 
+            // style a-frame canvas
             const canvas = document.querySelector('a-scene').querySelector('canvas');
             if (this.reverseRenderCanvasCheckbox.checked) {
                 if (canvas.classList) {
