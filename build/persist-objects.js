@@ -381,20 +381,20 @@ export async function populateNamespaceList(nsInput, nsList) {
 
     let scenes = [];
     // get editable scenes...
-    try {
-        const uScenes = await ARENAUserAccount.userScenes();
-        uScenes.forEach((uScene) => {
-            scenes.push(uScene.name);
-        });
-    } catch (err) {
-        Alert.fire({
-            icon: 'error',
-            title: `Error fetching scene list from account: ${err.statusText}`,
-            timer: 5000,
-        });
-        console.error(err);
-        return undefined;
-    }
+    // try {
+    //     const uScenes = await ARENAUserAccount.userScenes();
+    //     uScenes.forEach((uScene) => {
+    //         scenes.push(uScene.name);
+    //     });
+    // } catch (err) {
+    //     Alert.fire({
+    //         icon: 'error',
+    //         title: `Error fetching scene list from account: ${err.statusText}`,
+    //         timer: 5000,
+    //     });
+    //     console.error(err);
+    //     return undefined;
+    // }
 
     // get public scenes...
     if (persist.persistUri === undefined) {
