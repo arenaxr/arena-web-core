@@ -64,13 +64,13 @@ export default class ARENAUserAccount {
         return ARENAUserAccount._makeRequest('GET', `/user/v2/user_state`);
     }
 
-    // /**
-    //  * Request scene names which the user has permission to from user database
-    //  * @return {[string]} list of scene names
-    //  */
-    // static async userScenes() {
-    //     return ARENAUserAccount._makeRequest('GET', '/user/v2/my_scenes');
-    // }
+    /**
+     * Request scene names which the user has permission to from user database
+     * @return {[string]} list of scene names
+     */
+    static async userScenes() {
+        return ARENAUserAccount._makeRequest('GET', '/user/v2/my_scenes');
+    }
 
     /**
      * Request a scene is added to the user database.

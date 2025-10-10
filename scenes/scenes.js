@@ -55,13 +55,9 @@ window.addEventListener('onauth', async (e) => {
         $(this).select2({
             theme: 'bootstrap4',
             width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-            placeholder: 'scene name',
+            placeholder: $(this).data('placeholder'),
             allowClear: Boolean($(this).data('allow-clear')),
             closeOnSelect: !$(this).attr('multiple'),
-            ajax: {
-                url: '/user/scene-autocomplete',
-                dataType: 'json',
-            },
         });
     });
     selectEl.val(null).trigger('change');
@@ -330,19 +326,19 @@ window.addEventListener('onauth', async (e) => {
     // Request editable scenes...
     // my_scenes may include 'public' namespaces for staff
     // my_scenes may include other editor namespaces that have been granted
-    // axios
-    //     .get('/user/v2/my_scenes', {
-    //         withCredentials: true,
-    //     })
-    //     .then((res) => {
-    //         res.data.forEach((ns) => {
-    //             userSceneSelect.options.add(new Option(ns.name, ns.name));
-    //         });
-    //     })
-    //     .catch((err) => {
-    //         Swal.fire('My Scene Load Failed!', err.response.data, 'warning');
-    //         console.log(err);
-    //     });
+    axios
+        .get('/user/v2/my_scenes', {
+            withCredentials: true,
+        })
+        .then((res) => {
+            res.data.forEach((ns) => {
+                userSceneSelect.options.add(new Option(ns.name, ns.name));
+            });
+        })
+        .catch((err) => {
+            Swal.fire('My Scene Load Failed!', err.response.data, 'warning');
+            console.log(err);
+        });
 
     // Request public scenes...
     axios
