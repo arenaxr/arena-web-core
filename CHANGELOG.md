@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.2](https://github.com/arenaxr/arena-web-core/compare/v2.3.1...v2.3.2) (2025-12-04)
+
+
+### Bug Fixes
+
+* **a/v:** set Portal presense to plane type ([d8ab7dc](https://github.com/arenaxr/arena-web-core/commit/d8ab7dcf93a2d1472d2a1daf375c9160f35f9e84))
+* **store:** replace store iframe html injection with src update, improve error dialog ([f839d66](https://github.com/arenaxr/arena-web-core/commit/f839d66dfa238c35a28df52adcf31ae67d177727))
+
 ## [2.3.1](https://github.com/arenaxr/arena-web-core/compare/v2.3.0...v2.3.1) (2025-09-24)
 
 
