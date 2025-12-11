@@ -157,7 +157,7 @@ export async function fetchSceneObjects(scene) {
 }
 
 export function updateListItemVisibility(visible, li, iconVis) {
-    iconVis.className = visible ? 'icon-eye-open' : 'icon-eye-close';
+    iconVis.className = visible ? 'fas fa-eye' : 'fas fa-eye-slash';
     li.style.color = visible ? 'black' : 'gray';
 }
 
@@ -293,7 +293,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         // add edit "button"
         const editspan = document.createElement('span');
         const ielem = document.createElement('i');
-        ielem.className = 'icon-edit';
+        ielem.className = 'fas fa-edit';
         editspan.className = 'edit';
         editspan.title = 'Edit JSON';
         editspan.appendChild(ielem);
@@ -314,7 +314,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         if (sceneObjs[i].type !== 'program') {
             const editspan3d = document.createElement('span');
             const ielem3d = document.createElement('i');
-            ielem3d.className = 'icon-globe';
+            ielem3d.className = 'fas fa-globe';
             editspan3d.className = 'edit3d';
             editspan3d.title = 'Edit 3D';
             editspan3d.appendChild(ielem3d);

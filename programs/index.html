@@ -1,37 +1,34 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <link rel="icon" type="image/png" href="../static/images/conix-x.png" />
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <!-- login auth check, blocking to page load -->
-        <script src="../conf/defaults.js"></script>
-        <script src="../static/auth.js"></script>
-        <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/png" href="../static/images/conix-x.png" />
 
-        <link rel="stylesheet" href="../static/arenaxr-bootstrap/arenaxr-bootstrap.css" />
-        <script src="../static/vendor/jquery-2.1.1.min.js"></script>
-        <script src="../static/arenaxr-bootstrap/bootstrap.min.js"></script>
-        <link rel="preconnect" href="https://fonts.gstatic.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet" />
-        <script src="../navbar.js" type="text/javascript"></script>
+    <!-- login auth check, blocking to page load -->
+    <script src="../conf/defaults.js"></script>
+    <script src="../static/auth.js"></script>
+    <link rel="stylesheet" href="style.css" />
 
-        <title>ARENA Program Dashboard</title>
-    </head>
+    <!-- MDB -->
+    <link rel="stylesheet" href="../static/vendor/mdb/mdb.min.css" />
+    <script src="../static/vendor/jquery-2.1.1.min.js"></script>
+    <script src="../static/vendor/mdb/mdb.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet" />
+    <script src="../navbar.js" type="text/javascript"></script>
 
-    <body>
-        <div id="header"></div>
-        <div id="container">
-            <iframe
-                id="dashboardframe"
-                name="dashboardframe"
-                style="width: 100vw; height: 100vh; position: relative"
-                frameborder="0"
-                allowfullscreen
-                src="../dashboard"
-            ></iframe>
-        </div>
-    </body>
+    <title>ARENA Program Dashboard</title>
+</head>
+
+<body>
+    <div id="header"></div>
+    <div id="container">
+        <iframe id="dashboardframe" name="dashboardframe" style="width: 100vw; height: 100vh; position: relative"
+            frameborder="0" allowfullscreen src="../dashboard"></iframe>
+    </div>
+</body>
+
 </html>

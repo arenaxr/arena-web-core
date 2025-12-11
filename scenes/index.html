@@ -1,445 +1,309 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <link rel="icon" type="image/png" href="../static/images/conix-x.png" />
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <!-- login auth check, blocking to page load -->
-        <script src="../conf/defaults.js"></script>
-        <script src="../static/auth.js"></script>
+    <link rel="icon" type="image/png" href="../static/images/conix-x.png" />
 
-        <link rel="stylesheet" href="../static/arenaxr-bootstrap/arenaxr-bootstrap.css" />
-        <link rel="stylesheet" href="../static/vendor/fontawesome-5/css/all.min.css" type="text/css" />
-        <script src="../static/vendor/jquery-2.1.1.min.js"></script>
-        <script src="../static/arenaxr-bootstrap/bootstrap.min.js"></script>
-        <script src="../navbar.js" type="text/javascript"></script>
+    <!-- login auth check, blocking to page load -->
+    <script src="../conf/defaults.js"></script>
+    <script src="../static/auth.js"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css"
-        />
+    <!-- MDB -->
+    <link rel="stylesheet" href="../static/vendor/mdb/mdb.min.css" />
+    <link rel="stylesheet" href="../static/vendor/fontawesome-5/css/all.min.css" type="text/css" />
+    <script src="../static/vendor/jquery-2.1.1.min.js"></script>
+    <script src="../static/vendor/mdb/mdb.min.js"></script>
+    <script src="../navbar.js" type="text/javascript"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css" />
 
-        <link rel="stylesheet" href="style.css" />
-        <script type="text/javascript" src="scenes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-        <title>ARENA Scenes</title>
-    </head>
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript" src="scenes.js"></script>
 
-    <body>
-        <div id="header"></div>
+    <title>ARENA Scenes</title>
+</head>
 
-        <div class="d-flex align-items-center min-vh-75 routePage" id="sceneSelect">
-            <div class="container">
-                <div class="row d-flex justify-content-center align-items-center">
-                    <div class="col-lg-6 p-4 col-md-8 shadow rounded bg-white">
-                        <div class="row mb-3">
-                            <div class="col-4">
-                                <img
-                                    alt="conix xr logo"
-                                    style="max-height: 64px"
-                                    src="../static/images/xr-logo-v8.png"
-                                />
-                            </div>
-                            <div class="col text-end">
-                                <h5>Welcome <span id="username"></span></h5>
+<body>
+    <div id="header"></div>
+
+    <div class="d-flex align-items-center min-vh-75 routePage" id="sceneSelect">
+        <div class="container">
+            <div class="row d-flex justify-content-center align-items-center">
+                <div class="col-lg-6 p-4 col-md-8 shadow rounded bg-white">
+                    <div class="row mb-3">
+                        <div class="col-4">
+                            <img alt="conix xr logo" style="max-height: 64px" src="../static/images/xr-logo-v8.png" />
+                        </div>
+                        <div class="col text-end">
+                            <h5>Welcome <span id="username"></span></h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9 offset-md-3">
+                            <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="myscenes-tab" data-bs-toggle="tab"
+                                        data-bs-target="#myscenes" type="button" role="tab" aria-controls="myscenes"
+                                        aria-selected="true">
+                                        My Scenes
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="publicscenes-tab" data-bs-toggle="tab"
+                                        data-bs-target="#publicscenes" type="button" role="tab"
+                                        aria-controls="publicscenes" aria-selected="false">
+                                        Public Scenes
+                                    </button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="sceneTabs">
+                                <div class="tab-pane fade" id="myscenes" role="tabpanel" aria-labelledby="myscenes-tab">
+                                    <div class="row text-center mb-3">
+                                        <div class="col-sm-7">
+                                            <div class="form-group">
+                                                <label aria-hidden="true" class="form-label d-none"
+                                                    for="userSceneSelect">
+                                                    Search My Scenes
+                                                </label>
+                                                <select aria-label="Scene Select" id="userSceneSelect"
+                                                    class="form-control" data-placeholder="Search My Scene Names"
+                                                    data-allow-clear="1">
+                                                    <option></option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-5">
+                                            <button class="btn btn-light disabled" id="enterUserSceneBtn"
+                                                title="Enter Scene">
+                                                <i class="fas fa-sign-in-alt"></i>
+                                            </button>
+
+                                            <button class="btn btn-light disabled" id="enterArUserSceneBtn"
+                                                title="Enter Scene in AR">
+                                                <i class="fas fa-camera"></i>
+                                            </button>
+
+                                            <button class="btn btn-light disabled" id="cloneUserSceneBtn"
+                                                title="Duplicate Scene">
+                                                <i class="far fa-clone"></i>
+                                            </button>
+
+                                            <button class="btn btn-light disabled" id="deleteUserSceneBtn"
+                                                title="Delete Scene">
+                                                <i class="far fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row text-center mb-3">
+                                        <div class="col-sm-10">
+                                            <div class="form-floating mb-3">
+                                                <textarea aria-label="Scene URL" class="form-control form-control-sm"
+                                                    id="userSceneUrl" readonly type="text" value=""></textarea>
+                                                <label for="userSceneUrl">Scene URL</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <button class="btn btn-light disabled" id="copyUserSceneUrlBtn"
+                                                title="Copy Scene Url">
+                                                <i class="far fa-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-link text-left disabled"
+                                        id="advancedLinksUserBtn">
+                                        Scene URL Options
+                                    </button>
+                                    <div class="row text-left mb-3" id="uri-builder" hidden>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="armodeCheck" />
+                                            <label class="form-check-label" for="armodeCheck">
+                                                AR: Enter AR automatically; Remove hide-in-ar objects.
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="noreticleCheck" />
+                                            <label class="form-check-label" for="noreticleCheck">
+                                                AR: Remove recticle (gray circle)
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="vrCheck" />
+                                            <label class="form-check-label" for="vrCheck">
+                                                VR: Remove hide-in-vr objects.
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="nonameCheck" />
+                                            <label class="form-check-label" for="nonameCheck">
+                                                Avatar: Remove user name display.
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="skipavCheck" />
+                                            <label class="form-check-label" for="skipavCheck">
+                                                Avatar: Select audio/video options automatically.
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="noavCheck" />
+                                            <label class="form-check-label" for="noavCheck">
+                                                Avatar: Remove video conferencing.
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="demoModeCheck" />
+                                            <label class="form-check-label" for="demoModeCheck">
+                                                DemoMode: Hides certain UI elements for demo purposes.
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="startLastPosCheck" />
+                                            <label class="form-check-label" for="startLastPosCheck">
+                                                Nav: Restore user's last scene location.
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                id="anonymousCheck" />
+                                            <label class="form-check-label" for="anonymousCheck">
+                                                Auth: Use anonymous login.
+                                            </label>
+                                        </div>
+                                        <small style="color: grey">Change <a id="scenePermsLink">scene
+                                                permissions</a>.</small>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade show active" id="publicscenes" role="tabpanel"
+                                    aria-labelledby="publicscenes-tab">
+                                    <div class="row text-center">
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <label aria-hidden="true" class="form-label d-none"
+                                                    for="publicSceneSelect">
+                                                    Search Public Scenes
+                                                </label>
+                                                <select aria-label="Scene Select" id="publicSceneSelect"
+                                                    class="form-control" data-placeholder="Search Public Scene Names"
+                                                    data-allow-clear="1">
+                                                    <option></option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <button class="btn btn-light disabled" id="enterPublicSceneBtn"
+                                                title="Enter Scene">
+                                                <i class="fas fa-sign-in-alt"></i>
+                                            </button>
+
+                                            <button class="btn btn-light disabled" id="enterArPublicSceneBtn"
+                                                title="Enter Scene in AR">
+                                                <i class="fas fa-camera"></i>
+                                            </button>
+
+                                            <button class="btn btn-light disabled" id="clonePublicSceneBtn"
+                                                title="Duplicate Scene">
+                                                <i class="far fa-clone"></i>
+                                            </button>
+
+                                            <input aria-hidden="true" class="d-none" id="publicSceneUrl" type="hidden"
+                                                value="" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="col-md-9 offset-md-3">
-                                <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button
-                                            class="nav-link"
-                                            id="myscenes-tab"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#myscenes"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="myscenes"
-                                            aria-selected="true"
-                                        >
-                                            My Scenes
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button
-                                            class="nav-link active"
-                                            id="publicscenes-tab"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#publicscenes"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="publicscenes"
-                                            aria-selected="false"
-                                        >
-                                            Public Scenes
-                                        </button>
-                                    </li>
-                                </ul>
-                                <div class="tab-content" id="sceneTabs">
-                                    <div
-                                        class="tab-pane fade"
-                                        id="myscenes"
-                                        role="tabpanel"
-                                        aria-labelledby="myscenes-tab"
-                                    >
-                                        <div class="row text-center mb-3">
-                                            <div class="col-sm-7">
-                                                <div class="form-group">
-                                                    <label
-                                                        aria-hidden="true"
-                                                        class="form-label d-none"
-                                                        for="userSceneSelect"
-                                                    >
-                                                        Search My Scenes
-                                                    </label>
-                                                    <select
-                                                        aria-label="Scene Select"
-                                                        id="userSceneSelect"
-                                                        class="form-control"
-                                                        data-placeholder="Search My Scene Names"
-                                                        data-allow-clear="1"
-                                                    >
-                                                        <option></option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-5">
-                                                <button
-                                                    class="btn btn-light disabled"
-                                                    id="enterUserSceneBtn"
-                                                    title="Enter Scene"
-                                                >
-                                                    <i class="fas fa-sign-in-alt"></i>
-                                                </button>
-
-                                                <button
-                                                    class="btn btn-light disabled"
-                                                    id="enterArUserSceneBtn"
-                                                    title="Enter Scene in AR"
-                                                >
-                                                    <i class="fas fa-camera"></i>
-                                                </button>
-
-                                                <button
-                                                    class="btn btn-light disabled"
-                                                    id="cloneUserSceneBtn"
-                                                    title="Duplicate Scene"
-                                                >
-                                                    <i class="far fa-clone"></i>
-                                                </button>
-
-                                                <button
-                                                    class="btn btn-light disabled"
-                                                    id="deleteUserSceneBtn"
-                                                    title="Delete Scene"
-                                                >
-                                                    <i class="far fa-trash-alt"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="row text-center mb-3">
-                                            <div class="col-sm-10">
-                                                <div class="form-floating mb-3">
-                                                    <textarea
-                                                        aria-label="Scene URL"
-                                                        class="form-control form-control-sm"
-                                                        id="userSceneUrl"
-                                                        readonly
-                                                        type="text"
-                                                        value=""
-                                                    ></textarea>
-                                                    <label for="userSceneUrl">Scene URL</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-2">
-                                                <button
-                                                    class="btn btn-light disabled"
-                                                    id="copyUserSceneUrlBtn"
-                                                    title="Copy Scene Url"
-                                                >
-                                                    <i class="far fa-clipboard"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            class="btn btn-link text-left disabled"
-                                            id="advancedLinksUserBtn"
-                                        >
-                                            Scene URL Options
-                                        </button>
-                                        <div class="row text-left mb-3" id="uri-builder" hidden>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="armodeCheck"
-                                                />
-                                                <label class="form-check-label" for="armodeCheck">
-                                                    AR: Enter AR automatically; Remove hide-in-ar objects.
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="noreticleCheck"
-                                                />
-                                                <label class="form-check-label" for="noreticleCheck">
-                                                    AR: Remove recticle (gray circle)
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="vrCheck"
-                                                />
-                                                <label class="form-check-label" for="vrCheck">
-                                                    VR: Remove hide-in-vr objects.
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="nonameCheck"
-                                                />
-                                                <label class="form-check-label" for="nonameCheck">
-                                                    Avatar: Remove user name display.
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="skipavCheck"
-                                                />
-                                                <label class="form-check-label" for="skipavCheck">
-                                                    Avatar: Select audio/video options automatically.
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="noavCheck"
-                                                />
-                                                <label class="form-check-label" for="noavCheck">
-                                                    Avatar: Remove video conferencing.
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="demoModeCheck"
-                                                />
-                                                <label class="form-check-label" for="demoModeCheck">
-                                                    DemoMode: Hides certain UI elements for demo purposes.
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="startLastPosCheck"
-                                                />
-                                                <label class="form-check-label" for="startLastPosCheck">
-                                                    Nav: Restore user's last scene location.
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input small"
-                                                    type="checkbox"
-                                                    name="uri-builder"
-                                                    id="anonymousCheck"
-                                                />
-                                                <label class="form-check-label" for="anonymousCheck">
-                                                    Auth: Use anonymous login.
-                                                </label>
-                                            </div>
-                                            <small style="color: grey"
-                                                >Change <a id="scenePermsLink">scene permissions</a>.</small
-                                            >
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="tab-pane fade show active"
-                                        id="publicscenes"
-                                        role="tabpanel"
-                                        aria-labelledby="publicscenes-tab"
-                                    >
-                                        <div class="row text-center">
-                                            <div class="col-sm-8">
-                                                <div class="form-group">
-                                                    <label
-                                                        aria-hidden="true"
-                                                        class="form-label d-none"
-                                                        for="publicSceneSelect"
-                                                    >
-                                                        Search Public Scenes
-                                                    </label>
-                                                    <select
-                                                        aria-label="Scene Select"
-                                                        id="publicSceneSelect"
-                                                        class="form-control"
-                                                        data-placeholder="Search Public Scene Names"
-                                                        data-allow-clear="1"
-                                                    >
-                                                        <option></option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-4">
-                                                <button
-                                                    class="btn btn-light disabled"
-                                                    id="enterPublicSceneBtn"
-                                                    title="Enter Scene"
-                                                >
-                                                    <i class="fas fa-sign-in-alt"></i>
-                                                </button>
-
-                                                <button
-                                                    class="btn btn-light disabled"
-                                                    id="enterArPublicSceneBtn"
-                                                    title="Enter Scene in AR"
-                                                >
-                                                    <i class="fas fa-camera"></i>
-                                                </button>
-
-                                                <button
-                                                    class="btn btn-light disabled"
-                                                    id="clonePublicSceneBtn"
-                                                    title="Duplicate Scene"
-                                                >
-                                                    <i class="far fa-clone"></i>
-                                                </button>
-
-                                                <input
-                                                    aria-hidden="true"
-                                                    class="d-none"
-                                                    id="publicSceneUrl"
-                                                    type="hidden"
-                                                    value=""
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-9 offset-md-3">
-                                    <small id="userNoteSpan" style="color: grey"></small>
-                                </div>
+                                <small id="userNoteSpan" style="color: grey"></small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="d-none d-flex align-items-center min-vh-75 routePage" id="cloneScene">
-            <div class="container">
-                <div class="row d-flex justify-content-center align-items-center">
-                    <div class="col-lg-6 p-4 col-md-8 shadow rounded bg-white">
-                        <div class="row mb-3">
-                            <div class="col-4">
-                                <img
-                                    alt="conix xr logo"
-                                    style="max-height: 64px"
-                                    src="../static/images/xr-logo-v8.png"
-                                />
-                            </div>
-                            <div class="col text-end">
-                                <h5>Welcome <span id="username"></span></h5>
-                            </div>
+    <div class="d-none d-flex align-items-center min-vh-75 routePage" id="cloneScene">
+        <div class="container">
+            <div class="row d-flex justify-content-center align-items-center">
+                <div class="col-lg-6 p-4 col-md-8 shadow rounded bg-white">
+                    <div class="row mb-3">
+                        <div class="col-4">
+                            <img alt="conix xr logo" style="max-height: 64px" src="../static/images/xr-logo-v8.png" />
                         </div>
-                        <div class="row">
-                            <div class="col-md-9 offset-md-3">
-                                <div class="text-primary border-bottom border-2 border-primary pb-2 mb-4">
-                                    Duplicate a Scene
-                                </div>
+                        <div class="col text-end">
+                            <h5>Welcome <span id="username"></span></h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9 offset-md-3">
+                            <div class="text-primary border-bottom border-2 border-primary pb-2 mb-4">
+                                Duplicate a Scene
+                            </div>
 
-                                <div class="row mb-3">
-                                    <div class="col-12 mb-3">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="sourceScene" readonly type="text" />
-                                            <label for="sourceScene">Source Scene</label>
-                                        </div>
+                            <div class="row mb-3">
+                                <div class="col-12 mb-3">
+                                    <div class="form-floating">
+                                        <input class="form-control" id="sourceScene" readonly type="text" />
+                                        <label for="sourceScene">Source Scene</label>
                                     </div>
-                                    <div class="col-8">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="newSceneNameInput" type="text" />
-                                            <label class="form-label" for="newSceneNameInput">New Scene Name</label>
-                                        </div>
-                                        <button class="d-none btn btn-warning float-end">
-                                            <i class="fas fa-lock"></i> Protect
-                                        </button>
+                                </div>
+                                <div class="col-8">
+                                    <div class="form-floating">
+                                        <input class="form-control" id="newSceneNameInput" type="text" />
+                                        <label class="form-label" for="newSceneNameInput">New Scene Name</label>
                                     </div>
-                                    <div class="col-4 pt-2" id="doCloneSceneContainer">
-                                        <button class="btn btn-light text-primary" id="closeCloneScene" title="Cancel">
-                                            <i class="far fa-times-circle"></i>
-                                        </button>
-                                        <button
-                                            class="btn btn-light text-primary disabled"
-                                            id="doCloneSceneBtn"
-                                            title="Duplicate Scene"
-                                        >
-                                            <i class="far fa-check-circle"></i>
-                                        </button>
-                                    </div>
-                                    <div class="col-12 d-none mt-3" id="cloneSceneCreated">
-                                        <div class="row">
-                                            <div class="col-9">
-                                                <div class="form-floating">
-                                                    <input
-                                                        aria-label="Scene URL"
-                                                        class="form-control form-control-sm"
-                                                        id="cloneSceneUrl"
-                                                        readonly
-                                                        type="text"
-                                                        value=""
-                                                    />
-                                                    <label class="form-label" for="cloneSceneUrl">New Scene URL</label>
-                                                </div>
+                                    <button class="d-none btn btn-warning float-end">
+                                        <i class="fas fa-lock"></i> Protect
+                                    </button>
+                                </div>
+                                <div class="col-4 pt-2" id="doCloneSceneContainer">
+                                    <button class="btn btn-light text-primary" id="closeCloneScene" title="Cancel">
+                                        <i class="far fa-times-circle"></i>
+                                    </button>
+                                    <button class="btn btn-light text-primary disabled" id="doCloneSceneBtn"
+                                        title="Duplicate Scene">
+                                        <i class="far fa-check-circle"></i>
+                                    </button>
+                                </div>
+                                <div class="col-12 d-none mt-3" id="cloneSceneCreated">
+                                    <div class="row">
+                                        <div class="col-9">
+                                            <div class="form-floating">
+                                                <input aria-label="Scene URL" class="form-control form-control-sm"
+                                                    id="cloneSceneUrl" readonly type="text" value="" />
+                                                <label class="form-label" for="cloneSceneUrl">New Scene URL</label>
                                             </div>
-                                            <div class="col-3 pt-2">
-                                                <button
-                                                    class="btn btn-light text-primary"
-                                                    id="enterCloneSceneBtn"
-                                                    title="Enter Scene"
-                                                >
-                                                    <i class="fas fa-sign-in-alt"></i>
-                                                </button>
-                                                <button
-                                                    class="btn btn-light text-primary"
-                                                    id="copyCloneSceneUrlBtn"
-                                                    title="Copy Scene URL"
-                                                >
-                                                    <i class="far fa-clipboard"></i>
-                                                </button>
-                                            </div>
+                                        </div>
+                                        <div class="col-3 pt-2">
+                                            <button class="btn btn-light text-primary" id="enterCloneSceneBtn"
+                                                title="Enter Scene">
+                                                <i class="fas fa-sign-in-alt"></i>
+                                            </button>
+                                            <button class="btn btn-light text-primary" id="copyCloneSceneUrlBtn"
+                                                title="Copy Scene URL">
+                                                <i class="far fa-clipboard"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -449,5 +313,7 @@
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>
