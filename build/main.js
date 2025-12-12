@@ -328,15 +328,15 @@ window.addEventListener('onauth', async (e) => {
     function newSceneModal(theNewScene = undefined) {
         Swal.fire({
             title: 'Add New or Unlisted Scene',
-            html: `<div class='input-prepend'>
-                    <span class='add-on' style='width:125px'>Namespace</span>
-                    <input type='text' class='input-medium' style='width:215px' list='modalnamespacelist' placeholder='Select Namespace...' id='modalnamespaceinput'>
+            html: `<div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:125px'>Namespace</span>
+                    <input type='text' class='form-control' style='width:215px' list='modalnamespacelist' placeholder='Select Namespace...' id='modalnamespaceinput'>
                     <datalist id='modalnamespacelist'></datalist>
-                  </div>
-                  <div class='input-prepend'>
-                    <span class='add-on' style='width:125px'>Scene</span>
-                    <input type='text' style='width:215px' id='modalscenename' placeholder='New Scene Name'>
-                  </div>
+                </div>
+                <div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:125px'>Scene</span>
+                    <input type='text' class='form-control' style='width:215px' id='modalscenename' placeholder='New Scene Name'>
+                </div>
                   <p><small>You can enter an existing unlisted Scene. New Scenes will be created with default permissions.</small></p>`,
             width: 600,
             confirmButtonText: 'Add Scene',
@@ -745,10 +745,10 @@ window.addEventListener('onauth', async (e) => {
         Swal.fire({
             title: 'Copy selected objects',
             html: `<p>Copy to existing scene</p>
-                   <div class='input-prepend'>
-                    <span class='add-on' style='width:120px'>Destination Scene</span>
-                    <select id='modalsceneinput' style='width:215px'></select>
-                  </div>`,
+                    <div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:120px'>Destination Scene</span>
+                    <select id='modalsceneinput' class='form-control' style='width:215px'></select>
+                    </div>`,
             confirmButtonText: 'Copy Objects',
             focusConfirm: false,
             showCancelButton: true,
