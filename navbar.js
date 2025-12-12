@@ -48,14 +48,26 @@ $(document).ready(() => {
             .filter(function checkActiveURL() {
                 const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
                 const loc = window.location.pathname.replace(/^\/+|\/+$/g, '');
-                if (loc === 'files') {
-                    btnCopyStorePath.show();
-                } else {
-                    btnCopyStorePath.hide();
-                }
-                return link === loc;
+                const locBase = loc.split('/')[0];
+                return link === loc || link === locBase;
             })
             .addClass('active');
+
+        // Generic helper: toggle `.visible` on any control with `data-visible-on`
+        const updatePageControls = () => {
+            const loc = window.location.pathname.replace(/^\/+|\/+$/g, '');
+            const locBase = loc.split('/')[0];
+            $('[data-visible-on]').each(function eachControl() {
+                const el = $(this);
+                const cfg = (el.attr('data-visible-on') || '').toString();
+                const parts = cfg.split(',').map((s) => s.trim()).filter(Boolean);
+                if (parts.includes(loc) || parts.includes(locBase)) el.addClass('visible');
+                else el.removeClass('visible');
+            });
+        };
+
+        // initialize page controls now
+        updatePageControls();
 
         // copy the file store public path
         btnCopyStorePath.on('click', (e) => {

@@ -31,9 +31,42 @@
         }
     }
 
-    #btn-copy-store-path {
-        display: none;
+    /* copy-store icon: hidden by default with zero width to avoid layout gap;
+       when `.visible` is added it expands with a fade + slide animation */
+    a#btn-copy-store-path {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 0;
+        padding: 0;
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+        overflow: hidden;
+        white-space: nowrap;
+        pointer-events: none;
+        transition: width 180ms ease, padding 180ms ease, opacity 180ms ease, transform 200ms ease;
     }
+    a#btn-copy-store-path .fas { line-height: 1; vertical-align: middle; }
+
+    a#btn-copy-store-path.visible {
+        width: auto;
+        padding: 0.25rem 0.5rem;
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+    /* Ensure the control inherits navbar link colors and animates on hover/focus */
+    a#btn-copy-store-path,
+    a#btn-copy-store-path.visible {
+        color: rgba(255, 255, 255, 0.55);
+        transition: color 120ms ease;
+    }
+    a#btn-copy-store-path.visible:hover,
+    a#btn-copy-store-path.visible:focus {
+        color: rgba(255, 255, 255, 0.9);
+    }
+    a#btn-copy-store-path .fas { color: currentColor; transition: color 120ms ease; }
 </style>
 
 <!-- Navbar -->
@@ -90,7 +123,7 @@
             <!-- Navbar dropdown -->
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a href="#" id="btn-copy-store-path"><i class="nav-link fa fa-link" title="Copy Store Path"></i></a>
+                    <a href="#" id="btn-copy-store-path" class="nav-link" aria-label="Copy Store Path" data-visible-on="files"><i class="fas fa-link" aria-hidden="true"></i></a>
                 </li>
 
                 <!-- Dropdown menu -->
@@ -103,7 +136,3 @@
     </div>
     <!-- Container wrapper -->
 </nav>
-<!-- Navbar -->
-<div class="page-header">
-    <div class="clearfix"></div>
-</div>
