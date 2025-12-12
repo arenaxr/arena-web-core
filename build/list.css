@@ -1,13 +1,13 @@
 /* Include the padding and border in an element's total width and height */
 
-/* Remove margins and padding from the list */
-ul {
+/* Scope list styles to elements inside .list-scope to avoid global ul styling */
+.list-scope ul {
     margin: 0;
     padding: 0;
 }
 
-/* Style the list items */
-ul li {
+/* Style the list items (scoped) */
+.list-scope ul li {
     cursor: pointer;
     position: relative;
     padding: 3px 8px 3px 40px;
@@ -23,35 +23,35 @@ ul li {
     user-select: none;
 }
 
-/* Set all odd list items to a different color (zebra-stripes) */
-ul li:nth-child(odd) {
+/* Set all odd list items to a different color (zebra-stripes) - scoped */
+.list-scope ul li:nth-child(odd) {
     background: #f9f9f9;
 }
 
-/* Darker background-color on hover */
-ul li:hover {
+/* Darker background-color on hover - scoped */
+.list-scope ul li:hover {
     background: #ddd;
 }
 
-/* When clicked on, add a background color and strike out text */
-ul li.checked {
+/* When clicked on, add a background color and strike out text - scoped */
+.list-scope ul li.checked {
     background: #888;
     color: #fff;
     /*text-decoration: line-through;*/
 }
 
-/* Add a "checked" mark when clicked on */
-ul li.checked::before {
-    /*content: '';*/
-    position: absolute;
-    /*border-color: #fff;
-  border-style: solid;
-  border-width: 0 2px 2px 0;
-  top: 0px;
-  right: 10px;*/
-    /*transform: rotate(45deg);*/
-    height: 15px;
-    width: 7px;
+/* Add a "checked" mark when clicked on - scoped */
+.list-scope ul li.checked::before {
+        /*content: '';*/
+        position: absolute;
+        /*border-color: #fff;
+    border-style: solid;
+    border-width: 0 2px 2px 0;
+    top: 0px;
+    right: 10px;*/
+        /*transform: rotate(45deg);*/
+        height: 15px;
+        width: 7px;
 }
 
 /* Style the object type image */
