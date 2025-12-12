@@ -53,7 +53,7 @@ window.addEventListener('onauth', async (e) => {
     const selectEl = $('select');
     selectEl.each(function selectEach() {
         $(this).select2({
-            theme: 'bootstrap5',
+            theme: 'bootstrap4',
             width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
             placeholder: $(this).data('placeholder'),
             allowClear: Boolean($(this).data('allow-clear')),
@@ -63,7 +63,7 @@ window.addEventListener('onauth', async (e) => {
     selectEl.val(null).trigger('change');
 
     const usernameSelect = document.getElementById('username');
-    if (usernameSelect) usernameSelect.textContent = username;
+    $(usernameSelect).text(username);
 
     const userSceneSelect = document.getElementById('userSceneSelect');
     const userSceneUrl = document.getElementById('userSceneUrl');

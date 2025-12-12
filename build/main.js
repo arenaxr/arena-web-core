@@ -270,32 +270,23 @@ window.addEventListener('onauth', async (e) => {
             let elEx;
             let elEy;
             let elEz;
-            // load rotation-euler fragment and initialize values
-            (function loadRotationEuler() {
-                const container = document.getElementById('rotation-euler');
-                if (!container) return;
-                fetch('rotation-euler.html')
-                    .then((res) => res.text())
-                    .then((html) => {
-                        container.innerHTML = html;
-                        // update euler degrees on form from quaternions
-                        [elEx] = document.getElementsByName('root[data][rotation][euler-x]');
-                        [elEy] = document.getElementsByName('root[data][rotation][euler-y]');
-                        [elEz] = document.getElementsByName('root[data][rotation][euler-z]');
-                        const eu = new THREE.Euler().setFromQuaternion(
-                            new THREE.Quaternion(
-                                parseFloat(elQx.value),
-                                parseFloat(elQy.value),
-                                parseFloat(elQz.value),
-                                parseFloat(elQw.value)
-                            )
-                        );
-                        if (elEx) elEx.value = parseFloat(THREE.MathUtils.radToDeg(eu.x).toFixed(3));
-                        if (elEy) elEy.value = parseFloat(THREE.MathUtils.radToDeg(eu.y).toFixed(3));
-                        if (elEz) elEz.value = parseFloat(THREE.MathUtils.radToDeg(eu.z).toFixed(3));
-                    })
-                    .catch((err) => console.error('Failed to load rotation-euler fragment:', err));
-            })();
+            $('#rotation-euler').load('rotation-euler.html', () => {
+                // update euler degrees on form from quaternions
+                [elEx] = document.getElementsByName('root[data][rotation][euler-x]');
+                [elEy] = document.getElementsByName('root[data][rotation][euler-y]');
+                [elEz] = document.getElementsByName('root[data][rotation][euler-z]');
+                const eu = new THREE.Euler().setFromQuaternion(
+                    new THREE.Quaternion(
+                        parseFloat(elQx.value),
+                        parseFloat(elQy.value),
+                        parseFloat(elQz.value),
+                        parseFloat(elQw.value)
+                    )
+                );
+                elEx.value = parseFloat(THREE.MathUtils.radToDeg(eu.x).toFixed(3));
+                elEy.value = parseFloat(THREE.MathUtils.radToDeg(eu.y).toFixed(3));
+                elEz.value = parseFloat(THREE.MathUtils.radToDeg(eu.z).toFixed(3));
+            });
             rowEuler.addEventListener('change', () => {
                 // update quaternions on form from euler degree changes
                 [elEx] = document.getElementsByName('root[data][rotation][euler-x]');
@@ -327,8 +318,8 @@ window.addEventListener('onauth', async (e) => {
     // set defaults
     JSONEditor.defaults.options.display_required_only = true;
     JSONEditor.defaults.options.required_by_default = false;
-    JSONEditor.defaults.options.theme = 'bootstrap5';
-    JSONEditor.defaults.options.iconlib = 'fontawesome5';
+    JSONEditor.defaults.options.theme = 'bootstrap2';
+    JSONEditor.defaults.options.iconlib = 'fontawesome4';
     JSONEditor.defaults.options.object_layout = 'normal';
     JSONEditor.defaults.options.show_errors = 'interaction';
     JSONEditor.defaults.options.ajax = true;
@@ -422,14 +413,7 @@ window.addEventListener('onauth', async (e) => {
                     objTypeFilter,
                     newObj.object_id
                 );
-                // focus the label that matches the displayed text
-                try {
-                    const targetText = `${newObj.object_id} (${newObj.data.object_type})`;
-                    const label = Array.from(document.querySelectorAll('label')).find((l) => l.textContent && l.textContent.trim() === targetText);
-                    if (label && typeof label.focus === 'function') label.focus();
-                } catch (e) {
-                    console.error('Couldn\'t focus uploaded object label', e);
-                }
+                $(`label[innerHTML='${newObj.object_id} (${newObj.data.object_type})']`).focus();
             }, 500);
             // push updated data to forms
             output.value = JSON.stringify(newObj, null, 2);
