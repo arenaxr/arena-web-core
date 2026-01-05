@@ -69,18 +69,18 @@
                         <datalist id="scenelist"></datalist>
                         <!--</select>-->
                     </div>
-                    <a class="btn btn-sm" href="#" id="openaddscene" title="Add new or unlisted scene."><i
+                        <a class="btn btn-sm btn-outline-primary" href="#" id="openaddscene" title="Add new or unlisted scene."><i
                             class="fas fa-plus"></i></a>
-                    <a class="btn btn-sm btn-danger" href="#" id="deletescene" title="Delete Current Scene"><i
+                        <a class="btn btn-sm btn-danger" href="#" id="deletescene" title="Delete Current Scene"><i
                             class="fas fa-trash"></i></a>
-                    <a class="btn btn-sm" href="#" id="refreshscenelist" title="Refresh Scene List from User Account"><i
+                        <a class="btn btn-sm btn-outline-primary" href="#" id="refreshscenelist" title="Refresh Scene List from User Account"><i
                             class="fas fa-sync"></i></a>
-                    <a class="btn btn-sm" href="#" id="importscene" title="Import from JSON file">
+                        <a class="btn btn-sm btn-outline-primary" href="#" id="importscene" title="Import from JSON file">
                         { } <i class="fas fa-upload"></i>
-                    </a>
-                    <a class="btn btn-sm" href="#" id="exportscene" title="Export to JSON file" download>
+                        </a>
+                        <a class="btn btn-sm btn-outline-primary" href="#" id="exportscene" title="Export to JSON file" download>
                         { } <i class="fas fa-download"></i>
-                    </a>
+                        </a>
                 </form>
                 <div id="scenelinks">
                     <p>
@@ -112,7 +112,7 @@
                     <span class="input-group-text">Filter object_id (regex)</span>
                     <input type="text" id="objfilter" class="form-control" value=".*" />
                 </div>
-                <div class="controls controls-row" id="type_chk_div"></div>
+                <div class="controls d-flex flex-wrap" id="type_chk_div"></div>
                 <div class="objlist list-scope">
                     <ul id="objlist">
                         <li>No objects in the scene</li>
@@ -123,16 +123,16 @@
                     <a class="btn btn-sm btn-danger" href="#" id="delobj" title="Delete Selected Objects">
                         <i class="fas fa-trash"></i> Delete Selected
                     </a>
-                    <a class="btn btn-sm" href="#" id="copyobj" title="Copy Selected Objects">
+                    <a class="btn btn-sm btn-outline-primary" href="#" id="copyobj" title="Copy Selected Objects">
                         <i class="fas fa-share"></i> Copy Selected
                     </a>
-                    <a class="btn btn-sm" href="#" id="selectall" title="Selected All Objects in the List">
+                    <a class="btn btn-sm btn-outline-primary" href="#" id="selectall" title="Selected All Objects in the List">
                         <i class="fas fa-check"></i> Select All
                     </a>
-                    <a class="btn btn-sm" href="#" id="clearlist" title="Clear Selection">
+                    <a class="btn btn-sm btn-outline-primary" href="#" id="clearlist" title="Clear Selection">
                         <i class="fas fa-times"></i> Clear Selected
                     </a>
-                    <a class="btn btn-sm" href="#" id="refreshlist" title="Refresh List from Database"><i
+                    <a class="btn btn-sm btn-outline-primary" href="#" id="refreshlist" title="Refresh List from Database"><i
                             class="fas fa-sync"></i>
                     </a>
                 </form>
@@ -141,34 +141,34 @@
             <div class="col-md-4">
                 <h3>Filter Object Type</h3>
                 <p>Click to show/hide object type from scene object list</p>
-                <select id="objfiltersel" class="objtypelist" size="7" multiple></select>
-                <a class="btn btn-sm" href="#" id="objfiltershowall" title="Selected All Types"><i
-                        class="fas fa-check"></i> Show All</a>
-                <a class="btn btn-sm" href="#" id="objfilterhideall" title="Clear Types Selection"><i
-                        class="fas fa-times"></i> Hide All</a>
+                <select id="objfiltersel" class="objtypelist form-select" size="7" multiple></select>
+                <a class="btn btn-sm btn-outline-primary" href="#" id="objfiltershowall" title="Selected All Types"><i
+                    class="fas fa-check"></i> Show All</a>
+                <a class="btn btn-sm btn-outline-primary" href="#" id="objfilterhideall" title="Clear Types Selection"><i
+                    class="fas fa-times"></i> Hide All</a>
             </div>
         </div>
         <!-- row 2-->
         <div id="addeditsection" style="display: none">
             <div class="row">
-                <div class="span8 col-md-8 columns eight large-8" id="edit_section">
+                <div class="col-md-8" id="edit_section">
                     <h3>Add/Edit Object</h3>
                     <form class="d-flex flex-wrap align-items-center">
-                        <label class="checkbox">
+                        <label class="form-label">
                             Type:
-                            <select id="objtype">
+                            <select id="objtype" class="form-select">
                                 <!-- schema files added by main.js -->
                             </select>
                         </label>
                     </form>
-                    <form class="form-inline">
-                        <button class="btn btn-sm" type="button" id="clearform" title="Clear Form Data">
+                    <form class="d-flex flex-wrap align-items-center">
+                        <button class="btn btn-sm btn-outline-primary" type="button" id="clearform" title="Clear Form Data">
                             <i class="fas fa-file"></i>Clear Form
                         </button>
-                        <button class="btn btn-sm" type="button" id="genid" title="Generate a Random object_id">
+                        <button class="btn btn-sm btn-outline-primary" type="button" id="genid" title="Generate a Random object_id">
                             <i class="fas fa-tag"></i>Gen object_id
                         </button>
-                        <button class="btn btn-sm" type="button" id="uploadfilestore" title="Upload File and Publish">
+                        <button class="btn btn-sm btn-outline-primary" type="button" id="uploadfilestore" title="Upload File and Publish">
                             <i class="fas fa-file"></i>Upload File & Publish
                         </button>
                         <button class="btn btn-primary btn-sm addobj" type="button" title="Add or Update Object">
@@ -199,18 +199,17 @@
                 </div>
                 <div class="col-md-4">
                     <h3>Object JSON</h3>
-                    <p>
-                        <a class="btn btn-sm" href="#" id="setvalue" title="Update Form with JSON Data"><i
-                                class="fas fa-random"></i>Update form</a>
-                        <a id="copy_json" class="btn btn-sm" href="#" title="Copy JSON to Clipboard"><i
-                                class="fas fa-share"></i>Copy JSON</a>
-                    </p>
-                    <textarea id="output" class="form-control objjson"></textarea>
-                    <a id="copy_json_oneline" class="btn btn-sm" href="#" title="Copy one-liner JSON to Clipboard"><i
+                        <p>
+                      <a class="btn btn-sm btn-outline-primary" href="#" id="setvalue" title="Update Form with JSON Data"><i class="fas fa-random"></i>Update form</a>
+                        <a id="copy_json" class="btn btn-sm btn-outline-primary" href="#" title="Copy JSON to Clipboard"><i
+                            class="fas fa-share"></i>Copy JSON</a>
+                        </p>
+                        <textarea id="output" class="form-control objjson"></textarea>
+                        <a id="copy_json_oneline" class="btn btn-sm btn-outline-primary" href="#" title="Copy one-liner JSON to Clipboard"><i
                             class="fas fa-share"></i>Copy one-liner JSON</a>
                     <h2>Validation</h2>
                     <p>This will update whenever the form changes to show validation errors if there are any.</p>
-                    <textarea id="validate" class="infopanel" readonly disabled></textarea>
+                        <textarea id="validate" class="infopanel form-control" readonly disabled></textarea>
                 </div>
             </div>
             <!-- row 4-->
