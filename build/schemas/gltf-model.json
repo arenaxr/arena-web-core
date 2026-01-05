@@ -3,7 +3,7 @@
     "description": "Load a GLTF model. \n\nBesides applying standard rotation and position attributes to the center-point of the GLTF model, the individual child components can also be manually manipulated. See format details in the `modelUpdate` data attribute. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -26,13 +26,13 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-common.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-gltf.json#/properties"
+                            "$ref": "./schemas/definitions-gltf.json#properties"
                         }
                     ],
                     "title": "GLTF Model Data",

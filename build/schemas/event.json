@@ -3,7 +3,7 @@
     "description": "Generate an event message for an object.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-event.json#/properties"
+            "$ref": "./schemas/definitions-arena-event.json#properties"
         },
         {
             "properties": {

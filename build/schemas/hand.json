@@ -3,7 +3,7 @@
     "description": "Hand is the (left or right) hand metadata pose and controller type of the user avatar.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -33,7 +33,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         }
                     ],
                     "title": "Hand Data",
