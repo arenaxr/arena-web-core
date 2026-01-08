@@ -157,6 +157,7 @@ window.addEventListener('onauth', async (e) => {
             const json = jsoneditor.getValue();
 
             output.setValue(JSON.stringify(json, null, 2));
+            output.gotoLine(1, 0);
 
             const validation_errors = jsoneditor.validate();
             // Show validation errors if there are any
@@ -212,6 +213,7 @@ window.addEventListener('onauth', async (e) => {
             window.jsoneditor = jsoneditor;
             jsoneditor.setValue(currentEditObj);
             output.setValue(JSON.stringify(currentEditObj, null, 2));
+            output.gotoLine(1, 0);
             reload(true);
 
             window.location.hash = 'edit_section';
@@ -320,6 +322,7 @@ window.addEventListener('onauth', async (e) => {
 
     // Start the output textarea empty
     output.setValue('');
+    output.gotoLine(1, 0);
 
     // set defaults
     JSONEditor.defaults.options.display_required_only = true;
@@ -424,6 +427,7 @@ window.addEventListener('onauth', async (e) => {
             }, 500);
             // push updated data to forms
             output.setValue(JSON.stringify(newObj, null, 2));
+            output.gotoLine(1, 0);
             jsoneditor.setValue(newObj);
         }
     }
@@ -611,6 +615,7 @@ window.addEventListener('onauth', async (e) => {
             );
         }
         output.setValue(JSON.stringify(obj, null, 2));
+        output.gotoLine(1, 0);
         jsoneditor.setValue(obj);
     });
 
