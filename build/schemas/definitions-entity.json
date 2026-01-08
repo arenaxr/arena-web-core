@@ -65,17 +65,20 @@
             "properties": {
                 "x": {
                     "default": 1,
-                    "exclusiveMinimum": 0,
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
                     "type": "number"
                 },
                 "y": {
                     "default": 1,
-                    "exclusiveMinimum": 0,
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
                     "type": "number"
                 },
                 "z": {
                     "default": 1,
-                    "exclusiveMinimum": 0,
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
                     "type": "number"
                 }
             },

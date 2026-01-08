@@ -1,55 +1,58 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <link rel="icon" type="image/png" href="../static/images/conix-x.png" />
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <!-- login auth check, blocking to page load -->
-        <script src="../conf/defaults.js"></script>
-        <script src="../static/auth.js"></script>
-        <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/png" href="../static/images/conix-x.png" />
 
-        <link rel="stylesheet" href="../static/arenaxr-bootstrap/arenaxr-bootstrap.css" />
-        <script src="../static/vendor/jquery-2.1.1.min.js"></script>
-        <script src="../static/arenaxr-bootstrap/bootstrap.min.js"></script>
-        <link rel="preconnect" href="https://fonts.gstatic.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet" />
-        <script src="../navbar.js" type="text/javascript"></script>
+    <!-- login auth check, blocking to page load -->
+    <script src="../conf/defaults.js"></script>
+    <script src="../static/auth.js"></script>
+    <link rel="stylesheet" href="style.css" />
 
-        <!-- Network graph -->
-        <script src="../static/vendor/paho-mqtt.js"></script>
-        <script src="../static/vendor/graphs/cytoscape.min.js"></script>
-        <script src="../static/vendor/graphs/layout-base.js"></script>
-        <script src="../static/vendor/graphs/cose-base.js"></script>
-        <script src="../static/vendor/graphs/cytoscape-fcose.js"></script>
+    <!-- MDB -->
+    <link rel="stylesheet" href="../static/vendor/mdb/mdb.min.css" />
+    <script src="../static/vendor/jquery-2.1.1.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet" />
+    <script src="../static/arenaxr-bootstrap/bootstrap.min.js"></script>
+    <script src="../navbar.js" type="text/javascript"></script>
 
-        <script src="graph.js" type="module"></script>
+    <!-- Network graph -->
+    <script src="../static/vendor/paho-mqtt.js"></script>
+    <script src="../static/vendor/graphs/cytoscape.min.js"></script>
+    <script src="../static/vendor/graphs/layout-base.js"></script>
+    <script src="../static/vendor/graphs/cose-base.js"></script>
+    <script src="../static/vendor/graphs/cytoscape-fcose.js"></script>
 
-        <title>ARENA MQTT Network</title>
-    </head>
+    <script src="graph.js" type="module"></script>
 
-    <body>
-        <div id="header"></div>
-        <div id="container">
-            <h2 id="title">ARENA MQTT Network</h2>
+    <title>ARENA MQTT Network</title>
+</head>
 
-            <button id="reverse" title="Previous Graph" class="timeButton">&#171;</button>
-            <button id="pause" title="Pause/Resume Graphs" class="timeButton">&#10074;&#10074;</button>
-            <button id="forward" title="Next Graph" class="timeButton">&#187;</button>
+<body>
+    <div id="header"></div>
+    <div id="container">
+        <h2 id="title">ARENA MQTT Network</h2>
 
-            <label id="uptodate" class="info">Graph is ready!</label>
-            <div class="refreshSpinner info">
-                <label>Fetching graph...</label>
-                <div class="rect1"></div>
-                <div class="rect2"></div>
-                <div class="rect3"></div>
-            </div>
+        <button id="reverse" title="Previous Graph" class="timeButton">&#171;</button>
+        <button id="pause" title="Pause/Resume Graphs" class="timeButton">&#10074;&#10074;</button>
+        <button id="forward" title="Next Graph" class="timeButton">&#187;</button>
+
+        <label id="uptodate" class="info">Graph is ready!</label>
+        <div class="refreshSpinner info">
+            <label>Fetching graph...</label>
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
         </div>
+    </div>
 
-        <div id="cy-container">
-            <div id="cy"></div>
-        </div>
-    </body>
+    <div id="cy-container">
+        <div id="cy"></div>
+    </div>
+</body>
+
 </html>

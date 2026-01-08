@@ -3,7 +3,7 @@
     "description": "Flat-shaded ocean primitive.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -70,7 +70,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         }
                     ],
                     "title": "Ocean Data",

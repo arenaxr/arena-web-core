@@ -3,7 +3,7 @@
     "description": "A light.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/light.html'>A-Frame Light</a>.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -167,10 +167,10 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-common.json#properties"
                         }
                     ],
                     "title": "Light Data",

@@ -3,7 +3,7 @@
     "description": "Draw a line that can have a custom width.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -45,7 +45,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         }
                     ],
                     "title": "Thickline Data",

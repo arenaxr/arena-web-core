@@ -30,8 +30,14 @@ window.addEventListener('onauth', async (e) => {
     const mqttToken = e.detail.mqtt_token;
     const userClient = e.detail.ids.userclient;
 
+    const aceConfig = {
+        mode: 'ace/mode/json',
+        maxLines: Infinity,
+        minLines: 5,
+    };
+
     // Divs/textareas on the page
-    const output = document.getElementById('output');
+    const output = ace.edit('output', aceConfig);
     const editor = document.getElementById('editor');
     const validate = document.getElementById('validate');
     const sceneinput = document.getElementById('sceneinput');
@@ -74,7 +80,7 @@ window.addEventListener('onauth', async (e) => {
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector('#copy_json'), {
         text() {
-            return output.value;
+            return output.getValue();
         },
     });
 
@@ -113,7 +119,7 @@ window.addEventListener('onauth', async (e) => {
     const updateUrl = function () {
         if (sceneinput.disabled === true) return;
         const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('scene', `${namespaceinput.value}/${sceneinput.value}`);
+        newUrl.searchParams.set('scene', `${namespaceinput.value}%2F${sceneinput.value}`);
         window.history.pushState({ path: newUrl.href }, '', decodeURIComponent(newUrl.href));
     };
 
@@ -150,7 +156,8 @@ window.addEventListener('onauth', async (e) => {
         jsoneditor.on('change', () => {
             const json = jsoneditor.getValue();
 
-            output.value = JSON.stringify(json, null, 2);
+            output.setValue(JSON.stringify(json, null, 2));
+            output.gotoLine(1, 0);
 
             const validation_errors = jsoneditor.validate();
             // Show validation errors if there are any
@@ -205,7 +212,8 @@ window.addEventListener('onauth', async (e) => {
         await jsoneditor.on('ready', () => {
             window.jsoneditor = jsoneditor;
             jsoneditor.setValue(currentEditObj);
-            output.value = JSON.stringify(currentEditObj, null, 2);
+            output.setValue(JSON.stringify(currentEditObj, null, 2));
+            output.gotoLine(1, 0);
             reload(true);
 
             window.location.hash = 'edit_section';
@@ -313,30 +321,32 @@ window.addEventListener('onauth', async (e) => {
     };
 
     // Start the output textarea empty
-    output.value = '';
+    output.setValue('');
+    output.gotoLine(1, 0);
 
     // set defaults
     JSONEditor.defaults.options.display_required_only = true;
     JSONEditor.defaults.options.required_by_default = false;
-    JSONEditor.defaults.options.theme = 'bootstrap2';
-    JSONEditor.defaults.options.iconlib = 'fontawesome4';
+    JSONEditor.defaults.options.theme = 'bootstrap5';
+    JSONEditor.defaults.options.iconlib = 'fontawesome5';
     JSONEditor.defaults.options.object_layout = 'normal';
     JSONEditor.defaults.options.show_errors = 'interaction';
     JSONEditor.defaults.options.ajax = true;
+    JSONEditor.defaults.options.case_sensitive_property_search = false;
 
     // show new scene modal
     function newSceneModal(theNewScene = undefined) {
         Swal.fire({
             title: 'Add New or Unlisted Scene',
-            html: `<div class='input-prepend'>
-                    <span class='add-on' style='width:125px'>Namespace</span>
-                    <input type='text' class='input-medium' style='width:215px' list='modalnamespacelist' placeholder='Select Namespace...' id='modalnamespaceinput'>
+            html: `<div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:125px'>Namespace</span>
+                    <input type='text' class='form-control' style='width:215px' list='modalnamespacelist' placeholder='Select Namespace...' id='modalnamespaceinput'>
                     <datalist id='modalnamespacelist'></datalist>
-                  </div>
-                  <div class='input-prepend'>
-                    <span class='add-on' style='width:125px'>Scene</span>
-                    <input type='text' style='width:215px' id='modalscenename' placeholder='New Scene Name'>
-                  </div>
+                </div>
+                <div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:125px'>Scene</span>
+                    <input type='text' class='form-control' style='width:215px' id='modalscenename' placeholder='New Scene Name'>
+                </div>
                   <p><small>You can enter an existing unlisted Scene. New Scenes will be created with default permissions.</small></p>`,
             width: 600,
             confirmButtonText: 'Add Scene',
@@ -416,14 +426,15 @@ window.addEventListener('onauth', async (e) => {
                 $(`label[innerHTML='${newObj.object_id} (${newObj.data.object_type})']`).focus();
             }, 500);
             // push updated data to forms
-            output.value = JSON.stringify(newObj, null, 2);
+            output.setValue(JSON.stringify(newObj, null, 2));
+            output.gotoLine(1, 0);
             jsoneditor.setValue(newObj);
         }
     }
 
     // switch image/model
     uploadFilestoreButton.addEventListener('click', async () => {
-        const jsonObj = JSON.parse(output.value);
+        const jsonObj = JSON.parse(output.getValue());
         await ARENAAUTH.uploadFileStoreDialog(
             namespaceinput.value,
             sceneinput.value,
@@ -564,7 +575,7 @@ window.addEventListener('onauth', async (e) => {
     setValueButton.addEventListener('click', () => {
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -587,7 +598,7 @@ window.addEventListener('onauth', async (e) => {
     genidButton.addEventListener('click', () => {
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -603,7 +614,8 @@ window.addEventListener('onauth', async (e) => {
                 (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
             );
         }
-        output.value = JSON.stringify(obj, null, 2);
+        output.setValue(JSON.stringify(obj, null, 2));
+        output.gotoLine(1, 0);
         jsoneditor.setValue(obj);
     });
 
@@ -745,10 +757,10 @@ window.addEventListener('onauth', async (e) => {
         Swal.fire({
             title: 'Copy selected objects',
             html: `<p>Copy to existing scene</p>
-                   <div class='input-prepend'>
-                    <span class='add-on' style='width:120px'>Destination Scene</span>
-                    <select id='modalsceneinput' style='width:215px'></select>
-                  </div>`,
+                    <div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:120px'>Destination Scene</span>
+                    <select id='modalsceneinput' class='form-control' style='width:215px'></select>
+                    </div>`,
             confirmButtonText: 'Copy Objects',
             focusConfirm: false,
             showCancelButton: true,
@@ -846,7 +858,7 @@ window.addEventListener('onauth', async (e) => {
         }
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',

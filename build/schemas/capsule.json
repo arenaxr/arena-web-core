@@ -3,7 +3,7 @@
     "description": "Capsule Geometry.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -40,13 +40,13 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-common.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                            "$ref": "./schemas/definitions-geometry.json#properties"
                         }
                     ],
                     "title": "Capsule Data",

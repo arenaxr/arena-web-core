@@ -8,17 +8,20 @@
         />
         <title>ARENA RunTime Supervisor</title>
 
+        <!-- login auth check, blocking to page load -->
+        <script src="../conf/defaults.js"></script>
+        <script src="../static/auth.js"></script>
+
         <!-- Navbar Header -->
         <script src="../static/vendor/jquery-2.1.1.min.js"></script>
-        <script src="../static/vendor/bootstrap-2.3.2/js/bootstrap-dropdown.js"></script>
-        <script src="../static/vendor/bootstrap-2.3.2/js/bootstrap-collapse.js"></script>
         <link rel="stylesheet" href="../static/vendor/fontawesome-5/css/all.min.css" />
-        <link rel="stylesheet" href="../static/vendor/bootstrap-2.3.2/css/bootstrap-combined.min.css" />
+        <link rel="stylesheet" href="../static/arenaxr-bootstrap/arenaxr-bootstrap.css" />
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet" />
-        <script src="../navbar-old.js" type="text/javascript"></script>
+        <script src="../static/arenaxr-bootstrap/bootstrap.min.js"></script>
+        <script src="../navbar.js" type="text/javascript"></script>
 
-        <link href="style.css" rel="stylesheet" />
+        <link href="style-arts.css" rel="stylesheet" />
         <!-- d3 -->
         <script src="../static/vendor/graphs/d3.v4.min.js"></script>
         <!-- paho mqtt -->
@@ -42,7 +45,7 @@
                     </div>
                     <div id="modules" class="tabcontent">
                         <a
-                            class="btn btn-sm btn-dark btn-block btn-section"
+                            class="btn btn-sm btn-dark d-block w-100 btn-section"
                             href="#"
                             id="_create_mod"
                             title="Press to toggle visibility of the section"
@@ -91,7 +94,7 @@
                             <select id="file_select"></select>
                         </div>
                         <a
-                            class="btn btn-sm btn-dark btn-block btn-section"
+                            class="btn btn-sm btn-dark d-block w-100 btn-section"
                             href="#"
                             id="_migrate_mod"
                             title="Press to toggle visibility of the section"
@@ -106,7 +109,7 @@
                             <br /><br />
                         </div>
                         <a
-                            class="btn btn-sm btn-dark btn-block btn-section"
+                            class="btn btn-sm btn-dark d-block w-100 btn-section"
                             href="#"
                             id="_stdout_mod"
                             title="Press to toggle visibility of the section"
@@ -131,7 +134,7 @@
                         Delete the runtime from ARTS database; does not terminate the runtime itself
                         <p />
                         <a
-                            class="btn btn-sm btn-dark btn-block btn-section"
+                            class="btn btn-sm btn-dark d-block w-100 btn-section"
                             href="#"
                             id="_dbg_rt"
                             title="Press to toggle visibility of the section"
@@ -178,10 +181,6 @@
         </div>
 
         <!-- demo src-->
-        <script src="script.js"></script>
-
-        <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
-        <script src="../conf/defaults.js"></script>
-        <script src="../src/auth.js"></script>
+        <script src="script-arts.js"></script>
     </body>
 </html>
