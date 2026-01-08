@@ -53,17 +53,17 @@
         <div class="row">
             <div class="col-md-8">
                 <h1>Scene Editor</h1>
-                <form class="d-flex flex-wrap align-items-center">
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" style="width: 80px">Namespace</span>
+                <form class="d-inline-flex flex-wrap align-items-center p-8">
+                    <div class="input-group" style="width: 300px">
+                        <span class="input-group-text">Namespace</span>
                         <!--<select id="namespacelist" class="input-medium">-->
                         <input type="text" class="form-control" list="namespacelist" placeholder="Select Namespace..."
                             autocomplete="off" id="namespaceinput" />
                         <datalist id="namespacelist"></datalist>
                     </div>
-                    <div class="input-group mb-3">
+                    <div class="input-group" style="width: 300px">
                         <!--</select>-->
-                        <span class="input-group-text" style="width: 80px">Scene</span>
+                        <span class="input-group-text">Scene</span>
                         <!--<select id="scenelist" class="input-medium">-->
                         <input type="text" class="form-control" list="scenelist" placeholder="Select Scene..."
                             autocomplete="off" id="sceneinput" />
@@ -93,8 +93,8 @@
             </div>
             <div class="col-md-4">
                 <p></p>
-                <div class="input-group mb-3">
-                    <span class="input-group-text" style="width: 80px">ARENA Host</span>
+                <div class="input-group">
+                    <span class="input-group-text">ARENA Host</span>
                     <input type="text" class="form-control" id="arenahost" readonly disabled value="" />
                 </div>
             </div>
@@ -109,7 +109,7 @@
                     </ul>
                 </div>
                 <h3>Scene Objects (Persisted)</h3>
-                <div class="input-group mb-3">
+                <div class="input-group">
                     <span class="input-group-text">Filter object_id (regex)</span>
                     <input type="text" id="objfilter" class="form-control" value=".*" />
                 </div>
