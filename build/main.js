@@ -329,6 +329,7 @@ window.addEventListener('onauth', async (e) => {
     JSONEditor.defaults.options.object_layout = 'normal';
     JSONEditor.defaults.options.show_errors = 'interaction';
     JSONEditor.defaults.options.ajax = true;
+    JSONEditor.defaults.options.case_sensitive_property_search = false;
 
     // show new scene modal
     function newSceneModal(theNewScene = undefined) {
