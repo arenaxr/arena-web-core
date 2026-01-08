@@ -30,8 +30,14 @@ window.addEventListener('onauth', async (e) => {
     const mqttToken = e.detail.mqtt_token;
     const userClient = e.detail.ids.userclient;
 
+    const aceConfig = {
+        mode: 'ace/mode/json',
+        maxLines: Infinity,
+        minLines: 5,
+    };
+
     // Divs/textareas on the page
-    const output = document.getElementById('output');
+    const output = ace.edit('output', aceConfig);
     const editor = document.getElementById('editor');
     const validate = document.getElementById('validate');
     const sceneinput = document.getElementById('sceneinput');
@@ -74,7 +80,7 @@ window.addEventListener('onauth', async (e) => {
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector('#copy_json'), {
         text() {
-            return output.value;
+            return output.getValue();
         },
     });
 
@@ -150,7 +156,7 @@ window.addEventListener('onauth', async (e) => {
         jsoneditor.on('change', () => {
             const json = jsoneditor.getValue();
 
-            output.value = JSON.stringify(json, null, 2);
+            output.setValue(JSON.stringify(json, null, 2));
 
             const validation_errors = jsoneditor.validate();
             // Show validation errors if there are any
@@ -205,7 +211,7 @@ window.addEventListener('onauth', async (e) => {
         await jsoneditor.on('ready', () => {
             window.jsoneditor = jsoneditor;
             jsoneditor.setValue(currentEditObj);
-            output.value = JSON.stringify(currentEditObj, null, 2);
+            output.setValue(JSON.stringify(currentEditObj, null, 2));
             reload(true);
 
             window.location.hash = 'edit_section';
@@ -313,7 +319,7 @@ window.addEventListener('onauth', async (e) => {
     };
 
     // Start the output textarea empty
-    output.value = '';
+    output.setValue('');
 
     // set defaults
     JSONEditor.defaults.options.display_required_only = true;
@@ -416,14 +422,14 @@ window.addEventListener('onauth', async (e) => {
                 $(`label[innerHTML='${newObj.object_id} (${newObj.data.object_type})']`).focus();
             }, 500);
             // push updated data to forms
-            output.value = JSON.stringify(newObj, null, 2);
+            output.setValue(JSON.stringify(newObj, null, 2));
             jsoneditor.setValue(newObj);
         }
     }
 
     // switch image/model
     uploadFilestoreButton.addEventListener('click', async () => {
-        const jsonObj = JSON.parse(output.value);
+        const jsonObj = JSON.parse(output.getValue());
         await ARENAAUTH.uploadFileStoreDialog(
             namespaceinput.value,
             sceneinput.value,
@@ -564,7 +570,7 @@ window.addEventListener('onauth', async (e) => {
     setValueButton.addEventListener('click', () => {
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -587,7 +593,7 @@ window.addEventListener('onauth', async (e) => {
     genidButton.addEventListener('click', () => {
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -603,7 +609,7 @@ window.addEventListener('onauth', async (e) => {
                 (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
             );
         }
-        output.value = JSON.stringify(obj, null, 2);
+        output.setValue(JSON.stringify(obj, null, 2));
         jsoneditor.setValue(obj);
     });
 
@@ -846,7 +852,7 @@ window.addEventListener('onauth', async (e) => {
         }
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',
