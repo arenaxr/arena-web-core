@@ -37,7 +37,7 @@
     "three-shim": "file:src/shims/three-shim",
     "uuidjs": "^5.0.1",
     "webxr-polyfill": "^2.0.3",
-    "xacro-parser": "github:gkjohnson/xacro-parser#2c75369"
+    "xacro-parser": "^0.3.11"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.5",
