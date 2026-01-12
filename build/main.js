@@ -17,6 +17,18 @@ const Alert = Swal.mixin({
 });
 window.Alert = Alert;
 
+window.addEventListener('load', async (e) => {
+    // always re-encode uri so that ?scene=aa/bb will not confuse downstream libs like json-editor
+    const url = new URL(window.location.href);
+    const sceneParam = url.searchParams.get('scene');
+    if (sceneParam) {
+        const encodedComponent = encodeURIComponent(sceneParam);
+        const newUrl = new URL(window.location.href);
+        url.searchParams.set('scene', encodedComponent);
+        window.history.pushState({ path: url.href }, '', decodeURIComponent(url.href));
+    }
+});
+
 window.addEventListener('onauth', async (e) => {
     let schema;
     let jsoneditor;
