@@ -966,7 +966,7 @@ window.addEventListener('onauth', async (e) => {
     arenaHostLbl.value = hostData.host;
 
     const url = new URL(window.location.href);
-    const sceneParam = url.searchParams.get('scene');
+    const sceneParam = decodeURIComponent(url.searchParams.get('scene')); // safely decode %2F to /
     const focusObjectId = url.searchParams.get('objectId');
     const debug = Boolean(url.searchParams.get('debug')); // deterministic truthy/falsy boolean
 
