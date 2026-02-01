@@ -22,7 +22,7 @@
     "aframe-environment-component": "^1.3.4",
     "aframe-extras": "^7.0.0",
     "aframe-thickline-component": "^0.0.3",
-    "axios": "^1.13.2",
+    "axios": "^1.13.4",
     "comlink": "^4.3.0",
     "he": "^1.2.0",
     "linkify-html": "^4.3.2",
