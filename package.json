@@ -40,7 +40,7 @@
     "xacro-parser": "^0.3.11"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.28.5",
+    "@babel/eslint-parser": "^7.28.6",
     "@parcel/babel-plugin-transform-runtime": "^2.16.3",
     "@parcel/babel-preset-env": "^2.16.3",
     "@parcel/transformer-glsl": "^2.16.3",
