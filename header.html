@@ -8,6 +8,7 @@
     .navbar-brand img {
         max-height: 16px;
     }
+
     body {
         padding-top: 60px;
     }
@@ -47,7 +48,11 @@
         pointer-events: none;
         transition: width 180ms ease, padding 180ms ease, opacity 180ms ease, transform 200ms ease;
     }
-    a#btn-copy-store-path .fas { line-height: 1; vertical-align: middle; }
+
+    a#btn-copy-store-path .fas {
+        line-height: 1;
+        vertical-align: middle;
+    }
 
     a#btn-copy-store-path.visible {
         width: auto;
@@ -56,17 +61,23 @@
         transform: translateY(0) scale(1);
         pointer-events: auto;
     }
+
     /* Ensure the control inherits navbar link colors and animates on hover/focus */
     a#btn-copy-store-path,
     a#btn-copy-store-path.visible {
         color: rgba(255, 255, 255, 0.55);
         transition: color 120ms ease;
     }
+
     a#btn-copy-store-path.visible:hover,
     a#btn-copy-store-path.visible:focus {
         color: rgba(255, 255, 255, 0.9);
     }
-    a#btn-copy-store-path .fas { color: currentColor; transition: color 120ms ease; }
+
+    a#btn-copy-store-path .fas {
+        color: currentColor;
+        transition: color 120ms ease;
+    }
 </style>
 
 <!-- Navbar -->
@@ -79,16 +90,9 @@
         </a>
 
         <!-- Toggle button -->
-        <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-        >
-            <span class="navbar-toggler-icon"></span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
         </button>
 
         <!-- Collapsible wrapper -->
@@ -123,7 +127,8 @@
             <!-- Navbar dropdown -->
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a href="#" id="btn-copy-store-path" class="nav-link" aria-label="Copy Store Path" data-visible-on="files"><i class="fas fa-link" aria-hidden="true"></i></a>
+                    <a href="#" id="btn-copy-store-path" class="nav-link" aria-label="Copy Store Path"
+                        data-visible-on="files"><i class="fas fa-link" aria-hidden="true"></i></a>
                 </li>
 
                 <!-- Dropdown menu -->
