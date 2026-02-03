@@ -966,7 +966,8 @@ window.addEventListener('onauth', async (e) => {
     arenaHostLbl.value = hostData.host;
 
     const url = new URL(window.location.href);
-    const sceneParam = decodeURIComponent(url.searchParams.get('scene')); // safely decode %2F to /
+    const sp = url.searchParams.get('scene');
+    const sceneParam = sp ? decodeURIComponent(sp) : null; // safely decode %2F to /
     const focusObjectId = url.searchParams.get('objectId');
     const debug = Boolean(url.searchParams.get('debug')); // deterministic truthy/falsy boolean
 
@@ -1012,8 +1013,11 @@ window.addEventListener('onauth', async (e) => {
         ns = sn[0];
         s = sn[1];
     } else {
-        ns = localStorage.getItem('namespace') === null ? username : localStorage.getItem('namespace');
-        s = localStorage.getItem('scene') === null ? dfts.scene : localStorage.getItem('scene');
+        ns = localStorage.getItem('namespace');
+        if (!ns || ns === 'null' || ns === 'undefined') ns = username;
+
+        s = localStorage.getItem('scene');
+        if (!s || s === 'null' || s === 'undefined') s = dfts.scene;
     }
     // do initial update
     if (ns !== namespaceinput.value) {
