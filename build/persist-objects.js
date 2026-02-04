@@ -75,7 +75,7 @@ export async function init(settings) {
         false
     );
 
-    mqttReconnect();
+    await mqttReconnect();
 }
 
 export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, sceneList) {
@@ -362,7 +362,10 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
 
 export function updateSubscribeTopic(scene) {
     if (persist.currentScene === scene) return;
-    if (!persist.mqttConnected) persist.pendingSubscribeUpdate = (scene) => updateSubscribeTopic(scene);
+    if (!persist.mqttConnected) {
+        persist.pendingSubscribeUpdate = () => updateSubscribeTopic(scene);
+        return;
+    }
 
     if (persist.currentScene) persist.mc.unsubscribe(persist.currentScene);
     if (scene) {
@@ -712,7 +715,7 @@ export async function addObject(obj, nameSpace, sceneName) {
     }
 }
 
-export function mqttReconnect(settings = undefined) {
+export async function mqttReconnect(settings = undefined) {
     settings = settings || persist;
 
     persist.mqttUri = settings.mqttUri !== undefined ? settings.mqttUri : 'wss://arena.andrew.cmu.edu/mqtt/';
@@ -732,7 +735,7 @@ export function mqttReconnect(settings = undefined) {
     });
 
     try {
-        settings.mc.connect();
+        await settings.mc.connect();
     } catch (error) {
         Alert.fire({
             icon: 'error',
