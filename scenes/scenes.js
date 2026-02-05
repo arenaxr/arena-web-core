@@ -294,11 +294,17 @@ window.addEventListener('onauth', async (e) => {
     document.getElementById('doCloneSceneBtn').addEventListener('click', () => {
         const [namespace, sceneId] = sourceScene.value.split('/');
         axios
-            .post(`/persist/${window.username}/${newSceneNameInput.value}`, {
-                action: 'clone',
-                namespace,
-                sceneId,
-            })
+            .post(
+                `/persist/${window.username}/${newSceneNameInput.value}`,
+                {
+                    action: 'clone',
+                    namespace,
+                    sceneId,
+                },
+                {
+                    withCredentials: true,
+                }
+            )
             .then((res) => {
                 Swal.fire('Clone success!', `${res.data.objectsCloned} objects cloned into new scene`, 'success');
                 cloneSceneUrl.value = `${window.location.origin}/${window.username}/${newSceneNameInput.value}`;
