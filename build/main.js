@@ -1041,6 +1041,8 @@ window.addEventListener('onauth', async (e) => {
     reload();
     updateLink();
     updateUrl();
+    const namespacedScene = `${ns}/${s}`;
+    ARENAUserAccount.refreshAuthToken('google', username, namespacedScene);
     updatePublishControlsByToken(ns, s, mqttToken, userClient);
 
     Swal.close();
