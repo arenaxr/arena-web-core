@@ -25,6 +25,10 @@ export default class ARENAUserAccount {
             xhr.responseType = 'json';
             xhr.onload = function onload() {
                 if (this.status >= 200 && this.status < 300) {
+                    // 200-299 expected success range
+                    resolve(xhr.response);
+                } else if (this.status === 404 && method === 'DELETE') {
+                    // 404 acceptable for DELETE ops
                     resolve(xhr.response);
                 } else {
                     reject(
