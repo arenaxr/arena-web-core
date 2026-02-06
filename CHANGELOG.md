@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.4.0](https://github.com/arenaxr/arena-web-core/compare/v2.3.2...v2.4.0) (2026-02-05)
+
+
+### Features
+
+* **build:** migrate to bootstrap-5 including json-editor 2.x ([3551109](https://github.com/arenaxr/arena-web-core/commit/355110924da57007c4801ebb259b13547f65a841))
+* refactor for bootstrap-5 ([442476c](https://github.com/arenaxr/arena-web-core/commit/442476c626e1d2266e61d002a38d241ab10ec099))
+
+
+### Bug Fixes
+
+* **build:** allow 404 acceptable for perms DELETE ops ([88cd957](https://github.com/arenaxr/arena-web-core/commit/88cd957a14212c2b1182fee1fcdd0b6f4d1cfe7e))
+* **build:** decode uri query with / before use ([141640e](https://github.com/arenaxr/arena-web-core/commit/141640e61da1e92d271cc2941d4f2211bcc17be2))
+* **build:** encode scene url param on load ([940990d](https://github.com/arenaxr/arena-web-core/commit/940990d17202bbff4a500d88a50ea590ac951ad1))
+* **build:** fix issues of undefined namespaces on load ([21f7577](https://github.com/arenaxr/arena-web-core/commit/21f7577ed1080e3587d4cd35e6ce30760f8794e7))
+* **build:** race condition where the application attempts to subscribe to an MQTT topic before the client is fully connected ([65032f6](https://github.com/arenaxr/arena-web-core/commit/65032f6cdc84b1f374b2a72c585eab154bbfabef))
+* **build:** use ns/sn in mqtt token request at load and change ([f4d55c8](https://github.com/arenaxr/arena-web-core/commit/f4d55c8e0f629f7d0f91d104389c6148746c70fd))
+* **navbar:** corrected inconsistant pages using MDB and Programs link ([e0f2255](https://github.com/arenaxr/arena-web-core/commit/e0f2255b5664fa2557e3d0b23ee9fa686b8ef577))
+* **navbar:** corrected missing menu icon for mobile browsers ([9145ca1](https://github.com/arenaxr/arena-web-core/commit/9145ca13d7d29faed2640ebbb17c61227f4494e6))
+* **scenes:** ensure credentials are sent to persist clone post ([ca70849](https://github.com/arenaxr/arena-web-core/commit/ca70849a3fe4872390a42b1cee80763bd0d0f8a6))
+
 ## [2.3.2](https://github.com/arenaxr/arena-web-core/compare/v2.3.1...v2.3.2) (2025-12-04)
 
 
