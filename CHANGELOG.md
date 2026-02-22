@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/arenaxr/arena-web-core/compare/v2.4.1...v2.4.2) (2026-02-22)
+
+
+### Bug Fixes
+
+* **text:** remove read-only derived properties from text entity ([1789626](https://github.com/arenaxr/arena-web-core/commit/17896264b1a90af64af8b271807367f3b507bd9a))
+
 ## [2.4.1](https://github.com/arenaxr/arena-web-core/compare/v2.4.0...v2.4.1) (2026-02-11)
 
 
