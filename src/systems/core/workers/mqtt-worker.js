@@ -27,6 +27,8 @@ class MQTTWorker {
 
     messageQueueConf = {};
 
+    lastPublishMsg = '';
+
     /**
      * @param {object} ARENAConfig
      * @param {function} healthCheck
@@ -215,8 +217,12 @@ class MQTTWorker {
 
             payload = JSON.stringify(payload);
         }
-        /* eslint-disable no-param-reassign */
-        this.mqttClient.publish(topic, payload, qos, retained);
+
+        // Dedupe: We can't think of the need for a client to publish two identical msgs w/ same timestamp
+        if (payload !== this.lastPublishMsg) {
+            this.mqttClient.publish(topic, payload, qos, retained);
+        }
+        this.lastPublishMsg = payload;
     }
 
     /**
