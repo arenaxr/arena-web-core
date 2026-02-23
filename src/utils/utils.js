@@ -9,10 +9,14 @@
 const { isIOS, isTablet, isR7, isMobileVR } = AFRAME.utils.device;
 const { TOPICS } = '../constants';
 
+const DEBOUNCE_CLIENT_TIME = 10; // Ms
+
 /**
  * Wrapper class for various utility functions
  */
 export default class ARENAUtils {
+    static lastClientEvent = ['', 0];
+
     /**
      * Extracts URL params
      * @param {string} parameter URL parameter
@@ -519,7 +523,13 @@ export default class ARENAUtils {
         } else {
             pubTopic = scenePublic; // Public client event
         }
-        ARENA.Mqtt.publish(pubTopic, msg);
+        const now = new Date().getTime();
+        const [lastMsg, lastTime] = this.lastClientEvent;
+        const strMsg = JSON.stringify(msg);
+        if (now - lastTime > DEBOUNCE_CLIENT_TIME || lastMsg !== strMsg) {
+            ARENA.Mqtt.publish(pubTopic, msg);
+        }
+        this.lastClientEvent = [strMsg, now];
     }
 
     /**
