@@ -449,17 +449,17 @@
                             "type": "array",
                             "items": {
                                 "type": "number",
-                                "enum": [1,2,3,4]
+                                "enum": [1, 2, 3, 4]
                             }
                         },
                         "groundCollisionMask": {
-                            "default": [1,2,3,4],
+                            "default": [1, 2, 3, 4],
                             "description": "Which collision layers will collide with the ground",
                             "title": "Ground Collision Mask",
                             "type": "array",
                             "items": {
                                 "type": "number",
-                                "enum": [1,2,3,4]
+                                "enum": [1, 2, 3, 4]
                             }
                         },
                         "gravity": {
@@ -560,7 +560,7 @@
                     "description": "Set an OpenVPS server to localize by camera image on mobile devices"
                 }
             },
-            "required": ["maxAVDist", "physics", "originMarker","privateScene"],
+            "required": ["maxAVDist", "physics", "originMarker", "privateScene"],
             "title": "Scene Options",
             "type": "object",
             "description": "ARENA Scene Options."
