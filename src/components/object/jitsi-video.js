@@ -55,6 +55,7 @@ AFRAME.registerComponent('jitsi-video', {
 
     onJitsiConnect(e) {
         const args = e.detail;
+        if (!args) return;
         if (this.data.jitsiId !== '') {
             this.updateVideo();
             return;
@@ -70,12 +71,14 @@ AFRAME.registerComponent('jitsi-video', {
         }
 
         // check remote video
-        args.pl.forEach((user) => {
-            if (user.dn === this.data.displayName) {
-                this.data.jitsiId = user.jid;
-                this.updateVideo();
-            }
-        });
+        if (args.pl) {
+            args.pl.forEach((user) => {
+                if (user.dn === this.data.displayName) {
+                    this.data.jitsiId = user.jid;
+                    this.updateVideo();
+                }
+            });
+        }
 
         this.updateVideo();
     },
