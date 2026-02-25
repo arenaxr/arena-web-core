@@ -82,7 +82,7 @@
                 "loop": {
                     "default": 0,
                     "description": "How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
-                    "type": "string"
+                    "type": ["string", "integer", "boolean"]
                 },
                 "pauseEvents": {
                     "default": [],
@@ -93,6 +93,7 @@
                     }
                 },
                 "property": {
+                    "default": "",
                     "description": "Property to animate. Can be a component name, a dot-delimited property of a component (e.g., material.color), or a plain attribute.",
                     "type": "string"
                 },
@@ -333,7 +334,11 @@
                     "description": "If set to true, the object will receive extra attention by the simulation engine (at a performance cost)."
                 },
                 "shapeOffset": {
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "$ref": "#/definitions/vector3",
                     "description": "Offset applied to generated collision shapes."
                 }
@@ -410,7 +415,10 @@
                     "description": "Target object selector. Must be an entity having the physx-body component. If not specified, joins to the initial position in the world."
                 },
                 "breakForce": {
-                    "default": { "x": -1, "y": -1 },
+                    "default": {
+                        "x": -1,
+                        "y": -1
+                    },
                     "$ref": "#/definitions/vector2",
                     "description": "Force needed to break the constraint. First component is linear force, second is angular force in degrees. Set both components >= 0 to enable."
                 },
@@ -430,7 +438,10 @@
                     "description": "When used with a D6 type, sets up a 'soft' fixed joint. E.g., for grabbing things."
                 },
                 "projectionTolerance": {
-                    "default": { "x": -1, "y": -1 },
+                    "default": {
+                        "x": -1,
+                        "y": -1
+                    },
                     "$ref": "#/definitions/vector2",
                     "description": "Kinematic projection, which forces joint back into alignment when the solver fails. First component is linear tolerance in meters, second is angular tolerance in degrees."
                 }
@@ -522,7 +533,7 @@
                     "description": "Damping to apply to the drive."
                 },
                 "forceLimit": {
-                    "default": 3.4028234663852886e+38,
+                    "default": 3.4028234663852886e38,
                     "type": "number",
                     "description": "Maximum amount of force used to get to the target position."
                 },
@@ -532,12 +543,20 @@
                     "description": "If true, will operate directly on body acceleration rather than on force."
                 },
                 "linearVelocity": {
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "$ref": "#/definitions/vector3",
                     "description": "Target linear velocity relative to the joint."
                 },
                 "angularVelocity": {
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "$ref": "#/definitions/vector3",
                     "description": "Target angular velocity relative to the joint."
                 },
@@ -1072,7 +1091,11 @@
             "properties": {
                 "acceleration": {
                     "description": "For sphere and disc distributions, only the x axis is used.",
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1084,13 +1107,17 @@
                 },
                 "accelerationSpread": {
                     "description": "Spread of the particle's acceleration. for sphere and disc distributions, only the x axis is used.",
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "activeMultiplier": {
                     "description": "Multiply the rate of particles emission, if larger than 1 then the particles will be emitted in bursts. note, very large numbers will emit all particles at once.",
-                    "default": "1",
+                    "default": 1,
                     "type": "number"
                 },
                 "affectedByFog": {
@@ -1100,7 +1127,7 @@
                 },
                 "alphaTest": {
                     "description": "Alpha values below the alphaTest threshold are considered invisible.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "angle": {
@@ -1170,22 +1197,22 @@
                 },
                 "drag": {
                     "description": "Apply resistance to moving the particle, 0 is no resistance, 1 is full resistance, particle will stop moving at half of it's maxAge.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "dragSpread": {
                     "description": "Spread to apply to the drag attribute.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "duration": {
                     "description": "Duration of the emitter (seconds), if less than 0 then continuously emit particles.",
-                    "default": "-1",
+                    "default": -1,
                     "type": "number"
                 },
                 "emitterScale": {
                     "description": "Global scaling factor for all particles from the emitter.",
-                    "default": "100",
+                    "default": 100,
                     "type": "number"
                 },
                 "enableInEditor": {
@@ -1210,12 +1237,12 @@
                 },
                 "maxAge": {
                     "description": "Maximum age of a particle before reusing.",
-                    "default": "1",
+                    "default": 1,
                     "type": "number"
                 },
                 "maxAgeSpread": {
                     "description": "Variance for the 'maxAge' attribute.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "opacity": {
@@ -1238,7 +1265,7 @@
                 },
                 "particleCount": {
                     "description": "Maximum number of particles for this emitter.",
-                    "default": "100",
+                    "default": 100,
                     "type": "integer"
                 },
                 "positionDistribution": {
@@ -1249,24 +1276,36 @@
                 },
                 "positionOffset": {
                     "description": "Fixed offset to the apply to the emitter relative to its parent entity.",
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "positionSpread": {
                     "description": "Particles are positioned within +- of these local bounds. for sphere and disc distributions only the x axis is used.",
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "radius": {
                     "description": "Radius of the disc or sphere emitter (ignored for box). note radius of 0 will prevent velocity and acceleration if they use a sphere or disc distribution.",
-                    "default": "1",
+                    "default": 1,
                     "type": "number"
                 },
                 "radiusScale": {
                     "description": "Scales the emitter for sphere and disc shapes to form oblongs and ellipses.",
-                    "default": { "x": 1, "y": 1, "z": 1 },
+                    "default": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1323,24 +1362,32 @@
                 },
                 "rotation": {
                     "description": "Rotation in degrees.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "rotationAxis": {
                     "description": "Local axis when using rotation.",
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationAxisSpread": {
                     "description": "Variance in the axis of rotation.",
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationSpread": {
                     "description": "Rotation variance in degrees.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "rotationStatic": {
@@ -1374,17 +1421,20 @@
                 },
                 "textureFrameCount": {
                     "description": "Number of frames in the spritesheet, negative numbers default to textureFrames.x * textureFrames.y.",
-                    "default": "-1",
+                    "default": -1,
                     "type": "integer"
                 },
                 "textureFrameLoop": {
                     "description": "Number of times the spritesheet should be looped over the lifetime of a particle.",
-                    "default": "1",
+                    "default": 1,
                     "type": "integer"
                 },
                 "textureFrames": {
                     "description": "X and Y frames for a spritesheet. each particle will transition through every frame of the spritesheet over its lifetime (see textureFramesLoop).",
-                    "default": { "x": 1, "y": 1 },
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector2"
                 },
@@ -1395,7 +1445,11 @@
                 },
                 "velocity": {
                     "description": "For sphere and disc distributions, only the x axis is used.",
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1407,18 +1461,22 @@
                 },
                 "velocitySpread": {
                     "description": "Variance for the velocity.",
-                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "wiggle": {
                     "description": "Extra distance the particle moves over its lifetime.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "wiggleSpread": {
                     "description": "+- spread for the wiggle attribute.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 }
             },
