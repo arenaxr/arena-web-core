@@ -110,11 +110,12 @@ AFRAME.registerSystem('arena-jitsi', {
 
         if (!ARENA.params.noav && ARENA.isJitsiPermitted()) {
             const _this = this;
-            ARENA.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
+            ARENA.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, async () => {
                 // Only show if no previous preferences were set / first time AV setup
                 if (ARENA.params.armode) {
                     ARENA.events.addEventListener(ARENA_EVENTS.CV_INITIALIZED, _this.connect.bind(_this));
-                } else if (localStorage.getItem('prefAudioInput') === null && ARENA.params.skipav === undefined) {
+                } else if (!(await _this.validateDeviceIds()) ||
+                           (localStorage.getItem('prefAudioInput') === null && ARENA.params.skipav === undefined)) {
                     window.setupAV(() => {
                         // Initialize Jitsi videoconferencing after A/V setup window
                         _this.connect();
@@ -123,6 +124,35 @@ AFRAME.registerSystem('arena-jitsi', {
                     ARENA.events.addEventListener(ARENA_EVENTS.SCENE_OBJ_LOADED, _this.connect.bind(_this));
                 }
             });
+        }
+    },
+
+    /**
+     * Validate saved device IDs against currently available devices.
+     * Clears preferences if any saved device is no longer available.
+     * @return {Promise<boolean>} true if all saved devices are still valid
+     */
+    async validateDeviceIds() {
+        const prefAudioInput = localStorage.getItem('prefAudioInput');
+        const prefVideoInput = localStorage.getItem('prefVideoInput');
+        const prefAudioOutput = localStorage.getItem('prefAudioOutput');
+        if (!prefAudioInput && !prefVideoInput && !prefAudioOutput) return true;
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const deviceIds = new Set(devices.map((d) => d.deviceId));
+            const valid =
+                (!prefAudioInput || deviceIds.has(prefAudioInput)) &&
+                (!prefVideoInput || deviceIds.has(prefVideoInput)) &&
+                (!prefAudioOutput || deviceIds.has(prefAudioOutput));
+            if (!valid) {
+                console.warn('Saved A/V device IDs are no longer available, clearing preferences');
+                localStorage.removeItem('prefAudioInput');
+                localStorage.removeItem('prefVideoInput');
+                localStorage.removeItem('prefAudioOutput');
+            }
+            return valid;
+        } catch (e) {
+            return true; // Can't enumerate devices, assume valid
         }
     },
 
