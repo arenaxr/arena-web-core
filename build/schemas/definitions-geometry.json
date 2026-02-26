@@ -29,7 +29,7 @@
             "required": ["displayName"]
         },
         "material": {
-            "description": "The material properties of the object's surface.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/material.html'>A-Frame Material</a>.",
+            "description": "The material properties of the object's surface.\n\nMore properties at <a href='https://aframe.io/docs/1.7.0/components/material.html'>A-Frame Material</a>.",
             "properties": {
                 "alphaTest": {
                     "default": 0,
@@ -37,6 +37,34 @@
                     "maximum": 1,
                     "description": "Alpha test threshold for transparency.",
                     "type": "number"
+                },
+                "ambientOcclusionMap": {
+                    "description": "Ambient occlusion map. Requires `shader: standard` or `phong`.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "ambientOcclusionMapIntensity": {
+                    "default": 1,
+                    "description": "Intensity of the ambient occlusion map. Requires `shader: standard` or `phong`.",
+                    "type": "number"
+                },
+                "ambientOcclusionTextureOffset": {
+                    "default": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "description": "Texture offset for the ambient occlusion map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
+                "ambientOcclusionTextureRepeat": {
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
+                    "description": "Texture repeat for the ambient occlusion map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
                 },
                 "anisotropy": {
                     "default": 0,
@@ -49,6 +77,34 @@
                     "description": "The blending mode for the material's RGB and Alpha sent to the WebGLRenderer.",
                     "enum": ["none", "normal", "additive", "subtractive", "multiply"],
                     "type": "string"
+                },
+                "bumpMap": {
+                    "description": "Bump map. Used to add the illusion of surface detail without geometry. Requires `shader: phong`.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "bumpMapScale": {
+                    "default": 1,
+                    "description": "Scale of the bump map effect. Requires `shader: phong`.",
+                    "type": "number"
+                },
+                "bumpTextureOffset": {
+                    "default": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "description": "Texture offset for the bump map. Requires `shader: phong`.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
+                "bumpTextureRepeat": {
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
+                    "description": "Texture repeat for the bump map. Requires `shader: phong`.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
                 },
                 "color": {
                     "default": "#ffffff",
@@ -72,6 +128,39 @@
                     "description": "Render when depth test succeeds.",
                     "type": "boolean"
                 },
+                "displacementBias": {
+                    "default": 0.5,
+                    "description": "The zero point of the displacement map. Requires `shader: standard` or `phong`.",
+                    "type": "number"
+                },
+                "displacementMap": {
+                    "description": "Displacement map. Distorts a simpler model at a high resolution. Requires `shader: standard` or `phong`.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "displacementScale": {
+                    "default": 1,
+                    "description": "Scale of the displacement map effect. Requires `shader: standard` or `phong`.",
+                    "type": "number"
+                },
+                "displacementTextureOffset": {
+                    "default": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "description": "Texture offset for the displacement map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
+                "displacementTextureRepeat": {
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
+                    "description": "Texture repeat for the displacement map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
                 "dithering": {
                     "default": true,
                     "description": "Whether material is dithered with noise. Removes banding from gradients like ones produced by lighting.",
@@ -87,6 +176,11 @@
                     "default": 1,
                     "description": "Intensity of the emissive lighting component. Requires `shader: standard` or `phong`.",
                     "type": "number"
+                },
+                "envMap": {
+                    "default": "",
+                    "description": "Environment cubemap texture for reflections. Can be a selector or comma-separated list of URLs. Requires `shader: standard` or `phong`.",
+                    "type": "string"
                 },
                 "flatShading": {
                     "default": false,
@@ -109,6 +203,61 @@
                     "maximum": 1,
                     "description": "How metallic the material is from 0 to 1. Requires `shader: standard`.",
                     "type": "number"
+                },
+                "metalnessMap": {
+                    "description": "Metalness map. Requires `shader: standard`.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "metalnessTextureOffset": {
+                    "default": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "description": "Texture offset for the metalness map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
+                "metalnessTextureRepeat": {
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
+                    "description": "Texture repeat for the metalness map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
+                "normalMap": {
+                    "description": "Normal map. Defines the angle of the surface at each point. Requires `shader: standard` or `phong`.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "normalScale": {
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
+                    "description": "Scale of the effect of the normal map in the X and Y directions.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
+                "normalTextureOffset": {
+                    "default": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "description": "Texture offset for the normal map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
+                "normalTextureRepeat": {
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
+                    "description": "Texture repeat for the normal map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
                 },
                 "npot": {
                     "default": false,
@@ -155,11 +304,34 @@
                     "format": "grid"
                 },
                 "roughness": {
-                    "default": 0,
+                    "default": 0.5,
                     "minimum": 0,
                     "maximum": 1,
                     "description": "How rough the material is from 0 to 1. A rougher material will scatter reflected light in more directions than a smooth material. Requires `shader: standard`.",
                     "type": "number"
+                },
+                "roughnessMap": {
+                    "description": "Roughness map. Requires `shader: standard`.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "roughnessTextureOffset": {
+                    "default": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "description": "Texture offset for the roughness map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
+                },
+                "roughnessTextureRepeat": {
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
+                    "description": "Texture repeat for the roughness map.",
+                    "$ref": "#/definitions/vector2",
+                    "format": "grid"
                 },
                 "shader": {
                     "default": "standard",
@@ -182,6 +354,11 @@
                     "default": "#111111",
                     "description": "This defines how shiny the material is and the color of its shine. Requires `shader: phong`.",
                     "format": "color",
+                    "type": "string"
+                },
+                "sphericalEnvMap": {
+                    "description": "Environment spherical texture for reflections. Requires `shader: standard` or `phong`.",
+                    "format": "uri",
                     "type": "string"
                 },
                 "src": {
