@@ -192,11 +192,6 @@
                     "description": "Whether or not material is affected by fog.",
                     "type": "boolean"
                 },
-                "height": {
-                    "default": 256,
-                    "description": "Height of video (in pixels), if defining a video texture. Requires `shader: standard` or `flat`.",
-                    "type": "integer"
-                },
                 "metalness": {
                     "default": 0,
                     "minimum": 0,
@@ -385,11 +380,6 @@
                     "default": true,
                     "description": "Whether material is visible. Raycasters will ignore invisible materials.",
                     "type": "boolean"
-                },
-                "width": {
-                    "default": 512,
-                    "description": "Width of video (in pixels), if defining a video texture. Requires `shader: standard` or `flat`.",
-                    "type": "integer"
                 },
                 "wireframe": {
                     "default": false,
