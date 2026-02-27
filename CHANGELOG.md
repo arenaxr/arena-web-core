@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.2](https://github.com/arenaxr/arena-web-core/compare/v2.4.1...v2.4.2) (2026-02-26)
+
+
+### Bug Fixes
+
+* **a/v setup:** try to test for change device id when skipav, closes [#763](https://github.com/arenaxr/arena-web-core/issues/763) ([32d3fd4](https://github.com/arenaxr/arena-web-core/commit/32d3fd4c71a6ee0443ef6b5821849c91471f2f91))
+* **build:** animation-mixer add useRegExp, fix repitition Infinity when null ([d0dcf6e](https://github.com/arenaxr/arena-web-core/commit/d0dcf6e5eea762cd2b5ed9659521763e6c2a5065))
+* **build:** spe str-&gt;int defaults, animation fix loop/property ([75045c2](https://github.com/arenaxr/arena-web-core/commit/75045c24094c2dccea94e9279ace01a0c7c09cef))
+* dedupe identical publish msgs ([5343fb1](https://github.com/arenaxr/arena-web-core/commit/5343fb174eeaad6e9998a9c86f3cd54fa596d91a))
+* **jitsi:** fix race condition when jitsi connect be re-relayed without args ([8c76b47](https://github.com/arenaxr/arena-web-core/commit/8c76b473c3a905f0ecca09363bce1f0a65dc9ec3))
+* **multisrc:** fix parsing error causing crash in multisrc ([81b7774](https://github.com/arenaxr/arena-web-core/commit/81b777435a52f86bc6ddcd06eabda91ab8909870))
+* **text:** remove read-only derived properties from text entity ([1789626](https://github.com/arenaxr/arena-web-core/commit/17896264b1a90af64af8b271807367f3b507bd9a))
+
 ## [2.4.1](https://github.com/arenaxr/arena-web-core/compare/v2.4.0...v2.4.1) (2026-02-11)
 
 
