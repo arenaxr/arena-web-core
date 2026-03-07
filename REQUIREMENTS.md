@@ -8,37 +8,37 @@
 graph TD
     subgraph browser["ARENA Web Client (A-Frame / three.js)"]
         subgraph core["Core Systems"]
-            mqttSys["arena-mqtt\n(MQTT PubSub)"]
-            sceneSys["scene\n(Scene Management)"]
-            authSys["arena-auth\n(JWT Auth)"]
+            mqttSys["arena-mqtt<br/>(MQTT PubSub)"]
+            sceneSys["scene<br/>(Scene Management)"]
+            authSys["arena-auth<br/>(JWT Auth)"]
         end
 
         subgraph rendering["Rendering"]
-            aframe["A-Frame ECS\n(Entities + Components)"]
-            geom["Geometries\n(box, sphere, etc.)"]
-            postproc["Post-processing\n(Effects Pipeline)"]
-            renderfusion["RenderFusion\n(Remote Rendering)"]
+            aframe["A-Frame ECS<br/>(Entities + Components)"]
+            geom["Geometries<br/>(box, sphere, etc.)"]
+            postproc["Post-processing<br/>(Effects Pipeline)"]
+            renderfusion["RenderFusion<br/>(Remote Rendering)"]
         end
 
         subgraph interaction["Interaction"]
-            ui["UI Systems\n(Chat, Users, Settings)"]
-            build3d["Build3D\n(Scene Builder)"]
-            facetrack["Face Tracking\n(Avatar Expressions)"]
+            ui["UI Systems<br/>(Chat, Users, Settings)"]
+            build3d["Build3D<br/>(Scene Builder)"]
+            facetrack["Face Tracking<br/>(Avatar Expressions)"]
         end
 
         subgraph xr["XR"]
-            webxr["WebXR\n(VR Headsets)"]
-            webar["WebAR\n(AR Passthrough)"]
-            armarker["AR Markers\n(AprilTag Detection)"]
+            webxr["WebXR<br/>(VR Headsets)"]
+            webar["WebAR<br/>(AR Passthrough)"]
+            armarker["AR Markers<br/>(AprilTag Detection)"]
         end
     end
 
     subgraph external["External Services"]
-        mqtt["Mosquitto\n(MQTT Broker)"]
-        jitsi["Jitsi\n(Video Conferencing)"]
-        persist["arena-persist\n(REST API)"]
-        account["arena-account\n(OAuth + JWT)"]
-        filestore["File Store\n(filebrowser)"]
+        mqtt["Mosquitto<br/>(MQTT Broker)"]
+        jitsi["Jitsi<br/>(Video Conferencing)"]
+        persist["arena-persist<br/>(REST API)"]
+        account["arena-account<br/>(OAuth + JWT)"]
+        filestore["File Store<br/>(filebrowser)"]
     end
 
     mqttSys <-->|pub/sub| mqtt
