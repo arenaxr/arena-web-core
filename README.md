@@ -18,6 +18,9 @@ The main ARENA documentation is here: [https://docs.arenaxr.org/](https://docs.a
 
 - [Quick Start for users](https://docs.arenaxr.org/content/overview/user-guide.html).
 - [Quick Start for developers](https://docs.arenaxr.org/content/overview/dev-guide.html).
+- [Requirements & Architecture](REQUIREMENTS.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
 ## Installation
 
