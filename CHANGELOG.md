@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.4.3](https://github.com/arenaxr/arena-web-core/compare/v2.4.2...v2.4.3) (2026-03-11)
+
+
+### Bug Fixes
+
+* sync dependancies ([5124e8f](https://github.com/arenaxr/arena-web-core/commit/5124e8f9f3088e3a3c1aece8901df7184a915f80))
+* sync dependancies ([b3b58fb](https://github.com/arenaxr/arena-web-core/commit/b3b58fb20463abcb794b076d095277f48f27188d))
+
 ## [2.4.2](https://github.com/arenaxr/arena-web-core/compare/v2.4.1...v2.4.2) (2026-02-26)
 
 
