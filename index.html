@@ -36,6 +36,7 @@
         <link rel="stylesheet" href="static/vendor/mdb/mdb.min.css" />
         <link rel="stylesheet" href="static/vendor/fontawesome-5/css/all.min.css" />
     </head>
+
     <body>
         <!-- overlay for webxr -->
         <div id="overlay"></div>
@@ -96,8 +97,9 @@
                             visible="false"
                             arena-hand="hand:right"
                             laser-controls="hand:right"
+                            vr-thumbstick-fly="speed: 1.0; cameraRig: #cameraRig; camera: #my-camera"
                             raycaster="objects: [click-listener],[click-listener-local]; enabled: false"
-                          ></a-entity>
+                        ></a-entity>
                     </a-entity>
                 </a-entity>
             </a-entity>
