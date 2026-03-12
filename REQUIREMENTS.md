@@ -72,7 +72,7 @@ graph TD
 | [src/geometries/](src/geometries/) | Custom geometries (4 files) | roundedbox, triangle, etc. |
 | [scenes/](scenes/) | Scene builder pages (3 files) | build interface HTML |
 | [network/](network/) | Network monitoring (4 files) | MQTT network graph visualization |
-| [arts/](arts/) | Runtime visualization (4 files) | WASM runtime status |
+| [programs/](programs/) | Runtime visualization (4 files) | WASM runtime status |
 
 ## Feature Requirements
 
