@@ -251,5 +251,5 @@
             "description": "Object data payload; Program config data"
         }
     },
-    "required": ["object_id", "action", "persist", "type", "data", "timestamp"]
+    "required": ["object_id", "action", "persist", "type", "data"]
 }
