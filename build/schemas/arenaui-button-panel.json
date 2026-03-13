@@ -22,10 +22,10 @@
                                     "title": "Buttons",
                                     "default": [
                                         {
-                                            "name": "Option 1"
+                                            "name": "Confirm"
                                         },
                                         {
-                                            "name": "Option 2"
+                                            "name": "Cancel"
                                         }
                                     ],
                                     "uniqueItems": false,
@@ -89,6 +89,11 @@
                                     "title": "Color Theme",
                                     "default": "light",
                                     "enum": ["light", "dark"]
+                                },
+                                "themeOverride": {
+                                    "type": "array",
+                                    "title": "Color Theme Override",
+                                    "default": []
                                 },
                                 "materialSides": {
                                     "type": "string",

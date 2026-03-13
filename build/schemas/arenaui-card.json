@@ -92,6 +92,11 @@
                                     "default": "light",
                                     "enum": ["light", "dark"]
                                 },
+                                "themeOverride": {
+                                    "type": "array",
+                                    "title": "Color Theme Override",
+                                    "default": []
+                                },
                                 "materialSides": {
                                     "type": "string",
                                     "title": "Material Sides",
