@@ -114,7 +114,8 @@
                                 "value": {
                                     "description": "The actual content of the text. Line breaks and tabs are supported with `\\n` and `\\t`.",
                                     "title": "Value (Text)",
-                                    "type": "string"
+                                    "type": "string",
+                                    "default": "Default Text"
                                 },
                                 "whiteSpace": {
                                     "type": "string",

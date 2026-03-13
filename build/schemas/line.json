@@ -28,7 +28,7 @@
                                     "title": "vertex B (end)",
                                     "description": "End coordinate.",
                                     "format": "grid",
-                                    "$ref": "#/definitions/vector3",
+                                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -47,7 +47,7 @@
                                     "title": "vertex A (start)",
                                     "description": "Start point coordinate.",
                                     "format": "grid",
-                                    "$ref": "#/definitions/vector3",
+                                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
                                     "default": {
                                         "x": 0,
                                         "y": 0.5,
@@ -76,27 +76,5 @@
             }
         }
     ],
-    "required": ["object_id", "action", "type", "data", "persist"],
-    "definitions": {
-        "vector3": {
-            "title": "Vector3",
-            "format": "grid",
-            "properties": {
-                "x": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "y": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "z": {
-                    "default": 0,
-                    "type": "number"
-                }
-            },
-            "required": ["x", "y", "z"],
-            "type": "object"
-        }
-    }
+    "required": ["object_id", "action", "type", "data", "persist"]
 }
