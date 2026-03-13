@@ -34,6 +34,15 @@
         "program_id": {
             "description": "The program_id on private program topics that interactions to be directed to, if the private flag is set true. Ignored if private flag is false.",
             "type": "string"
+        },
+        "timestamp": {
+            "description": "Indicates the time of message in milliseconds.",
+            "type": "string"
+        },
+        "override": {
+            "description": "If true, override timestamp and overwrite protection will not happen for older messages.",
+            "type": "boolean",
+            "default": false
         }
     }
 }
