@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.4.4](https://github.com/arenaxr/arena-web-core/compare/v2.4.3...v2.4.4) (2026-03-13)
+
+
+### Bug Fixes
+
+* **arenaui:** fix themeOverride runtime, add schema suggestions ([e2f1b1c](https://github.com/arenaxr/arena-web-core/commit/e2f1b1cd60d5b417c05796b13c33fa5174437377))
+* **schema:** add timestamp/override for message envelope ([0bb6b77](https://github.com/arenaxr/arena-web-core/commit/0bb6b77b6bbc9be8dfe68c69182e5a6ba37df5ca))
+* **schema:** arenaui, add missing themeOverride properties ([90aae55](https://github.com/arenaxr/arena-web-core/commit/90aae55ec8f2294500208ee8fc5cc555f6c5ef56))
+* **schema:** consolidate vector2/vector3 definitions to common ([998b506](https://github.com/arenaxr/arena-web-core/commit/998b506c32a875765ad4e2120a5985d0da60e228))
+* **schema:** thickline, add missing sizeAttenuation property ([88fd882](https://github.com/arenaxr/arena-web-core/commit/88fd8824cb2b475b0cb4d95b38db75be58c49353))
+
 ## [2.4.3](https://github.com/arenaxr/arena-web-core/compare/v2.4.2...v2.4.3) (2026-03-11)
 
 
