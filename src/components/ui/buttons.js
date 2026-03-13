@@ -295,7 +295,7 @@ AFRAME.registerComponent('arenaui-button-panel', {
         if (data.theme !== oldData.theme) {
             this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
         }
-        if (data.themeOverride !== oldData.themOverride) {
+        if (data.themeOverride !== oldData.themeOverride) {
             data.themeOverride.forEach((override) => {
                 if (override[0] in this.ARENAColors) {
                     this.ARENAColors[override[0]] = override[1]; // Tuple of key-value

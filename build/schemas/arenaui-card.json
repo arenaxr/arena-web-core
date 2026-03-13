@@ -95,6 +95,34 @@
                                 "themeOverride": {
                                     "type": "array",
                                     "title": "Color Theme Override",
+                                    "description": "Array of color override tuples e.g. [['textBg', '#000000']]",
+                                    "items": {
+                                        "type": "array",
+                                        "items": [
+                                            {
+                                                "type": "string",
+                                                "enum": [
+                                                    "text",
+                                                    "textBg",
+                                                    "captionBg",
+                                                    "textBgOpacity",
+                                                    "bg",
+                                                    "bgOpacity",
+                                                    "buttonText",
+                                                    "buttonBg",
+                                                    "buttonBgOpacity",
+                                                    "buttonBgHover",
+                                                    "buttonBgSelected"
+                                                ]
+                                            },
+                                            {
+                                                "type": "string",
+                                                "format": "color"
+                                            }
+                                        ],
+                                        "minItems": 2,
+                                        "maxItems": 2
+                                    },
                                     "default": []
                                 },
                                 "materialSides": {
