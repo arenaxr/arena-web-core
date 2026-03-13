@@ -111,7 +111,7 @@
     },
     "program": {
         "description": "ARENA program data.",
-        "file": "schemas/arena-program.json",
+        "file": "schemas/program.json",
         "title": "Program"
     },
     "ring": {
@@ -126,7 +126,7 @@
     },
     "scene-options": {
         "description": "ARENA scene options.",
-        "file": "schemas/arena-scene-options.json",
+        "file": "schemas/scene-options.json",
         "title": "Scene Options"
     },
     "sphere": {
