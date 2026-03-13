@@ -41,6 +41,12 @@
                                     "title": "Line path",
                                     "description": "Comma-separated list of x y z coordinates of the line vertices.",
                                     "default": "-2 -1 0, 0 20 0, 10 -1 10"
+                                },
+                                "sizeAttenuation": {
+                                    "type": "boolean",
+                                    "title": "Size Attenuation",
+                                    "description": "Whether the line width is constant regardless of distance (false) or scales with it (true).",
+                                    "default": false
                                 }
                             }
                         },
