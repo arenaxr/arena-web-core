@@ -69,6 +69,9 @@ A-Frame supports multiple instances of the same component via double-underscore 
 - Inbound MQTT messages are applied via `create-update.js`'s `setEntityAttributes`, which calls `entityEl.setAttribute('animation__walk', value)` — A-Frame handles the rest.
 - No special-casing for `__` is needed in build3d; the naming convention flows naturally through all paths.
 
+> [!WARNING]
+> **Cross-Platform Limitation:** Multi-instance component support varies across ARENA clients. `arena-unity` and `arena-py` may not fully support `__` suffixed component names. When the Inspector touches a `__` suffixed component, it may also trigger a mutation on the base component name, causing both to appear in the same MQTT update (e.g., `{ "animation": {}, "animation__walk": {...} }`). Build3D does **not** automatically strip the base component, since it could legitimately have user-set properties.
+
 ## Known Issues
 
 ### `spe-particles` Fog Crash (Upstream)
@@ -77,7 +80,7 @@ Adding `spe-particles` without a proper multi-instance suffix (e.g. skipping the
 TypeError: Cannot set properties of null (setting 'r')
     at refreshFogUniforms
 ```
-This is an upstream issue — the particle system initializes with a null fog color reference. ARENA's `create-update.js` mitigates this by defaulting `affectedByFog = false` for inbound messages, but entities created locally in the Inspector bypass that guard. **Workaround:** Always provide a suffix when the Inspector prompts for one (e.g. `spe-particles__myeffect`).
+This is an upstream issue — the particle system initializes with a null fog color reference. ARENA's `create-update.js` mitigates this for inbound messages by defaulting `affectedByFog = false`, and build3d mirrors this guard for outbound payloads. However, the crash occurs at component *init time* before either guard can intervene. **Workaround:** Always provide a suffix when the Inspector prompts for one (e.g. `spe-particles__myeffect`).
 
 ## Anti-Patterns Addressed
 - **DO NOT** bind massive generic `MutationObservers` against the entire A-Frame `childList`/`attribute` scene tree. Subscribing natively to A-Frame lifecycle events (`tick` + `componentchanged`) performs magnitudes faster.

@@ -41,7 +41,7 @@ function extractDataFullDOM(mutation) {
         if (['position', 'rotation', 'scale'].includes(attr.name)) return;
 
         let attribute = mutation.target.getDOMAttribute(attr.name);
-        
+
         // Parse multi-property component strings, but guard against URLs containing colons
         if (typeof attribute === 'string' && attribute.includes(':') && !attribute.includes('//')) {
             attribute = AFRAME.utils.styleParser.parse(attribute);
@@ -236,20 +236,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     publishChanges() {
         if (!this.data.enabled || Object.keys(this.changedData).length === 0) return;
 
-        // Strip base component names when a __suffixed sibling exists in the same batch
-        // e.g. if both 'spe-particles' and 'spe-particles__test' are queued, drop 'spe-particles'
-        const keys = Object.keys(this.changedData);
-        const suffixedBases = new Set(keys.filter(k => k.includes('__')).map(k => k.split('__')[0]));
-        suffixedBases.forEach(base => {
-            if (this.changedData[base] !== undefined) {
-                delete this.changedData[base];
-            }
-        });
-        if (Object.keys(this.changedData).length === 0) {
-            this.changedData = {};
-            return;
-        }
-
         const msg = {
             object_id: this.el.id === 'env' ? 'scene-options' : this.el.id,
             action: 'update',
@@ -259,7 +245,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         };
         this.changedData = {};
         LogToUser(msg, 'components');
-        console.debug('publishing:', msg.action, JSON.stringify(msg));
+        console.debug('publishing:', JSON.stringify(msg));
         const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
         ARENA.Mqtt.publish(
             topicBase.formatStr({
@@ -279,7 +265,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             if (attrName === 'id') {
                 // console.debug(`The id attribute was modified.`, mutation.target.id, mutation.oldValue);
                 if (mutation.oldValue && mutation.target.id !== mutation.oldValue) {
-                    
+
                     // Capture the original ID only at the beginning of the typing sequence
                     if (!this.renameOldId) {
                         this.renameOldId = mutation.oldValue;
@@ -293,7 +279,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                     this.renameTimeout = setTimeout(() => {
                         const finalNewId = this.el.id;
                         const originalOldId = this.renameOldId;
-                        
+
                         // Reset for next rename sequence
                         this.renameOldId = null;
                         this.renameTimeout = null;
@@ -308,7 +294,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                             persist: true,
                         };
                         LogToUser(outMsg);
-                        console.debug('publishing:', outMsg.action, JSON.stringify(outMsg));
+                        console.debug('publishing:', JSON.stringify(outMsg));
                         ARENA.Mqtt.publish(
                             topicBase.formatStr({
                                 objectId: outMsg.object_id,
@@ -326,7 +312,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                             data: extractDataFullDOM(fakeMutation),
                         };
                         LogToUser(createMsg, 'id');
-                        console.debug('publishing:', createMsg.action, JSON.stringify(createMsg));
+                        console.debug('publishing:', JSON.stringify(createMsg));
                         ARENA.Mqtt.publish(
                             topicBase.formatStr({
                                 objectId: createMsg.object_id,
@@ -457,7 +443,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                 persist: true,
             };
             LogToUser(msg);
-            console.debug('publishing:', msg.action, JSON.stringify(msg));
+            console.debug('publishing:', JSON.stringify(msg));
             const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
             ARENA.Mqtt.publish(
                 topicBase.formatStr({

@@ -42,7 +42,7 @@ function updateMqttWidth() {
 
 function publishUploadedFile(newObj) {
     if (newObj) {
-        console.debug('publishing:', newObj.action, JSON.stringify(newObj));
+        console.debug('publishing:', JSON.stringify(newObj));
         const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
         ARENA.Mqtt.publish(
             topicBase.formatStr({
@@ -201,15 +201,15 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttTitle.style.display = 'flex';
                 inspectorMqttTitle.style.justifyContent = 'space-between';
                 inspectorMqttTitle.style.alignItems = 'center';
-                
+
                 const titleText = document.createElement('span');
                 titleText.textContent = `ARENA's Build3D MQTT Publish Log (user: ${ARENAAUTH.user_username})`;
                 inspectorMqttTitle.appendChild(titleText);
-                
+
                 const chevron = document.createElement('i');
                 chevron.className = 'fa fa-chevron-down';
                 inspectorMqttTitle.appendChild(chevron);
-                
+
                 inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
 
                 // log
