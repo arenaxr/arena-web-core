@@ -61,6 +61,24 @@ sequenceDiagram
     end
 ```
 
+## Multi-Instance Components
+
+A-Frame supports multiple instances of the same component via double-underscore suffixed names (e.g. `animation__walk`, `animation__idle`, `spe-particles__fire`). Build3D handles these transparently:
+
+- Both the `MutationObserver` and `componentchanged`/`componentinitialized` event paths detect suffixed names and route them through the `default` case of `extractDataUpdates`, publishing `data['animation__walk'] = { ... }`.
+- Inbound MQTT messages are applied via `create-update.js`'s `setEntityAttributes`, which calls `entityEl.setAttribute('animation__walk', value)` — A-Frame handles the rest.
+- No special-casing for `__` is needed in build3d; the naming convention flows naturally through all paths.
+
+## Known Issues
+
+### `spe-particles` Fog Crash (Upstream)
+Adding `spe-particles` without a proper multi-instance suffix (e.g. skipping the Inspector's prefix prompt) can cause a Three.js render crash:
+```
+TypeError: Cannot set properties of null (setting 'r')
+    at refreshFogUniforms
+```
+This is an upstream issue — the particle system initializes with a null fog color reference. ARENA's `create-update.js` mitigates this by defaulting `affectedByFog = false` for inbound messages, but entities created locally in the Inspector bypass that guard. **Workaround:** Always provide a suffix when the Inspector prompts for one (e.g. `spe-particles__myeffect`).
+
 ## Anti-Patterns Addressed
 - **DO NOT** bind massive generic `MutationObservers` against the entire A-Frame `childList`/`attribute` scene tree. Subscribing natively to A-Frame lifecycle events (`tick` + `componentchanged`) performs magnitudes faster.
 - **DO NOT** cross-reference or dynamically diff internal A-Frame registries (like `.schema`) to trim payload bloat. The official native `getDOMAttribute` efficiently maps explicitly assigned values out of the box and honors user-level reversions natively.

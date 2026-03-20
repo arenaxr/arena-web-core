@@ -177,8 +177,15 @@ function extractDataUpdates(mutation, attribute, changes) {
             break;
         default:
             // handle special cases of boolean as string first
-            if (changes === 'true' || changes === 'false') data[mutation.attributeName] = JSON.parse(changes);
+            if (changes === null) data[mutation.attributeName] = null; // component was removed
+            else if (changes === 'true' || changes === 'false') data[mutation.attributeName] = JSON.parse(changes);
             else data[mutation.attributeName] = changes || {};
+            // Guard spe-particles fog crash: mirror create-update.js workaround
+            if (mutation.attributeName.startsWith('spe-particles') && typeof data[mutation.attributeName] === 'object' && data[mutation.attributeName] !== null) {
+                if (!Object.hasOwn(data[mutation.attributeName], 'affectedByFog')) {
+                    data[mutation.attributeName].affectedByFog = false;
+                }
+            }
             break;
     }
 
@@ -209,6 +216,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         };
 
         this.onComponentChanged = this.onComponentChanged.bind(this);
+        this.onComponentRemoved = this.onComponentRemoved.bind(this);
         this.objectAttributesUpdate = this.objectAttributesUpdate.bind(this);
 
         this.renameOldId = null;
@@ -227,6 +235,21 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     },
     publishChanges() {
         if (!this.data.enabled || Object.keys(this.changedData).length === 0) return;
+
+        // Strip base component names when a __suffixed sibling exists in the same batch
+        // e.g. if both 'spe-particles' and 'spe-particles__test' are queued, drop 'spe-particles'
+        const keys = Object.keys(this.changedData);
+        const suffixedBases = new Set(keys.filter(k => k.includes('__')).map(k => k.split('__')[0]));
+        suffixedBases.forEach(base => {
+            if (this.changedData[base] !== undefined) {
+                delete this.changedData[base];
+            }
+        });
+        if (Object.keys(this.changedData).length === 0) {
+            this.changedData = {};
+            return;
+        }
+
         const msg = {
             object_id: this.el.id === 'env' ? 'scene-options' : this.el.id,
             action: 'update',
@@ -315,6 +338,12 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             } else {
                 // Non-id attribute mutation (geometry, material, etc.) from Inspector DOM writes
                 setTimeout(() => {
+                    // Check if this attribute was removed (component deletion)
+                    if (!this.el.hasAttribute(attrName)) {
+                        this.changedData[attrName] = null;
+                        this.debouncePublish();
+                        return;
+                    }
                     const attribute = this.el.getAttribute(attrName);
                     const domAttr = this.el.getDOMAttribute(attrName);
                     const fakeMutation = { attributeName: attrName, target: this.el };
@@ -344,6 +373,14 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             Object.assign(this.changedData, data);
             this.debouncePublish();
         }, 0);
+    },
+    onComponentRemoved(evt) {
+        if (!this.data.enabled || !this.el.id) return;
+        const { name } = evt.detail;
+        if (name === 'build3d-mqtt-object') return;
+        // Publish null to signal component deletion on the wire
+        this.changedData[name] = null;
+        this.debouncePublish();
     },
     tick(t, dt) {
         if (!this.data.enabled || !this.el.object3D) return;
@@ -396,6 +433,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             this.observer.observe(this.el, { attributes: true, attributeOldValue: true });
             this.el.addEventListener('componentchanged', this.onComponentChanged);
             this.el.addEventListener('componentinitialized', this.onComponentChanged);
+            this.el.addEventListener('componentremoved', this.onComponentRemoved);
             if (this.el.object3D) {
                 this.lastTransform.position.copy(this.el.object3D.position);
                 this.lastTransform.rotation.copy(this.el.object3D.quaternion);
@@ -405,6 +443,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             this.observer.disconnect();
             this.el.removeEventListener('componentchanged', this.onComponentChanged);
             this.el.removeEventListener('componentinitialized', this.onComponentChanged);
+            this.el.removeEventListener('componentremoved', this.onComponentRemoved);
             // console.debug(`build3d watching entity ${this.el.id} attributes stopped`);
         }
     },
