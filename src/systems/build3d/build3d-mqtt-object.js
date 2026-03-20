@@ -183,94 +183,155 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         },
     },
     init() {
+        this.changedData = {};
+        this.publishTimeout = null;
+
+        this.lastTransform = {
+            position: new THREE.Vector3(),
+            rotation: new THREE.Quaternion(),
+            scale: new THREE.Vector3(),
+        };
+
+        this.onComponentChanged = this.onComponentChanged.bind(this);
+        this.objectAttributesUpdate = this.objectAttributesUpdate.bind(this);
+        
+        // Track ID changes only
         this.observer = new MutationObserver(this.objectAttributesUpdate);
+        
+        this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
+    },
+    debouncePublish() {
+        if (this.publishTimeout) clearTimeout(this.publishTimeout);
+        this.publishTimeout = setTimeout(() => {
+            this.publishChanges();
+        }, 150);
+    },
+    publishChanges() {
+        if (!this.data.enabled || Object.keys(this.changedData).length === 0) return;
+        const msg = {
+            object_id: this.el.id === 'env' ? 'scene-options' : this.el.id,
+            action: 'update',
+            type: this.el.id === 'env' ? 'scene-options' : 'object',
+            persist: true,
+            data: { ...this.changedData },
+        };
+        this.changedData = {};
+        LogToUser(msg, 'components');
+        console.log('publishing:', msg.action, msg);
+        const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
+        ARENA.Mqtt.publish(
+            topicBase.formatStr({
+                objectId: msg.object_id,
+            }),
+            msg
+        );
     },
     objectAttributesUpdate(mutationList, observer) {
-        const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
         mutationList.forEach((mutation) => {
-            switch (mutation.type) {
-                case 'attributes':
-                    // mutation.target
-                    // mutation.attributeName
-                    // mutation.oldValue
-                    console.log(
-                        `The ${mutation.attributeName} attribute was modified.`,
-                        mutation.target.id,
-                        mutation.oldValue
+            if (mutation.type === 'attributes' && mutation.attributeName === 'id') {
+                console.log(`The id attribute was modified.`, mutation.target.id, mutation.oldValue);
+                if (mutation.oldValue && mutation.target.id !== mutation.oldValue) {
+                    const outMsg = {
+                        object_id: mutation.oldValue,
+                        action: 'delete',
+                        persist: true,
+                    };
+                    LogToUser(outMsg);
+                    console.log('publishing:', outMsg.action, outMsg);
+                    const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
+                    ARENA.Mqtt.publish(
+                        topicBase.formatStr({
+                            objectId: outMsg.object_id,
+                        }),
+                        outMsg
                     );
-                    if (mutation.attributeName === 'build3d-mqtt-object') {
-                        return; // no need to handle on/off mutations to our own component
-                    }
-                    if (mutation.target.id) {
-                        // TODO (mwfarb): make name change occur only on focus loss, otherwise is too frequent
-                        const attribute = mutation.target.getAttribute(mutation.attributeName);
-                        // when 'id' changes, we have a new object, maybe a name change
-                        const msg = {
-                            object_id: mutation.target.id === 'env' ? 'scene-options' : mutation.target.id,
-                            action: mutation.attributeName === 'id' ? 'create' : 'update',
-                            type: mutation.target.id === 'env' ? 'scene-options' : 'object',
-                            persist: true,
-                            data: {},
-                        };
-                        // use aframe-watcher updates to send only changes updated
-                        let changes;
-                        if (
-                            AFRAME.INSPECTOR &&
-                            AFRAME.INSPECTOR.history &&
-                            AFRAME.INSPECTOR.history.updates[mutation.target.id]
-                        ) {
-                            changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
-                        }
-                        if (msg.action === 'update') {
-                            msg.data = extractDataUpdates(mutation, attribute, changes);
-                        } else if (msg.action === 'create') {
-                            msg.data = extractDataFullDOM(mutation); // TODO(mwfarb): careful here, this still may pull too much data
-                        }
-                        LogToUser(msg, mutation.attributeName, changes);
-                        console.log('publishing:', msg.action, msg);
-                        ARENA.Mqtt.publish(
-                            topicBase.formatStr({
-                                objectId: msg.object_id,
-                            }),
-                            msg
-                        );
 
-                        // check rename case
-                        if (
-                            mutation.attributeName === 'id' &&
-                            mutation.oldValue &&
-                            mutation.target.id !== mutation.oldValue
-                        ) {
-                            const outMsg = {
-                                object_id: mutation.oldValue,
-                                action: 'delete',
-                                persist: true,
-                            };
-                            LogToUser(outMsg);
-                            console.log('publishing:', outMsg.action, outMsg);
-                            ARENA.Mqtt.publish(
-                                topicBase.formatStr({
-                                    objectId: outMsg.object_id,
-                                }),
-                                outMsg
-                            );
-                        }
-                    }
-                    break;
-                default:
-                // ignore
+                    // publishing create for new ID with full data
+                    const fakeMutation = { target: mutation.target };
+                    const createMsg = {
+                        object_id: mutation.target.id === 'env' ? 'scene-options' : mutation.target.id,
+                        action: 'create',
+                        type: mutation.target.id === 'env' ? 'scene-options' : 'object',
+                        persist: true,
+                        data: extractDataFullDOM(fakeMutation),
+                    };
+                    LogToUser(createMsg, 'id');
+                    console.log('publishing:', createMsg.action, createMsg);
+                    ARENA.Mqtt.publish(
+                        topicBase.formatStr({
+                            objectId: createMsg.object_id,
+                        }),
+                        createMsg
+                    );
+                }
             }
         });
     },
-    update() {
-        if (this.data.enabled) {
+    onComponentChanged(evt) {
+        if (!this.data.enabled || !this.el.id) return;
+        const { name, newData } = evt.detail;
+        if (name === 'position' || name === 'rotation' || name === 'scale' || name === 'build3d-mqtt-object') return;
+        
+        // Defer read to allow A-Frame Inspector to synchronously populate history.updates
+        setTimeout(() => {
+            let changes;
+            if (AFRAME.INSPECTOR && AFRAME.INSPECTOR.history && AFRAME.INSPECTOR.history.updates[this.el.id]) {
+                changes = AFRAME.INSPECTOR.history.updates[this.el.id][name];
+            }
+
+            const fakeMutation = { attributeName: name, target: this.el };
+            const data = extractDataUpdates(fakeMutation, newData, changes);
+            
+            Object.assign(this.changedData, data);
+            this.debouncePublish();
+        }, 0);
+    },
+    tick(t, dt) {
+        if (!this.data.enabled || !this.el.object3D) return;
+        let transformChanged = false;
+
+        if (!this.lastTransform.position.equals(this.el.object3D.position)) {
+            this.changedData.position = {
+                x: this.el.object3D.position.x,
+                y: this.el.object3D.position.y,
+                z: this.el.object3D.position.z
+            };
+            this.lastTransform.position.copy(this.el.object3D.position);
+            transformChanged = true;
+        }
+        if (!this.lastTransform.rotation.equals(this.el.object3D.quaternion)) {
+            const { quaternion } = this.el.object3D;
+            this.changedData.rotation = { x: quaternion._x, y: quaternion._y, z: quaternion._z, w: quaternion._w };
+            this.lastTransform.rotation.copy(quaternion);
+            transformChanged = true;
+        }
+        if (!this.lastTransform.scale.equals(this.el.object3D.scale)) {
+            this.changedData.scale = {
+                x: this.el.object3D.scale.x,
+                y: this.el.object3D.scale.y,
+                z: this.el.object3D.scale.z
+            };
+            this.lastTransform.scale.copy(this.el.object3D.scale);
+            transformChanged = true;
+        }
+
+        if (transformChanged) {
+            this.debouncePublish();
+        }
+    },
+    update(oldData) {
+        if (this.data.enabled && (Object.keys(oldData).length === 0 || !oldData.enabled)) {
             console.log(`build3d watching entity ${this.el.id} attributes...`);
-            this.observer.observe(this.el, {
-                attributes: true,
-                attributeOldValue: true,
-            });
-        } else {
+            this.observer.observe(this.el, { attributeFilter: ['id'], attributeOldValue: true });
+            this.el.addEventListener('componentchanged', this.onComponentChanged);
+            if (this.el.object3D) {
+                this.lastTransform.position.copy(this.el.object3D.position);
+                this.lastTransform.rotation.copy(this.el.object3D.quaternion);
+                this.lastTransform.scale.copy(this.el.object3D.scale);
+            }
+        } else if (!this.data.enabled && oldData.enabled) {
             this.observer.disconnect();
+            this.el.removeEventListener('componentchanged', this.onComponentChanged);
             console.log(`build3d watching entity ${this.el.id} attributes stopped`);
         }
     },

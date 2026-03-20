@@ -14,7 +14,6 @@ import { TOPICS } from '../../constants';
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  * @module build3d-mqtt-scene
  */
-let toolbarName = 'translate';
 
 // register component actions
 const B3DACTIONS = {
@@ -175,68 +174,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             }
         });
     },
-    cursorAttributesUpdate(mutationList, observer) {
-        mutationList.forEach((mutation) => {
-            switch (mutation.type) {
-                case 'attributes':
-                    console.log(
-                        `The ${mutation.attributeName} attribute was modified.`,
-                        mutation.target.id,
-                        mutation.oldValue
-                    );
-                    // TODO (mwfarb): we are writing to DOM too frequently, try diffing a change graph...
-                    if (mutation.attributeName === 'class') {
-                        if (mutation.target.className.includes('a-mouse-cursor-hover')) {
-                            // flush selected attr to dom from grab cursor update
-                            const el = AFRAME.INSPECTOR.selectedEntity;
-                            if (el) {
-                                console.log('toolbar flush', el.id, toolbarName);
-                                switch (toolbarName) {
-                                    case 'translate':
-                                        el.setAttribute('position', el.getAttribute('position'));
-                                        AFRAME.INSPECTOR.selectedEntity.components.position.flushToDOM();
-                                        break;
-                                    case 'rotate':
-                                        el.setAttribute('rotation', el.getAttribute('rotation'));
-                                        AFRAME.INSPECTOR.selectedEntity.components.rotation.flushToDOM();
-                                        break;
-                                    case 'scale':
-                                        el.setAttribute('scale', el.getAttribute('scale'));
-                                        AFRAME.INSPECTOR.selectedEntity.components.scale.flushToDOM();
-                                        break;
-                                    default:
-                                    // skip
-                                }
-                            }
-                        }
-                    }
-                    break;
-                default:
-                // skip
-            }
-        });
-    },
-    transformToolbarUpdate(mutationList, observer) {
-        mutationList.forEach((mutation) => {
-            switch (mutation.type) {
-                case 'attributes':
-                    console.log(
-                        `The ${mutation.attributeName} attribute was modified.`,
-                        mutation.target.id,
-                        mutation.oldValue
-                    );
-                    if (mutation.attributeName === 'class') {
-                        if (mutation.target.classList.contains('active')) {
-                            toolbarName = mutation.target.title;
-                            console.log('toolbarName', toolbarName);
-                        }
-                    }
-                    break;
-                default:
-                // skip
-            }
-        });
-    },
     tick() {
         if (!this.scenegraphDiv) {
             // this.scenegraphDiv = document.getElementById('scenegraph');
@@ -323,39 +260,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                         subtree: true,
                     };
                     observer.observe(this.components, options);
-                }
-            }
-        }
-        if (!this.cursor) {
-            if (document.getElementsByClassName('a-grab-cursor').length > 0) {
-                // eslint-disable-next-line prefer-destructuring
-                this.cursor = document.getElementsByClassName('a-grab-cursor')[0];
-                if (this.cursor) {
-                    // watch for mouse down use of grab tools
-                    const observer = new MutationObserver(this.cursorAttributesUpdate);
-                    console.log('build3d watching cursor class attributes...');
-                    observer.observe(this.cursor, {
-                        attributeFilter: ['class'],
-                        attributes: true,
-                        attributeOldValue: true,
-                    });
-                }
-            }
-        }
-        // TODO (mwfarb): fix transformToolbar, is usually late and gets clipped from the global pause()
-        if (!this.transformToolbar) {
-            if (document.getElementsByClassName('toolbarButtons').length > 0) {
-                // eslint-disable-next-line prefer-destructuring
-                this.transformToolbar = document.getElementsByClassName('toolbarButtons')[0];
-                if (this.transformToolbar) {
-                    // watch for active toolbar grab tool change
-                    const observer = new MutationObserver(this.transformToolbarUpdate);
-                    console.log('build3d watching toolbar class attributes...');
-                    observer.observe(this.transformToolbar, {
-                        attributeFilter: ['class'],
-                        attributes: true,
-                        subtree: true,
-                    });
                 }
             }
         }
