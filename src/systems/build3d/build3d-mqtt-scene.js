@@ -6,7 +6,7 @@
  * @date 2020
  */
 
-/* global ARENAAUTH, $ */
+/* global ARENAAUTH */
 
 import { TOPICS } from '../../constants';
 
@@ -42,13 +42,11 @@ function updateMqttWidth() {
 
 function publishUploadedFile(newObj) {
     if (newObj) {
-        console.log('publishing:', newObj.action, newObj);
+        console.debug('publishing:', newObj.action, JSON.stringify(newObj));
+        const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
         ARENA.Mqtt.publish(
-            TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
-                nameSpace: ARENA.nameSpace,
-                sceneName: ARENA.sceneName,
-                userClient: ARENA.userClient,
-                object_id: newObj.object_id,
+            topicBase.formatStr({
+                objectId: newObj.object_id,
             }),
             newObj
         );
@@ -80,12 +78,15 @@ async function handleComponentUploadAction(selectedEntity, componentName) {
 }
 
 function addComponentAction(componentName, dataAction, title, iconName) {
-    const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
-    const thebutton = $(thetitle).siblings(`.componentHeaderActions`).find(`[data-action="${dataAction}"]`);
+    const thetitle = document.querySelector(`.component .componentHeader .componentTitle[title="${componentName}"]`);
+    if (!thetitle) return;
+    const actionsContainer = thetitle.parentElement.querySelector('.componentHeaderActions');
+    if (!actionsContainer) return;
+    const thebutton = actionsContainer.querySelector(`[data-action="${dataAction}"]`);
 
     // does the graph have a new component?
     // insert the upload link and and action listener
-    if (thetitle.length > 0 && thebutton.length === 0) {
+    if (!thebutton) {
         const buttonId = `${componentName}-${dataAction}`;
         const actionButton = document.createElement('a');
         actionButton.id = buttonId;
@@ -115,7 +116,7 @@ function addComponentAction(componentName, dataAction, title, iconName) {
             },
             false
         );
-        thetitle.siblings('.componentHeaderActions').prepend(actionButton);
+        actionsContainer.prepend(actionButton);
     }
 }
 
@@ -157,13 +158,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                         });
                     }
                     if (mutation.removedNodes.length > 0) {
-                        /* console.debug(
-                            `${mutation.removedNodes.length} child nodes have been removed.`,
-                            mutation.removedNodes
-                        ); */
-                        mutation.removedNodes.forEach((node) => {
-                            // console.debug('delete node:', node.nodeName, node.components);
-                        });
+                        // Removed nodes are handled by each entity's build3d-mqtt-object remove() lifecycle
                     }
                     break;
                 default:
@@ -173,8 +168,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
     },
     tick() {
         if (!this.scenegraphDiv) {
-            // this.scenegraphDiv = document.getElementById('scenegraph');
-            // this.scenegraphDiv = document.getElementById('inspectorContainer');
             this.scenegraphDiv = document.getElementById('viewportBar');
             if (this.scenegraphDiv) {
                 // container
@@ -226,7 +219,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttLog.style.width = '100%';
                 inspectorMqttLog.style.height = '100%';
                 inspectorMqttLog.style.backgroundColor = '#242424';
-                inspectorMqttLog.style.color = 'c3c3c3';
+                inspectorMqttLog.style.color = '#c3c3c3';
                 inspectorMqttLog.style.opacity = '.75';
                 inspectorMqttLog.style.paddingLeft = '10px';
                 inspectorMqttLog.style.fontFamily = 'monospace,monospace';

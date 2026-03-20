@@ -12,9 +12,11 @@ The `build3d` system acts as a real-time translation layer between the local [A-
 
 ### 2. `build3d-mqtt-object`
 **Responsibility:** Dedicated, event-driven networking layer on a per-entity basis.
-- **Transform Ticking (`tick`):** Bypasses the DOM entirely for standard transforms. Evaluates `object3D.position/rotation/scale` via `AFRAME.utils.throttleTick` specifically targeting `AFRAME.INSPECTOR.selectedEntity`. This filters out background physics/animations while preserving the ability to manually edit them.
-- **Component Modifications (`componentchanged`):** Leverages A-Frame's native event emitter to catch customized component assignments (geometry, materials, etc).
-- **ID Mutations (`objectAttributesUpdate`):** Debounces `id` string typing internally through a 750ms timeout window. Once the user halts typing, a single `delete` (old ID) and `create` (new ID) MQTT sequence is dispatched safely, eliminating network spam during rapid keystrokes.
+- **Dual-Path Change Detection:** The Inspector uses *two distinct mechanisms* to modify entities, requiring both a `MutationObserver` (catches direct DOM attribute writes like `element.setAttribute('geometry', '...')`) and A-Frame event listeners (`componentchanged`/`componentinitialized`, which catch API-level component modifications). The debounce buffer naturally deduplicates overlapping events from both sources.
+- **Transform Ticking (`tick`):** Bypasses the DOM entirely for standard transforms. Evaluates `object3D.position/rotation/scale` via `AFRAME.utils.throttleTick` specifically targeting `AFRAME.INSPECTOR.selectedEntity`. This filters out background physics/animations while preserving the ability to manually edit them. Transform attributes (`position`, `rotation`, `scale`, `class`) are explicitly skipped by the MutationObserver.
+- **Component Modifications (`componentchanged`/`componentinitialized`):** Leverages A-Frame's native event emitter to catch component assignments made through the A-Frame API.
+- **Attribute Mutations (`objectAttributesUpdate`):** The MutationObserver catches DOM-level attribute writes from the Inspector. Non-id, non-transform mutations are routed through `extractDataUpdates` using `getDOMAttribute()` for clean payloads.
+- **ID Mutations:** Debounces `id` string typing internally through a 750ms timeout window. Once the user halts typing, a single `delete` (old ID) and `create` (new ID) MQTT sequence is dispatched safely, eliminating network spam during rapid keystrokes.
 - **Payload Truncation:** Intercepts outgoing data via `getDOMAttribute()` to only bundle properties the user explicitly authored. This gracefully side-steps A-Frame component schemas to prevent sending bloated internal engine defaults over the wire, while preserving intentional explicit selections (like resetting a value back to default).
 
 ## Workflow Execution (Component Data Mutation)

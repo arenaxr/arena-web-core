@@ -8,14 +8,25 @@
 
 import { TOPICS } from '../../constants';
 
-const symbols = { create: 'create', update: 'update', delete: 'delete' };
+const OBJECT_TYPE_COMPONENTS = new Set([
+    'arenaui-button-panel', 'arenaui-card', 'arenaui-prompt',
+    'gaussian_splatting', 'gltf-model', 'image', 'light', 'line',
+    'obj-model', 'ocean', 'pcd-model', 'text', 'thickline',
+    'threejs-scene', 'urdf-model',
+]);
+
+function coerceVisible(value) {
+    if (typeof value === 'object' && value !== null && Object.keys(value).length === 0) return true;
+    if (value === 'false' || value === false) return false;
+    return true;
+}
 
 function LogToUser(msg, attributeName, changes) {
     const inspectorMqttLog = document.getElementById('inspectorMqttLog');
     if (inspectorMqttLog) {
         inspectorMqttLog.appendChild(document.createElement('br'));
         const line = document.createElement('span');
-        line.innerHTML += `${symbols[msg.action]}: ${msg.object_id} ${attributeName || ''} ${JSON.stringify(
+        line.innerHTML += `${msg.action}: ${msg.object_id} ${attributeName || ''} ${JSON.stringify(
             changes || (msg.data ? msg.data : '')
         )}`;
         inspectorMqttLog.appendChild(line);
@@ -31,30 +42,13 @@ function extractDataFullDOM(mutation) {
 
         let attribute = mutation.target.getDOMAttribute(attr.name);
         
-        if (typeof attribute === 'string' && attribute.includes(':')) {
+        // Parse multi-property component strings, but guard against URLs containing colons
+        if (typeof attribute === 'string' && attribute.includes(':') && !attribute.includes('//')) {
             attribute = AFRAME.utils.styleParser.parse(attribute);
         }
 
-        switch (attr.name) {
-            case 'arenaui-button-panel':
-            case 'arenaui-card':
-            case 'arenaui-prompt':
-            case 'gaussian_splatting':
-            case 'gltf-model':
-            case 'image':
-            case 'light':
-            case 'line':
-            case 'obj-model':
-            case 'ocean':
-            case 'pcd-model':
-            case 'text':
-            case 'thickline':
-            case 'threejs-scene':
-            case 'urdf-model':
-                data.object_type = attr.name;
-                break;
-            default:
-            // skip
+        if (OBJECT_TYPE_COMPONENTS.has(attr.name)) {
+            data.object_type = attr.name;
         }
 
         switch (attr.name) {
@@ -63,9 +57,7 @@ function extractDataFullDOM(mutation) {
                 // skip
                 break;
             case 'visible':
-                if (typeof attribute === 'object' && Object.keys(attribute).length === 0) data.visible = true;
-                else if (attribute === 'false' || attribute === false) data.visible = false;
-                else data.visible = true;
+                data.visible = coerceVisible(attribute);
                 break;
             case 'geometry':
                 // we apply primitive data directory to root data
@@ -123,26 +115,8 @@ function extractDataFullDOM(mutation) {
 function extractDataUpdates(mutation, attribute, changes) {
     let data = {};
 
-    switch (mutation.attributeName) {
-        case 'arenaui-button-panel':
-        case 'arenaui-card':
-        case 'arenaui-prompt':
-        case 'gaussian_splatting':
-        case 'gltf-model':
-        case 'image':
-        case 'light':
-        case 'line':
-        case 'obj-model':
-        case 'ocean':
-        case 'pcd-model':
-        case 'text':
-        case 'thickline':
-        case 'threejs-scene':
-        case 'urdf-model':
-            data.object_type = mutation.attributeName;
-            break;
-        default:
-        // skip
+    if (OBJECT_TYPE_COMPONENTS.has(mutation.attributeName)) {
+        data.object_type = mutation.attributeName;
     }
     switch (mutation.attributeName) {
         case 'id':
@@ -168,17 +142,20 @@ function extractDataUpdates(mutation, attribute, changes) {
             break;
         case 'geometry':
             // we apply primitive data directory to root data
-            if (changes) {
-                data = changes;
+            // Fall back to getDOMAttribute if Inspector history didn't capture changes yet
+            // eslint-disable-next-line no-case-declarations
+            const geomData = changes || mutation.target.getDOMAttribute('geometry') || {};
+            if (geomData) {
+                data = { ...data, ...geomData };
                 delete data.primitive;
             }
-            if (mutation.target.nodeName.toLowerCase() === 'a-videosphere') {
+            if (attribute && mutation.target.nodeName.toLowerCase() === 'a-videosphere') {
                 // sphere shouldn't overwrite videosphere
                 data.object_type = 'videosphere';
-            } else if (attribute.primitive === 'plane') {
+            } else if (attribute && attribute.primitive === 'plane') {
                 // plane shouldn't overwrite image
                 data.object_type = mutation.target.hasAttribute('src') ? 'image' : attribute.primitive;
-            } else {
+            } else if (attribute) {
                 data.object_type = attribute.primitive;
             }
             break;
@@ -186,9 +163,7 @@ function extractDataUpdates(mutation, attribute, changes) {
             data['env-presets'] = changes || {};
             break;
         case 'visible':
-            if (typeof changes === 'object' && Object.keys(changes).length === 0) data.visible = true;
-            else if (changes === 'false' || changes === false) data.visible = false;
-            else data.visible = true;
+            data.visible = coerceVisible(changes);
             break;
         case 'material':
             if (changes && changes.src) {
@@ -206,11 +181,7 @@ function extractDataUpdates(mutation, attribute, changes) {
             else data[mutation.attributeName] = changes || {};
             break;
     }
-    // if (!data.object_type) {
-    //     // always try and get the object_type, complicated
-    //     let dataFull = extractDataFullDOM(mutation);
-    //     if (dataFull.object_type) data.object_type = dataFull.object_type;
-    // }
+
 
     return data;
 }
@@ -243,7 +214,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         this.renameOldId = null;
         this.renameTimeout = null;
 
-        // Track ID changes only
+        // Track attribute changes including id renames and Inspector-driven component mutations
         this.observer = new MutationObserver(this.objectAttributesUpdate);
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
@@ -276,7 +247,13 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     },
     objectAttributesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'id') {
+            if (mutation.type !== 'attributes') return;
+            const attrName = mutation.attributeName;
+
+            // Skip transforms (handled by tick) and self-referencing component
+            if (['position', 'rotation', 'scale', 'build3d-mqtt-object', 'class'].includes(attrName)) return;
+
+            if (attrName === 'id') {
                 // console.debug(`The id attribute was modified.`, mutation.target.id, mutation.oldValue);
                 if (mutation.oldValue && mutation.target.id !== mutation.oldValue) {
                     
@@ -335,6 +312,17 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                         );
                     }, 750);
                 }
+            } else {
+                // Non-id attribute mutation (geometry, material, etc.) from Inspector DOM writes
+                setTimeout(() => {
+                    const attribute = this.el.getAttribute(attrName);
+                    const domAttr = this.el.getDOMAttribute(attrName);
+                    const fakeMutation = { attributeName: attrName, target: this.el };
+                    const data = extractDataUpdates(fakeMutation, attribute, domAttr);
+
+                    Object.assign(this.changedData, data);
+                    this.debouncePublish();
+                }, 0);
             }
         });
     },
@@ -405,8 +393,9 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     update(oldData) {
         if (this.data.enabled && (Object.keys(oldData).length === 0 || !oldData.enabled)) {
             // console.debug(`build3d watching entity ${this.el.id} attributes...`);
-            this.observer.observe(this.el, { attributeFilter: ['id'], attributeOldValue: true });
+            this.observer.observe(this.el, { attributes: true, attributeOldValue: true });
             this.el.addEventListener('componentchanged', this.onComponentChanged);
+            this.el.addEventListener('componentinitialized', this.onComponentChanged);
             if (this.el.object3D) {
                 this.lastTransform.position.copy(this.el.object3D.position);
                 this.lastTransform.rotation.copy(this.el.object3D.quaternion);
@@ -415,6 +404,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         } else if (!this.data.enabled && oldData.enabled) {
             this.observer.disconnect();
             this.el.removeEventListener('componentchanged', this.onComponentChanged);
+            this.el.removeEventListener('componentinitialized', this.onComponentChanged);
             // console.debug(`build3d watching entity ${this.el.id} attributes stopped`);
         }
     },
@@ -428,13 +418,11 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                 persist: true,
             };
             LogToUser(msg);
-            console.log('publishing:', msg.action, msg);
+            console.debug('publishing:', msg.action, JSON.stringify(msg));
+            const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
             ARENA.Mqtt.publish(
-                TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
-                    nameSpace: ARENA.nameSpace,
-                    sceneName: ARENA.sceneName,
-                    userClient: ARENA.userClient,
-                    object_id: msg.object_id,
+                topicBase.formatStr({
+                    objectId: msg.object_id,
                 }),
                 msg
             );
