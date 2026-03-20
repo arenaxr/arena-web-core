@@ -25,8 +25,16 @@ function LogToUser(msg, attributeName, changes) {
 
 function extractDataFullDOM(mutation) {
     let data = { object_type: 'entity' };
-    mutation.target.attributes.forEach((attr) => {
-        const attribute = mutation.target.getAttribute(attr.name);
+    Array.from(mutation.target.attributes).forEach((attr) => {
+        // Skip transforms in iteration; we explicitly fetch live object3D matrix below
+        if (['position', 'rotation', 'scale'].includes(attr.name)) return;
+
+        let attribute = mutation.target.getDOMAttribute(attr.name);
+        
+        if (typeof attribute === 'string' && attribute.includes(':')) {
+            attribute = AFRAME.utils.styleParser.parse(attribute);
+        }
+
         switch (attr.name) {
             case 'arenaui-button-panel':
             case 'arenaui-card':
@@ -48,56 +56,73 @@ function extractDataFullDOM(mutation) {
             default:
             // skip
         }
+
         switch (attr.name) {
             case 'id':
             case 'build3d-mqtt-object':
                 // skip
                 break;
-            case 'position':
-                data.position = attribute;
-                break;
-            case 'rotation':
-                // eslint-disable-next-line no-case-declarations
-                const { quaternion } = mutation.target.object3D;
-                data.rotation = {
-                    // always send quaternions over the wire
-                    x: quaternion._x,
-                    y: quaternion._y,
-                    z: quaternion._z,
-                    w: quaternion._w,
-                };
-                break;
-            case 'scale':
-                data.scale = attribute;
+            case 'visible':
+                if (typeof attribute === 'object' && Object.keys(attribute).length === 0) data.visible = true;
+                else if (attribute === 'false' || attribute === false) data.visible = false;
+                else data.visible = true;
                 break;
             case 'geometry':
                 // we apply primitive data directory to root data
-                data = { ...data, ...attribute };
-                delete data.primitive;
-                if (mutation.target.nodeName.toLowerCase() === 'a-videosphere') {
-                    // sphere shouldn't overwrite videosphere
-                    data.object_type = 'videosphere';
-                } else if (attribute.primitive === 'plane') {
-                    // plane shouldn't overwrite image
-                    data.object_type = mutation.target.hasAttribute('src') ? 'image' : attribute.primitive;
-                } else {
-                    data.object_type = attribute.primitive;
+                if (attribute) {
+                    data = { ...data, ...attribute };
+                    delete data.primitive;
+                    if (mutation.target.nodeName.toLowerCase() === 'a-videosphere') {
+                        data.object_type = 'videosphere';
+                    } else if (attribute.primitive === 'plane') {
+                        data.object_type = mutation.target.hasAttribute('src') ? 'image' : attribute.primitive;
+                    } else {
+                        data.object_type = attribute.primitive || 'entity';
+                    }
                 }
                 break;
             case 'environment':
                 data['env-presets'] = attribute;
                 delete data.object_type;
                 break;
+            case 'material':
+                if (attribute && attribute.src) {
+                    const geom = mutation.target.getAttribute('geometry');
+                    if (geom && geom.primitive === 'plane') {
+                        data.url = attribute.src;
+                    }
+                }
+                data.material = attribute;
+                break;
             default:
-                data[attr.name] = attribute;
+                if (attribute === 'true' || attribute === 'false') data[attr.name] = JSON.parse(attribute);
+                else data[attr.name] = attribute;
                 break;
         }
     });
+
+    // Ensure accurate, live transforms are always included via local matrix regardless of DOM staleness
+    if (mutation.target.object3D) {
+        data.position = {
+            x: mutation.target.object3D.position.x,
+            y: mutation.target.object3D.position.y,
+            z: mutation.target.object3D.position.z,
+        };
+        const { quaternion } = mutation.target.object3D;
+        data.rotation = { x: quaternion._x, y: quaternion._y, z: quaternion._z, w: quaternion._w };
+        data.scale = {
+            x: mutation.target.object3D.scale.x,
+            y: mutation.target.object3D.scale.y,
+            z: mutation.target.object3D.scale.z,
+        };
+    }
+
     return data;
 }
 
 function extractDataUpdates(mutation, attribute, changes) {
     let data = {};
+
     switch (mutation.attributeName) {
         case 'arenaui-button-panel':
         case 'arenaui-card':
@@ -160,6 +185,11 @@ function extractDataUpdates(mutation, attribute, changes) {
         case 'environment':
             data['env-presets'] = changes || {};
             break;
+        case 'visible':
+            if (typeof changes === 'object' && Object.keys(changes).length === 0) data.visible = true;
+            else if (changes === 'false' || changes === false) data.visible = false;
+            else data.visible = true;
+            break;
         case 'material':
             if (changes && changes.src) {
                 // If this is a plane/image, ARENA uses the root 'url' property instead of material.src
@@ -210,6 +240,9 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         this.onComponentChanged = this.onComponentChanged.bind(this);
         this.objectAttributesUpdate = this.objectAttributesUpdate.bind(this);
 
+        this.renameOldId = null;
+        this.renameTimeout = null;
+
         // Track ID changes only
         this.observer = new MutationObserver(this.objectAttributesUpdate);
 
@@ -246,38 +279,61 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             if (mutation.type === 'attributes' && mutation.attributeName === 'id') {
                 // console.debug(`The id attribute was modified.`, mutation.target.id, mutation.oldValue);
                 if (mutation.oldValue && mutation.target.id !== mutation.oldValue) {
-                    const outMsg = {
-                        object_id: mutation.oldValue,
-                        action: 'delete',
-                        persist: true,
-                    };
-                    LogToUser(outMsg);
-                    console.debug('publishing:', outMsg.action, JSON.stringify(outMsg));
-                    const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
-                    ARENA.Mqtt.publish(
-                        topicBase.formatStr({
-                            objectId: outMsg.object_id,
-                        }),
-                        outMsg
-                    );
+                    
+                    // Capture the original ID only at the beginning of the typing sequence
+                    if (!this.renameOldId) {
+                        this.renameOldId = mutation.oldValue;
+                    }
 
-                    // publishing create for new ID with full data
-                    const fakeMutation = { target: mutation.target };
-                    const createMsg = {
-                        object_id: mutation.target.id === 'env' ? 'scene-options' : mutation.target.id,
-                        action: 'create',
-                        type: mutation.target.id === 'env' ? 'scene-options' : 'object',
-                        persist: true,
-                        data: extractDataFullDOM(fakeMutation),
-                    };
-                    LogToUser(createMsg, 'id');
-                    console.debug('publishing:', createMsg.action, JSON.stringify(createMsg));
-                    ARENA.Mqtt.publish(
-                        topicBase.formatStr({
-                            objectId: createMsg.object_id,
-                        }),
-                        createMsg
-                    );
+                    if (this.renameTimeout) {
+                        clearTimeout(this.renameTimeout);
+                    }
+
+                    // Debounce keystrokes (wait 750ms after typing stops)
+                    this.renameTimeout = setTimeout(() => {
+                        const finalNewId = this.el.id;
+                        const originalOldId = this.renameOldId;
+                        
+                        // Reset for next rename sequence
+                        this.renameOldId = null;
+                        this.renameTimeout = null;
+
+                        if (originalOldId === finalNewId) return; // User renamed it back, abort
+
+                        const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
+
+                        const outMsg = {
+                            object_id: originalOldId,
+                            action: 'delete',
+                            persist: true,
+                        };
+                        LogToUser(outMsg);
+                        console.debug('publishing:', outMsg.action, JSON.stringify(outMsg));
+                        ARENA.Mqtt.publish(
+                            topicBase.formatStr({
+                                objectId: outMsg.object_id,
+                            }),
+                            outMsg
+                        );
+
+                        // publishing create for new ID with full data
+                        const fakeMutation = { target: this.el };
+                        const createMsg = {
+                            object_id: finalNewId === 'env' ? 'scene-options' : finalNewId,
+                            action: 'create',
+                            type: finalNewId === 'env' ? 'scene-options' : 'object',
+                            persist: true,
+                            data: extractDataFullDOM(fakeMutation),
+                        };
+                        LogToUser(createMsg, 'id');
+                        console.debug('publishing:', createMsg.action, JSON.stringify(createMsg));
+                        ARENA.Mqtt.publish(
+                            topicBase.formatStr({
+                                objectId: createMsg.object_id,
+                            }),
+                            createMsg
+                        );
+                    }, 750);
                 }
             }
         });
