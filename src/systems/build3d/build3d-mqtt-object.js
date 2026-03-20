@@ -288,6 +288,18 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     },
     tick(t, dt) {
         if (!this.data.enabled || !this.el.object3D) return;
+
+        // ONLY track transform changes if this entity is selected in the Inspector!
+        // This filters out background physics/animations while preserving the ability to edit them.
+        const isSelected = AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened && AFRAME.INSPECTOR.selectedEntity === this.el;
+        if (!isSelected) {
+            // Keep caching the latest transform so we don't trigger a jump when selected
+            this.lastTransform.position.copy(this.el.object3D.position);
+            this.lastTransform.rotation.copy(this.el.object3D.quaternion);
+            this.lastTransform.scale.copy(this.el.object3D.scale);
+            return;
+        }
+
         let transformChanged = false;
 
         if (!this.lastTransform.position.equals(this.el.object3D.position)) {
