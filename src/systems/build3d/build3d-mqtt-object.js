@@ -28,6 +28,9 @@ function extractDataFullDOM(mutation) {
     mutation.target.attributes.forEach((attr) => {
         const attribute = mutation.target.getAttribute(attr.name);
         switch (attr.name) {
+            case 'arenaui-button-panel':
+            case 'arenaui-card':
+            case 'arenaui-prompt':
             case 'gaussian_splatting':
             case 'gltf-model':
             case 'image':
@@ -96,9 +99,12 @@ function extractDataFullDOM(mutation) {
 function extractDataUpdates(mutation, attribute, changes) {
     let data = {};
     switch (mutation.attributeName) {
+        case 'arenaui-button-panel':
+        case 'arenaui-card':
+        case 'arenaui-prompt':
         case 'gaussian_splatting':
         case 'gltf-model':
-        case 'image': // TODO (mwfarb): add url update to material.src
+        case 'image':
         case 'light':
         case 'line':
         case 'obj-model':
@@ -154,6 +160,16 @@ function extractDataUpdates(mutation, attribute, changes) {
         case 'environment':
             data['env-presets'] = changes || {};
             break;
+        case 'material':
+            if (changes && changes.src) {
+                // If this is a plane/image, ARENA uses the root 'url' property instead of material.src
+                const geom = mutation.target.getAttribute('geometry');
+                if (geom && geom.primitive === 'plane') {
+                    data.url = changes.src;
+                }
+            }
+            data.material = changes || {};
+            break;
         default:
             // handle special cases of boolean as string first
             if (changes === 'true' || changes === 'false') data[mutation.attributeName] = JSON.parse(changes);
@@ -173,7 +189,6 @@ function extractDataUpdates(mutation, attribute, changes) {
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  * @module build3d-mqtt-object
  */
-// TODO: reduce logging to a reasonable level, similar to build page
 AFRAME.registerComponent('build3d-mqtt-object', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     schema: {
@@ -194,10 +209,10 @@ AFRAME.registerComponent('build3d-mqtt-object', {
 
         this.onComponentChanged = this.onComponentChanged.bind(this);
         this.objectAttributesUpdate = this.objectAttributesUpdate.bind(this);
-        
+
         // Track ID changes only
         this.observer = new MutationObserver(this.objectAttributesUpdate);
-        
+
         this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
     },
     debouncePublish() {
@@ -217,7 +232,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         };
         this.changedData = {};
         LogToUser(msg, 'components');
-        console.log('publishing:', msg.action, msg);
+        console.debug('publishing:', msg.action, JSON.stringify(msg));
         const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
         ARENA.Mqtt.publish(
             topicBase.formatStr({
@@ -229,7 +244,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     objectAttributesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
             if (mutation.type === 'attributes' && mutation.attributeName === 'id') {
-                console.log(`The id attribute was modified.`, mutation.target.id, mutation.oldValue);
+                // console.debug(`The id attribute was modified.`, mutation.target.id, mutation.oldValue);
                 if (mutation.oldValue && mutation.target.id !== mutation.oldValue) {
                     const outMsg = {
                         object_id: mutation.oldValue,
@@ -237,7 +252,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                         persist: true,
                     };
                     LogToUser(outMsg);
-                    console.log('publishing:', outMsg.action, outMsg);
+                    console.debug('publishing:', outMsg.action, JSON.stringify(outMsg));
                     const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
                     ARENA.Mqtt.publish(
                         topicBase.formatStr({
@@ -256,7 +271,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                         data: extractDataFullDOM(fakeMutation),
                     };
                     LogToUser(createMsg, 'id');
-                    console.log('publishing:', createMsg.action, createMsg);
+                    console.debug('publishing:', createMsg.action, JSON.stringify(createMsg));
                     ARENA.Mqtt.publish(
                         topicBase.formatStr({
                             objectId: createMsg.object_id,
@@ -271,7 +286,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         if (!this.data.enabled || !this.el.id) return;
         const { name, newData } = evt.detail;
         if (name === 'position' || name === 'rotation' || name === 'scale' || name === 'build3d-mqtt-object') return;
-        
+
         // Defer read to allow A-Frame Inspector to synchronously populate history.updates
         setTimeout(() => {
             let changes;
@@ -281,7 +296,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
 
             const fakeMutation = { attributeName: name, target: this.el };
             const data = extractDataUpdates(fakeMutation, newData, changes);
-            
+
             Object.assign(this.changedData, data);
             this.debouncePublish();
         }, 0);
@@ -333,7 +348,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     },
     update(oldData) {
         if (this.data.enabled && (Object.keys(oldData).length === 0 || !oldData.enabled)) {
-            console.log(`build3d watching entity ${this.el.id} attributes...`);
+            // console.debug(`build3d watching entity ${this.el.id} attributes...`);
             this.observer.observe(this.el, { attributeFilter: ['id'], attributeOldValue: true });
             this.el.addEventListener('componentchanged', this.onComponentChanged);
             if (this.el.object3D) {
@@ -344,7 +359,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         } else if (!this.data.enabled && oldData.enabled) {
             this.observer.disconnect();
             this.el.removeEventListener('componentchanged', this.onComponentChanged);
-            console.log(`build3d watching entity ${this.el.id} attributes stopped`);
+            // console.debug(`build3d watching entity ${this.el.id} attributes stopped`);
         }
     },
     remove() {

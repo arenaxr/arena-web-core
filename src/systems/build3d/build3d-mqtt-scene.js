@@ -127,17 +127,14 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             default: 'scene-options',
         },
     },
-    // TODO: reduce logging to a reasonable level, similar to build page
     multiple: false,
     init() {
         const observer = new MutationObserver(this.sceneNodesUpdate);
-        console.log('build3d watching scene children...');
+        // console.debug('build3d watching scene children...');
         observer.observe(this.el, {
             childList: true,
             subtree: true,
         });
-
-        // TODO (mwfarb): possible better selector? AFRAME.INSPECTOR.selectEntity(document.getElementById('env'));
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -146,26 +143,26 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             switch (mutation.type) {
                 case 'childList':
                     if (mutation.addedNodes.length > 0) {
-                        console.log(`${mutation.addedNodes.length} child nodes have been added.`, mutation.addedNodes);
+                        // console.debug(`${mutation.addedNodes.length} child nodes have been added.`, mutation.addedNodes);
                         mutation.addedNodes.forEach((node) => {
-                            console.log('add node:', node.nodeName, node.components);
+                            // console.debug('add node:', node.nodeName, node.components);
                             // new blank entities are added by the user in the inspector
                             if (
                                 node.nodeName.toLowerCase() === 'a-entity' &&
                                 Object.keys(node.components).length === 0
                             ) {
-                                console.log('add build3d-mqtt-object:');
+                                // console.debug('add build3d-mqtt-object:');
                                 node.setAttribute('build3d-mqtt-object', 'enabled', true);
                             }
                         });
                     }
                     if (mutation.removedNodes.length > 0) {
-                        console.log(
+                        /* console.debug(
                             `${mutation.removedNodes.length} child nodes have been removed.`,
                             mutation.removedNodes
-                        );
+                        ); */
                         mutation.removedNodes.forEach((node) => {
-                            console.log('delete node:', node.nodeName, node.components);
+                            // console.debug('delete node:', node.nodeName, node.components);
                         });
                     }
                     break;
@@ -200,16 +197,27 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 window.onresize = updateMqttWidth;
 
                 // title
-                const inspectorMqttTitle = document.createElement('span');
+                const inspectorMqttTitle = document.createElement('div');
                 inspectorMqttTitle.id = 'inspectorMqttTitle';
                 inspectorMqttTitle.style.backgroundColor = 'darkgreen';
                 inspectorMqttTitle.style.color = 'white';
                 inspectorMqttTitle.style.opacity = '.75';
                 inspectorMqttTitle.style.width = '100%';
-                inspectorMqttTitle.style.paddingLeft = '10px';
-                inspectorMqttTitle.textContent = `ARENA's Build3D MQTT Publish Log (user: ${ARENAAUTH.user_username})`;
+                inspectorMqttTitle.style.padding = '2px 10px';
+                inspectorMqttTitle.style.cursor = 'pointer';
+                inspectorMqttTitle.style.display = 'flex';
+                inspectorMqttTitle.style.justifyContent = 'space-between';
+                inspectorMqttTitle.style.alignItems = 'center';
+                
+                const titleText = document.createElement('span');
+                titleText.textContent = `ARENA's Build3D MQTT Publish Log (user: ${ARENAAUTH.user_username})`;
+                inspectorMqttTitle.appendChild(titleText);
+                
+                const chevron = document.createElement('i');
+                chevron.className = 'fa fa-chevron-down';
+                inspectorMqttTitle.appendChild(chevron);
+                
                 inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
-                // TODO (mwfarb): add open close chevrons for log window in title fa-chevron-up fa-chevron-down
 
                 // log
                 const inspectorMqttLog = document.createElement('div');
@@ -225,6 +233,18 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttLog.style.fontSize = '10px';
                 inspectorMqttLogWrap.appendChild(inspectorMqttLog);
 
+                inspectorMqttTitle.onclick = () => {
+                    if (inspectorMqttLog.style.display === 'none') {
+                        inspectorMqttLog.style.display = 'block';
+                        chevron.className = 'fa fa-chevron-down';
+                        inspectorMqttLogWrap.style.height = '25%';
+                    } else {
+                        inspectorMqttLog.style.display = 'none';
+                        chevron.className = 'fa fa-chevron-up';
+                        inspectorMqttLogWrap.style.height = 'auto';
+                    }
+                };
+
                 const line = document.createElement('span');
                 line.innerHTML += `Watching for local changes...`;
                 inspectorMqttLog.appendChild(document.createElement('br'));
@@ -236,8 +256,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 // eslint-disable-next-line prefer-destructuring
                 this.components = document.getElementsByClassName('components')[0];
                 if (this.components) {
-                    // TODO (mwfarb): listening for Inspector's own emitted events 'entityselect' or 'componentadd' would be ideal
-
                     // handle selected entity
                     const observer = new MutationObserver((mutationList) => {
                         mutationList.forEach((mutation) => {
