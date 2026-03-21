@@ -221,6 +221,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
 
         this.renameOldId = null;
         this.renameTimeout = null;
+        this.hasBeenPublished = false; // Track whether a create was ever published for this entity
 
         // Track attribute changes including id renames and Inspector-driven component mutations
         this.observer = new MutationObserver(this.objectAttributesUpdate);
@@ -253,6 +254,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             }),
             msg
         );
+        this.hasBeenPublished = true;
     },
     objectAttributesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
@@ -288,19 +290,22 @@ AFRAME.registerComponent('build3d-mqtt-object', {
 
                         const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
 
-                        const outMsg = {
-                            object_id: originalOldId,
-                            action: 'delete',
-                            persist: true,
-                        };
-                        LogToUser(outMsg);
-                        console.debug('publishing:', JSON.stringify(outMsg));
-                        ARENA.Mqtt.publish(
-                            topicBase.formatStr({
-                                objectId: outMsg.object_id,
-                            }),
-                            outMsg
-                        );
+                        // Only send delete if this entity was previously published AND had a real ID
+                        if (this.hasBeenPublished && originalOldId) {
+                            const outMsg = {
+                                object_id: originalOldId,
+                                action: 'delete',
+                                persist: true,
+                            };
+                            LogToUser(outMsg);
+                            console.debug('publishing:', JSON.stringify(outMsg));
+                            ARENA.Mqtt.publish(
+                                topicBase.formatStr({
+                                    objectId: outMsg.object_id,
+                                }),
+                                outMsg
+                            );
+                        }
 
                         // publishing create for new ID with full data
                         const fakeMutation = { target: this.el };
@@ -319,6 +324,27 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                             }),
                             createMsg
                         );
+                        this.hasBeenPublished = true;
+
+                        // Update children's parent reference to prevent orphaning
+                        const children = this.el.querySelectorAll('[build3d-mqtt-object]');
+                        children.forEach((child) => {
+                            if (!child.id) return;
+                            const childMsg = {
+                                object_id: child.id,
+                                action: 'update',
+                                type: 'object',
+                                persist: true,
+                                data: { parent: finalNewId },
+                            };
+                            console.debug('publishing:', JSON.stringify(childMsg));
+                            ARENA.Mqtt.publish(
+                                topicBase.formatStr({
+                                    objectId: childMsg.object_id,
+                                }),
+                                childMsg
+                            );
+                        });
                     }, 750);
                 }
             } else {
@@ -418,8 +444,11 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             // console.debug(`build3d watching entity ${this.el.id} attributes...`);
             this.observer.observe(this.el, { attributes: true, attributeOldValue: true });
             this.el.addEventListener('componentchanged', this.onComponentChanged);
-            this.el.addEventListener('componentinitialized', this.onComponentChanged);
             this.el.addEventListener('componentremoved', this.onComponentRemoved);
+            // Entities loaded from persistence have an ID when first enabled; new Inspector entities don't
+            if (this.el.id) {
+                this.hasBeenPublished = true;
+            }
             if (this.el.object3D) {
                 this.lastTransform.position.copy(this.el.object3D.position);
                 this.lastTransform.rotation.copy(this.el.object3D.quaternion);
@@ -428,7 +457,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         } else if (!this.data.enabled && oldData.enabled) {
             this.observer.disconnect();
             this.el.removeEventListener('componentchanged', this.onComponentChanged);
-            this.el.removeEventListener('componentinitialized', this.onComponentChanged);
             this.el.removeEventListener('componentremoved', this.onComponentRemoved);
             // console.debug(`build3d watching entity ${this.el.id} attributes stopped`);
         }
