@@ -42,14 +42,10 @@ function updateMqttWidth() {
 
 function publishUploadedFile(newObj) {
     if (newObj) {
-        console.debug('publishing:', JSON.stringify(newObj));
         const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
-        ARENA.Mqtt.publish(
-            topicBase.formatStr({
-                objectId: newObj.object_id,
-            }),
-            newObj
-        );
+        const pubTopic = topicBase.formatStr({ objectId: newObj.object_id });
+        console.debug('publishing:', pubTopic, JSON.stringify(newObj));
+        ARENA.Mqtt.publish(pubTopic, newObj);
 
         AFRAME.INSPECTOR.selectEntity(AFRAME.INSPECTOR.selectedEntity);
     }

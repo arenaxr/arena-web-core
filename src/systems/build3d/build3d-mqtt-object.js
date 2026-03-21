@@ -246,14 +246,10 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         };
         this.changedData = {};
         LogToUser(msg, 'components');
-        console.debug('publishing:', JSON.stringify(msg));
         const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
-        ARENA.Mqtt.publish(
-            topicBase.formatStr({
-                objectId: msg.object_id,
-            }),
-            msg
-        );
+        const pubTopic = topicBase.formatStr({ objectId: msg.object_id });
+        console.debug('publishing:', pubTopic, JSON.stringify(msg));
+        ARENA.Mqtt.publish(pubTopic, msg);
         this.hasBeenPublished = true;
     },
     objectAttributesUpdate(mutationList, observer) {
@@ -262,7 +258,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             const attrName = mutation.attributeName;
 
             // Skip transforms (handled by tick) and self-referencing component
-            if (['position', 'rotation', 'scale', 'build3d-mqtt-object', 'class'].includes(attrName)) return;
+            if (['position', 'rotation', 'scale', 'build3d-mqtt-object', 'class', 'attribution'].includes(attrName)) return;
 
             if (attrName === 'id') {
                 // console.debug(`The id attribute was modified.`, mutation.target.id, mutation.oldValue);
@@ -298,13 +294,9 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                                 persist: true,
                             };
                             LogToUser(outMsg);
-                            console.debug('publishing:', JSON.stringify(outMsg));
-                            ARENA.Mqtt.publish(
-                                topicBase.formatStr({
-                                    objectId: outMsg.object_id,
-                                }),
-                                outMsg
-                            );
+                            const pubTopic = topicBase.formatStr({ objectId: outMsg.object_id });
+                            console.debug('publishing:', pubTopic, JSON.stringify(outMsg));
+                            ARENA.Mqtt.publish(pubTopic, outMsg);
                         }
 
                         // publishing create for new ID with full data
@@ -317,13 +309,9 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                             data: extractDataFullDOM(fakeMutation),
                         };
                         LogToUser(createMsg, 'id');
-                        console.debug('publishing:', JSON.stringify(createMsg));
-                        ARENA.Mqtt.publish(
-                            topicBase.formatStr({
-                                objectId: createMsg.object_id,
-                            }),
-                            createMsg
-                        );
+                        const pubTopic = topicBase.formatStr({ objectId: createMsg.object_id });
+                        console.debug('publishing:', pubTopic, JSON.stringify(createMsg));
+                        ARENA.Mqtt.publish(pubTopic, createMsg);
                         this.hasBeenPublished = true;
 
                         // Update children's parent reference to prevent orphaning
@@ -337,13 +325,9 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                                 persist: true,
                                 data: { parent: finalNewId },
                             };
-                            console.debug('publishing:', JSON.stringify(childMsg));
-                            ARENA.Mqtt.publish(
-                                topicBase.formatStr({
-                                    objectId: childMsg.object_id,
-                                }),
-                                childMsg
-                            );
+                            const pubTopic = topicBase.formatStr({ objectId: childMsg.object_id });
+                            console.debug('publishing:', pubTopic, JSON.stringify(childMsg));
+                            ARENA.Mqtt.publish(pubTopic, childMsg);
                         });
                     }, 750);
                 }
@@ -370,7 +354,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     onComponentChanged(evt) {
         if (!this.data.enabled || !this.el.id) return;
         const { name, newData } = evt.detail;
-        if (name === 'position' || name === 'rotation' || name === 'scale' || name === 'build3d-mqtt-object') return;
+        if (['position', 'rotation', 'scale', 'build3d-mqtt-object', 'class', 'attribution'].includes(name)) return;
 
         // Defer read to allow A-Frame Inspector to synchronously populate history.updates
         setTimeout(() => {
@@ -471,14 +455,10 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                 persist: true,
             };
             LogToUser(msg);
-            console.debug('publishing:', JSON.stringify(msg));
             const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
-            ARENA.Mqtt.publish(
-                topicBase.formatStr({
-                    objectId: msg.object_id,
-                }),
-                msg
-            );
+            const pubTopic = topicBase.formatStr({ objectId: msg.object_id });
+            console.debug('publishing:', pubTopic, JSON.stringify(msg));
+            ARENA.Mqtt.publish(pubTopic, msg);
         }
     },
 });
