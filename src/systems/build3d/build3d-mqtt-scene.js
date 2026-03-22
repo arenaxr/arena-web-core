@@ -205,6 +205,25 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             }
         }
 
+        // Auto-select objectId entity once sceneRoot is expanded.
+        // Deferred via setTimeout so the Inspector's async scene graph UI
+        // settles after the expand click before we override the selection.
+        if (this.sceneRootExpanded && !this.objectIdSelected) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const objectId = urlParams.get('objectId');
+            if (objectId) {
+                const targetEntity = document.getElementById(objectId);
+                if (targetEntity && AFRAME.INSPECTOR) {
+                    setTimeout(() => {
+                        AFRAME.INSPECTOR.selectEntity(targetEntity);
+                    }, 500);
+                    this.objectIdSelected = true;
+                }
+            } else {
+                this.objectIdSelected = true; // No objectId param, nothing to do
+            }
+        }
+
         if (!this.scenegraphDiv) {
             this.scenegraphDiv = document.getElementById('viewportBar');
             if (this.scenegraphDiv) {
