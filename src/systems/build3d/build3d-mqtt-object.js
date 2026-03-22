@@ -325,6 +325,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                                 persist: true,
                                 data: { parent: finalNewId },
                             };
+                            LogToUser(childMsg);
                             const pubTopic = topicBase.formatStr({ objectId: childMsg.object_id });
                             console.debug('publishing:', pubTopic, JSON.stringify(childMsg));
                             ARENA.Mqtt.publish(pubTopic, childMsg);

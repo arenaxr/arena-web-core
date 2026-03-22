@@ -42,6 +42,7 @@ function updateMqttWidth() {
 
 function publishUploadedFile(newObj) {
     if (newObj) {
+        LogToUser(newObj);
         const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
         const pubTopic = topicBase.formatStr({ objectId: newObj.object_id });
         console.debug('publishing:', pubTopic, JSON.stringify(newObj));
@@ -148,6 +149,12 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                                 node.nodeName.toLowerCase() === 'a-entity' &&
                                 Object.keys(node.components).length === 0
                             ) {
+                                if (!node.id) {
+                                    let promptId = prompt('Provide a unique ID for this new object (e.g., my-entity):');
+                                    if (promptId) {
+                                        node.id = promptId.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                                    }
+                                }
                                 // console.debug('add build3d-mqtt-object:');
                                 node.setAttribute('build3d-mqtt-object', 'enabled', true);
                             }
@@ -163,6 +170,25 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         });
     },
     tick() {
+        // Auto-expand sceneRoot once on load
+        if (!this.sceneRootExpanded) {
+            const sceneRootNameEl = Array.from(document.querySelectorAll('.outliner .entity .entityName')).find(
+                (el) => el.textContent.trim() === 'sceneRoot'
+            );
+            if (sceneRootNameEl) {
+                const entityRow = sceneRootNameEl.closest('.entity');
+                if (entityRow) {
+                    const collapseSpan = entityRow.querySelector('.collapsespace');
+                    if (collapseSpan && collapseSpan.querySelector('.fa-caret-right')) {
+                        collapseSpan.click();
+                        this.sceneRootExpanded = true;
+                    } else if (collapseSpan && collapseSpan.querySelector('.fa-caret-down')) {
+                        this.sceneRootExpanded = true; // Already expanded
+                    }
+                }
+            }
+        }
+
         if (!this.scenegraphDiv) {
             this.scenegraphDiv = document.getElementById('viewportBar');
             if (this.scenegraphDiv) {
@@ -269,11 +295,66 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                     observer.observe(this.components, options);
                 }
             }
+        } else if (!document.body.contains(this.components)) {
+            // inspector rebuilt the components panel; reset so we re-bind the observer
+            this.components = null;
         }
+
         if (!this.env) {
             this.env = document.getElementById('env');
             if (this.env) {
                 this.env.setAttribute('build3d-mqtt-object', 'enabled', true);
+            }
+        }
+
+        // Apply UI lockout if selected entity is stateless 
+        // We run this in tick() to automatically detect ID updates and un-lock the panel securely.
+        if (AFRAME.INSPECTOR) {
+            const { selectedEntity } = AFRAME.INSPECTOR;
+            if (selectedEntity) {
+                let warningBox = document.getElementById('build3d-id-warning');
+                const allComponentDivs = document.querySelectorAll('.components > div, .components > span');
+
+                if (!selectedEntity.id && selectedEntity.hasAttribute('build3d-mqtt-object')) {
+                    // Lockout: Hide component additions and specific components
+                    allComponentDivs.forEach((c) => {
+                        if (c.id !== 'componentEntityHeader' && c.id !== 'build3d-id-warning') {
+                            c.style.display = 'none';
+                        }
+                    });
+
+                    // Create warning box if it doesn't exist
+                    if (!warningBox) {
+                        warningBox = document.createElement('div');
+                        warningBox.id = 'build3d-id-warning';
+                        warningBox.style.padding = '15px';
+                        warningBox.style.margin = '15px';
+                        warningBox.style.backgroundColor = '#333';
+                        warningBox.style.border = '1px solid #ffeb3b';
+                        warningBox.style.borderRadius = '4px';
+                        warningBox.style.color = '#ffeb3b';
+                        warningBox.style.textAlign = 'center';
+                        warningBox.innerHTML =
+                            '<strong>⚠️ ID Required</strong><br/><br/>This object does not have an ID yet. A unique ID is required for ARENA MQTT state synchronization.<br/><br/>☝️ Please enter an ID in the box above to unlock component properties.';
+
+                        const commonComps = document.getElementById('componentEntityHeader');
+                        if (commonComps) {
+                            commonComps.after(warningBox);
+                        } else {
+                            const componentsContainer = document.querySelector('.components');
+                            if (componentsContainer) componentsContainer.prepend(warningBox);
+                        }
+                    }
+                    warningBox.style.display = 'block';
+                } else {
+                    // Unlock: Restore normal visibility
+                    allComponentDivs.forEach((c) => {
+                        if (c.id !== 'build3d-id-warning') {
+                            c.style.display = '';
+                        }
+                    });
+                    if (warningBox) warningBox.style.display = 'none';
+                }
             }
         }
     },
