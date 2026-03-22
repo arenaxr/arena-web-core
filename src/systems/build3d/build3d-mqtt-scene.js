@@ -180,7 +180,23 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 if (entityRow) {
                     const collapseSpan = entityRow.querySelector('.collapsespace');
                     if (collapseSpan && collapseSpan.querySelector('.fa-caret-right')) {
+                        // The programmatic click will bubble up and accidentally select sceneRoot.
+                        // We must cache the current selection and URL target to restore it immediately.
+                        let targetEntity = AFRAME.INSPECTOR ? AFRAME.INSPECTOR.selectedEntity : null;
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const objectId = urlParams.get('objectId');
+                        if (objectId) {
+                            const urlEntity = document.getElementById(objectId);
+                            if (urlEntity) targetEntity = urlEntity;
+                        }
+
                         collapseSpan.click();
+
+                        // Restore the actual targeted selection
+                        if (targetEntity && targetEntity.id !== 'sceneRoot' && AFRAME.INSPECTOR) {
+                            AFRAME.INSPECTOR.selectEntity(targetEntity);
+                        }
+
                         this.sceneRootExpanded = true;
                     } else if (collapseSpan && collapseSpan.querySelector('.fa-caret-down')) {
                         this.sceneRootExpanded = true; // Already expanded
@@ -307,7 +323,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             }
         }
 
-        // Apply UI lockout if selected entity is stateless 
+        // Apply UI lockout if selected entity is stateless
         // We run this in tick() to automatically detect ID updates and un-lock the panel securely.
         if (AFRAME.INSPECTOR) {
             const { selectedEntity } = AFRAME.INSPECTOR;
