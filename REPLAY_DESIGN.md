@@ -43,7 +43,9 @@ When a user initiates a replay (or joins an existing replay session), the `arena
 
 ### 3. Read-Only Spectator Client (`replay.html`)
 While the client logic is vastly simplified by the backend pump, it still requires a specialized HTML entry point in `arena-web-core`.
-- **Clean Slate**: It loads `a-scene` but explicitly disables `build3d`, `jitsi`, `chat`, click listeners, and physics colliders. 
+- **Spectator Stealth (Clean Slate)**: The viewer must not muddy the historical rendering. As such, `replay.html` explicitly disables `build3d`, click listeners, and physics colliders. 
+  - **Avatars & Jitsi**: Live spectator avatars (camera boxes) and Jitsi *video* rendering are explicitly suppressed to avoid confusing live viewers with historical recorded avatars. 
+  - **Communication**: However, Jitsi *audio* and the 2D Chat UI overlay remain fully enabled so users can socialize during a Watch Party. 
 - **Pre-loading**: The backend sends an initial "Manifest" message containing all unique `gltf-model` URLs found in the recording. The client forces a pre-fetch (memory load) for all assets so scrubbing backward/forward doesn't stutter on HTTP requests.
 - **Time-Series Scrubber UI**: A 2D HTML/CSS overlay at the bottom. Displays the current timeline position (broadcasted by the backend `playback_status` messages) and contains the Play/Pause/Scrub controls (which emit commands back to the server).
 
