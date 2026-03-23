@@ -546,7 +546,7 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * loads scene objects from specified persistence URL if specified,
      * or this.persistenceUrl if not
-     * @param {[{Object}]} [sceneObjs] Objects to load
+     * @param {Object[]} [sceneObjs] Objects to load
      * @param {string} [parentName] parentObject to attach sceneObjects to
      * @param {string} [prefixName] prefix to add to container
      */

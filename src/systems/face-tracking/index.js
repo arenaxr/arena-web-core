@@ -132,7 +132,7 @@ AFRAME.registerSystem('face-tracking', {
 
     /**
      * Draws a bounding box on the overlay canvas
-     * @param {[]} bbox array formatted like so: [x1,y1,x2,y2]
+     * @param {Array} bbox array formatted like so: [x1,y1,x2,y2]
      */
     drawBbox(bbox) {
         const overlayCtx = this.overlayCanvas.getContext('2d');
@@ -153,7 +153,7 @@ AFRAME.registerSystem('face-tracking', {
 
     /**
      * Draws a polyline on the overlay canvas. Helper function for drawing face landmarks
-     * @param {[]} landmarks array formatted like so: [x1,y1,x2,y2,x3,x3,...]
+     * @param {Array} landmarks array formatted like so: [x1,y1,x2,y2,x3,x3,...]
      * @param {number} start start index to draw lines
      * @param {number} end end index to draw lines
      * @param {boolean} closed whether or not to connect the start and end points of polyline
@@ -207,7 +207,7 @@ AFRAME.registerSystem('face-tracking', {
 
     /**
      * Checks if landmarks are valid
-     * @param {[]} landmarks array formatted like so: [x1,y1,x2,y2,x3,x3,...]
+     * @param {Array} landmarks array formatted like so: [x1,y1,x2,y2,x3,x3,...]
      * @return {boolean} whether or not the landmarks has a valid face or not
      */
     hasFace(landmarks) {

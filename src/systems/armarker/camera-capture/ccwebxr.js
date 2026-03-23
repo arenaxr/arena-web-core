@@ -1,3 +1,6 @@
+/**
+ * @module ccwebxr
+ */
 /* eslint-disable no-throw-literal */
 /**
  * @fileoverview Capture passthrough camera frames using WebXR Raw Camera Access API

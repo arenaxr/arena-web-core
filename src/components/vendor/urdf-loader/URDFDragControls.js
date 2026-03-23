@@ -28,10 +28,10 @@ const prevHitPoint = new THREE.Vector3();
 const newHitPoint = new THREE.Vector3();
 const pivotPoint = new THREE.Vector3();
 const tempVector = new THREE.Vector3();
-const tempTHREE.Vector2 = new THREE.Vector3();
+const tempVector2 = new THREE.Vector3();
 const projectedStartPoint = new THREE.Vector3();
 const projectedEndPoint = new THREE.Vector3();
-const THREE.Plane = new THREE.Plane();
+const tempPlane = new THREE.Plane();
 export class URDFDragControls {
 
     constructor(scene) {
@@ -50,11 +50,11 @@ export class URDFDragControls {
     update() {
 
         const {
-            THREE.Raycaster,
             hovered,
             manipulating,
             scene,
         } = this;
+        const raycaster = this.THREE.Raycaster;
 
         if (manipulating) {
 
@@ -63,7 +63,7 @@ export class URDFDragControls {
         }
 
         let hoveredJoint = null;
-        const intersections = THREE.Raycaster.intersectObject(scene, true);
+        const intersections = raycaster.intersectObject(scene, true);
         if (intersections.length !== 0) {
 
             const hit = intersections[0];
@@ -117,7 +117,7 @@ export class URDFDragControls {
 
     getRevoluteDelta(joint, startPoint, endPoint) {
 
-        // set up the THREE.Plane
+        // set up the tempPlane
         tempVector
             .copy(joint.axis)
             .transformDirection(joint.matrixWorld)
@@ -125,12 +125,12 @@ export class URDFDragControls {
         pivotPoint
             .set(0, 0, 0)
             .applyMatrix4(joint.matrixWorld);
-        THREE.Plane
+        tempPlane
             .setFromNormalAndCoplanarPoint(tempVector, pivotPoint);
 
-        // project the drag points onto the THREE.Plane
-        THREE.Plane.projectPoint(startPoint, projectedStartPoint);
-        THREE.Plane.projectPoint(endPoint, projectedEndPoint);
+        // project the drag points onto the tempPlane
+        tempPlane.projectPoint(startPoint, projectedStartPoint);
+        tempPlane.projectPoint(endPoint, projectedEndPoint);
 
         // get the directions relative to the pivot
         projectedStartPoint.sub(pivotPoint);
@@ -138,7 +138,7 @@ export class URDFDragControls {
 
         tempVector.crossVectors(projectedStartPoint, projectedEndPoint);
 
-        const direction = Math.sign(tempVector.dot(THREE.Plane.normal));
+        const direction = Math.sign(tempVector.dot(tempPlane.normal));
         return direction * projectedEndPoint.angleTo(projectedStartPoint);
 
     }
@@ -146,20 +146,21 @@ export class URDFDragControls {
     getPrismaticDelta(joint, startPoint, endPoint) {
 
         tempVector.subVectors(endPoint, startPoint);
-        THREE.Plane
+        tempPlane
             .normal
             .copy(joint.axis)
             .transformDirection(joint.parent.matrixWorld)
             .normalize();
 
-        return tempVector.dot(THREE.Plane.normal);
+        return tempVector.dot(tempPlane.normal);
 
     }
 
     moveRay(toRay) {
 
-        const { THREE.Raycaster, hitDistance, manipulating } = this;
-        const { ray } = THREE.Raycaster;
+        const { hitDistance, manipulating } = this;
+        const raycaster = this.THREE.Raycaster;
+        const { ray } = raycaster;
 
         if (manipulating) {
 
@@ -229,7 +230,7 @@ export class PointerURDFDragControls extends URDFDragControls {
         this.camera = camera;
         this.domElement = domElement;
 
-        const THREE.Raycaster = new THREE.Raycaster();
+        const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
         function updateMouse(e) {
@@ -242,8 +243,8 @@ export class PointerURDFDragControls extends URDFDragControls {
         this._mouseDown = e => {
 
             updateMouse(e);
-            THREE.Raycaster.setFromCamera(mouse, this.camera);
-            this.moveRay(THREE.Raycaster.ray);
+            raycaster.setFromCamera(mouse, this.camera);
+            this.moveRay(raycaster.ray);
             this.setGrabbed(true);
 
         };
@@ -251,16 +252,16 @@ export class PointerURDFDragControls extends URDFDragControls {
         this._mouseMove = e => {
 
             updateMouse(e);
-            THREE.Raycaster.setFromCamera(mouse, this.camera);
-            this.moveRay(THREE.Raycaster.ray);
+            raycaster.setFromCamera(mouse, this.camera);
+            this.moveRay(raycaster.ray);
 
         };
 
         this._mouseUp = e => {
 
             updateMouse(e);
-            THREE.Raycaster.setFromCamera(mouse, this.camera);
-            this.moveRay(THREE.Raycaster.ray);
+            raycaster.setFromCamera(mouse, this.camera);
+            this.moveRay(raycaster.ray);
             this.setGrabbed(false);
 
         };
@@ -275,7 +276,7 @@ export class PointerURDFDragControls extends URDFDragControls {
 
         const { camera, initialGrabPoint } = this;
 
-        // set up the THREE.Plane
+        // set up the tempPlane
         tempVector
             .copy(joint.axis)
             .transformDirection(joint.matrixWorld)
@@ -283,7 +284,7 @@ export class PointerURDFDragControls extends URDFDragControls {
         pivotPoint
             .set(0, 0, 0)
             .applyMatrix4(joint.matrixWorld);
-        THREE.Plane
+        tempPlane
             .setFromNormalAndCoplanarPoint(tempVector, pivotPoint);
 
         tempVector
@@ -292,7 +293,7 @@ export class PointerURDFDragControls extends URDFDragControls {
             .normalize();
 
         // if looking into the THREE.Plane of rotation
-        if (Math.abs(tempVector.dot(THREE.Plane.normal)) > 0.3) {
+        if (Math.abs(tempVector.dot(tempPlane.normal)) > 0.3) {
 
             return super.getRevoluteDelta(joint, startPoint, endPoint);
 
@@ -302,14 +303,14 @@ export class PointerURDFDragControls extends URDFDragControls {
             tempVector.set(0, 1, 0).transformDirection(camera.matrixWorld);
 
             // get points projected onto the THREE.Plane of rotation
-            THREE.Plane.projectPoint(startPoint, projectedStartPoint);
-            THREE.Plane.projectPoint(endPoint, projectedEndPoint);
+            tempPlane.projectPoint(startPoint, projectedStartPoint);
+            tempPlane.projectPoint(endPoint, projectedEndPoint);
 
             tempVector.set(0, 0, -1).transformDirection(camera.matrixWorld);
-            tempVector.cross(THREE.Plane.normal);
-            tempTHREE.Vector2.subVectors(endPoint, startPoint);
+            tempVector.cross(tempPlane.normal);
+            tempVector2.subVectors(endPoint, startPoint);
 
-            return tempVector.dot(tempTHREE.Vector2);
+            return tempVector.dot(tempVector2);
 
         }
 

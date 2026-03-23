@@ -1,3 +1,6 @@
+/**
+ * @module parser
+ */
 /* eslint-disable camelcase */
 
 const warn = AFRAME.utils.debug('ARENA:message:warn');

@@ -1,3 +1,6 @@
+/**
+ * @module create-update
+ */
 /* eslint-disable no-case-declarations */
 
 import { ARENAUtils } from '../../../utils';

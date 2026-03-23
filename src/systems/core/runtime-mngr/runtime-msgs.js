@@ -1,3 +1,6 @@
+/**
+ * @module runtime-msgs
+ */
 /* eslint-disable camelcase */
 
 /**

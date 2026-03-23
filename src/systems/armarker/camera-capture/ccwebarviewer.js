@@ -1,4 +1,7 @@
 /**
+ * @module ccwebarviewer
+ */
+/**
  * @fileoverview Camera capture for custom iOS browser (WebXRViewer/WebARViewer)
  * https://apps.apple.com/us/app/webxr-viewer/id1295998056
  *

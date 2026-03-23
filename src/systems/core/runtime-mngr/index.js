@@ -1,4 +1,7 @@
 /**
+ * @module runtime-mngr
+ */
+/**
  * @fileoverview Register as a runtime; Send requests to orchestrator
  *
  * Open source software under the terms in /LICENSE

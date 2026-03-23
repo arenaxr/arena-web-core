@@ -1,3 +1,6 @@
+/**
+ * @module client-event
+ */
 const warn = AFRAME.utils.debug('ARENA:client-event:warn');
 const error = AFRAME.utils.debug('ARENA:client-event:error');
 

@@ -1,3 +1,6 @@
+/**
+ * @module ccwebar
+ */
 /* eslint-disable no-throw-literal */
 /**
  * @fileoverview Capture camera facing forward using getUserMedia

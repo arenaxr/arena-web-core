@@ -1,3 +1,6 @@
+/**
+ * @module armarker-reloc
+ */
 /* eslint-disable no-throw-literal */
 
 /**

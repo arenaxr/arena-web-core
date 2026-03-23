@@ -620,7 +620,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     /**
      * Getter to return the active user list state.
-     * @return {[Object]} The list of active users.
+     * @return {Object[]} The list of active users.
      */
     getUserList() {
         return this.liveUsers;

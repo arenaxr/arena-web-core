@@ -208,7 +208,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
     /**
      * Handles local tracks.
-     * @param {[]} tracks Array with JitsiTrack objects
+     * @param {Array} tracks Array with JitsiTrack objects
      */
     async onLocalTracks(tracks) {
         this.localTracks = tracks;
@@ -1073,7 +1073,7 @@ AFRAME.registerSystem('arena-jitsi', {
     /**
      *
      * @param {*} participantJitsiId
-     * @returns
+     * @returns {String}
      */
     getUserId(participantJitsiId) {
         if (this.jitsiId === participantJitsiId) return ARENA.idTag;
@@ -1085,7 +1085,7 @@ AFRAME.registerSystem('arena-jitsi', {
      *
      * @param {*} participantJitsiId
      * @param {*} property
-     * @returns
+     * @returns {Object}
      */
     getProperty(participantJitsiId, property) {
         return this.conference.getParticipantById(participantJitsiId).getProperty(property);

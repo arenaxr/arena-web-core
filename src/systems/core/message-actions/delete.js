@@ -1,3 +1,6 @@
+/**
+ * @module delete
+ */
 const error = AFRAME.utils.debug('ARENA:delete:error');
 
 /**

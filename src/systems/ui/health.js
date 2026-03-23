@@ -26,7 +26,7 @@
 
 /**
  * Render the display of errors in #error-block for troubleshooting.
- * @param {[objects]} errors Array of error Objects under errorCode key.
+ * @param {Object[]} errors Array of error Objects under errorCode key.
  */
 function drawErrorBlock(errors) {
     const errBlock = $('#error-block');

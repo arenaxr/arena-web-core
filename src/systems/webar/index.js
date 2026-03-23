@@ -1,4 +1,7 @@
 /**
+ * @module webar
+ */
+/**
  * @fileoverview AR session handler for standard, non-webxr devices
  *
  * Open source software under the terms in /LICENSE
