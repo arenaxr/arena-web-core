@@ -11,45 +11,54 @@ import { TOPICS } from '../../constants';
 
 /**
  * Listen for collisions, callback on event.
- * Requires [Physics for A-Frame VR]{@link https://github.com/c-frame/aframe-physics-system}
+ * Requires [A-Frame PhysX]{@link https://github.com/c-frame/physx}
  * @module collision-listener
- * @requires 'aframe-physics-system'
+ * @requires 'aframe-physx'
  */
 AFRAME.registerComponent('collision-listener', {
-    // listen for collisions, call defined function on event evt
     init() {
         const { topicParams } = ARENA;
         const topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
         const topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
         const topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
 
-        // console.log("collision-listener Component init");
-        this.el.addEventListener('collide', function onCollide(evt) {
-            // colliding object, only act if is clients' own
-            const collider = evt.detail.body.el.id;
-            if (collider !== 'my-camera') {
+        const publishCollision = (evt, type) => {
+            // physics contact events
+            const colliderEl = evt.detail.otherComponent?.el;
+            if (!colliderEl) return;
+            const colliderId = colliderEl.id;
+
+            // only act if we are colliding with the client's own camera or hands
+            let sourceName;
+            if (colliderId === 'my-camera') {
+                sourceName = ARENA.idTag;
+            } else if (colliderId === 'leftHand' || colliderId === 'rightHand') {
+                sourceName = colliderEl.components['arena-hand']?.name || `${colliderId}_${ARENA.idTag}`;
+            } else {
                 return;
             }
 
-            // const coordsData = ARENAUtils.setClickData(evt);
-            const coordsData = {
-                x: 0,
-                y: 0,
-                z: 0,
-            };
-
-            // original click event; simply publish to MQTT
             const thisMsg = {
-                object_id: collider,
+                object_id: sourceName,
                 action: 'clientEvent',
-                type: 'collision',
+                type: type,
                 data: {
-                    targetPosition: coordsData,
-                    target: this.id,
+                    target: this.el.id,
+                    targetPosition: ARENAUtils.getWorldPos(this.el),
+                    originPosition: ARENAUtils.getWorldPos(colliderEl),
                 },
             };
-            // publishing events attached to user id objects allows sculpting security
+
             ARENAUtils.publishClientEvent(this.el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
-        });
+        };
+
+        this.onContactBegin = (evt) => publishCollision(evt, 'collision');
+
+        this.el.addEventListener('contactbegin', this.onContactBegin);
+        // contactend is also possible, just keeping state old with Ammo.js system for now
     },
+
+    remove() {
+        this.el.removeEventListener('contactbegin', this.onContactBegin);
+    }
 });
