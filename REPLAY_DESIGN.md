@@ -30,24 +30,27 @@ A dedicated backend service—highly recommended to be built in **Go (Golang)** 
 > 
 > *Conclusion: Playback should be strictly isolated to read-only environments.*
 
-### 2. Unified Playback Architecture (Backend-Driven MQTT Proxy)
-> *Based on design feedback, we have simplified the architecture: there is no difference between a "Single Player" scrub and a "Watch Party". Both rely on the backend proxying historical messages over a live MQTT topic.*
+### 2. Primary Playback Architecture (Local Client Pump)
+> *For the initial V1 release, the system will heavily prioritize an ultra-responsive, single-viewer experience. This avoids the immediate hurdle of building dynamic MQTT Auth/ACL rules required for server-side proxying.*
 
-When a user initiates a replay (or joins an existing replay session), the `arena-recorder` spins up a lightweight "Playback Engine" worker on the backend.
-- **The Engine**: This Go routine opens the `.jsonl` file and acts as the timeline pump. It reads the historical messages and publishes them to a unique, dynamic MQTT topic (e.g., `realm/s/original_scene/replay_session_123`).
-- **Scrubbing & Client Sync**: When an arbitrary timeline jump occurs (e.g., jumping to $T_{50}$), the backend computes the exact state of all objects at $T_{50}$ using the nearest previous keyframe and fast-forwards the historical MQTT messages instantly in memory. 
-  - **Crucially:** The viewer client `replay.html` forces a reload and **fetches this computed state via a REST API call** against the backend (identical to how standard ARENA clients fetch the initial scene state from `arena-persist`). This radically prevents overloading the MQTT broker with thousands of `create` messages every time someone moves the slider.
-  - Once the client renders the exact REST state of $T_{50}$, the backend resumes streaming the normal, incremental time-steps over the live MQTT topic.
-- **Client Simplicity**: The viewer client (`replay.html`) doesn't need complex local timeline logic. It just joins the replay scene, makes the initial REST call for the current 3D state, and renders whatever incoming MQTT messages the proxy pumps. 
-- **Watch Parties**: Multiplayer viewing is instantly supported by default. Any number of users can join `replay_session_123`, but only the "Host" has permission to send Control Messages to scrub the timeline.
+When a user initiates a replay, the `replay.html` client handles the timeline natively in the browser:
+- **REST File Streaming**: The client authenticates against the `arena-recorder` backend and fetches the `.jsonl` replay file (or chunks) **via a strict REST API**, storing the historical messages in local browser memory.
+- **Local Timeline Engine**: `replay.js` implements a custom A-Frame `system` that replaces the standard ARENA MQTT real-time loop. It "pumps" the downloaded JSON messages into the scene components locally based on the elapsed playhead time.
+- **Instant Scrubbing**: Because the data is local, the user can scrub back and forth with zero network latency. When seeking ($T_{50}$), the local engine instantly locates the nearest previous keyframe, resets the scene, and rapidly loops over the array in memory up to the target timestamp before resuming normal speed.
 
 ### 3. Read-Only Spectator Client (`replay.html`)
-While the client logic is vastly simplified by the backend pump, it still requires a specialized HTML entry point in `arena-web-core`.
-- **Spectator Stealth (Clean Slate)**: The viewer must not muddy the historical rendering. As such, `replay.html` explicitly disables `build3d`, click listeners, and physics colliders. 
-  - **Avatars & Jitsi**: Live spectator avatars (camera boxes) and Jitsi *video* rendering are explicitly suppressed to avoid confusing live viewers with historical recorded avatars. 
-  - **Communication**: However, Jitsi *audio* and the 2D Chat UI overlay remain fully enabled so users can socialize during a Watch Party. 
-- **Pre-loading**: The backend sends an initial "Manifest" message containing all unique `gltf-model` URLs found in the recording. The client forces a pre-fetch (memory load) for all assets so scrubbing backward/forward doesn't stutter on HTTP requests.
-- **Time-Series Scrubber UI**: A 2D HTML/CSS overlay at the bottom. Displays the current timeline position (broadcasted by the backend `playback_status` messages) and contains the Play/Pause/Scrub controls (which emit commands back to the server).
+- **Clean Slate**: It loads `a-scene` but explicitly disables `build3d`, `jitsi`, `chat`, click listeners, and physics colliders to prevent the spectator from altering the local timeline. 
+- **Pre-loading**: Parses the `.jsonl` metadata at load to extract all unique `gltf-model` URLs. Forces a pre-fetch (memory load) for all assets so scrubbing doesn't stutter on HTTP requests.
+- **Time-Series Scrubber UI**: A 2D HTML/CSS overlay at the bottom displaying the timeline slider and controls (Play, Pause, Speed).
+
+---
+
+## Phase 2 / Future Expansion: Multiplayer Watch Parties (Backend MQTT Proxy)
+*Due to the strict Auth/ACL restructuring required to safely proxy historical data, synchronized multiplayer viewing is deferred to Phase 2.*
+
+When Watch Parties are supported, the playback architecture flips:
+- **The Engine**: The Go backend opens the `.jsonl` file and becomes the timeline pump, blasting historical messages to an ephemeral live MQTT topic (e.g., `realm/s/original_scene/replay_123`).
+- **Syncing & Spectators**: Viewers join this live topic via the standard network stack. The client is completely "dumb" and relies entirely on the server to push state changes. Live avatars and Jitsi video are suppressed (stealth mode) to avoid muddying the historical render, but Jitsi Audio and Chat remain enabled for socialization.
 
 ---
 
