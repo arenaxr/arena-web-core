@@ -1,69 +1,79 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>ARENA 3D Replay</title>
-    <!-- login auth check, blocking to page load -->
-    <script src="../conf/defaults.js"></script>
-    <script src="../static/auth.js"></script>
 
-    <!-- AFRAME base -->
-    <script src="../static/vendor/aframe/aframe-master.min.js"></script>
+<head>
+  <meta charset="utf-8" />
+  <title>ARENA 3D Replay</title>
+  <!-- login auth check, blocking to page load -->
+  <script src="../conf/defaults.js"></script>
+  <script src="../static/auth.js"></script>
 
-    <!-- use the parcel bundled output -->
-    <script src="../dist/replay.js"></script>
-    <style>
-      #scrubber {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80%;
-        z-index: 9999;
-        background: rgba(0,0,0,0.8);
-        padding: 15px;
-        border-radius: 10px;
-        color: white;
-        display: flex;
-        gap: 15px;
-        align-items: center;
-        font-family: sans-serif;
-      }
-      #scrubber input[type="range"] {
-        flex-grow: 1;
-        cursor: pointer;
-      }
-      #playBtn {
-        padding: 8px 16px;
-        border-radius: 5px;
-        border: none;
-        background: #007bff;
-        color: white;
-        cursor: pointer;
-        font-weight: bold;
-      }
-      #playBtn:hover {
-        background: #0056b3;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Disable build3d, chat, and other highly interactive components for replay mode -->
-    <a-scene
-      physics="debug: false"
-      renderer="colorManagement: true"
-    >
-      <a-entity id="cameraRig">
-         <a-camera id="my-camera" look-controls wasd-controls></a-camera>
+  <!-- AFRAME base -->
+  <script src="../static/vendor/aframe/aframe-master.min.js"></script>
+  <script src="../static/vendor/jquery-2.1.1.min.js"></script>
+  <script src="../static/vendor/lib-jitsi-meet.min.js"></script>
+
+  <!-- use the main parcel bundle (replay system is included; core systems skip init in replay mode) -->
+  <script src="../dist/index.js"></script>
+  <style>
+    #scrubber {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      font-family: sans-serif;
+    }
+
+    #scrubber input[type="range"] {
+      flex-grow: 1;
+      cursor: pointer;
+    }
+
+    #playBtn {
+      padding: 8px 16px;
+      border-radius: 5px;
+      border: none;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #playBtn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <a-scene arena-replay physics="debug: false" renderer="colorManagement: true" tabindex="0">
+    <a-entity id="sceneRoot">
+      <a-entity id="cameraRig" position="0 1.6 0">
+        <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
+          <a-camera id="my-camera" look-controls="pointerLockEnabled: true" wasd-controls="acceleration: 30"></a-camera>
+        </a-entity>
       </a-entity>
-    </a-scene>
-    
-    <div id="scrubber">
-      <select id="recordingSelect">
-        <option value="">Select a Recording</option>
-      </select>
-      <button id="playBtn">Play / Pause</button>
-      <input type="range" id="timeline" min="0" max="100" value="0">
+    </a-entity>
+  </a-scene>
+
+  <div id="scrubber">
+    <select id="recordingSelect">
+      <option value="">Select a Recording</option>
+    </select>
+    <button id="playBtn">Play / Pause</button>
+    <div id="timeDisplay" style="font-family: monospace; min-width: 160px; text-align: center;">--:--:-- / --:--:--
     </div>
-  </body>
+    <input type="range" id="timeline" min="0" max="100" value="0">
+  </div>
+</body>
+
 </html>
