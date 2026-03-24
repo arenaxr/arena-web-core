@@ -13,6 +13,9 @@ import { CreateUpdate, Delete } from './message-actions/index';
 // The Replay System
 AFRAME.registerSystem('arena-replay', {
     init: function () {
+        // Only initialize when replay mode is explicitly enabled on the scene
+        if (!this.el.hasAttribute('arena-replay')) return;
+
         console.log('ARENA 3D Replay System Initialized');
         console.log('[Replay] sceneRoot:', !!document.getElementById('sceneRoot'));
         console.log('[Replay] CreateUpdate:', typeof CreateUpdate?.handle);
@@ -223,7 +226,7 @@ AFRAME.registerSystem('arena-replay', {
     },
 
     tick: function (time, timeDelta) {
-        if (!this.isPlaying || this.messages.length === 0) return;
+        if (!this.isPlaying || !this.messages || this.messages.length === 0) return;
 
         const now = performance.now();
         const delta = now - this.lastTickTime;
