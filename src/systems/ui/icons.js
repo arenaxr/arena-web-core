@@ -384,6 +384,18 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         version.title = 'Show the ARENA versions listed on a new page';
         pagesDiv.appendChild(version);
 
+        // Recording controls
+        const recordDiv = document.createElement('div');
+        appendBold(recordDiv, 'Recording: ');
+        formDiv.appendChild(recordDiv);
+
+        this.recordButton = document.createElement('a');
+        this.recordButton.href = '#';
+        this.recordButton.innerHTML = 'Start/Stop Recording';
+        this.recordButton.title = 'Start or stop recording this scene';
+        this.recordButton.onclick = this.handleRecord.bind(this);
+        recordDiv.appendChild(this.recordButton);
+
         // Auth status
         appendBold(formDiv, 'Scene: ');
         this.sceneNameDiv = document.createElement('span');
@@ -772,6 +784,55 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             cancelButtonText: 'Cancel',
         }).then(() => {
             this.settingsPopup.style.display = 'block';
+        });
+    },
+
+    handleRecord(e) {
+        e.preventDefault();
+        this.settingsPopup.style.display = 'none'; // close settings panel
+
+        const sceneFqn = this.arena.namespacedScene;
+        const [namespace, sceneId] = sceneFqn.split('/');
+
+        Swal.fire({
+            title: 'Recording',
+            text: `Start or stop recording for ${sceneFqn}?`,
+            icon: 'info',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'Start Recording',
+            denyButtonText: 'Stop Recording',
+            cancelButtonText: 'Cancel',
+            showCloseButton: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Must ensure axios exists or use fetch, window.axios usually exists via auth.js/a-frame setup, but we'll use fetch to be safe if axios isn't global
+                fetch('/recorder/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ namespace, sceneId }),
+                })
+                .then(async (res) => {
+                    const text = await res.text();
+                    if (res.ok) Swal.fire('Started!', 'Recording has begun.', 'success');
+                    else Swal.fire('Error', text, 'error');
+                })
+                .catch(err => Swal.fire('Error', err.message, 'error'));
+            } else if (result.isDenied) {
+                fetch('/recorder/stop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ namespace, sceneId }),
+                })
+                .then(async (res) => {
+                    const text = await res.text();
+                    if (res.ok) Swal.fire('Stopped!', 'Recording has stopped.', 'success');
+                    else Swal.fire('Error', text, 'error');
+                })
+                .catch(err => Swal.fire('Error', err.message, 'error'));
+            }
         });
     },
 

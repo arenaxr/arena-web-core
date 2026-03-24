@@ -3,8 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <title>ARENA 3D Replay</title>
-    <!-- Use the parcel bundled output -->
-    <script type="module" src="../src/replay.js"></script>
+    <!-- login auth check, blocking to page load -->
+    <script src="../conf/defaults.js"></script>
+    <script src="../static/auth.js"></script>
+
+    <!-- AFRAME base -->
+    <script src="../static/vendor/aframe/aframe-master.min.js"></script>
+
+    <!-- use the parcel bundled output -->
+    <script src="../dist/replay.js"></script>
     <style>
       #scrubber {
         position: absolute;
@@ -52,6 +59,9 @@
     </a-scene>
     
     <div id="scrubber">
+      <select id="recordingSelect">
+        <option value="">Select a Recording</option>
+      </select>
       <button id="playBtn">Play / Pause</button>
       <input type="range" id="timeline" min="0" max="100" value="0">
     </div>

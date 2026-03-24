@@ -81,6 +81,8 @@ window.addEventListener('onauth', async (e) => {
 
     const enterPublicSceneBtn = document.getElementById('enterPublicSceneBtn');
     const enterArPublicSceneBtn = document.getElementById('enterArPublicSceneBtn');
+    const recordUserSceneBtn = document.getElementById('recordUserSceneBtn');
+    const recordPublicSceneBtn = document.getElementById('recordPublicSceneBtn');
 
     const advancedLinksDiv = document.getElementById('uri-builder');
     const userNoteSpan = document.getElementById('userNoteSpan');
@@ -90,6 +92,7 @@ window.addEventListener('onauth', async (e) => {
 
     window.publicButtons.push(enterPublicSceneBtn);
     window.publicButtons.push(enterArPublicSceneBtn);
+    window.publicButtons.push(recordPublicSceneBtn);
     if (auth.authenticated) {
         window.publicButtons.push(clonePublicSceneBtn); // add clone option for full user
         tabMyScenes.parentElement.style.display = 'block';
@@ -102,6 +105,7 @@ window.addEventListener('onauth', async (e) => {
         [
             enterUserSceneBtn,
             enterArUserSceneBtn,
+            recordUserSceneBtn,
             cloneUserSceneBtn,
             deleteUserSceneBtn,
             copyUserSceneUrlBtn,
@@ -158,6 +162,34 @@ window.addEventListener('onauth', async (e) => {
     });
     enterUserSceneBtn.addEventListener('click', () => (window.location = userSceneUrl.value));
     enterArUserSceneBtn.addEventListener('click', () => (window.location = `${userSceneUrl.value}?armode=1`));
+
+    const handleRecord = (sceneFqn) => {
+        const [namespace, sceneId] = sceneFqn.split('/');
+        Swal.fire({
+            title: 'Recording',
+            text: `Start or stop recording for ${sceneFqn}?`,
+            icon: 'video',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'Start Recording',
+            denyButtonText: 'Stop Recording',
+            cancelButtonText: 'Cancel',
+            showCloseButton: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.post('/recorder/start', { namespace, sceneId }, { withCredentials: true })
+                    .then(() => Swal.fire('Started!', 'Recording has begun.', 'success'))
+                    .catch(err => Swal.fire('Error', err.response?.data || err.message, 'error'));
+            } else if (result.isDenied) {
+                axios.post('/recorder/stop', { namespace, sceneId }, { withCredentials: true })
+                    .then(() => Swal.fire('Stopped!', 'Recording has stopped.', 'success'))
+                    .catch(err => Swal.fire('Error', err.response?.data || err.message, 'error'));
+            }
+        });
+    };
+
+    recordUserSceneBtn.addEventListener('click', () => handleRecord(window.userSceneId));
+    recordPublicSceneBtn.addEventListener('click', () => handleRecord(window.publicSceneId));
 
     // set listeners for advanced links URI-builder
     advancedLinksUserBtn.addEventListener('click', () => {

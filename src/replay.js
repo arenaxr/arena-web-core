@@ -1,4 +1,3 @@
-import 'aframe';
 import axios from 'axios';
 
 // The Replay System
@@ -10,68 +9,144 @@ AFRAME.registerSystem('arena-replay', {
         this.playhead = 0;
         this.isPlaying = false;
         
-        // Parse URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        this.namespace = urlParams.get('namespace');
-        this.sceneId = urlParams.get('sceneId');
-        this.session = urlParams.get('session');
-        
         this.setupUI();
-        this.fetchReplayData();
+        this.fetchRecordingsList();
     },
     
     setupUI: function() {
         const playBtn = document.getElementById('playBtn');
         const timeline = document.getElementById('timeline');
+        const recordingSelect = document.getElementById('recordingSelect');
         
-        if (!playBtn || !timeline) return;
+        if (!playBtn || !timeline || !recordingSelect) return;
         
         playBtn.addEventListener('click', () => {
-            this.isPlaying = !this.isPlaying;
+            if (this.messages.length > 0) {
+                this.isPlaying = !this.isPlaying;
+            }
         });
         
         timeline.addEventListener('input', (e) => {
-            // Seek playhead based on percentage
             const pct = e.target.value / 100;
             if (this.messages.length > 0) {
                 this.playhead = Math.floor(pct * this.messages.length);
                 this.fastForwardTo(this.playhead);
             }
         });
+
+        recordingSelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                this.fetchReplayData(e.target.value);
+            }
+        });
+    },
+
+    fetchRecordingsList: async function() {
+        try {
+            const res = await axios.get('/recorder/list', { withCredentials: true });
+            const select = document.getElementById('recordingSelect');
+            if (res.data && res.data.length > 0) {
+                res.data.forEach(rec => {
+                    const opt = document.createElement('option');
+                    opt.value = rec.filename;
+                    const date = new Date(parseInt(rec.timestamp) * 1000).toLocaleString();
+                    opt.text = `${rec.name} (${date})`;
+                    select.appendChild(opt);
+                });
+            }
+        } catch(e) {
+            console.error("Failed to fetch recordings list", e);
+        }
     },
     
-    fetchReplayData: async function() {
-        if (!this.namespace || !this.sceneId || !this.session) {
-            console.error("Missing Replay URL parameters.");
-            return;
-        }
-        
+    fetchReplayData: async function(filename) {
+        this.isPlaying = false;
+        this.messages = [];
+        this.playhead = 0;
+        document.getElementById('timeline').value = 0;
+
         try {
-            // Call arena-recorder REST API
-            const res = await axios.get(`/recorder/api/v1/replay?namespace=${this.namespace}&sceneId=${this.sceneId}&session=${this.session}`);
-            
-            // Assume the response is an array of MQTT payloads or NDJSON that we split
+            const res = await axios.get(`/recorder/files/${filename}`, { withCredentials: true });
             const data = typeof res.data === 'string' ? res.data.split('\n').filter(l => l.trim()).map(JSON.parse) : res.data;
             this.messages = data;
-            
             console.log(`Loaded ${this.messages.length} frames.`);
+            
+            // Reconstruct the start frame
+            this.fastForwardTo(0);
         } catch(e) {
             console.error("Failed to fetch replay data", e);
         }
     },
     
+    applyMessage: function(msg) {
+        const scene = this.el;
+        if (!msg.object_id) return;
+        
+        let el = document.getElementById(msg.object_id);
+        
+        if (msg.action === 'delete') {
+            if (el) el.parentNode.removeChild(el);
+            return;
+        }
+
+        if (!el) {
+            if (msg.action === 'update') return;
+            
+            // Most objects in ARENA are a-entity
+            let type = 'a-entity';
+            if (msg.type && ['camera', 'light'].includes(msg.type)) {
+                type = `a-${msg.type}`;
+            }
+            
+            el = document.createElement(type);
+            el.setAttribute('id', msg.object_id);
+            // In ARENA, type might need to be set as a component if it's text etc
+            if (msg.type && type === 'a-entity') {
+                if (msg.type === 'gltf-model') {
+                    // special handling not strictly needed if data has gltf-model URI
+                }
+            }
+            scene.appendChild(el);
+        }
+
+        if (msg.data) {
+            for (const [key, val] of Object.entries(msg.data)) {
+                // Ignore type and object_id inside data
+                if (key === 'object_id') continue;
+                
+                // Set A-Frame attribute
+                if (typeof val === 'object' && val !== null) {
+                    el.setAttribute(key, val);
+                } else {
+                    // direct primitive
+                    el.setAttribute(key, val);
+                }
+            }
+        }
+    },
+
     fastForwardTo: function(targetIndex) {
-        // clear scene and reconstruct state rapidly up to targetIndex
+        // clear scene objects (keep camera Rig)
+        const scene = this.el;
+        const entities = scene.querySelectorAll('a-entity, a-box, a-gltf-model, a-sphere, a-cylinder, a-plane');
+        for (let i = 0; i < entities.length; i++) {
+            if (entities[i].id !== 'cameraRig' && entities[i].id !== 'my-camera') {
+                entities[i].parentNode.removeChild(entities[i]);
+            }
+        }
+
         console.log("Seeking to index", targetIndex);
+        for (let i = 0; i <= targetIndex; i++) {
+            if (i < this.messages.length) {
+                this.applyMessage(this.messages[i]);
+            }
+        }
     },
     
     tick: function (time, timeDelta) {
         if (this.isPlaying && this.messages.length > 0 && this.playhead < this.messages.length) {
-            // Pump message locally
             const msg = this.messages[this.playhead];
-            
-            // In a fully integrated version, we push this msg to the existing ARENA.core.mqttMessage handler.
-            console.debug("Pump frame:", msg);
+            this.applyMessage(msg);
             
             this.playhead++;
             
@@ -80,7 +155,6 @@ AFRAME.registerSystem('arena-replay', {
                 timeline.value = (this.playhead / this.messages.length) * 100;
             }
         } else if (this.isPlaying && this.messages.length > 0 && this.playhead >= this.messages.length) {
-            // Reached the end
             this.isPlaying = false;
         }
     }
