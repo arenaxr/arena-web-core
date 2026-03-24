@@ -52,11 +52,15 @@ AFRAME.registerComponent('landmark', {
     },
 
     init() {
-        this.system.registerComponent(this);
+        if (this.system?.registerComponent) {
+            this.system.registerComponent(this);
+        }
     },
 
     remove() {
-        this.system.unregisterComponent(this);
+        if (this.system?.unregisterComponent) {
+            this.system.unregisterComponent(this);
+        }
     },
     /* eslint-disable no-param-reassign */
     teleportTo(moveEl = undefined) {

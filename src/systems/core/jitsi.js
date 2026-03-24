@@ -29,6 +29,9 @@ AFRAME.registerSystem('arena-jitsi', {
     },
 
     init() {
+        // Skip Jitsi in replay mode
+        if (this.el.hasAttribute('arena-replay')) return;
+
         const { data } = this;
 
         this.connectOptions = {

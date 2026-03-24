@@ -87,10 +87,12 @@ AFRAME.registerSystem('arena-health-ui', {
             );
             // update icon display once doc is ready
             const icon = document.getElementById('error-icon');
-            if (Object.keys(_this.activeErrors).length) {
-                icon.style.display = 'block';
-            } else {
-                icon.style.display = 'none';
+            if (icon) {
+                if (Object.keys(_this.activeErrors).length) {
+                    icon.style.display = 'block';
+                } else {
+                    icon.style.display = 'none';
+                }
             }
         });
     },

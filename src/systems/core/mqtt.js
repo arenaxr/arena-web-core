@@ -21,6 +21,9 @@ AFRAME.registerSystem('arena-mqtt', {
     },
 
     init() {
+        // Skip MQTT in replay mode
+        if (this.el.hasAttribute('arena-replay')) return;
+
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
         this.onSceneMessageArrived = this.onSceneMessageArrived.bind(this);
     },
