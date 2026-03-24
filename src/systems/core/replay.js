@@ -115,8 +115,20 @@ AFRAME.registerSystem('arena-replay', {
             console.log(`[Replay] Loaded ${this.messages.length} frames, duration: ${this.duration}ms`);
             this.updateTimeDisplay();
 
-            // Reconstruct the start frame
-            this.fastForwardTo(0);
+            // Find the end of the persist snapshot (all messages with timeOffset === 0)
+            // These are the initial scene objects dumped from arena-persist at recording start
+            let persistEndIdx = 0;
+            for (let i = 0; i < this.messages.length; i++) {
+                if (this.messages[i].timeOffset === 0) {
+                    persistEndIdx = i;
+                } else {
+                    break;
+                }
+            }
+            console.log(`[Replay] Persist snapshot: ${persistEndIdx + 1} objects`);
+
+            // Bootstrap the scene with the full persist snapshot
+            this.fastForwardTo(persistEndIdx);
         } catch(e) {
             console.error("[Replay] Failed to fetch replay data", e);
         }

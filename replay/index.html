@@ -55,11 +55,11 @@
 </head>
 
 <body>
-  <a-scene arena-replay physics="debug: false" renderer="colorManagement: true" tabindex="0">
+  <a-scene arena-replay physics="debug: false" renderer="colorManagement: true">
     <a-entity id="sceneRoot">
       <a-entity id="cameraRig" position="0 1.6 0">
         <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
-          <a-camera id="my-camera" look-controls="pointerLockEnabled: true" wasd-controls="acceleration: 30"></a-camera>
+          <a-camera id="my-camera" look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 30" arrow-controls></a-camera>
         </a-entity>
       </a-entity>
     </a-entity>
