@@ -293,14 +293,15 @@ AFRAME.registerSystem('arena-replay', {
     },
 
     formatTime: function(msOffset) {
-        if (!this.messages || this.messages.length === 0) return "--:--:--";
+        if (!this.messages || this.messages.length === 0) return "--:--";
         try {
-            const startT = new Date(this.messages[0].timestamp).getTime();
-            const date = new Date(startT + msOffset);
-            if (isNaN(date.getTime())) return "--:--:--";
-            return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' });
+            if (isNaN(msOffset) || msOffset < 0) msOffset = 0;
+            const date = new Date(msOffset);
+            // Returns HH:MM:SS format based on epoch. We strip '00:' for shorter durations.
+            const iso = date.toISOString().substr(11, 8);
+            return iso.startsWith('00:') ? iso.substr(3) : iso; 
         } catch(e) {
-            return "--:--:--";
+            return "--:--";
         }
     },
 
