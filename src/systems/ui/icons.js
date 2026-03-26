@@ -385,16 +385,18 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         pagesDiv.appendChild(version);
 
         // Recording controls
-        const recordDiv = document.createElement('div');
-        appendBold(recordDiv, 'Recording: ');
-        formDiv.appendChild(recordDiv);
+        if (sceneWriter) {
+            const recordDiv = document.createElement('div');
+            appendBold(recordDiv, 'Recording: ');
+            formDiv.appendChild(recordDiv);
 
-        this.recordButton = document.createElement('a');
-        this.recordButton.href = '#';
-        this.recordButton.innerHTML = 'Start/Stop Recording';
-        this.recordButton.title = 'Start or stop recording this scene';
-        this.recordButton.onclick = this.handleRecord.bind(this);
-        recordDiv.appendChild(this.recordButton);
+            this.recordButton = document.createElement('a');
+            this.recordButton.href = '#';
+            this.recordButton.innerHTML = 'Start/Stop Recording';
+            this.recordButton.title = 'Start or stop recording this scene';
+            this.recordButton.onclick = this.handleRecord.bind(this);
+            recordDiv.appendChild(this.recordButton);
+        }
 
         // Auth status
         appendBold(formDiv, 'Scene: ');

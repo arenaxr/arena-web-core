@@ -28,6 +28,16 @@ window.addEventListener('onauth', async (e) => {
     const mqttToken = e.detail.mqtt_token;
     const auth = ARENAAUTH.getAuthStatus();
 
+    const hasPublRight = (namespace, sceneId) => {
+        const writeTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+            nameSpace: namespace,
+            sceneName: sceneId,
+            userClient: this.userClient,
+            idTag: '+',
+        });
+        return ARENAAUTH.matchJWT(writeTopic, this.mqttToken.token_payload.publ);
+    };
+
     // all auth types should have access to this page, even anonymous users should be able to read public scenes
 
     window.username = auth.username;
@@ -92,7 +102,6 @@ window.addEventListener('onauth', async (e) => {
 
     window.publicButtons.push(enterPublicSceneBtn);
     window.publicButtons.push(enterArPublicSceneBtn);
-    window.publicButtons.push(recordPublicSceneBtn);
     if (auth.authenticated) {
         window.publicButtons.push(clonePublicSceneBtn); // add clone option for full user
         tabMyScenes.parentElement.style.display = 'block';
@@ -105,7 +114,6 @@ window.addEventListener('onauth', async (e) => {
         [
             enterUserSceneBtn,
             enterArUserSceneBtn,
-            recordUserSceneBtn,
             cloneUserSceneBtn,
             deleteUserSceneBtn,
             copyUserSceneUrlBtn,
@@ -129,10 +137,18 @@ window.addEventListener('onauth', async (e) => {
             scenePermsLink.href = `${window.location.origin}/user/v2/profile/scenes/${_e.target.value}`;
             deleteUserSceneBtn.value = _e.target.value;
             toggleUserSceneButtons(true);
+
+            const [namespace, sceneId] = window.userSceneId.split('/');
+            if (hasPublRight(namespace, sceneId)) {
+                recordUserSceneBtn.classList.remove('disabled');
+            } else {
+                recordUserSceneBtn.classList.add('disabled');
+            }
         } else {
             window.userSceneId = '';
             updateUserSceneUrlBox('No valid scene selected');
             toggleUserSceneButtons(false);
+            recordUserSceneBtn.classList.add('disabled');
         }
     }
 
@@ -141,12 +157,18 @@ window.addEventListener('onauth', async (e) => {
             window.publicSceneId = _e.target.value;
             publicSceneUrl.value = `${window.location.origin}/${_e.target.value}`;
             togglePublicSceneButtons(true);
-            console.log('valid public', _e.target.value);
+
+            const [namespace, sceneId] = window.publicSceneId.split('/');
+            if (hasPublRight(namespace, sceneId)) {
+                recordPublicSceneBtn.classList.remove('disabled');
+            } else {
+                recordPublicSceneBtn.classList.add('disabled');
+            }
         } else {
             window.publicSceneId = '';
             publicSceneUrl.value = '';
             togglePublicSceneButtons(false);
-            console.log('invalid public', _e.target.value);
+            recordPublicSceneBtn.classList.add('disabled');
         }
     }
 

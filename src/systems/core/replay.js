@@ -25,7 +25,15 @@ AFRAME.registerSystem('arena-replay', {
         this.isPlaying = false;
 
         this.setupUI();
-        this.fetchRecordingsList();
+        this.fetchRecordingsList().then(() => {
+            const params = new URLSearchParams(window.location.search);
+            const recordingFilename = params.get('recording');
+            if (recordingFilename) {
+                const select = document.getElementById('recordingSelect');
+                if (select) select.value = recordingFilename;
+                this.fetchReplayData(recordingFilename);
+            }
+        });
     },
 
     setupUI: function() {
