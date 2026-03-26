@@ -83,11 +83,15 @@ AFRAME.registerSystem('arena-replay', {
             const newUrl = new URL(window.location.href);
 
             if (val) {
-                const parts = val.replace('.jsonl', '').split('-');
-                if (parts.length >= 3) {
-                    const session = parts.pop();
-                    const sceneId = parts.pop();
-                    const namespace = parts.join('-');
+                let namespace, sceneId, session;
+                const parts = val.replace('.jsonl', '').split('~');
+                if (parts.length === 3) {
+                    namespace = parts[0];
+                    sceneId = parts[1];
+                    session = parts[2];
+                }
+
+                if (namespace && sceneId && session) {
                     newUrl.searchParams.set('namespace', namespace);
                     newUrl.searchParams.set('sceneId', sceneId);
                     newUrl.searchParams.set('session', session);
@@ -205,6 +209,16 @@ AFRAME.registerSystem('arena-replay', {
                     break;
                 }
             }
+
+            // Ensure scene-options geometry is processed first so environment/lighting exists
+            for (let i = 0; i <= persistEndIdx; i++) {
+                if (this.messages[i].type === 'scene-options') {
+                    const sceneOpt = this.messages.splice(i, 1)[0];
+                    this.messages.unshift(sceneOpt);
+                    break;
+                }
+            }
+
             console.log(`[Replay] Persist snapshot: ${persistEndIdx + 1} objects`);
 
             // Bootstrap the scene with the full persist snapshot
