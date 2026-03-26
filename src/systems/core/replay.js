@@ -120,7 +120,16 @@ AFRAME.registerSystem('arena-replay', {
                 });
             }
         } catch(e) {
-            console.error("[Replay] Failed to fetch recordings list", e);
+            console.warn("[Replay] Failed to fetch Recordings list, service may be unavailable.", e);
+            const select = document.getElementById('recordingSelect');
+            if (select) {
+                const opt = document.createElement('option');
+                opt.text = "⚠️ Recorder service unavailable";
+                opt.value = "";
+                // Do not disable option in case they need to clear it back out
+                select.appendChild(opt);
+                select.value = "";
+            }
         }
     },
 
@@ -201,7 +210,7 @@ AFRAME.registerSystem('arena-replay', {
             // Bootstrap the scene with the full persist snapshot
             this.fastForwardTo(persistEndIdx);
         } catch(e) {
-            console.error("[Replay] Failed to fetch replay data", e);
+            console.warn("[Replay] Failed to fetch replay data, service may be unavailable.", e);
         }
     },
 
