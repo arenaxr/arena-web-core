@@ -27,7 +27,15 @@ AFRAME.registerSystem('arena-replay', {
         this.setupUI();
         this.fetchRecordingsList().then(() => {
             const params = new URLSearchParams(window.location.search);
-            const recordingFilename = params.get('recording');
+            const namespace = params.get('namespace');
+            const sceneId = params.get('sceneId');
+            const session = params.get('session');
+            
+            let recordingFilename = params.get('recording');
+            if (namespace && sceneId && session) {
+                recordingFilename = `${namespace}-${sceneId}-${session}.jsonl`;
+            }
+
             if (recordingFilename) {
                 const select = document.getElementById('recordingSelect');
                 if (select) select.value = recordingFilename;
@@ -71,8 +79,29 @@ AFRAME.registerSystem('arena-replay', {
         });
 
         recordingSelect.addEventListener('change', (e) => {
-            if (e.target.value) {
-                this.fetchReplayData(e.target.value);
+            const val = e.target.value;
+            const newUrl = new URL(window.location.href);
+
+            if (val) {
+                const parts = val.replace('.jsonl', '').split('-');
+                if (parts.length >= 3) {
+                    const session = parts.pop();
+                    const sceneId = parts.pop();
+                    const namespace = parts.join('-');
+                    newUrl.searchParams.set('namespace', namespace);
+                    newUrl.searchParams.set('sceneId', sceneId);
+                    newUrl.searchParams.set('session', session);
+                    newUrl.searchParams.delete('recording');
+                }
+                window.history.replaceState({}, '', newUrl);
+                this.fetchReplayData(val);
+            } else {
+                newUrl.searchParams.delete('namespace');
+                newUrl.searchParams.delete('sceneId');
+                newUrl.searchParams.delete('session');
+                newUrl.searchParams.delete('recording');
+                window.history.replaceState({}, '', newUrl);
+                this.clearScene();
             }
         });
     },
@@ -95,14 +124,45 @@ AFRAME.registerSystem('arena-replay', {
         }
     },
 
-    fetchReplayData: async function(filename) {
+    clearScene: function() {
         this.isPlaying = false;
         this.messages = [];
         this.playhead = 0;
         this.playheadTime = 0;
         this.duration = 0;
         this.lastTickTime = 0;
-        document.getElementById('timeline').value = 0;
+        const timeline = document.getElementById('timeline');
+        if (timeline) timeline.value = 0;
+        this.updateTimeDisplay();
+
+        const sceneRoot = document.getElementById('sceneRoot');
+        const scene = document.querySelector('a-scene');
+
+        if (scene) {
+            scene.setAttribute('environment', 'preset: default; seed: 1');
+        }
+
+        if (sceneRoot) {
+            Array.from(sceneRoot.children).forEach(child => {
+                if (!['cameraRig', 'cameraSpinner', 'my-camera', 'env'].includes(child.id)) {
+                    sceneRoot.removeChild(child);
+                }
+            });
+        } else {
+            console.warn('[Replay] sceneRoot not found, clearing scene-level entities');
+            const scene = document.querySelector('a-scene');
+            if (scene) {
+                Array.from(scene.querySelectorAll(':scope > a-entity')).forEach(child => {
+                    if (!['cameraRig', 'cameraSpinner', 'my-camera', 'env', 'sceneRoot'].includes(child.id)) {
+                        child.parentNode.removeChild(child);
+                    }
+                });
+            }
+        }
+    },
+
+    fetchReplayData: async function(filename) {
+        this.clearScene();
 
         try {
             const res = await axios.get(`/recorder/files/${filename}`, { withCredentials: true });
