@@ -224,7 +224,7 @@ export default class CreateUpdate {
                 }
                 return;
 
-            case 'scene-options':
+            case 'scene-options': {
                 // update env-presets section in real-time
                 const envPresets = message.data['env-presets'];
                 if (envPresets) {
@@ -240,6 +240,7 @@ export default class CreateUpdate {
                     });
                 }
                 return;
+            }
 
             case 'face-features':
             case 'landmarks':

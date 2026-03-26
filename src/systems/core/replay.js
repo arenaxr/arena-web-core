@@ -215,6 +215,19 @@ AFRAME.registerSystem('arena-replay', {
                 if (this.messages[i].type === 'scene-options') {
                     const sceneOpt = this.messages.splice(i, 1)[0];
                     this.messages.unshift(sceneOpt);
+
+                    // Hydrate environment explicitly on the scene to match arena.js startup behavior
+                    if (sceneOpt.data && sceneOpt.data['env-presets']) {
+                        const envPresets = sceneOpt.data['env-presets'];
+                        const scene = document.querySelector('a-scene');
+                        if (scene) {
+                            let envString = '';
+                            Object.entries(envPresets).forEach(([k, v]) => {
+                                envString += `${k}:${v};`;
+                            });
+                            scene.setAttribute('environment', envString);
+                        }
+                    }
                     break;
                 }
             }
