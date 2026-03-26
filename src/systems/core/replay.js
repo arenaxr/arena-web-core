@@ -33,7 +33,7 @@ AFRAME.registerSystem('arena-replay', {
             
             let recordingFilename = params.get('recording');
             if (namespace && sceneId && session) {
-                recordingFilename = `${namespace}-${sceneId}-${session}.jsonl`;
+                recordingFilename = `${namespace}~${sceneId}~${session}.jsonl`;
             }
 
             if (recordingFilename) {
@@ -219,13 +219,15 @@ AFRAME.registerSystem('arena-replay', {
                     // Hydrate environment explicitly on the scene to match arena.js startup behavior
                     if (sceneOpt.data && sceneOpt.data['env-presets']) {
                         const envPresets = sceneOpt.data['env-presets'];
-                        const scene = document.querySelector('a-scene');
-                        if (scene) {
-                            let envString = '';
-                            Object.entries(envPresets).forEach(([k, v]) => {
-                                envString += `${k}:${v};`;
-                            });
-                            scene.setAttribute('environment', envString);
+                        const sceneRoot = document.getElementById('sceneRoot');
+                        if (sceneRoot) {
+                            let envObj = document.getElementById('env');
+                            if (!envObj) {
+                                envObj = document.createElement('a-entity');
+                                envObj.id = 'env';
+                                sceneRoot.appendChild(envObj);
+                            }
+                            envObj.setAttribute('environment', envPresets, true);
                         }
                     }
                     break;

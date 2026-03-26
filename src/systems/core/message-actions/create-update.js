@@ -51,7 +51,7 @@ export default class CreateUpdate {
         }
 
         switch (message.type) {
-            case 'object':
+            case 'object': {
                 // our own camera/controllers: bail, this message is meant for all other viewers
                 if (typeof ARENA !== 'undefined' && id === ARENA.idTag) {
                     return;
@@ -166,13 +166,14 @@ export default class CreateUpdate {
                     entityEl.sceneEl.setAttribute('camera-orbit', { target: entityEl });
                 }
                 return;
+            }
 
             case 'camera-override':
                 if (typeof ARENA === 'undefined' || id !== ARENA.idTag) return; // bail if not for us
                 this.handleCameraOverride(action, message);
                 return;
 
-            case 'rig':
+            case 'rig': {
                 if (typeof ARENA !== 'undefined' && id === ARENA.idTag) {
                     // our camera Rig
                     const cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
@@ -223,6 +224,7 @@ export default class CreateUpdate {
                     AFRAME.scenes[0].systems['arena-chat-ui'].relocalizedMsg();
                 }
                 return;
+            }
 
             case 'scene-options': {
                 // update env-presets section in real-time
@@ -232,12 +234,10 @@ export default class CreateUpdate {
                     if (!environment) {
                         environment = document.createElement('a-entity');
                         environment.id = 'env';
-                        environment.setAttribute('environment', true); // always ensure the component is added
                         sceneRoot.appendChild(environment);
                     }
-                    Object.entries(envPresets).forEach(([attribute, value]) => {
-                        environment.setAttribute('environment', attribute, value);
-                    });
+                    // Pass the object directly with the clobber flag (true) to replace instead of merge
+                    environment.setAttribute('environment', envPresets, true);
                 }
                 return;
             }
@@ -363,7 +363,7 @@ export default class CreateUpdate {
                 }
                 delete data.image; // no other properties applicable to image; delete it
                 break;
-            case 'text':
+            case 'text': {
                 // Support legacy `data: { text: 'STRING TEXT' }`
                 const theText = data.text;
                 if (typeof theText === 'string' || theText instanceof String) {
@@ -374,6 +374,7 @@ export default class CreateUpdate {
                 if (!Object.hasOwn(data, 'width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)
                 if (!Object.hasOwn(data, 'align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
                 break;
+            }
             case 'handLeft':
             case 'handRight':
                 newAttributes = {

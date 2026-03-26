@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+  <meta name="viewport"
+    content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
   <title>ARENA 3D Replay</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 
@@ -28,18 +29,19 @@
   <script src="../dist/index.js"></script>
 
   <style>
-    body, html {
+    body,
+    html {
       height: 100%;
       font-family: 'Roboto', sans-serif;
     }
 
     #replay-wrapper {
-        position: relative;
-        width: 100%;
-        height: 75vh;
-        border-radius: 5px;
-        overflow: hidden;
-        border: 1px solid #ddd;
+      position: relative;
+      width: 100%;
+      height: 75vh;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid #ddd;
     }
 
     #scrubber {
@@ -79,8 +81,8 @@
     }
 
     #timeDisplay {
-      font-family: monospace; 
-      min-width: 100px; 
+      font-family: monospace;
+      min-width: 100px;
       text-align: center;
     }
   </style>
@@ -88,17 +90,20 @@
 
 <body>
   <div id="header"></div>
-  
+
   <div class="container-fluid mt-3">
     <div class="row">
       <div class="col-12">
         <h3 class="mb-3">3D Scene Replay Viewer</h3>
         <div id="replay-wrapper">
-          <a-scene embedded arena-replay physics="debug: false" renderer="colorManagement: true">
+          <a-scene embedded arena-replay physics="debug: false" renderer="colorManagement: true"
+            gltf-model="dracoDecoderPath: /static/vendor/draco/;">
+            <a-assets></a-assets>
             <a-entity id="sceneRoot">
               <a-entity id="cameraRig" position="0 1.6 0">
                 <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
-                  <a-camera id="my-camera" look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 30" arrow-controls></a-camera>
+                  <a-camera id="my-camera" look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 30"
+                    arrow-controls></a-camera>
                 </a-entity>
               </a-entity>
             </a-entity>
