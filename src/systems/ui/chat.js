@@ -113,6 +113,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         // Announce ASAP
         this.presenceMsg({ action: 'join', type: UserType.ARENA });
 
+        if (ARENA.isRecording) {
+            this.showRecordingBanner(true);
+        }
+
         this.keepalive_interval_ms = 30000;
         // cleanup userlist periodically
         window.setInterval(this.userCleanup.bind(this), this.keepalive_interval_ms * 3);
@@ -426,6 +430,40 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
+     * Toggles visibility of the recording banner
+     * @param {boolean} isRecording - True to show banner
+     */
+    showRecordingBanner(isRecording) {
+        let banner = document.getElementById('recording-banner');
+        if (isRecording) {
+            if (!banner) {
+                const b = document.createElement('div');
+                b.id = 'recording-banner';
+                b.innerHTML = '<i class="fas fa-video text-danger" style="animation: blinker 1s linear infinite;"></i> Recording in Progress';
+                b.style.position = 'absolute';
+                b.style.top = '10px';
+                b.style.left = '50%';
+                b.style.transform = 'translateX(-50%)';
+                b.style.backgroundColor = 'rgba(0,0,0,0.6)';
+                b.style.color = 'white';
+                b.style.padding = '5px 15px';
+                b.style.borderRadius = '5px';
+                b.style.zIndex = '9999';
+                b.style.pointerEvents = 'none';
+                if (!document.getElementById('recording-banner-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'recording-banner-style';
+                    style.innerHTML = '@keyframes blinker { 50% { opacity: 0; } }';
+                    document.head.appendChild(style);
+                }
+                document.body.appendChild(b);
+            }
+        } else {
+            if (banner) banner.remove();
+        }
+    },
+
+    /**
      * Upserts a user in the liveUsers dictionary. Updates timestamp tag either way
      * @param {string} id - User ID, typically idTag
      * @param {object} user - User object
@@ -720,6 +758,12 @@ AFRAME.registerSystem('arena-chat-ui', {
                 setTimeout(() => {
                     ARENAAUTH.signOut();
                 }, 5000);
+            } else if (msg.action === 'recording') {
+                if (msg.text === 'recording_started') {
+                    this.showRecordingBanner(true);
+                } else if (msg.text === 'recording_stopped') {
+                    this.showRecordingBanner(false);
+                }
             }
             return;
         }

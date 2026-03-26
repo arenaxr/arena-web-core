@@ -44,6 +44,33 @@ AFRAME.registerSystem('arena-mqtt', {
 
         const mqttToken = ARENA.mqttToken.mqtt_token;
         const { nameSpace, sceneName, userClient, idTag } = ARENA;
+
+        // Check if scene is currently recording before joining
+        try {
+            const res = await fetch(`/recorder/status?namespace=${nameSpace}&sceneId=${sceneName}`, {credentials: 'include'});
+            if (res.ok) {
+                const data = await res.json();
+                if (data.is_recording) {
+                    const result = await Swal.fire({
+                        title: 'Recording in Progress',
+                        text: 'This scene is currently being recorded. Do you wish to join?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Join',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true,
+                    });
+                    if (!result.isConfirmed) {
+                        window.location.href = '/';
+                        return; // Exit and do not connect
+                    }
+                    ARENA.isRecording = true; // Signal chat.js to immediately load the banner
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to check recording status', e);
+        }
+
         // Do not pass functions in mqttClientOptions
         ARENA.Mqtt = this; // Restore old alias
         this.connect(
@@ -78,7 +105,6 @@ AFRAME.registerSystem('arena-mqtt', {
                 subscriptions: [
                     TOPICS.SUBSCRIBE.SCENE_PUBLIC.formatStr({ nameSpace, sceneName }),
                     TOPICS.SUBSCRIBE.SCENE_PRIVATE.formatStr({ nameSpace, sceneName, idTag }),
-                    `${TOPICS.TOKENS.REALM === 0 ? 'realm' : 'realm'}/s/${nameSpace}/${sceneName}/!record`,
                 ],
                 mqttHostURI: this.mqttHostURI,
                 idTag,
@@ -163,39 +189,6 @@ AFRAME.registerSystem('arena-mqtt', {
         delete message.workerTimestamp;
         const theMessage = message.payloadObj; // This will be given as json
         const topicSplit = message.destinationName.split('/');
-
-        // Handle recording banner
-        if (topicSplit.length === 5 && topicSplit[4] === '!record') {
-            const banner = document.getElementById('recording-banner');
-            if (theMessage && theMessage.status === 'recording') {
-                if (!banner) {
-                    const b = document.createElement('div');
-                    b.id = 'recording-banner';
-                    b.innerHTML = '<i class="fas fa-video text-danger" style="animation: blinker 1s linear infinite;"></i> Recording in Progress';
-                    b.style.position = 'absolute';
-                    b.style.top = '10px';
-                    b.style.left = '50%';
-                    b.style.transform = 'translateX(-50%)';
-                    b.style.backgroundColor = 'rgba(0,0,0,0.6)';
-                    b.style.color = 'white';
-                    b.style.padding = '5px 15px';
-                    b.style.borderRadius = '5px';
-                    b.style.zIndex = '9999';
-                    b.style.pointerEvents = 'none';
-                    // add keyframes
-                    if (!document.getElementById('recording-banner-style')) {
-                        const style = document.createElement('style');
-                        style.id = 'recording-banner-style';
-                        style.innerHTML = '@keyframes blinker { 50% { opacity: 0; } }';
-                        document.head.appendChild(style);
-                    }
-                    document.body.appendChild(b);
-                }
-            } else if (theMessage && theMessage.status === 'stopped') {
-                if (banner) banner.remove();
-            }
-            return;
-        }
 
         if (!theMessage) {
             warn('Received empty message');
