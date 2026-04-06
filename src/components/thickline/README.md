@@ -57,13 +57,13 @@ Install and use by directly including the [browser files](dist):
 
 #### NPM Installation
 
-Install via NPM:
+For local development in this repository, install via your pinned lockfile:
 
 ```bash
-npm install aframe-meshline-component
+npm ci
 ```
 
-Then register and use.
+Then register and use `aframe-meshline-component`.
 
 ```js
 require('aframe');
