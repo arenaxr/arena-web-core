@@ -7,6 +7,8 @@
  * the shared CreateUpdate/Delete handlers.
  */
 
+/* global ARENAAUTH */
+
 import axios from 'axios';
 import { CreateUpdate, Delete } from './message-actions/index';
 
@@ -39,7 +41,12 @@ AFRAME.registerSystem('arena-replay', {
             if (recordingFilename) {
                 const select = document.getElementById('recordingSelect');
                 if (select) select.value = recordingFilename;
-                this.fetchReplayData(recordingFilename);
+
+                // Refresh JWT with scene-specific subs rights before fetching
+                const sceneAuth = (namespace && sceneId)
+                    ? ARENAAUTH.refreshSceneAuth(`${namespace}/${sceneId}`)
+                    : Promise.resolve();
+                sceneAuth.then(() => this.fetchReplayData(recordingFilename));
             }
         });
     },
@@ -98,7 +105,12 @@ AFRAME.registerSystem('arena-replay', {
                     newUrl.searchParams.delete('recording');
                 }
                 window.history.replaceState({}, '', newUrl);
-                this.fetchReplayData(val);
+
+                // Refresh JWT with scene-specific subs rights before fetching
+                const sceneAuth = (namespace && sceneId)
+                    ? ARENAAUTH.refreshSceneAuth(`${namespace}/${sceneId}`)
+                    : Promise.resolve();
+                sceneAuth.then(() => this.fetchReplayData(val));
             } else {
                 newUrl.searchParams.delete('namespace');
                 newUrl.searchParams.delete('sceneId');
