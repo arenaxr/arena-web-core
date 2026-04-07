@@ -230,16 +230,21 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.screenshareButton.style.display = 'none';
             this.settingsButtons.push(this.screenshareButton);
 
-            // non-editors cannot change/obscure the scene by generating a new screenshare object
-            let screenObjPermitted = this.arena.isUserSceneWriter();
-            if (!screenObjPermitted) {
-                // without object permissions, are there existing objects to screenshare upon?
-                screenObjPermitted =
-                    sceneEl.querySelector('[screenshareable]') || sceneEl.querySelector('#screenshare');
-            }
+            if (jitsiPermitted && !ARENA.utils.isMobile()) {
+                // non-editors cannot change/obscure the scene by generating a new screenshare object
+                let screenObjPermitted = this.arena.isUserSceneWriter();
+                if (!screenObjPermitted) {
+                    // without object permissions, are there existing objects to screenshare upon?
+                    screenObjPermitted =
+                        sceneEl.querySelector('[screenshareable]') || sceneEl.querySelector('#screenshare');
+                }
 
-            if (screenObjPermitted && jitsiPermitted && !ARENA.utils.isMobile()) {
-                // no screenshare on mobile - doesn't work
+                if (!screenObjPermitted) {
+                    const btn = this.screenshareButton.querySelector('button');
+                    btn.setAttribute('title', 'Screen sharing requires a screenshareable object or scene editor permissions');
+                    btn.classList.add('disabled');
+                }
+
                 this._buttonList[this.buttons.SCREENSHARE] = this.screenshareButton;
                 this.iconsDiv.appendChild(this.screenshareButton);
             }
@@ -385,40 +390,48 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         pagesDiv.appendChild(version);
 
         // Recording controls
-        if (sceneWriter) {
-            const recordDiv = document.createElement('div');
-            appendBold(recordDiv, 'Recording: ');
-            formDiv.appendChild(recordDiv);
+        const recordDiv = document.createElement('div');
+        appendBold(recordDiv, 'Recording: ');
+        formDiv.appendChild(recordDiv);
 
-            this.recordButton = document.createElement('a');
-            this.recordButton.href = '#';
-            this.recordButton.innerHTML = 'Start/Stop Recording';
+        this.recordButton = document.createElement('a');
+        this.recordButton.href = '#';
+        this.recordButton.innerHTML = 'Start/Stop Recording';
+        if (sceneWriter) {
             this.recordButton.title = 'Start or stop recording this scene';
             this.recordButton.onclick = this.handleRecord.bind(this);
-            recordDiv.appendChild(this.recordButton);
+        } else {
+            this.recordButton.title = 'Recording requires scene editor permissions';
+            this.recordButton.className = 'disabled';
+            this.recordButton.onclick = (e) => e.preventDefault();
         }
+        recordDiv.appendChild(this.recordButton);
 
         // Auth status
         appendBold(formDiv, 'Scene: ');
         this.sceneNameDiv = document.createElement('span');
         formDiv.appendChild(this.sceneNameDiv);
+        formDiv.append(' (');
+        const aSec = document.createElement('a');
+        aSec.innerHTML = 'Security';
         if (sceneWriter) {
-            // add permissions link
-            formDiv.append(' (');
-            const aSec = document.createElement('a');
             aSec.href = `/user/v2/profile/scenes/${this.arena.namespacedScene}`;
             aSec.target = '_blank';
             aSec.rel = 'noopener noreferrer';
-            aSec.innerHTML = 'Security';
             aSec.title = 'Open the security controls for the scene (editors only)';
-            formDiv.appendChild(aSec);
-            formDiv.append(')');
+        } else {
+            aSec.href = '#';
+            aSec.title = 'Security settings require scene editor permissions';
+            aSec.className = 'disabled';
+            aSec.onclick = (e) => e.preventDefault();
         }
+        formDiv.appendChild(aSec);
+        formDiv.append(')');
         formDiv.appendChild(document.createElement('br'));
 
         appendBold(formDiv, 'Authenticator: ');
         this.authType = document.createElement('span');
-        this.authType.style.textTransform = 'capitalize';
+        this.authType.className = 'auth-type';
         formDiv.appendChild(this.authType);
         formDiv.appendChild(document.createElement('br'));
 
@@ -639,6 +652,9 @@ AFRAME.registerSystem('arena-side-menu-ui', {
 
         const { sceneEl } = el;
         const cameraEl = sceneEl.camera.el;
+
+        // Guard against clicks when disabled
+        if (this.screenshareButton.querySelector('button').classList.contains('disabled')) return;
 
         if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
 
