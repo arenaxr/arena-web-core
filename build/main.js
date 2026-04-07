@@ -67,7 +67,6 @@ window.addEventListener('onauth', async (e) => {
     const deleteSceneButton = document.getElementById('deletescene');
     const importSceneButton = document.getElementById('importscene');
     const exportSceneButton = document.getElementById('exportscene');
-    const recordSceneButton = document.getElementById('recordscene');
     const uploadFilestoreButton = document.getElementById('uploadfilestore');
     const setValueButton = document.getElementById('setvalue');
     const selectSchema = document.getElementById('objtype');
@@ -579,35 +578,6 @@ window.addEventListener('onauth', async (e) => {
         item.addEventListener('click', () => {
             const modal = document.getElementById('newSceneModal');
             modal.style.display = 'none';
-        });
-    });
-
-    recordSceneButton.addEventListener('click', async () => {
-        if (sceneinput.disabled === true || !sceneinput.value) return;
-        const namespace = namespaceinput.value;
-        const sceneId = sceneinput.value;
-        const sceneFqn = `${namespace}/${sceneId}`;
-
-        Swal.fire({
-            title: 'Recording',
-            text: `Start or stop recording for ${sceneFqn}?`,
-            icon: 'video',
-            showCancelButton: true,
-            showDenyButton: true,
-            confirmButtonText: 'Start Recording',
-            denyButtonText: 'Stop Recording',
-            cancelButtonText: 'Cancel',
-            showCloseButton: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                axios.post('/recorder/start', { namespace, sceneId }, { withCredentials: true })
-                    .then(() => Swal.fire('Started!', 'Recording has begun.', 'success'))
-                    .catch(err => Swal.fire('Error', err.response?.data || err.message, 'error'));
-            } else if (result.isDenied) {
-                axios.post('/recorder/stop', { namespace, sceneId }, { withCredentials: true })
-                    .then(() => Swal.fire('Stopped!', 'Recording has stopped.', 'success'))
-                    .catch(err => Swal.fire('Error', err.response?.data || err.message, 'error'));
-            }
         });
     });
 

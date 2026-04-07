@@ -27,28 +27,37 @@ AFRAME.registerSystem('arena-replay', {
         this.isPlaying = false;
 
         this.setupUI();
-        this.fetchRecordingsList().then(() => {
-            const params = new URLSearchParams(window.location.search);
-            const namespace = params.get('namespace');
-            const sceneId = params.get('sceneId');
-            const session = params.get('session');
-            
-            let recordingFilename = params.get('recording');
-            if (namespace && sceneId && session) {
-                recordingFilename = `${namespace}~${sceneId}~${session}.jsonl`;
-            }
 
-            if (recordingFilename) {
-                const select = document.getElementById('recordingSelect');
-                if (select) select.value = recordingFilename;
+        const loadRecordings = () => {
+            this.fetchRecordingsList().then(() => {
+                const params = new URLSearchParams(window.location.search);
+                const namespace = params.get('namespace');
+                const sceneId = params.get('sceneId');
+                const session = params.get('session');
+                
+                let recordingFilename = params.get('recording');
+                if (namespace && sceneId && session) {
+                    recordingFilename = `${namespace}~${sceneId}~${session}.jsonl`;
+                }
 
-                // Refresh JWT with scene-specific subs rights before fetching
-                const sceneAuth = (namespace && sceneId)
-                    ? ARENAAUTH.refreshSceneAuth(`${namespace}/${sceneId}`)
-                    : Promise.resolve();
-                sceneAuth.then(() => this.fetchReplayData(recordingFilename));
-            }
-        });
+                if (recordingFilename) {
+                    const select = document.getElementById('recordingSelect');
+                    if (select) select.value = recordingFilename;
+
+                    // Refresh JWT with scene-specific subs rights before fetching
+                    const sceneAuth = (namespace && sceneId)
+                        ? ARENAAUTH.refreshSceneAuth(`${namespace}/${sceneId}`)
+                        : Promise.resolve();
+                    sceneAuth.then(() => this.fetchReplayData(recordingFilename));
+                }
+            });
+        };
+
+        if (window.ARENAAUTH && window.ARENAAUTH.mqtt_token) {
+            loadRecordings();
+        } else {
+            window.addEventListener('onauth', loadRecordings, { once: true });
+        }
     },
 
     setupUI: function() {

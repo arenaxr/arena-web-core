@@ -28,16 +28,6 @@ window.addEventListener('onauth', async (e) => {
     const mqttToken = e.detail.mqtt_token;
     const auth = ARENAAUTH.getAuthStatus();
 
-    const hasPublRight = (namespace, sceneId) => {
-        const writeTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
-            nameSpace: namespace,
-            sceneName: sceneId,
-            userClient: this.userClient,
-            idTag: '+',
-        });
-        return ARENAAUTH.matchJWT(writeTopic, this.mqttToken.token_payload.publ);
-    };
-
     // all auth types should have access to this page, even anonymous users should be able to read public scenes
 
     window.username = auth.username;
@@ -91,8 +81,6 @@ window.addEventListener('onauth', async (e) => {
 
     const enterPublicSceneBtn = document.getElementById('enterPublicSceneBtn');
     const enterArPublicSceneBtn = document.getElementById('enterArPublicSceneBtn');
-    const recordUserSceneBtn = document.getElementById('recordUserSceneBtn');
-    const recordPublicSceneBtn = document.getElementById('recordPublicSceneBtn');
 
     const advancedLinksDiv = document.getElementById('uri-builder');
     const userNoteSpan = document.getElementById('userNoteSpan');
@@ -137,18 +125,10 @@ window.addEventListener('onauth', async (e) => {
             scenePermsLink.href = `${window.location.origin}/user/v2/profile/scenes/${_e.target.value}`;
             deleteUserSceneBtn.value = _e.target.value;
             toggleUserSceneButtons(true);
-
-            const [namespace, sceneId] = window.userSceneId.split('/');
-            if (hasPublRight(namespace, sceneId)) {
-                recordUserSceneBtn.classList.remove('disabled');
-            } else {
-                recordUserSceneBtn.classList.add('disabled');
-            }
         } else {
             window.userSceneId = '';
             updateUserSceneUrlBox('No valid scene selected');
             toggleUserSceneButtons(false);
-            recordUserSceneBtn.classList.add('disabled');
         }
     }
 
@@ -157,18 +137,10 @@ window.addEventListener('onauth', async (e) => {
             window.publicSceneId = _e.target.value;
             publicSceneUrl.value = `${window.location.origin}/${_e.target.value}`;
             togglePublicSceneButtons(true);
-
-            const [namespace, sceneId] = window.publicSceneId.split('/');
-            if (hasPublRight(namespace, sceneId)) {
-                recordPublicSceneBtn.classList.remove('disabled');
-            } else {
-                recordPublicSceneBtn.classList.add('disabled');
-            }
         } else {
             window.publicSceneId = '';
             publicSceneUrl.value = '';
             togglePublicSceneButtons(false);
-            recordPublicSceneBtn.classList.add('disabled');
         }
     }
 
@@ -185,33 +157,7 @@ window.addEventListener('onauth', async (e) => {
     enterUserSceneBtn.addEventListener('click', () => (window.location = userSceneUrl.value));
     enterArUserSceneBtn.addEventListener('click', () => (window.location = `${userSceneUrl.value}?armode=1`));
 
-    const handleRecord = (sceneFqn) => {
-        const [namespace, sceneId] = sceneFqn.split('/');
-        Swal.fire({
-            title: 'Recording',
-            text: `Start or stop recording for ${sceneFqn}?`,
-            icon: 'video',
-            showCancelButton: true,
-            showDenyButton: true,
-            confirmButtonText: 'Start Recording',
-            denyButtonText: 'Stop Recording',
-            cancelButtonText: 'Cancel',
-            showCloseButton: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                axios.post('/recorder/start', { namespace, sceneId }, { withCredentials: true })
-                    .then(() => Swal.fire('Started!', 'Recording has begun.', 'success'))
-                    .catch(err => Swal.fire('Error', err.response?.data || err.message, 'error'));
-            } else if (result.isDenied) {
-                axios.post('/recorder/stop', { namespace, sceneId }, { withCredentials: true })
-                    .then(() => Swal.fire('Stopped!', 'Recording has stopped.', 'success'))
-                    .catch(err => Swal.fire('Error', err.response?.data || err.message, 'error'));
-            }
-        });
-    };
 
-    recordUserSceneBtn.addEventListener('click', () => handleRecord(window.userSceneId));
-    recordPublicSceneBtn.addEventListener('click', () => handleRecord(window.publicSceneId));
 
     // set listeners for advanced links URI-builder
     advancedLinksUserBtn.addEventListener('click', () => {
