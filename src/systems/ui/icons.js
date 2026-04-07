@@ -231,18 +231,20 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.settingsButtons.push(this.screenshareButton);
 
             if (jitsiPermitted && !ARENA.utils.isMobile()) {
-                // non-editors cannot change/obscure the scene by generating a new screenshare object
-                let screenObjPermitted = this.arena.isUserSceneWriter();
-                if (!screenObjPermitted) {
-                    // without object permissions, are there existing objects to screenshare upon?
-                    screenObjPermitted =
-                        sceneEl.querySelector('[screenshareable]') || sceneEl.querySelector('#screenshare');
-                }
+                const screenshareBtn = this.screenshareButton.querySelector('button');
 
-                if (!screenObjPermitted) {
-                    const btn = this.screenshareButton.querySelector('button');
-                    btn.setAttribute('title', 'Screen sharing requires a screenshareable object or scene editor permissions');
-                    btn.classList.add('disabled');
+                if (!this.arena.isUserSceneWriter()) {
+                    // Start disabled; persist objects may not be in the DOM yet
+                    screenshareBtn.setAttribute('title', 'Screen sharing requires a screenshareable object or scene editor permissions');
+                    screenshareBtn.classList.add('disabled');
+
+                    // Re-evaluate once scene objects finish loading from persistence
+                    sceneEl.addEventListener(ARENA_EVENTS.SCENE_OBJ_LOADED, () => {
+                        if (sceneEl.querySelector('[screenshareable]') || sceneEl.querySelector('#screenshare')) {
+                            screenshareBtn.setAttribute('title', data.screenshareButtonText);
+                            screenshareBtn.classList.remove('disabled');
+                        }
+                    });
                 }
 
                 this._buttonList[this.buttons.SCREENSHARE] = this.screenshareButton;
