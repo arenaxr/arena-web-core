@@ -434,12 +434,11 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {boolean} isRecording - True to show banner
      */
     showRecordingBanner(isRecording) {
-        let banner = document.getElementById('recording-banner');
+        const banner = document.getElementById('recording-banner');
         if (isRecording) {
             if (!banner) {
                 const b = document.createElement('div');
                 b.id = 'recording-banner';
-                b.innerHTML = '<i class="fas fa-video text-danger" style="animation: blinker 1s linear infinite;"></i> Recording in Progress';
                 b.style.position = 'absolute';
                 b.style.top = '10px';
                 b.style.left = '50%';
@@ -449,7 +448,51 @@ AFRAME.registerSystem('arena-chat-ui', {
                 b.style.padding = '5px 15px';
                 b.style.borderRadius = '5px';
                 b.style.zIndex = '9999';
-                b.style.pointerEvents = 'none';
+                b.style.pointerEvents = 'auto';
+                b.style.display = 'flex';
+                b.style.alignItems = 'center';
+                b.style.gap = '10px';
+                b.style.fontFamily = 'sans-serif';
+                b.style.fontSize = '13px';
+
+                const label = document.createElement('span');
+                label.innerHTML =
+                    '<i class="fas fa-video text-danger" style="animation: blinker 1s linear infinite;"></i> Recording';
+                b.appendChild(label);
+
+                // Stop button
+                const stopBtn = document.createElement('button');
+                stopBtn.id = 'recording-stop-btn';
+                stopBtn.textContent = '⏹ Stop';
+                stopBtn.style.background = '#dc3545';
+                stopBtn.style.color = 'white';
+                stopBtn.style.border = 'none';
+                stopBtn.style.borderRadius = '3px';
+                stopBtn.style.padding = '2px 8px';
+                stopBtn.style.cursor = 'pointer';
+                stopBtn.style.fontSize = '12px';
+                stopBtn.title = 'Stop the current recording';
+                stopBtn.addEventListener('click', () => {
+                    const namespace = ARENA.nameSpace;
+                    const sceneId = ARENA.sceneName;
+                    if (!namespace || !sceneId) return;
+                    fetch('/recorder/stop', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ namespace, sceneId }),
+                    })
+                        .then(async (res) => {
+                            if (!res.ok) {
+                                const text = await res.text();
+                                console.error('[Recorder] Stop failed:', text);
+                            }
+                            // Banner will be removed by the incoming recording_stopped chat-ctrl
+                        })
+                        .catch((err) => console.error('[Recorder] Stop error:', err.message));
+                });
+                b.appendChild(stopBtn);
+
                 if (!document.getElementById('recording-banner-style')) {
                     const style = document.createElement('style');
                     style.id = 'recording-banner-style';
@@ -458,8 +501,8 @@ AFRAME.registerSystem('arena-chat-ui', {
                 }
                 document.body.appendChild(b);
             }
-        } else {
-            if (banner) banner.remove();
+        } else if (banner) {
+            banner.remove();
         }
     },
 
@@ -763,6 +806,13 @@ AFRAME.registerSystem('arena-chat-ui', {
                     this.showRecordingBanner(true);
                 } else if (msg.text === 'recording_stopped') {
                     this.showRecordingBanner(false);
+                } else if (msg.text === 'recording_failed') {
+                    this.showRecordingBanner(false);
+                    this.displayAlert(
+                        'Recording failed to start. The recorder could not subscribe to the scene.',
+                        5000,
+                        'error'
+                    );
                 }
             }
             return;
