@@ -3,6 +3,7 @@
 /* eslint-disable import/extensions */
 import * as PersistObjects from './persist-objects.js';
 import TOPICS from '../src/constants/topics.js';
+import * as FileStore from '../src/utils/filestore-upload.js';
 
 const Alert = Swal.mixin({
     toast: true,
@@ -176,10 +177,10 @@ window.addEventListener('onauth', async (e) => {
                 validate.value = JSON.stringify(validation_errors, null, 2);
             } else {
                 validate.value = 'valid';
+                uploadFilestoreButton.style.display =
+                    FileStore.filestoreUploadSchema[json.data.object_type] === undefined ? 'none' : 'inline';
             }
             insertEulerRotationEditor();
-            uploadFilestoreButton.style.display =
-                ARENAAUTH.filestoreUploadSchema[json.data.object_type] === undefined ? 'none' : 'inline';
         });
 
         const typeSel = document.getElementsByName('root[type]')[0];
@@ -445,7 +446,7 @@ window.addEventListener('onauth', async (e) => {
     // switch image/model
     uploadFilestoreButton.addEventListener('click', async () => {
         const jsonObj = JSON.parse(output.getValue());
-        await ARENAAUTH.uploadFileStoreDialog(
+        await FileStore.uploadFileStoreDialog(
             namespaceinput.value,
             sceneinput.value,
             jsonObj.object_id,
