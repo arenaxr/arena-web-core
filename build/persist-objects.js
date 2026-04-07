@@ -10,7 +10,6 @@
 /* eslint-disable import/extensions */
 import TOPICS from '../src/constants/topics.js';
 import MqttClient from './mqtt-client.js';
-import ARENAUserAccount from './arena-account.js';
 import { TTLCache } from './ttl-cache.js';
 
 let persist;
@@ -80,7 +79,7 @@ export async function init(settings) {
 
 export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, sceneList) {
     try {
-        persist.authState = await ARENAUserAccount.userAuthState();
+        persist.authState = await ARENAAUTH.userAuthState();
     } catch (err) {
         Swal.fire({
             icon: 'Error',
@@ -385,7 +384,7 @@ export async function populateNamespaceList(nsInput, nsList) {
     let scenes = [];
     // get editable scenes...
     try {
-        const uScenes = await ARENAUserAccount.userScenes();
+        const uScenes = await ARENAAUTH.userScenes();
         uScenes.forEach((uScene) => {
             scenes.push(uScene.name);
         });
@@ -536,7 +535,7 @@ export async function addNewScene(ns, sceneName, newObjs) {
     const exists = persist.scenes.find((scene) => scene.ns === ns && scene.name === sceneName);
     if (!exists) {
         try {
-            const result = await ARENAUserAccount.requestUserNewScene(`${ns}/${sceneName}`);
+            const result = await ARENAAUTH.requestUserNewScene(`${ns}/${sceneName}`);
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -564,7 +563,7 @@ export async function deleteScene(ns, sceneName) {
     selectedObjsPerformAction('delete', `${ns}/${sceneName}`, true);
     let result;
     try {
-        result = await ARENAUserAccount.requestDeleteUserScene(`${ns}/${sceneName}`);
+        result = await ARENAAUTH.requestDeleteUserScene(`${ns}/${sceneName}`);
     } catch (err) {
         Alert.fire({
             icon: 'error',

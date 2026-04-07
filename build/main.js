@@ -2,7 +2,6 @@
 
 /* eslint-disable import/extensions */
 import * as PersistObjects from './persist-objects.js';
-import ARENAUserAccount from './arena-account.js';
 import TOPICS from '../src/constants/topics.js';
 
 const Alert = Swal.mixin({
@@ -403,9 +402,8 @@ window.addEventListener('onauth', async (e) => {
             },
         }).then(async (result) => {
             if (result.isDismissed) return;
-            // TODO: check if add new objects is check on an existing unlisted scene? Might result in adding objects to the scene...
             const namespacedScene = `${result.value.ns}/${result.value.scene}`;
-            ARENAUserAccount.refreshAuthToken('google', username, namespacedScene);
+            ARENAAUTH.refreshSceneAuth(namespacedScene);
             const exists = await PersistObjects.addNewScene(
                 result.value.ns,
                 result.value.scene,
@@ -707,8 +705,7 @@ window.addEventListener('onauth', async (e) => {
         }
         saved_scene = sceneinput.value;
         const namespacedScene = `${namespaceinput.value}/${sceneinput.value}`;
-        // TODO: trigger auth
-        ARENAUserAccount.refreshAuthToken('google', username, namespacedScene);
+        ARENAAUTH.refreshSceneAuth(namespacedScene);
         await PersistObjects.populateObjectList(namespacedScene, objFilter.value, objTypeFilter);
         reload();
         updateLink();
@@ -982,7 +979,7 @@ window.addEventListener('onauth', async (e) => {
     }
 
     const hostData = mqttAndPersistURI(location.hostname);
-    const authState = await ARENAUserAccount.userAuthState();
+    const authState = await ARENAAUTH.userAuthState();
     if (!authState.authenticated) {
         Swal.fire({
             icon: 'error',
@@ -1072,7 +1069,7 @@ window.addEventListener('onauth', async (e) => {
     updateLink();
     updateUrl();
     const namespacedScene = `${ns}/${s}`;
-    ARENAUserAccount.refreshAuthToken('google', username, namespacedScene);
+    ARENAAUTH.refreshSceneAuth(namespacedScene);
     updatePublishControlsByToken(ns, s, mqttToken, userClient);
 
     Swal.close();
