@@ -398,7 +398,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
 
         this.recordButton = document.createElement('a');
         this.recordButton.href = '#';
-        this.recordButton.innerHTML = 'Start/Stop Recording';
+        this.recordButton.innerHTML = 'Record';
         if (sceneWriter) {
             this.recordButton.title = 'Start or stop recording this scene';
             this.recordButton.onclick = this.handleRecord.bind(this);
@@ -408,6 +408,16 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.recordButton.onclick = (e) => e.preventDefault();
         }
         recordDiv.appendChild(this.recordButton);
+
+        recordDiv.append(' | ');
+
+        const replayLink = document.createElement('a');
+        replayLink.href = `/replay/?scene=${this.arena.namespacedScene}`;
+        replayLink.target = '_blank';
+        replayLink.rel = 'noopener noreferrer';
+        replayLink.innerHTML = 'Replay';
+        replayLink.title = 'Open the 3D Replay viewer';
+        recordDiv.appendChild(replayLink);
 
         // Auth status
         appendBold(formDiv, 'Scene: ');
