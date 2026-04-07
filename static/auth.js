@@ -24,7 +24,7 @@
 
 // auth namespace
 window.ARENAAUTH = {
-    nonScenePaths: ['scenes', 'build', 'programs', 'network', 'files', 'dashboard'],
+    nonScenePaths: ['scenes', 'build', 'programs', 'network', 'files', 'dashboard', 'replay'],
     signInPath: `//${window.location.host}/user/v2/login`,
     signOutPath: `//${window.location.host}/user/v2/logout`,
     filestoreUploadSchema: {
@@ -250,6 +250,44 @@ window.ARENAAUTH = {
             }
         } catch (e) {
             throw Error(`Error requesting auth token: ${e.message}`);
+        }
+    },
+    /**
+     * Re-request the MQTT auth token scoped to a specific scene.
+     * Use this when the current JWT may not have subscribe/publish rights for a
+     * particular namespace/scene (e.g., switching scenes in the Build page or
+     * Replay viewer). This updates the mqtt_token cookie server-side.
+     * @param {string} namespacedScene - Scene in "namespace/sceneName" format
+     * @return {Promise<{mqtt_username: string, mqtt_token: string}>}
+     */
+    async refreshSceneAuth(namespacedScene) {
+        if (!this.user_type || !this.user_username) {
+            console.warn('[Auth] Cannot refresh scene auth: user not authenticated yet');
+            return null;
+        }
+        const authParams = {
+            username: this.user_username,
+            id_auth: this.user_type,
+            client: 'web',
+            realm: ARENA.params?.realm || (typeof ARENADefaults !== 'undefined' ? ARENADefaults.realm : 'realm'),
+            scene: namespacedScene,
+        };
+        try {
+            const res = await this.makeUserRequest(
+                'POST',
+                '/user/v2/mqtt_auth',
+                authParams,
+                'application/x-www-form-urlencoded'
+            );
+            if (!res) return null;
+            const authData = await res.json();
+            this.user_username = authData.username;
+            this.token_payload = this.parseJwt(authData.token);
+            console.log(`[Auth] Refreshed JWT for scene: ${namespacedScene}`);
+            return { mqtt_username: authData.username, mqtt_token: authData.token };
+        } catch (e) {
+            console.error(`[Auth] Failed to refresh scene auth: ${e.message}`);
+            return null;
         }
     },
     /**
@@ -605,6 +643,44 @@ window.ARENAAUTH = {
     /**
      * Internal call to perform fetch request
      */
+    /**
+     * Request user state data for client-side state management
+     * @return {Promise<object>} object with user account data
+     */
+    async userAuthState() {
+        const res = await this.makeUserRequest('GET', `/user/v2/user_state`);
+        if (!res) return null;
+        return res.json();
+    },
+    /**
+     * Request scene names which the user has permission to from user database
+     * @return {Promise<string[]>} list of scene names
+     */
+    async userScenes() {
+        const res = await this.makeUserRequest('GET', '/user/v2/my_scenes');
+        if (!res) return null;
+        return res.json();
+    },
+    /**
+     * Request a scene is added to the user database.
+     * @param {string} sceneNamespace name of the scene without namespace
+     * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
+     */
+    async requestUserNewScene(sceneNamespace, isPublic = false) {
+        // TODO: add public parameter
+        const res = await this.makeUserRequest('POST', `/user/v2/scenes/${sceneNamespace}`);
+        if (!res) return null;
+        return res.json();
+    },
+    /**
+     * Request to delete scene permissions from user db
+     * @param {string} sceneNamespace name of the scene without namespace
+     */
+    async requestDeleteUserScene(sceneNamespace) {
+        const res = await this.makeUserRequest('DELETE', `/user/v2/scenes/${sceneNamespace}`);
+        if (!res) return null;
+        return res.json();
+    },
     async makeUserRequest(method, url, params = undefined, contentType = undefined) {
         return fetch(url, {
             headers: {
@@ -615,7 +691,7 @@ window.ARENAAUTH = {
             body: params ? new URLSearchParams(params) : null,
         })
             .then((response) => {
-                if (response.ok) {
+                if (response.ok || (method === 'DELETE' && response.status === 404)) {
                     return response;
                 }
                 throw new Error(
