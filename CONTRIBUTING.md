@@ -145,6 +145,18 @@ When adding or updating a dependency:
 - Verify `package.json` does not contain `^` or `~` prefixes before committing
 - Always commit `package-lock.json` alongside `package.json` changes
 
+### 9. Repo Linting & Formatting
+
+This repository enforces code style using [ESLint](https://eslint.org/) and [Prettier](https://prettier.io/). Before submitting a pull request, you **must** format and lint your javascript files.
+
+```bash
+# Automatically format code using Prettier
+npm run format
+
+# Find and automatically fix linting errors using ESLint
+npm run lint
+```
+
 ## Build & Test
 
 ```bash
@@ -153,9 +165,6 @@ npm run watch
 
 # Production build
 npm run build
-
-# Lint
-npm run lint
 ```
 
 ## File Structure Conventions
@@ -170,3 +179,5 @@ npm run lint
 | `replay/` | Standalone + Bundle | 3D replay viewer page |
 | `static/` | Standalone | Shared vendor libs, auth, navbar |
 | `conf/` | Config | Deployment defaults |
+
+The `arena-web-core` uses [Release Please](https://github.com/googleapis/release-please) to automate CHANGELOG generation and semantic versioning. Your PR titles *must* follow Conventional Commit standards (e.g., `feat:`, `fix:`, `chore:`).
