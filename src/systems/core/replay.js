@@ -82,12 +82,12 @@ AFRAME.registerSystem('arena-replay', {
                 const targetTime = pct * this.duration;
                 let targetIdx = 0;
                 for (let i = 0; i < this.messages.length; i++) {
-                    if (this.messages[i].timeOffset >= targetTime) {
+                    if (this.messages[i].timeOffset <= targetTime) {
                         targetIdx = i;
+                    } else {
                         break;
                     }
                 }
-                if (targetIdx === 0 && targetTime > 0) targetIdx = this.messages.length - 1;
 
                 this.playhead = targetIdx;
                 this.fastForwardTo(this.playhead);
@@ -237,6 +237,34 @@ AFRAME.registerSystem('arena-replay', {
                 } else {
                     break;
                 }
+            }
+
+            // Topological sort the persist snapshot to ensure parents are created before children
+            const snapshot = this.messages.slice(0, persistEndIdx + 1);
+            const orderedSnapshot = [];
+            const snapshotMap = new Map(snapshot.map(m => [m.object_id, m]));
+            
+            const addMsg = (msg, descendants = []) => {
+                if (!snapshotMap.has(msg.object_id)) return;
+                const parent = msg.data?.parent;
+                if (parent && snapshotMap.has(parent)) {
+                    if (descendants.includes(parent) || msg.object_id === parent) {
+                        console.warn('[Replay] Circular reference detected in snapshot for', msg.object_id);
+                    } else {
+                        addMsg(snapshotMap.get(parent), [...descendants, msg.object_id]);
+                    }
+                }
+                orderedSnapshot.push(msg);
+                snapshotMap.delete(msg.object_id);
+            };
+
+            while (snapshotMap.size > 0) {
+                const [id, msg] = snapshotMap.entries().next().value;
+                addMsg(msg);
+            }
+
+            for (let i = 0; i <= persistEndIdx; i++) {
+                this.messages[i] = orderedSnapshot[i];
             }
 
             // Ensure scene-options geometry is processed first so environment/lighting exists
