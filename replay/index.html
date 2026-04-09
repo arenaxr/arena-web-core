@@ -43,9 +43,9 @@
 
     #replay-title {
       position: fixed;
-      top: 60px;
-      /* adjusted via JS after navbar renders */
-      left: 10px;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 9999;
       background: rgba(0, 0, 0, 0.6);
       color: #fff;
@@ -109,7 +109,6 @@
 <body>
   <div id="header"></div>
   <div id="replay-title">ARENA 3D Replay</div>
-  <script src="replay.js"></script>
 
   <a-scene arena-replay physics="debug: false" renderer="colorManagement: true"
     gltf-model="dracoDecoderPath: /static/vendor/draco/;">
