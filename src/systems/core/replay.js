@@ -172,8 +172,16 @@ AFRAME.registerSystem('arena-replay', {
         const sceneRoot = document.getElementById('sceneRoot');
         const scene = document.querySelector('a-scene');
 
-        if (scene) {
-            scene.setAttribute('environment', 'preset: default; seed: 1');
+        if (sceneRoot) {
+            let envObj = document.getElementById('env');
+            if (envObj) {
+                // Completely remove the old one to avoid state leakage in the complex environment component
+                sceneRoot.removeChild(envObj);
+            }
+            envObj = document.createElement('a-entity');
+            envObj.id = 'env';
+            envObj.setAttribute('environment', 'preset: default; seed: 1', true);
+            sceneRoot.appendChild(envObj);
         }
 
         if (sceneRoot) {
@@ -236,21 +244,6 @@ AFRAME.registerSystem('arena-replay', {
                 if (this.messages[i].type === 'scene-options') {
                     const sceneOpt = this.messages.splice(i, 1)[0];
                     this.messages.unshift(sceneOpt);
-
-                    // Hydrate environment explicitly on the scene to match arena.js startup behavior
-                    if (sceneOpt.data && sceneOpt.data['env-presets']) {
-                        const envPresets = sceneOpt.data['env-presets'];
-                        const sceneRoot = document.getElementById('sceneRoot');
-                        if (sceneRoot) {
-                            let envObj = document.getElementById('env');
-                            if (!envObj) {
-                                envObj = document.createElement('a-entity');
-                                envObj.id = 'env';
-                                sceneRoot.appendChild(envObj);
-                            }
-                            envObj.setAttribute('environment', envPresets, true);
-                        }
-                    }
                     break;
                 }
             }
@@ -377,9 +370,17 @@ AFRAME.registerSystem('arena-replay', {
 
 // Attach system to scene and set default environment when loaded via replay page
 document.addEventListener('DOMContentLoaded', () => {
+    const sceneRoot = document.getElementById('sceneRoot');
     const scene = document.querySelector('a-scene');
-    if (scene && scene.hasAttribute('arena-replay')) {
+    if (scene && sceneRoot && scene.hasAttribute('arena-replay')) {
         // Set default environment for lighting and ground plane (matches ARENA default)
-        scene.setAttribute('environment', 'preset: default; seed: 1');
+        let envObj = document.getElementById('env');
+        if (envObj) {
+            sceneRoot.removeChild(envObj);
+        }
+        envObj = document.createElement('a-entity');
+        envObj.id = 'env';
+        envObj.setAttribute('environment', 'preset: default; seed: 1', true);
+        sceneRoot.appendChild(envObj);
     }
 });
