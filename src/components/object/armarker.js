@@ -68,7 +68,9 @@ AFRAME.registerComponent('armarker', {
     },
     init() {
         this.update();
-        this.system.registerComponent(this);
+        if (this.system?.registerComponent) {
+            this.system.registerComponent(this);
+        }
         if (this.data.buildable) {
             // Toggle clientside dynamic
             this.el.setAttribute('material', 'wireframe', this.data.dynamic);
@@ -91,6 +93,8 @@ AFRAME.registerComponent('armarker', {
         }
     },
     remove() {
-        this.system.unregisterComponent(this);
+        if (this.system?.unregisterComponent) {
+            this.system.unregisterComponent(this);
+        }
     },
 });

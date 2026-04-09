@@ -21,6 +21,9 @@ AFRAME.registerSystem('arena-mqtt', {
     },
 
     init() {
+        // Skip MQTT in replay mode
+        if (this.el.hasAttribute('arena-replay')) return;
+
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
         this.onSceneMessageArrived = this.onSceneMessageArrived.bind(this);
     },
@@ -41,6 +44,33 @@ AFRAME.registerSystem('arena-mqtt', {
 
         const mqttToken = ARENA.mqttToken.mqtt_token;
         const { nameSpace, sceneName, userClient, idTag } = ARENA;
+
+        // Check if scene is currently recording before joining
+        try {
+            const res = await fetch(`/recorder/status?namespace=${nameSpace}&sceneId=${sceneName}`, {credentials: 'include'});
+            if (res.ok) {
+                const data = await res.json();
+                if (data.is_recording) {
+                    const result = await Swal.fire({
+                        title: 'Recording in Progress',
+                        text: 'This scene is currently being recorded. Do you wish to join?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Join',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true,
+                    });
+                    if (!result.isConfirmed) {
+                        window.location.href = '/';
+                        return; // Exit and do not connect
+                    }
+                    ARENA.isRecording = true; // Signal chat.js to immediately load the banner
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to check recording status', e);
+        }
+
         // Do not pass functions in mqttClientOptions
         ARENA.Mqtt = this; // Restore old alias
         this.connect(

@@ -113,6 +113,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         // Announce ASAP
         this.presenceMsg({ action: 'join', type: UserType.ARENA });
 
+        if (ARENA.isRecording) {
+            this.showRecordingBanner(true);
+        }
+
         this.keepalive_interval_ms = 30000;
         // cleanup userlist periodically
         window.setInterval(this.userCleanup.bind(this), this.keepalive_interval_ms * 3);
@@ -426,6 +430,83 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
+     * Toggles visibility of the recording banner
+     * @param {boolean} isRecording - True to show banner
+     */
+    showRecordingBanner(isRecording) {
+        const banner = document.getElementById('recording-banner');
+        if (isRecording) {
+            if (!banner) {
+                const b = document.createElement('div');
+                b.id = 'recording-banner';
+                b.style.position = 'absolute';
+                b.style.top = '10px';
+                b.style.left = '50%';
+                b.style.transform = 'translateX(-50%)';
+                b.style.backgroundColor = 'rgba(0,0,0,0.6)';
+                b.style.color = 'white';
+                b.style.padding = '5px 15px';
+                b.style.borderRadius = '5px';
+                b.style.zIndex = '9999';
+                b.style.pointerEvents = 'auto';
+                b.style.display = 'flex';
+                b.style.alignItems = 'center';
+                b.style.gap = '10px';
+                b.style.fontFamily = 'sans-serif';
+                b.style.fontSize = '13px';
+
+                const label = document.createElement('span');
+                label.innerHTML =
+                    '<i class="fas fa-video text-danger" style="animation: blinker 1s linear infinite;"></i> Recording';
+                b.appendChild(label);
+
+                // Stop button
+                const stopBtn = document.createElement('button');
+                stopBtn.id = 'recording-stop-btn';
+                stopBtn.textContent = '⏹ Stop';
+                stopBtn.style.background = '#dc3545';
+                stopBtn.style.color = 'white';
+                stopBtn.style.border = 'none';
+                stopBtn.style.borderRadius = '3px';
+                stopBtn.style.padding = '2px 8px';
+                stopBtn.style.cursor = 'pointer';
+                stopBtn.style.fontSize = '12px';
+                stopBtn.title = 'Stop the current recording';
+                stopBtn.addEventListener('click', () => {
+                    const namespace = ARENA.nameSpace;
+                    const sceneId = ARENA.sceneName;
+                    if (!namespace || !sceneId) return;
+                    fetch('/recorder/stop', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ namespace, sceneId }),
+                    })
+                        .then(async (res) => {
+                            if (!res.ok) {
+                                const text = await res.text();
+                                console.error('[Recorder] Stop failed:', text);
+                            }
+                            // Banner will be removed by the incoming recording_stopped chat-ctrl
+                        })
+                        .catch((err) => console.error('[Recorder] Stop error:', err.message));
+                });
+                b.appendChild(stopBtn);
+
+                if (!document.getElementById('recording-banner-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'recording-banner-style';
+                    style.innerHTML = '@keyframes blinker { 50% { opacity: 0; } }';
+                    document.head.appendChild(style);
+                }
+                document.body.appendChild(b);
+            }
+        } else if (banner) {
+            banner.remove();
+        }
+    },
+
+    /**
      * Upserts a user in the liveUsers dictionary. Updates timestamp tag either way
      * @param {string} id - User ID, typically idTag
      * @param {object} user - User object
@@ -720,6 +801,19 @@ AFRAME.registerSystem('arena-chat-ui', {
                 setTimeout(() => {
                     ARENAAUTH.signOut();
                 }, 5000);
+            } else if (msg.action === 'recording') {
+                if (msg.text === 'recording_started') {
+                    this.showRecordingBanner(true);
+                } else if (msg.text === 'recording_stopped') {
+                    this.showRecordingBanner(false);
+                } else if (msg.text === 'recording_failed') {
+                    this.showRecordingBanner(false);
+                    this.displayAlert(
+                        'Recording failed to start. The recorder could not subscribe to the scene.',
+                        5000,
+                        'error'
+                    );
+                }
             }
             return;
         }

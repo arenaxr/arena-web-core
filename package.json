@@ -58,7 +58,7 @@
     "process": "0.11.10"
   },
   "scripts": {
-    "collect-static": "cp src/systems/armarker/apriltag-detector/apriltag*.* dist/",
+    "collect-static": "mkdir -p dist && cp src/systems/armarker/apriltag-detector/apriltag*.* dist/",
     "prewatch": "npm run collect-static",
     "watch": "parcel watch src/index.js",
     "prebuild": "npm run collect-static",

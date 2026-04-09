@@ -525,9 +525,14 @@ AFRAME.registerComponent('arena-user', {
         if (elHandL) elHandL.remove();
         const elHandR = document.getElementById(`handRight_${this.idTag}`);
         if (elHandR) elHandR.remove();
-        // try to remove chat user
-        delete this.chat?.liveUsers[this.idTag];
-        this.chat?.populateUserList();
+        if (this.chat) {
+            if (this.chat.liveUsers) {
+                delete this.chat.liveUsers[this.idTag];
+            }
+            if (this.chat.usersList && this.chat.populateUserList) {
+                this.chat.populateUserList();
+            }
+        }
     },
 
     tick() {

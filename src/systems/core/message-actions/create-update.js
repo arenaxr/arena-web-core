@@ -51,18 +51,18 @@ export default class CreateUpdate {
         }
 
         switch (message.type) {
-            case 'object':
+            case 'object': {
                 // our own camera/controllers: bail, this message is meant for all other viewers
-                if (id === ARENA.idTag) {
+                if (typeof ARENA !== 'undefined' && id === ARENA.idTag) {
                     return;
                 }
-                if (id === ARENA.handLName) {
+                if (typeof ARENA !== 'undefined' && id === ARENA.handLName) {
                     return;
                 }
-                if (id === ARENA.handRName) {
+                if (typeof ARENA !== 'undefined' && id === ARENA.handRName) {
                     return;
                 }
-                if (id === ARENA.faceName) {
+                if (typeof ARENA !== 'undefined' && id === ARENA.faceName) {
                     return;
                 }
 
@@ -102,7 +102,7 @@ export default class CreateUpdate {
                 if (addObj) {
                     // Parent/Child handling
                     if (parentName) {
-                        if (ARENA.idTag === message.data.parent) {
+                        if (typeof ARENA !== 'undefined' && ARENA.idTag === message.data.parent) {
                             // our camera is named 'my-camera'
                             if (!message.data.camera) {
                                 // Don't attach extra cameras, use own id to skip
@@ -159,21 +159,22 @@ export default class CreateUpdate {
                 // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
                 if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
 
-                if (id === ARENA.params.camFollow) {
+                if (typeof ARENA !== 'undefined' && ARENA.params?.camFollow && id === ARENA.params.camFollow) {
                     ARENAUtils.relocateUserCamera(undefined, undefined, entityEl.object3D.matrixWorld);
-                } else if (id === ARENA.params.orbit && action === ACTIONS.CREATE) {
+                } else if (typeof ARENA !== 'undefined' && ARENA.params?.orbit && id === ARENA.params.orbit && action === ACTIONS.CREATE) {
                     // set camera to orbit around this object
                     entityEl.sceneEl.setAttribute('camera-orbit', { target: entityEl });
                 }
                 return;
+            }
 
             case 'camera-override':
-                if (id !== ARENA.idTag) return; // bail if not for us
+                if (typeof ARENA === 'undefined' || id !== ARENA.idTag) return; // bail if not for us
                 this.handleCameraOverride(action, message);
                 return;
 
-            case 'rig':
-                if (id === ARENA.idTag) {
+            case 'rig': {
+                if (typeof ARENA !== 'undefined' && id === ARENA.idTag) {
                     // our camera Rig
                     const cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
                     const cameraRigObj3D = document.getElementById('cameraRig').object3D;
@@ -223,8 +224,9 @@ export default class CreateUpdate {
                     AFRAME.scenes[0].systems['arena-chat-ui'].relocalizedMsg();
                 }
                 return;
+            }
 
-            case 'scene-options':
+            case 'scene-options': {
                 // update env-presets section in real-time
                 const envPresets = message.data['env-presets'];
                 if (envPresets) {
@@ -232,14 +234,13 @@ export default class CreateUpdate {
                     if (!environment) {
                         environment = document.createElement('a-entity');
                         environment.id = 'env';
-                        environment.setAttribute('environment', true); // always ensure the component is added
                         sceneRoot.appendChild(environment);
                     }
-                    Object.entries(envPresets).forEach(([attribute, value]) => {
-                        environment.setAttribute('environment', attribute, value);
-                    });
+                    // Pass the object directly with the clobber flag (true) to replace instead of merge
+                    environment.setAttribute('environment', envPresets, true);
                 }
                 return;
+            }
 
             case 'face-features':
             case 'landmarks':
@@ -289,7 +290,7 @@ export default class CreateUpdate {
                     rotation: data.rotation,
                     'arena-user': data['arena-user'],
                 };
-                if (ARENA.sceneEl.systems.physx) {
+                if (typeof ARENA !== 'undefined' && ARENA.sceneEl?.systems?.physx) {
                     newAttributes = {
                         // 'physx-body': { type: 'kinematic' },
                         // 'physx-material': { restitution: 0 },
@@ -299,14 +300,14 @@ export default class CreateUpdate {
                 }
                 this.setEntityAttributes(entityEl, newAttributes);
                 // Merge-update live users, but don't repopulate userlist
-                AFRAME.scenes[0].systems.chat?.upsertLiveUser(message.id, { dn: data['arena-user'].displayName }, true);
+                AFRAME.scenes?.[0]?.systems?.chat?.upsertLiveUser(message.id, { dn: data['arena-user']?.displayName }, true);
                 return true;
             case 'gltf-model':
-                if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
+                if (typeof ARENA !== 'undefined' && ARENA.params?.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
                     warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                     return false; // do not add this object
                 }
-                if (ARENA.params.vrmode && Object.hasOwn(data, 'hide-on-enter-vr')) {
+                if (typeof ARENA !== 'undefined' && ARENA.params?.vrmode && Object.hasOwn(data, 'hide-on-enter-vr')) {
                     warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                     return false; // do not add this object
                 }
@@ -362,7 +363,7 @@ export default class CreateUpdate {
                 }
                 delete data.image; // no other properties applicable to image; delete it
                 break;
-            case 'text':
+            case 'text': {
                 // Support legacy `data: { text: 'STRING TEXT' }`
                 const theText = data.text;
                 if (typeof theText === 'string' || theText instanceof String) {
@@ -373,6 +374,7 @@ export default class CreateUpdate {
                 if (!Object.hasOwn(data, 'width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)
                 if (!Object.hasOwn(data, 'align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
                 break;
+            }
             case 'handLeft':
             case 'handRight':
                 newAttributes = {
@@ -381,7 +383,7 @@ export default class CreateUpdate {
                     'gltf-model': data.url,
                     // TODO: Add support new component for arena-other-user-hand for grab handling
                 };
-                if (ARENA.sceneEl.systems.physx) {
+                if (typeof ARENA !== 'undefined' && ARENA.sceneEl?.systems?.physx) {
                     newAttributes = {
                         'physx-body': { type: 'kinematic' },
                         'physx-remote-grabber': true,
@@ -439,7 +441,7 @@ export default class CreateUpdate {
         // what remains in data are components we set as attributes of the entity
         this.setEntityAttributes(entityEl, data);
 
-        if (typeof ARENA.clickableOnlyEvents !== 'undefined' && !ARENA.clickableOnlyEvents) {
+        if (typeof ARENA !== 'undefined' && typeof ARENA.clickableOnlyEvents !== 'undefined' && !ARENA.clickableOnlyEvents) {
             // unusual case: clickableOnlyEvents = true by default
             if (!Object.hasOwn(entityEl, 'click-listener')) {
                 // attach click-listener to all objects that don't already have them
@@ -590,7 +592,7 @@ export default class CreateUpdate {
                 data: { position, rotation },
             } = message;
 
-            const target = document.getElementById(ARENA.params.camFollow);
+            const target = typeof ARENA !== 'undefined' && ARENA.params?.camFollow ? document.getElementById(ARENA.params.camFollow) : null;
             if (target) {
                 ARENAUtils.relocateUserCamera(undefined, undefined, target.object3D.matrixWorld);
             } else {

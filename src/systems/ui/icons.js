@@ -230,16 +230,23 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.screenshareButton.style.display = 'none';
             this.settingsButtons.push(this.screenshareButton);
 
-            // non-editors cannot change/obscure the scene by generating a new screenshare object
-            let screenObjPermitted = this.arena.isUserSceneWriter();
-            if (!screenObjPermitted) {
-                // without object permissions, are there existing objects to screenshare upon?
-                screenObjPermitted =
-                    sceneEl.querySelector('[screenshareable]') || sceneEl.querySelector('#screenshare');
-            }
+            if (jitsiPermitted && !ARENA.utils.isMobile()) {
+                const screenshareBtn = this.screenshareButton.querySelector('button');
 
-            if (screenObjPermitted && jitsiPermitted && !ARENA.utils.isMobile()) {
-                // no screenshare on mobile - doesn't work
+                if (!this.arena.isUserSceneWriter()) {
+                    // Start disabled; persist objects may not be in the DOM yet
+                    screenshareBtn.setAttribute('title', 'Screen sharing requires a screenshareable object or scene editor permissions');
+                    screenshareBtn.classList.add('disabled');
+
+                    // Re-evaluate once scene objects finish loading from persistence
+                    sceneEl.addEventListener(ARENA_EVENTS.SCENE_OBJ_LOADED, () => {
+                        if (sceneEl.querySelector('[screenshareable]') || sceneEl.querySelector('#screenshare')) {
+                            screenshareBtn.setAttribute('title', data.screenshareButtonText);
+                            screenshareBtn.classList.remove('disabled');
+                        }
+                    });
+                }
+
                 this._buttonList[this.buttons.SCREENSHARE] = this.screenshareButton;
                 this.iconsDiv.appendChild(this.screenshareButton);
             }
@@ -384,27 +391,59 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         version.title = 'Show the ARENA versions listed on a new page';
         pagesDiv.appendChild(version);
 
+        // Recording controls
+        const recordDiv = document.createElement('div');
+        appendBold(recordDiv, 'Recording: ');
+        formDiv.appendChild(recordDiv);
+
+        this.recordButton = document.createElement('a');
+        this.recordButton.href = '#';
+        this.recordButton.innerHTML = 'Record';
+        if (sceneWriter) {
+            this.recordButton.title = 'Start or stop recording this scene';
+            this.recordButton.onclick = this.handleRecord.bind(this);
+        } else {
+            this.recordButton.title = 'Recording requires scene editor permissions';
+            this.recordButton.className = 'disabled';
+            this.recordButton.onclick = (e) => e.preventDefault();
+        }
+        recordDiv.appendChild(this.recordButton);
+
+        recordDiv.append(' | ');
+
+        const replayLink = document.createElement('a');
+        replayLink.href = `/replay/?scene=${this.arena.namespacedScene}`;
+        replayLink.target = '_blank';
+        replayLink.rel = 'noopener noreferrer';
+        replayLink.innerHTML = 'Replay';
+        replayLink.title = 'Open the 3D Replay viewer';
+        recordDiv.appendChild(replayLink);
+
         // Auth status
         appendBold(formDiv, 'Scene: ');
         this.sceneNameDiv = document.createElement('span');
         formDiv.appendChild(this.sceneNameDiv);
+        formDiv.append(' (');
+        const aSec = document.createElement('a');
+        aSec.innerHTML = 'Security';
         if (sceneWriter) {
-            // add permissions link
-            formDiv.append(' (');
-            const aSec = document.createElement('a');
             aSec.href = `/user/v2/profile/scenes/${this.arena.namespacedScene}`;
             aSec.target = '_blank';
             aSec.rel = 'noopener noreferrer';
-            aSec.innerHTML = 'Security';
             aSec.title = 'Open the security controls for the scene (editors only)';
-            formDiv.appendChild(aSec);
-            formDiv.append(')');
+        } else {
+            aSec.href = '#';
+            aSec.title = 'Security settings require scene editor permissions';
+            aSec.className = 'disabled';
+            aSec.onclick = (e) => e.preventDefault();
         }
+        formDiv.appendChild(aSec);
+        formDiv.append(')');
         formDiv.appendChild(document.createElement('br'));
 
         appendBold(formDiv, 'Authenticator: ');
         this.authType = document.createElement('span');
-        this.authType.style.textTransform = 'capitalize';
+        this.authType.className = 'auth-type';
         formDiv.appendChild(this.authType);
         formDiv.appendChild(document.createElement('br'));
 
@@ -626,6 +665,9 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         const { sceneEl } = el;
         const cameraEl = sceneEl.camera.el;
 
+        // Guard against clicks when disabled
+        if (this.screenshareButton.querySelector('button').classList.contains('disabled')) return;
+
         if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
 
         Swal.fire({
@@ -772,6 +814,55 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             cancelButtonText: 'Cancel',
         }).then(() => {
             this.settingsPopup.style.display = 'block';
+        });
+    },
+
+    handleRecord(e) {
+        e.preventDefault();
+        this.settingsPopup.style.display = 'none'; // close settings panel
+
+        const sceneFqn = this.arena.namespacedScene;
+        const [namespace, sceneId] = sceneFqn.split('/');
+
+        Swal.fire({
+            title: 'Recording',
+            text: `Start or stop recording for ${sceneFqn}?`,
+            icon: 'info',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'Start Recording',
+            denyButtonText: 'Stop Recording',
+            cancelButtonText: 'Cancel',
+            showCloseButton: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Must ensure axios exists or use fetch, window.axios usually exists via auth.js/a-frame setup, but we'll use fetch to be safe if axios isn't global
+                fetch('/recorder/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ namespace, sceneId }),
+                })
+                .then(async (res) => {
+                    const text = await res.text();
+                    if (res.ok) Swal.fire('Started!', 'Recording has begun.', 'success');
+                    else Swal.fire('Error', text, 'error');
+                })
+                .catch(err => Swal.fire('Error', err.message, 'error'));
+            } else if (result.isDenied) {
+                fetch('/recorder/stop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ namespace, sceneId }),
+                })
+                .then(async (res) => {
+                    const text = await res.text();
+                    if (res.ok) Swal.fire('Stopped!', 'Recording has stopped.', 'success');
+                    else Swal.fire('Error', text, 'error');
+                })
+                .catch(err => Swal.fire('Error', err.message, 'error'));
+            }
         });
     },
 

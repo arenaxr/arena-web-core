@@ -23,6 +23,12 @@ AFRAME.registerSystem('arena-scene', {
     },
 
     init() {
+        // Skip full ARENA bootstrap in replay mode
+        if (this.el.hasAttribute('arena-replay')) {
+            console.log('[arena-scene] Replay mode detected, skipping MQTT/Jitsi/scene bootstrap');
+            return;
+        }
+
         this.utils = ARENAUtils;
 
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));

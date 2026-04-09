@@ -137,12 +137,10 @@ window.addEventListener('onauth', async (e) => {
             window.publicSceneId = _e.target.value;
             publicSceneUrl.value = `${window.location.origin}/${_e.target.value}`;
             togglePublicSceneButtons(true);
-            console.log('valid public', _e.target.value);
         } else {
             window.publicSceneId = '';
             publicSceneUrl.value = '';
             togglePublicSceneButtons(false);
-            console.log('invalid public', _e.target.value);
         }
     }
 
@@ -158,6 +156,8 @@ window.addEventListener('onauth', async (e) => {
     });
     enterUserSceneBtn.addEventListener('click', () => (window.location = userSceneUrl.value));
     enterArUserSceneBtn.addEventListener('click', () => (window.location = `${userSceneUrl.value}?armode=1`));
+
+
 
     // set listeners for advanced links URI-builder
     advancedLinksUserBtn.addEventListener('click', () => {

@@ -67,6 +67,15 @@
     background-color: #ef2d5e;
 }
 
+.arena-button.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.arena-button.disabled:hover {
+    background-color: transparent;
+}
+
 /* Buttons used to control various settings - fixed at the top left of the page */
 
 .side-menu-container {
@@ -141,6 +150,16 @@
     right: 100px;
     font-size: small;
     overflow: auto;
+}
+
+.settings-popup a.disabled {
+    color: #999;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.settings-popup .auth-type {
+    text-transform: capitalize;
 }
 
 /* Echo the user display name */

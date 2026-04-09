@@ -34,10 +34,14 @@ AFRAME.registerComponent('screenshareable', {
     },
 
     register() {
-        this.system.registerComponent(this);
+        if (this.system?.registerComponent) {
+            this.system.registerComponent(this);
+        }
     },
 
     remove() {
-        this.system.unregisterComponent(this);
+        if (this.system?.unregisterComponent) {
+            this.system.unregisterComponent(this);
+        }
     },
 });

@@ -8,6 +8,8 @@
 
 /* global ARENAAUTH */
 
+import { ARENAUtils } from '../../utils/index.js';
+import * as FileStore from '../../utils/filestore-upload.js';
 import { TOPICS } from '../../constants';
 
 /**
@@ -23,13 +25,20 @@ const B3DACTIONS = {
 const arenaComponentActions = {
     'build3d-mqtt-object': { action: B3DACTIONS.JSON_EDIT, label: 'Edit Json', icon: 'fa-code' },
 };
-Object.keys(ARENAAUTH.filestoreUploadSchema).forEach((props) => {
-    arenaComponentActions[props] = {
-        action: B3DACTIONS.FS_UPLOAD,
-        label: 'Upload to Filestore',
-        icon: 'fa-upload',
-    };
-});
+let componentsPopulated = false;
+function getArenaComponentActions() {
+    if (!componentsPopulated && FileStore && FileStore.filestoreUploadSchema) {
+        Object.keys(FileStore.filestoreUploadSchema).forEach((props) => {
+            arenaComponentActions[props] = {
+                action: B3DACTIONS.FS_UPLOAD,
+                label: 'Upload to Filestore',
+                icon: 'fa-upload',
+            };
+        });
+        componentsPopulated = true;
+    }
+    return arenaComponentActions;
+}
 
 function updateMqttWidth() {
     const inspectorMqttLogWrap = document.getElementById('inspectorMqttLogWrap');
@@ -56,7 +65,7 @@ async function handleComponentUploadAction(selectedEntity, componentName) {
     const objid = selectedEntity.id;
     let objtype = componentName;
     // merge only, leave as much of original wire format as possible, including object_type
-    const srcs = ARENAAUTH.filestoreUploadSchema[componentName];
+    const srcs = FileStore.filestoreUploadSchema[componentName];
     if (srcs[0]) {
         if (srcs[0].startsWith(`${componentName}.`)) {
             // sub-component, test for geometry, if needed
@@ -65,7 +74,7 @@ async function handleComponentUploadAction(selectedEntity, componentName) {
             }
         }
     }
-    const newObj = await ARENAAUTH.uploadFileStoreDialog(
+    const newObj = await FileStore.uploadFileStoreDialog(
         ARENA.nameSpace,
         ARENA.sceneName,
         objid,
@@ -312,12 +321,13 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                             // handle class change
 
                             // query active components
-                            Object.keys(arenaComponentActions).forEach((key) => {
+                            const actions = getArenaComponentActions();
+                            Object.keys(actions).forEach((key) => {
                                 addComponentAction(
                                     key,
-                                    arenaComponentActions[key].action,
-                                    arenaComponentActions[key].label,
-                                    arenaComponentActions[key].icon
+                                    actions[key].action,
+                                    actions[key].label,
+                                    actions[key].icon
                                 );
                             });
                         });
