@@ -93,9 +93,12 @@ window.addEventListener('onauth', async (e) => {
     if (auth.authenticated) {
         window.publicButtons.push(clonePublicSceneBtn); // add clone option for full user
         tabMyScenes.parentElement.style.display = 'block';
+        clonePublicSceneBtn.title = 'Duplicate Scene';
     } else {
         tabMyScenes.parentElement.style.display = 'none'; // anon users may not edit scenes
         userNoteSpan.textContent = 'To create or clone scenes, please login with an authenticated account.';
+        clonePublicSceneBtn.classList.add('disabled');
+        clonePublicSceneBtn.title = 'Duplicate Scene requires scene editor permissions';
     }
 
     const toggleUserSceneButtons = (toggle) => {
