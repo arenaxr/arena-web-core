@@ -263,7 +263,7 @@ window.ARENAAUTH = {
             this.user_username = authData.username;
             this.token_payload = this.parseJwt(authData.token);
             console.log(`[Auth] Refreshed JWT for scene: ${namespacedScene}`);
-            return { mqtt_username: authData.username, mqtt_token: authData.token };
+            return { mqtt_username: authData.username, mqtt_token: authData.token, ids: authData.ids };
         } catch (e) {
             console.error(`[Auth] Failed to refresh scene auth: ${e.message}`);
             return null;
@@ -531,6 +531,9 @@ window.ARENAAUTH = {
             const currentPattern = patternSegments[i];
             const patternChar = currentPattern[0];
             const currentTopic = topicSegments[i];
+
+            if (!currentTopic && !currentPattern) continue;
+            if (!currentTopic && currentPattern !== ALL) return false;
 
             // Only allow # at end
             if (patternChar === ALL) return i === lastIndex;

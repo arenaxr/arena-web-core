@@ -38,8 +38,8 @@ window.addEventListener('onauth', async (e) => {
     const objTypeFilter = {};
 
     const username = e.detail.mqtt_username;
-    const mqttToken = e.detail.mqtt_token;
-    const userClient = e.detail.ids.userclient;
+    let mqttToken = e.detail.mqtt_token;
+    let userClient = e.detail.ids?.userclient;
 
     const aceConfig = {
         mode: 'ace/mode/json',
@@ -403,7 +403,11 @@ window.addEventListener('onauth', async (e) => {
         }).then(async (result) => {
             if (result.isDismissed) return;
             const namespacedScene = `${result.value.ns}/${result.value.scene}`;
-            ARENAAUTH.refreshSceneAuth(namespacedScene);
+            const newAuth = await ARENAAUTH.refreshSceneAuth(namespacedScene);
+            if (newAuth) {
+                mqttToken = newAuth.mqtt_token;
+                if (newAuth.ids) userClient = newAuth.ids.userclient;
+            }
             const exists = await PersistObjects.addNewScene(
                 result.value.ns,
                 result.value.scene,
@@ -444,6 +448,7 @@ window.addEventListener('onauth', async (e) => {
 
     // switch image/model
     uploadFilestoreButton.addEventListener('click', async () => {
+        if (uploadFilestoreButton.classList.contains('isDisabled')) return;
         const jsonObj = JSON.parse(output.getValue());
         await FileStore.uploadFileStoreDialog(
             namespaceinput.value,
@@ -459,6 +464,7 @@ window.addEventListener('onauth', async (e) => {
     });
 
     deleteSceneButton.addEventListener('click', async () => {
+        if (deleteSceneButton.classList.contains('isDisabled')) return;
         Swal.fire({
             title: 'Delete Scene ?',
             text: "You won't be able to revert this.",
@@ -493,6 +499,7 @@ window.addEventListener('onauth', async (e) => {
     });
 
     importSceneButton.addEventListener('click', async () => {
+        if (importSceneButton.classList.contains('isDisabled')) return;
         Swal.fire({
             title: 'Import from JSON',
             html: `<div>
@@ -676,7 +683,11 @@ window.addEventListener('onauth', async (e) => {
         }
         saved_scene = sceneinput.value;
         const namespacedScene = `${namespaceinput.value}/${sceneinput.value}`;
-        ARENAAUTH.refreshSceneAuth(namespacedScene);
+        const newAuth = await ARENAAUTH.refreshSceneAuth(namespacedScene);
+        if (newAuth) {
+            mqttToken = newAuth.mqtt_token;
+            if (newAuth.ids) userClient = newAuth.ids.userclient;
+        }
         await PersistObjects.populateObjectList(namespacedScene, objFilter.value, objTypeFilter);
         reload();
         updateLink();
@@ -750,6 +761,7 @@ window.addEventListener('onauth', async (e) => {
     });
 
     delButton.addEventListener('click', async () => {
+        if (delButton.classList.contains('isDisabled')) return;
         PersistObjects.selectedObjsPerformAction('delete', `${namespaceinput.value}/${sceneinput.value}`);
         setTimeout(async () => {
             if (sceneinput.disabled === false)
@@ -1040,7 +1052,11 @@ window.addEventListener('onauth', async (e) => {
     updateLink();
     updateUrl();
     const namespacedScene = `${ns}/${s}`;
-    ARENAAUTH.refreshSceneAuth(namespacedScene);
+    const newAuth = await ARENAAUTH.refreshSceneAuth(namespacedScene);
+    if (newAuth) {
+        mqttToken = newAuth.mqtt_token;
+        if (newAuth.ids) userClient = newAuth.ids.userclient;
+    }
     updatePublishControlsByToken(ns, s, mqttToken, userClient);
 
     Swal.close();
@@ -1082,15 +1098,51 @@ function updatePublishControlsByToken(namespace, scenename, mqttToken, userClien
     const editor = ARENAAUTH.isUserSceneEditor(mqttToken, objectsTopic);
     const delButton = document.getElementById('delobj');
     const deleteSceneButton = document.getElementById('deletescene');
+    const uploadFileStore = document.getElementById('uploadfilestore');
+    const importScene = document.getElementById('importscene');
+    const exportScene = document.getElementById('exportscene');
+
     if (editor) {
         delButton.classList.remove('isDisabled');
+        delButton.title = 'Delete Selected Objects';
+
         deleteSceneButton.classList.remove('isDisabled');
+        deleteSceneButton.title = 'Delete Current Scene';
+
+        if (uploadFileStore) {
+            uploadFileStore.classList.remove('isDisabled');
+            uploadFileStore.title = 'Upload File and Publish';
+        }
+        if (importScene) {
+            importScene.classList.remove('isDisabled');
+            importScene.title = 'Import from JSON file';
+        }
     } else {
         delButton.classList.add('isDisabled');
+        delButton.title = 'Delete Object requires scene editor permissions';
+
         deleteSceneButton.classList.add('isDisabled');
+        deleteSceneButton.title = 'Delete Scene requires scene editor permissions';
+
+        if (uploadFileStore) {
+            uploadFileStore.classList.add('isDisabled');
+            uploadFileStore.title = 'Upload File requires scene editor permissions';
+        }
+        if (importScene) {
+            importScene.classList.add('isDisabled');
+            importScene.title = 'Import Scene requires scene editor permissions';
+        }
     }
+
     document.querySelectorAll('.addobj').forEach((item) => {
         item.disabled = !editor;
+        if (editor) {
+            item.title = 'Add or Update Object';
+            item.classList.remove('isDisabled');
+        } else {
+            item.title = 'Add/Update Object requires scene editor permissions';
+            item.classList.add('isDisabled');
+        }
     });
 }
 
