@@ -23,6 +23,8 @@ AFRAME.registerSystem('arena-replay', {
         console.log('[Replay] CreateUpdate:', typeof CreateUpdate?.handle);
 
         this.messages = [];
+        this.keyframes = [];
+        this.currentState = {}; // tracks what's currently rendered in the DOM
         this.playhead = 0;
         this.isPlaying = false;
 
@@ -161,6 +163,8 @@ AFRAME.registerSystem('arena-replay', {
     clearScene: function() {
         this.isPlaying = false;
         this.messages = [];
+        this.keyframes = [];
+        this.currentState = {};
         this.playhead = 0;
         this.playheadTime = 0;
         this.duration = 0;
@@ -210,22 +214,49 @@ AFRAME.registerSystem('arena-replay', {
             const res = await axios.get(`/recorder/files/${filename}`, { withCredentials: true });
             let rawData = typeof res.data === 'string' ? res.data.split('\n').filter(l => l.trim()).map(JSON.parse) : res.data;
 
-            this.messages = rawData.filter(m => m.timestamp);
+            // Extract keyframe_index if present (last line of cleanly-closed recordings)
+            if (rawData.length > 0 && rawData[rawData.length - 1].action === 'keyframe_index') {
+                const idxLine = rawData.pop();
+                console.log(`[Replay] Found keyframe index with ${idxLine.index.length} entries`);
+            }
 
-            if (this.messages.length > 0) {
-                const startT = new Date(this.messages[0].timestamp).getTime();
-                this.messages.forEach(m => {
+            // Separate keyframes from delta messages.
+            // Keyframes are stored separately for fast seeking; only delta messages
+            // (create/update/delete) remain in the main messages array.
+            this.keyframes = [];
+            this.messages = [];
+            for (const m of rawData) {
+                if (m.action === 'keyframe') {
+                    this.keyframes.push({
+                        messageIndex: this.messages.length,
+                        timestamp: m.timestamp,
+                        state: m.state,
+                    });
+                } else {
                     // Legacy compatibility: map 'attributes' (MongoDB schema) to 'data' (MQTT wire)
                     if (m.attributes && !m.data) {
                         m.data = m.attributes;
                         delete m.attributes;
                     }
+                    if (m.timestamp) {
+                        this.messages.push(m);
+                    }
+                }
+            }
+
+            if (this.messages.length > 0) {
+                const startT = new Date(this.messages[0].timestamp).getTime();
+                this.messages.forEach(m => {
                     m.timeOffset = new Date(m.timestamp).getTime() - startT;
+                });
+                // Compute timeOffset for keyframes as well
+                this.keyframes.forEach(kf => {
+                    kf.timeOffset = new Date(kf.timestamp).getTime() - startT;
                 });
                 this.duration = this.messages[this.messages.length - 1].timeOffset;
             }
 
-            console.log(`[Replay] Loaded ${this.messages.length} frames, duration: ${this.duration}ms`);
+            console.log(`[Replay] Loaded ${this.messages.length} delta messages, ${this.keyframes.length} keyframes, duration: ${this.duration}ms`);
             this.updateTimeDisplay();
 
             // Find the end of the persist snapshot (all messages with timeOffset === 0)
@@ -239,40 +270,45 @@ AFRAME.registerSystem('arena-replay', {
                 }
             }
 
-            // Topological sort the persist snapshot to ensure parents are created before children
-            const snapshot = this.messages.slice(0, persistEndIdx + 1);
-            const orderedSnapshot = [];
-            const snapshotMap = new Map(snapshot.map(m => [m.object_id, m]));
-            
-            const addMsg = (msg, descendants = []) => {
-                if (!snapshotMap.has(msg.object_id)) return;
-                const parent = msg.data?.parent;
-                if (parent && snapshotMap.has(parent)) {
-                    if (descendants.includes(parent) || msg.object_id === parent) {
-                        console.warn('[Replay] Circular reference detected in snapshot for', msg.object_id);
-                    } else {
-                        addMsg(snapshotMap.get(parent), [...descendants, msg.object_id]);
+            // When keyframes are present, the first keyframe already captures the persist
+            // snapshot as a compacted state map — applyKeyframeState handles topo-sort internally.
+            // The legacy topo-sort and scene-options hoisting are only needed for old recordings.
+            if (this.keyframes.length === 0) {
+                // Topological sort the persist snapshot to ensure parents are created before children
+                const snapshot = this.messages.slice(0, persistEndIdx + 1);
+                const orderedSnapshot = [];
+                const snapshotMap = new Map(snapshot.map(m => [m.object_id, m]));
+
+                const addMsg = (msg, descendants = []) => {
+                    if (!snapshotMap.has(msg.object_id)) return;
+                    const parent = msg.data?.parent;
+                    if (parent && snapshotMap.has(parent)) {
+                        if (descendants.includes(parent) || msg.object_id === parent) {
+                            console.warn('[Replay] Circular reference detected in snapshot for', msg.object_id);
+                        } else {
+                            addMsg(snapshotMap.get(parent), [...descendants, msg.object_id]);
+                        }
                     }
+                    orderedSnapshot.push(msg);
+                    snapshotMap.delete(msg.object_id);
+                };
+
+                while (snapshotMap.size > 0) {
+                    const [id, msg] = snapshotMap.entries().next().value;
+                    addMsg(msg);
                 }
-                orderedSnapshot.push(msg);
-                snapshotMap.delete(msg.object_id);
-            };
 
-            while (snapshotMap.size > 0) {
-                const [id, msg] = snapshotMap.entries().next().value;
-                addMsg(msg);
-            }
+                for (let i = 0; i <= persistEndIdx; i++) {
+                    this.messages[i] = orderedSnapshot[i];
+                }
 
-            for (let i = 0; i <= persistEndIdx; i++) {
-                this.messages[i] = orderedSnapshot[i];
-            }
-
-            // Ensure scene-options geometry is processed first so environment/lighting exists
-            for (let i = 0; i <= persistEndIdx; i++) {
-                if (this.messages[i].type === 'scene-options') {
-                    const sceneOpt = this.messages.splice(i, 1)[0];
-                    this.messages.unshift(sceneOpt);
-                    break;
+                // Ensure scene-options geometry is processed first so environment/lighting exists
+                for (let i = 0; i <= persistEndIdx; i++) {
+                    if (this.messages[i].type === 'scene-options') {
+                        const sceneOpt = this.messages.splice(i, 1)[0];
+                        this.messages.unshift(sceneOpt);
+                        break;
+                    }
                 }
             }
 
@@ -281,7 +317,7 @@ AFRAME.registerSystem('arena-replay', {
             // Bootstrap the scene with the full persist snapshot
             this.fastForwardTo(persistEndIdx);
         } catch(e) {
-            console.warn("[Replay] Failed to fetch replay data, service may be unavailable.", e);
+            console.warn('[Replay] Failed to fetch replay data, service may be unavailable.', e);
         }
     },
 
@@ -291,6 +327,8 @@ AFRAME.registerSystem('arena-replay', {
      */
     applyMessage: function(msg) {
         if (!msg.object_id || !msg.data) return;
+        // Skip keyframe meta-actions — these are handled separately by applyKeyframeState
+        if (msg.action === 'keyframe' || msg.action === 'keyframe_index') return;
 
         // Clone message to avoid modifying the timeline history cache
         const clone = JSON.parse(JSON.stringify(msg));
@@ -313,35 +351,164 @@ AFRAME.registerSystem('arena-replay', {
         }
     },
 
-    fastForwardTo: function(targetIndex) {
-        // Clear scene objects (keep camera rig and environment)
-        const sceneRoot = document.getElementById('sceneRoot');
+    /**
+     * Topologically sort a set of objects so parents are created before children.
+     * Input: plain object { object_id: obj, ... }. Returns: ordered array of objects.
+     */
+    topoSortObjects: function(stateObj) {
+        const entries = Object.entries(stateObj);
+        const stateMap = new Map(entries.map(([id, obj]) => [id, obj]));
+        const ordered = [];
 
-        if (sceneRoot) {
-            const children = Array.from(sceneRoot.children);
-            children.forEach(child => {
-                if (child.id !== 'cameraRig' && child.id !== 'cameraSpinner' && child.id !== 'my-camera' && child.id !== 'env') {
-                    sceneRoot.removeChild(child);
+        const add = (objId, visited = new Set()) => {
+            if (!stateMap.has(objId) || visited.has(objId)) return;
+            visited.add(objId);
+            const obj = stateMap.get(objId);
+            const parent = obj.data?.parent;
+            if (parent && stateMap.has(parent) && parent !== objId) {
+                add(parent, visited);
+            }
+            ordered.push(obj);
+            stateMap.delete(objId);
+        };
+
+        for (const [objId] of entries) {
+            add(objId);
+        }
+        return ordered;
+    },
+
+    /**
+     * Diff the target state against the currently rendered state and apply
+     * only the necessary DOM changes: delete removed objects, create new ones,
+     * and update changed ones. This avoids the visual flash of a full scene clear
+     * and preserves cached models/components for unchanged objects.
+     *
+     * Objects with time-sensitive components (animations, particles, sounds) are
+     * force-recreated (delete → create) since their internal state won't reset
+     * with a simple attribute update.
+     */
+    diffAndApplyState: function(targetState) {
+        // Components with internal timers/state that require a full recreate on seek
+        const RECREATE_COMPONENTS = ['animation', 'animation-mixer', 'sound', 'particle', 'blip'];
+
+        const currentIds = new Set(Object.keys(this.currentState));
+        const targetIds = new Set(Object.keys(targetState));
+
+        // 1. Delete objects that exist in current scene but not in target
+        for (const id of currentIds) {
+            if (!targetIds.has(id)) {
+                this.applyMessage({ object_id: id, action: 'delete', data: {} });
+            }
+        }
+
+        // 2. Separate new objects (need create + topo sort) from existing
+        const toCreate = {};
+        for (const [id, obj] of Object.entries(targetState)) {
+            if (!currentIds.has(id)) {
+                toCreate[id] = obj;
+            } else {
+                // Check if this object has time-sensitive components that need a full recreate
+                const needsRecreate = obj.data && RECREATE_COMPONENTS.some(c => c in obj.data);
+                if (needsRecreate) {
+                    this.applyMessage({ object_id: id, action: 'delete', data: {} });
+                    toCreate[id] = obj;
+                } else {
+                    // Safe to update in place — preserves cached models, textures, etc.
+                    this.applyMessage({ ...obj, action: 'update' });
                 }
-            });
-        } else {
-            console.warn('[Replay] sceneRoot not found, clearing scene-level entities');
-            const scene = document.querySelector('a-scene');
-            if (scene) {
-                Array.from(scene.querySelectorAll(':scope > a-entity')).forEach(child => {
-                    if (!['cameraRig', 'cameraSpinner', 'my-camera', 'env', 'sceneRoot'].includes(child.id)) {
-                        child.parentNode.removeChild(child);
-                    }
-                });
             }
         }
 
-        console.log(`[Replay] Seeking to index ${targetIndex}`);
-        for (let i = 0; i <= targetIndex; i++) {
-            if (i < this.messages.length) {
-                this.applyMessage(this.messages[i]);
+        // 3. Create new objects in parent-first order
+        const ordered = this.topoSortObjects(toCreate);
+        for (const obj of ordered) {
+            this.applyMessage({ ...obj, action: 'create' });
+        }
+
+        // Track what's now rendered
+        this.currentState = targetState;
+    },
+
+    /**
+     * Recursively merge src into dst. Maps are merged recursively;
+     * arrays and primitives are overwritten. Matches the Go recorder's deepMerge semantics.
+     *
+     * Optimized for ARENA's data shape: all values are plain JSON (no Date, RegExp,
+     * Symbol, or prototype chains). We skip cloning src values since message objects
+     * are already independent (parsed from JSON wire data).
+     */
+    deepMerge: function(dst, src) {
+        if (!dst || typeof dst !== 'object' || Array.isArray(dst)) return src;
+        if (!src || typeof src !== 'object' || Array.isArray(src)) return src;
+        const result = { ...dst };
+        const keys = Object.keys(src);
+        for (let i = 0, len = keys.length; i < len; ++i) {
+            const key = keys[i];
+            const sv = src[key];
+            // Recurse only when both sides are non-null plain objects (not arrays)
+            if (sv && typeof sv === 'object' && !Array.isArray(sv)) {
+                const dv = result[key];
+                result[key] = (dv && typeof dv === 'object' && !Array.isArray(dv))
+                    ? this.deepMerge(dv, sv)
+                    : sv;
+            } else {
+                result[key] = sv;
             }
         }
+        return result;
+    },
+
+    /**
+     * Build a compacted state map from a range of delta messages by applying
+     * create/update/delete operations in memory without touching the DOM.
+     * Returns a plain object: { object_id: compacted_object, ... }
+     */
+    compactMessages: function(startIdx, endIdx, initialState = {}) {
+        const state = {};
+        // Deep-copy initial state so we don't mutate keyframe caches
+        for (const [id, obj] of Object.entries(initialState)) {
+            state[id] = JSON.parse(JSON.stringify(obj));
+        }
+
+        for (let i = startIdx; i <= endIdx && i < this.messages.length; i++) {
+            const msg = this.messages[i];
+            const objId = msg.object_id;
+            if (!objId) continue;
+
+            const action = msg.action;
+            if (action === 'delete') {
+                delete state[objId];
+            } else if (action === 'create' || action === 'update') {
+                state[objId] = this.deepMerge(state[objId] || {}, msg);
+            }
+        }
+        return state;
+    },
+
+    fastForwardTo: function(targetIndex) {
+        // Find the nearest keyframe at or before the target message index.
+        let nearestKf = null;
+        for (const kf of this.keyframes) {
+            if (kf.messageIndex <= targetIndex) {
+                nearestKf = kf;
+            } else {
+                break;
+            }
+        }
+
+        // Compact all deltas into a single state map in memory (no DOM touches),
+        // then diff against the current scene to apply only the changes.
+        let targetState;
+        if (nearestKf) {
+            console.log(`[Replay] Seeking to index ${targetIndex} via keyframe at ${nearestKf.messageIndex} (${Object.keys(nearestKf.state).length} objects, ${targetIndex - nearestKf.messageIndex} deltas)`);
+            targetState = this.compactMessages(nearestKf.messageIndex, targetIndex, nearestKf.state);
+        } else {
+            console.log(`[Replay] Seeking to index ${targetIndex} (no keyframe, compacting from 0)`);
+            targetState = this.compactMessages(0, targetIndex);
+        }
+
+        this.diffAndApplyState(targetState);
 
         if (this.messages[targetIndex]) {
             this.playheadTime = this.messages[targetIndex].timeOffset;
