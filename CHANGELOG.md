@@ -1,5 +1,57 @@
 # Changelog
 
+## [2.5.0](https://github.com/arenaxr/arena-web-core/compare/v2.4.4...v2.5.0) (2026-04-16)
+
+
+### Features
+
+* add centralized refreshSceneAuth to auth.js ([0f0423f](https://github.com/arenaxr/arena-web-core/commit/0f0423fbe263533f65ada7748f914e39a9079cdb))
+* add stop button to recording banner and handle recording_failed ([ac25a36](https://github.com/arenaxr/arena-web-core/commit/ac25a364554be7f266dcb9b477b7ed37c554bdbb))
+* **physics:** migrate collision-listener to PhysX contact events ([3827dac](https://github.com/arenaxr/arena-web-core/commit/3827dacad09b4bd7c89dde7a818cd2e10868da39))
+* **replay:** add auth ui for record, attempt recording banner ([12d5de1](https://github.com/arenaxr/arena-web-core/commit/12d5de1c653f41b0c6fbacb76ca239a7f1846129))
+* **replay:** add auth verify, .jsonl record and replay ([88848bf](https://github.com/arenaxr/arena-web-core/commit/88848bfbf4244e44f9625d9847448437b06df710))
+* **replay:** add persitance scene banner when recording ([1378292](https://github.com/arenaxr/arena-web-core/commit/13782923004b6794dd0d5413854567e5e1c4dd85))
+* **replay:** add time index on replay, add header ([99feaba](https://github.com/arenaxr/arena-web-core/commit/99feaba1e1af92f2676a18fa2bf354662c1602db))
+* **replay:** add ui replay entry points ([b591b97](https://github.com/arenaxr/arena-web-core/commit/b591b979030a4a3a18abf336a87287f7fa98adb8))
+* **replay:** chunk load large files, seek more efficiently ([0d19d24](https://github.com/arenaxr/arena-web-core/commit/0d19d24178533ab11c102cfbb01553bd2918f4dd))
+* **replay:** keyframe-aware seek w/ diff updates ([b3085a0](https://github.com/arenaxr/arena-web-core/commit/b3085a06c2469e07d72085f53628ec63b255b963))
+
+
+### Bug Fixes
+
+* add public clone tool hint for scenes page ([077a3df](https://github.com/arenaxr/arena-web-core/commit/077a3df2fcba712a6c3bc67c30c4bc3f77049a4c))
+* **build3d:** add log collapse chevron, fix image update, logs ([fc0561b](https://github.com/arenaxr/arena-web-core/commit/fc0561b0a4762a445483bd37b581d46a61255ce8))
+* **build3d:** add prompt/lock for id entry on new entity ([8a0cd20](https://github.com/arenaxr/arena-web-core/commit/8a0cd20e50456ddc1f28f17b9594fd7a82d2a969))
+* **build3d:** avoid animation/physics transform triggers by only listening to selected obj ([e784144](https://github.com/arenaxr/arena-web-core/commit/e784144db03bba7d21c9d6d98ecbfbe334d22258))
+* **build3d:** code review updates, restore mutation observer to catch a-frame DOM writes alongside componenet events ([9012c66](https://github.com/arenaxr/arena-web-core/commit/9012c660ce35a02e01449de4bc216c73a0cc3971))
+* **build3d:** ensure missing is reminder only obsures components and updates on tick ([103a834](https://github.com/arenaxr/arena-web-core/commit/103a83424b770c4ad0031402ec43737267826d56))
+* **build3d:** ensure objectId param is preselected ([676e63b](https://github.com/arenaxr/arena-web-core/commit/676e63bd9797c69edbce59ea8b6426f0310c27cc))
+* **build3d:** explictly use the DOM as source of user truth for mqtt publish ([8b28b6b](https://github.com/arenaxr/arena-web-core/commit/8b28b6b731225aa535b1f2d840723352c058310b))
+* **build3d:** guard against losing base multi compoenent instance ([cb3736a](https://github.com/arenaxr/arena-web-core/commit/cb3736a9fbf4c6bff94a1ca33f707301525afe4f))
+* **build3d:** nullify removed components on wire, manage multi componenet ([498db12](https://github.com/arenaxr/arena-web-core/commit/498db12fcf51288755319f4809254d7ee0d889a2))
+* **build3d:** reduntant publishes: replace object mut. observer with inspector events ([9628d93](https://github.com/arenaxr/arena-web-core/commit/9628d93893799376332e30a2b6c518cdbccf138d))
+* **build3d:** remove redundant on component init handler causing persist repub ([347f75e](https://github.com/arenaxr/arena-web-core/commit/347f75e68338b87fdbc98dbbb0d3aab57654aed7))
+* **build:** corrected tooltip feedback and editor perms ([439090b](https://github.com/arenaxr/arena-web-core/commit/439090b82004f3c006a303757d991bbd7d665a58))
+* **docs:** repair recursive JSDoc generation and patch syntax errors ([0ff29f8](https://github.com/arenaxr/arena-web-core/commit/0ff29f88fcce1f4d9533b4c57df1308eaae1885d))
+* ensure centered replay title ([2f30aaf](https://github.com/arenaxr/arena-web-core/commit/2f30aaf6274376340d2ecbff5ff46251615515be))
+* ensure replay 0 time index updates all state, including child ordering ([6e061bb](https://github.com/arenaxr/arena-web-core/commit/6e061bb3e0bb3b884230a4f9478d9cb5dc6995e7))
+* ensure replay rebuilds env on every change ([f803bf6](https://github.com/arenaxr/arena-web-core/commit/f803bf63bcf7626edfbec7acd422ae9cb5256587))
+* improve scene settings permissions with disabled tooltip feedback ([6b3e01c](https://github.com/arenaxr/arena-web-core/commit/6b3e01cd8ddc6dc9118358c72cdc2d39590602d0))
+* refresh JWT with scene-specific rights before replay fetches ([f37f675](https://github.com/arenaxr/arena-web-core/commit/f37f675da0292615d9696342d19f9cdefa436d5d))
+* **replay:** add warnings when recorder service fails ([3dad2b8](https://github.com/arenaxr/arena-web-core/commit/3dad2b81ee86612f876c58efc3127f357db16f0d))
+* **replay:** adding guards for regular scenes don;t load replay ([417ccdc](https://github.com/arenaxr/arena-web-core/commit/417ccdc6d0c4f16fa22855c9fe63c943891b3b14))
+* **replay:** corrected hydration of scene options env ([bca82fa](https://github.com/arenaxr/arena-web-core/commit/bca82fa2008b6f96b67f0a77afc402918d90df36))
+* **replay:** ensure selection updates url, add scene clear ([ce3badd](https://github.com/arenaxr/arena-web-core/commit/ce3badd3ffee2fa1f7c2beb9f3d5e683725dba1b))
+* **replay:** fix nav, preload offset 0 objects ([8247692](https://github.com/arenaxr/arena-web-core/commit/8247692e8c10242c35196470d7e0d4a9ca896bba))
+* **replay:** fix scene env env load, srub, repair missing dist on build if needed ([d9cd0ca](https://github.com/arenaxr/arena-web-core/commit/d9cd0cafa3141c4aca74b4cd927303317f616f71))
+* **replay:** scene fix ([1cd5488](https://github.com/arenaxr/arena-web-core/commit/1cd54881a0c0b1dbf733c3cb7ba82bc186f517cd))
+* **replay:** unified package, env load, object hydration parity ([16812ac](https://github.com/arenaxr/arena-web-core/commit/16812ac44365bc2b458d08e6bfa6313141f6e672))
+* **reply:** add guarding for arena-replay loading components ([076345e](https://github.com/arenaxr/arena-web-core/commit/076345e4dffcda68cee3a08da3e3a1c91b09d68f))
+* rm record from build/scenes, gaurd replay onauth ([e76560a](https://github.com/arenaxr/arena-web-core/commit/e76560ad9802333385b904107a73a866febf0860))
+* **schema:** remove non-wire attribution component, real-time generated ecs should not translate to the wire ([0ca9dda](https://github.com/arenaxr/arena-web-core/commit/0ca9dda9e921b0d8fad4df5efd5b48dc3f7779d6))
+* wait for obj loaded event to enable screenshare button ([2f2b1f1](https://github.com/arenaxr/arena-web-core/commit/2f2b1f17955e7fa4f26250810bcfacff5dd6ee81))
+* widen replay viewer, add replay links ([41b38ca](https://github.com/arenaxr/arena-web-core/commit/41b38ca11a76e2042f325bb128176f75233f7003))
+
 ## [2.4.4](https://github.com/arenaxr/arena-web-core/compare/v2.4.3...v2.4.4) (2026-03-13)
 
 
