@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.1](https://github.com/arenaxr/arena-web-core/compare/v2.5.0...v2.5.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* **replay:** add 2s timeout to recorder status check to prevent blocking scene load ([7082e26](https://github.com/arenaxr/arena-web-core/commit/7082e26978525c416bd326ae9def9bc0518d9734))
+
 ## [2.5.0](https://github.com/arenaxr/arena-web-core/compare/v2.4.4...v2.5.0) (2026-05-09)
 
 
