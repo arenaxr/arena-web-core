@@ -47,7 +47,13 @@ AFRAME.registerSystem('arena-mqtt', {
 
         // Check if scene is currently recording before joining
         try {
-            const res = await fetch(`/recorder/status?namespace=${nameSpace}&sceneId=${sceneName}`, {credentials: 'include'});
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s max, don't block scene load
+            const res = await fetch(`/recorder/status?namespace=${nameSpace}&sceneId=${sceneName}`, {
+                credentials: 'include',
+                signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
             if (res.ok) {
                 const data = await res.json();
                 if (data.is_recording) {
