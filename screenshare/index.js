@@ -17,14 +17,26 @@ let localTracks = [];
 const remoteTracks = {};
 
 /**
- *
+ * Cleanup and close the screenshare tab.
  */
 function unload() {
     for (let i = 0; i < localTracks.length; i++) {
         localTracks[i].dispose();
     }
-    conference.leave();
-    connection.disconnect();
+    if (conference) {
+        try {
+            conference.leave();
+        } catch (e) {
+            console.warn('Error leaving conference:', e);
+        }
+    }
+    if (connection) {
+        try {
+            connection.disconnect();
+        } catch (e) {
+            console.warn('Error disconnecting:', e);
+        }
+    }
     window.close();
 }
 
@@ -115,6 +127,7 @@ function onConnectionSuccess() {
         conference.sendEndpointStatsMessage(stats); // send to remote
     });
 
+    // Set display name and properties BEFORE joining so they propagate with the initial presence
     conference.setDisplayName(
         `${(+new Date()).toString(36)} ${window.params.screenSharePrefix}_${window.params.idTag}`
     );
@@ -171,8 +184,14 @@ JitsiMeetJS.mediaDevices.addEventListener(JitsiMeetJS.events.mediaDevices.DEVICE
 
 connection.connect();
 
+// createLocalTracks must run at top-level (during page load) because Chrome requires
+// getDisplayMedia to be triggered from a user gesture context. The page load itself
+// is considered a user gesture since the user clicked the screenshare button to open this tab.
+// The race condition where properties may not have propagated yet is handled by the
+// PARTICIPANT_PROPERTY_CHANGED handler in jitsi.js on the receiving side.
 JitsiMeetJS.createLocalTracks({ devices: ['desktop'] })
     .then(onLocalTracks)
     .catch((error) => {
-        throw error;
+        console.error('Failed to create local tracks:', error);
+        window.close();
     });

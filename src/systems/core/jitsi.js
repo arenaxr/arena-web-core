@@ -308,6 +308,73 @@ AFRAME.registerSystem('arena-jitsi', {
     },
 
     /**
+     * Handle screenshare track setup for a participant. Called from both onRemoteTrack
+     * and PARTICIPANT_PROPERTY_CHANGED to handle the race condition where properties
+     * may arrive before or after the video track.
+     * @param {string} participantId Jitsi participant Id
+     * @param {string} videoId HTML video element Id
+     * @param {object} user JitsiParticipant object
+     */
+    handleScreenshareTrack(participantId, videoId, user) {
+        const { el } = this;
+        const { sceneEl } = el;
+
+        // Check if we already set up this screenshare (prevent double-setup)
+        if (this.screenShareDict[participantId]) return;
+
+        let dn = user.getProperty('screenshareDispName');
+        if (!dn) dn = user.getDisplayName();
+        if (!dn) dn = `No Name #${participantId}`;
+        const idTag = user.getProperty('screenshareidTag');
+        let objectIds = user.getProperty('screenshareObjIds');
+
+        if (!idTag || !objectIds) {
+            // Properties not available yet; PARTICIPANT_PROPERTY_CHANGED will retry
+            console.debug(`[screenshare] Properties not yet available for ${participantId}, deferring`);
+            return;
+        }
+
+        objectIds = objectIds.split(',');
+        sceneEl.emit(JITSI_EVENTS.SCREENSHARE, {
+            jid: participantId,
+            id: participantId,
+            dn,
+            sn: objectIds[0],
+            scene: ARENA.namespacedScene,
+            src: EVENT_SOURCES.JITSI,
+        });
+
+        // handle screen share video
+        for (let i = 0; i < objectIds.length; i++) {
+            if (objectIds[i]) {
+                const vidEl = document.getElementById(videoId);
+                if (!vidEl) continue;
+
+                // Wait for actual video data before binding texture.
+                // WebRTC streams start with MediaStreamTrack.muted=true until
+                // the media transport (JVB/P2P) establishes data flow.
+                // Binding an empty video causes a permanent black texture.
+                const tryUpdate = () => {
+                    if (vidEl.readyState >= 2) {
+                        this.updateScreenShareObject(objectIds[i], videoId, participantId);
+                        return true;
+                    }
+                    return false;
+                };
+
+                if (!tryUpdate()) {
+                    vidEl.addEventListener('loadeddata', () => tryUpdate(), { once: true });
+                    // Fallback poll in case loadeddata was missed
+                    const fallback = setInterval(() => {
+                        if (tryUpdate()) clearInterval(fallback);
+                    }, 500);
+                    setTimeout(() => clearInterval(fallback), 30000);
+                }
+            }
+        }
+    },
+
+    /**
      * Handles remote tracks
      * @param {object} track JitsiTrack object
      */
@@ -350,10 +417,15 @@ AFRAME.registerSystem('arena-jitsi', {
             // create HTML video elem to store video
             let vidEl = document.getElementById(videoId);
             if (!vidEl) {
-                vidEl = $(`<video autoplay='autoplay' id='${videoId}' playsinline/>`);
+                vidEl = $(`<video autoplay='autoplay' muted='muted' id='${videoId}' playsinline/>`);
                 $('a-assets').append(vidEl);
             }
-            track.attach(vidEl[0]);
+            track.attach($(`#${videoId}`)[0]);
+            // Explicitly play to ensure autoplay is triggered
+            const attachedVid = document.getElementById(videoId);
+            if (attachedVid) {
+                attachedVid.play().catch(() => {}); // Ignore autoplay errors, muted video will auto-play
+            }
 
             const user = this.conference.getParticipantById(participantId);
             let idTags = user.getProperty('arenaId');
@@ -361,43 +433,7 @@ AFRAME.registerSystem('arena-jitsi', {
             if (!idTags) return; // handle jitsi-only users that have not set the display name
 
             if (idTags.includes(data.screensharePrefix)) {
-                let dn = user.getProperty('screenshareDispName');
-                if (!dn) dn = user.getDisplayName();
-                if (!dn) dn = `No Name #${participantId}`;
-                const idTag = user.getProperty('screenshareidTag');
-                let objectIds = user.getProperty('screenshareObjIds');
-
-                if (idTag && objectIds) {
-                    objectIds = objectIds.split(',');
-                    sceneEl.emit(JITSI_EVENTS.SCREENSHARE, {
-                        jid: participantId,
-                        id: participantId,
-                        dn,
-                        sn: objectIds[0],
-                        scene: ARENA.namespacedScene,
-                        src: EVENT_SOURCES.JITSI,
-                    });
-
-                    // handle screen share video
-                    for (let i = 0; i < objectIds.length; i++) {
-                        if (objectIds[i]) {
-                            const video = $(`#${videoId}`);
-                            video.on('loadeddata', () => {
-                                this.updateScreenShareObject(objectIds[i], videoId, participantId);
-                            });
-                        }
-                    }
-                } else {
-                    // display as external user; possible spoofer
-                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
-                        jid: participantId,
-                        id: participantId,
-                        dn,
-                        scene: ARENA.namespacedScene,
-                        src: EVENT_SOURCES.JITSI,
-                    });
-                    return;
-                }
+                this.handleScreenshareTrack(participantId, videoId, user);
             }
         }
 
@@ -530,7 +566,13 @@ AFRAME.registerSystem('arena-jitsi', {
         if (!this.remoteTracks[id]) return;
         const screenShareEl = this.screenShareDict[id];
         if (screenShareEl) {
-            screenShareEl.setAttribute('material', 'src', null);
+            // Only clear the material if it's still showing THIS user's video.
+            // Another user may have since started sharing on the same object.
+            const material = screenShareEl.getAttribute('material');
+            const srcId = material?.src?.id || (typeof material?.src === 'string' ? material.src.replace('#', '') : null);
+            if (!srcId || srcId === `video${id}`) {
+                screenShareEl.setAttribute('material', 'src', null);
+            }
             delete this.screenShareDict[id];
         }
         $(`#video${id}`).remove();
@@ -661,6 +703,14 @@ AFRAME.registerSystem('arena-jitsi', {
                             scene: this.conferenceName,
                             src: EVENT_SOURCES.JITSI,
                         });
+                    }
+                } else if (propertyKey === 'screenshareObjIds') {
+                    // Fallback: handle screenshare properties arriving after the video track.
+                    // This covers the race condition where onRemoteTrack fires before
+                    // participant properties have propagated via XMPP.
+                    if (this.remoteTracks[id] && this.remoteTracks[id][1]) {
+                        const videoId = `video${id}`;
+                        this.handleScreenshareTrack(id, videoId, user);
                     }
                 }
             }
@@ -1042,6 +1092,11 @@ AFRAME.registerSystem('arena-jitsi', {
             videoConstraints.onStageEndpoints = panoIds;
         }
         videoConstraints.constraints = constraints;
+        // Always forward all tracks (no limit) and keep the default constraints
+        videoConstraints.lastN = -1;
+        videoConstraints.defaultConstraints = {
+            maxHeight: ARENA?.videoDefaultResolutionConstraint || 180,
+        };
         this.conference.setReceiverConstraints(videoConstraints);
     },
 
@@ -1051,6 +1106,8 @@ AFRAME.registerSystem('arena-jitsi', {
         videoConstraints.defaultConstraints = {
             maxHeight: resolution,
         };
+        // Always forward all tracks (no limit)
+        videoConstraints.lastN = -1;
         this.conference.setReceiverConstraints(videoConstraints);
     },
 

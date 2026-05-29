@@ -53,6 +53,6 @@ AFRAME.registerSystem('screenshareable', {
 
     get(object) {
         const objId = object.el.id.trim();
-        return this.screenshareable[objId];
+        return this.screenshareables[objId];
     },
 });
