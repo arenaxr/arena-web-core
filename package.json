@@ -26,7 +26,7 @@
     "comlink": "4.4.2",
     "he": "1.2.0",
     "linkify-html": "4.3.2",
-    "linkifyjs": "4.3.2",
+    "linkifyjs": "4.3.3",
     "mqtt-pattern": "2.1.1",
     "msgpackr": "1.11.10",
     "notiflix": "3.2.8",
