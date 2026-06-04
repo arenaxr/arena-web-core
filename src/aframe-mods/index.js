@@ -8,7 +8,6 @@
 
 import './aabb-collider';
 import './arrow-controls';
-import './gaussian-splatting-loading';
 import './gltf-model-model-update';
 import './gltf-model-loading';
 import './obj-model-loading';

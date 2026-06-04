@@ -15,6 +15,7 @@ import './attribution';
 import './blip';
 import './click-listener';
 import './collision-listener';
+import './gaussian-splatting';
 import './gltf-lod';
 import './goto-url';
 import './show-hide-on-enter-vr';

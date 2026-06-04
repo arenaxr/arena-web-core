@@ -1,6 +1,6 @@
 {
     "title": "Gaussian Splat",
-    "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering.\n\nMore information: <a href='https://github.com/quadjr/aframe-gaussian-splatting'>A-Frame Gaussian Splatting</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
+    "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering.\n\nRendered with <a href='https://sparkjs.dev'>Spark</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#properties"
@@ -18,7 +18,7 @@
                                     "enum": ["gaussian_splatting"]
                                 },
                                 "src": {
-                                    "description": "Url of the .ply or .splat file. Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
+                                    "description": "Url of the splat file (.ply incl. compressed, .splat, .spz, .ksplat, or .sog). Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
                                     "format": "uri",
                                     "title": "Url",
                                     "type": "string"
