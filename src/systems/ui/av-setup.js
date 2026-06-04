@@ -314,25 +314,28 @@ AFRAME.registerSystem('arena-av-setup', {
         if (!this.videoSelect.childElementCount) {
             this.videoSelect.appendChild(noElementOption.cloneNode(true));
         }
-        if (window.stream) {
-            const currentAudioIndex = [...this.audioInSelect.options].findIndex(
-                (option) => option.text === window.stream.getAudioTracks()[0].label
-            );
-            this.audioInSelect.selectedIndex = currentAudioIndex === -1 ? 0 : currentAudioIndex;
-
-            const currentVideoIndex = [...this.videoSelect.options].findIndex(
-                (option) => option.text === window.stream.getVideoTracks()[0].label
-            );
-            this.videoSelect.selectedIndex = currentVideoIndex === -1 ? 0 : currentVideoIndex;
-        } else {
-            this.audioInSelect.selectedIndex = 0;
-            this.videoSelect.selectedIndex = 0;
-        }
         if (!this.audioOutSelect.childElementCount) {
             noElementOption.text = 'Default Device';
             this.audioOutSelect.appendChild(noElementOption.cloneNode(true));
         }
-        this.audioOutSelect.selectedIndex = 0;
+        // Restore each dropdown's selection: prefer the user's saved deviceId, then the device
+        // backing the active preview stream (matched by track label), otherwise the first option.
+        // Restoring by saved id (not just label) preserves the user's pick - notably the speaker,
+        // which was previously always reset to the first/Default entry every time the dialog opened,
+        // silently overwriting prefAudioOutput with the default on the next Enter.
+        const preferredIndex = (selectEl, prefKey, track) => {
+            const pref = localStorage.getItem(prefKey);
+            let idx = pref ? [...selectEl.options].findIndex((option) => option.value === pref) : -1;
+            if (idx === -1 && track) {
+                idx = [...selectEl.options].findIndex((option) => option.text === track.label);
+            }
+            return idx === -1 ? 0 : idx;
+        };
+        const audioTrack = window.stream ? window.stream.getAudioTracks()[0] : null;
+        const videoTrack = window.stream ? window.stream.getVideoTracks()[0] : null;
+        this.audioInSelect.selectedIndex = preferredIndex(this.audioInSelect, 'prefAudioInput', audioTrack);
+        this.videoSelect.selectedIndex = preferredIndex(this.videoSelect, 'prefVideoInput', videoTrack);
+        this.audioOutSelect.selectedIndex = preferredIndex(this.audioOutSelect, 'prefAudioOutput', null);
     },
 
     /**
