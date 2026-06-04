@@ -137,28 +137,29 @@ AFRAME.registerSystem('arena-jitsi', {
 
     /**
      * Validate saved device IDs against currently available devices.
-     * Clears preferences if any saved device is no longer available.
+     * Clears only the preference(s) whose device is no longer available, leaving the rest intact.
      * @return {Promise<boolean>} true if all saved devices are still valid
      */
     async validateDeviceIds() {
-        const prefAudioInput = localStorage.getItem('prefAudioInput');
-        const prefVideoInput = localStorage.getItem('prefVideoInput');
-        const prefAudioOutput = localStorage.getItem('prefAudioOutput');
-        if (!prefAudioInput && !prefVideoInput && !prefAudioOutput) return true;
+        const prefKeys = ['prefAudioInput', 'prefVideoInput', 'prefAudioOutput'];
+        const prefs = prefKeys.map((key) => [key, localStorage.getItem(key)]);
+        if (prefs.every(([, value]) => !value)) return true;
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const deviceIds = new Set(devices.map((d) => d.deviceId));
-            const valid =
-                (!prefAudioInput || deviceIds.has(prefAudioInput)) &&
-                (!prefVideoInput || deviceIds.has(prefVideoInput)) &&
-                (!prefAudioOutput || deviceIds.has(prefAudioOutput));
-            if (!valid) {
-                console.warn('Saved A/V device IDs are no longer available, clearing preferences');
-                localStorage.removeItem('prefAudioInput');
-                localStorage.removeItem('prefVideoInput');
-                localStorage.removeItem('prefAudioOutput');
-            }
-            return valid;
+            let allValid = true;
+            prefs.forEach(([key, value]) => {
+                if (value && !deviceIds.has(value)) {
+                    // Only clear the specific device that is gone. macOS/Chrome rotates deviceIds
+                    // (sleep/wake, plug/unplug, the floating "default" entry); clearing all prefs
+                    // when any one is stale would discard the user's still-valid mic/camera choice
+                    // and fall back to the system default.
+                    console.warn(`Saved A/V device no longer available, clearing ${key}`);
+                    localStorage.removeItem(key);
+                    allValid = false;
+                }
+            });
+            return allValid;
         } catch (e) {
             return true; // Can't enumerate devices, assume valid
         }
@@ -178,7 +179,10 @@ AFRAME.registerSystem('arena-jitsi', {
         // Firefox does not allow audio output device change
         try {
             const prefAudioOutput = localStorage.getItem('prefAudioOutput');
-            JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
+            // only set an explicit output device; passing null/'' would force the system default
+            if (prefAudioOutput) {
+                JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
+            }
         } catch {
             // empty
         }
