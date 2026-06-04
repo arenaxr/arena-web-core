@@ -571,7 +571,22 @@ AFRAME.registerComponent('arena-user', {
                 }
             }
             if (data.pano) {
-                this.evaluateRemoteResolution(1920);
+                if (this.distance < this.panoRadius) {
+                    // User is INSIDE the videosphere — always request full resolution
+                    this.evaluateRemoteResolution(1920);
+                } else if (arenaCameraComponent && arenaCameraComponent.isVideoFrustumCullingEnabled() && this.panoEl) {
+                    // User is OUTSIDE the videosphere — apply frustum culling
+                    const panoInView = arenaCameraComponent.viewIntersectsObject3D(this.panoEl.object3D);
+                    if (panoInView) {
+                        this.evaluateRemoteResolution(480);
+                    } else {
+                        this.muteVideo();
+                        this.evaluateRemoteResolution(0);
+                    }
+                } else {
+                    // User is OUTSIDE but frustum culling disabled — use reduced resolution
+                    this.evaluateRemoteResolution(480);
+                }
             } else if (inFieldOfView === false) {
                 this.muteVideo();
                 this.evaluateRemoteResolution(0);
