@@ -61,6 +61,10 @@ AFRAME.registerComponent('gaussian_splatting', {
                 }
             },
         });
+        // Spark loads splats in OpenCV (Y-down) coordinates; re-orient to three.js /
+        // A-Frame Y-up. quaternion.set(x, y, z, w) -> (1,0,0,0) is a 180° flip about X.
+        // Applied on the mesh itself so the entity's A-Frame transform composes on top.
+        splatMesh.quaternion.set(1, 0, 0, 0);
         this.splatMesh = splatMesh;
         el.setObject3D('mesh', splatMesh);
 
