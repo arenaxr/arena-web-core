@@ -364,7 +364,13 @@ AFRAME.registerSystem('arena-av-setup', {
         this.videoElement.srcObject = stream;
 
         // Mic Test Meter via https://github.com/cwilso/volume-meter/
+        // The AudioContext is created outside a user gesture so it starts suspended; resume it or
+        // the meter's processor never runs. shutdown() nulls onaudioprocess and disconnects the
+        // node, so the meter must be recreated (not reused) each time a new stream is wired in -
+        // otherwise the green level bar stays at zero for every mic.
+        this.audioContext.resume().catch(() => {});
         this.meterProcess?.shutdown();
+        this.meterProcess = createAudioMeter(this.audioContext);
         this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
         this.mediaStreamSource.connect(this.meterProcess);
         this.micDrawLoop();
