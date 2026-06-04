@@ -1,8 +1,6 @@
 import { DepthTexture, FloatType, RenderTarget, Vector2, TempNode, QuadMesh, NodeMaterial, RendererUtils, NodeUpdateType } from 'three/webgpu';
 import { Loop, int, exp, min, float, mul, uv, vec2, vec3, Fn, textureSize, orthographicDepthToViewZ, screenUV, nodeObject, uniform, vec4, passTexture, texture, perspectiveDepthToViewZ, positionView, reference } from 'three/tsl';
 
-/** @module OutlineNode **/
-
 const _quadMesh = /*@__PURE__*/ new QuadMesh();
 const _size = /*@__PURE__*/ new Vector2();
 const _BLUR_DIRECTION_X = /*@__PURE__*/ new Vector2( 1.0, 0.0 );
@@ -42,6 +40,7 @@ let _rendererState;
  * ```
  *
  * @augments TempNode
+ * @three_import import { outline } from 'three/addons/tsl/display/OutlineNode.js';
  */
 class OutlineNode extends TempNode {
 
@@ -57,10 +56,10 @@ class OutlineNode extends TempNode {
 	 * @param {Scene} scene - A reference to the scene.
 	 * @param {Camera} camera - The camera the scene is rendered with.
 	 * @param {Object} params - The configuration parameters.
-	 * @param {Array<Object3D>} params.selectedObjects - An array of selected objects.
+	 * @param {Array<Object3D>} [params.selectedObjects] - An array of selected objects.
 	 * @param {Node<float>} [params.edgeThickness=float(1)] - The thickness of the edges.
 	 * @param {Node<float>} [params.edgeGlow=float(0)] - Can be used for an animated glow/pulse effects.
-	 * @param {Number} [params.downSampleRatio=2] - The downsample ratio.
+	 * @param {number} [params.downSampleRatio=2] - The downsample ratio.
 	 */
 	constructor( scene, camera, params = {} ) {
 
@@ -111,7 +110,7 @@ class OutlineNode extends TempNode {
 		/**
 		 * The downsample ratio.
 		 *
-		 * @type {Number}
+		 * @type {number}
 		 * @default 2
 		 */
 		this.downSampleRatio = downSampleRatio;
@@ -120,7 +119,7 @@ class OutlineNode extends TempNode {
 		 * The `updateBeforeType` is set to `NodeUpdateType.FRAME` since the node renders
 		 * its effect once per frame in `updateBefore()`.
 		 *
-		 * @type {String}
+		 * @type {string}
 		 * @default 'frame'
 		 */
 		this.updateBeforeType = NodeUpdateType.FRAME;
@@ -405,8 +404,8 @@ class OutlineNode extends TempNode {
 	/**
 	 * Sets the size of the effect.
 	 *
-	 * @param {Number} width - The width of the effect.
-	 * @param {Number} height - The height of the effect.
+	 * @param {number} width - The width of the effect.
+	 * @param {number} height - The height of the effect.
 	 */
 	setSize( width, height ) {
 
@@ -456,6 +455,8 @@ class OutlineNode extends TempNode {
 
 		this._updateSelectionCache();
 
+		const currentSceneName = scene.name;
+
 		// 1. Draw non-selected objects in the depth buffer
 
 		scene.overrideMaterial = this._depthMaterial;
@@ -471,6 +472,7 @@ class OutlineNode extends TempNode {
 
 		} );
 
+		scene.name = 'Outline [ Non-Selected Objects Pass ]';
 		renderer.render( scene, camera );
 
 		// 2. Draw only the selected objects by comparing the depth buffer of non-selected objects
@@ -488,6 +490,7 @@ class OutlineNode extends TempNode {
 
 		} );
 
+		scene.name = 'Outline [ Selected Objects Pass ]';
 		renderer.render( scene, camera );
 
 		//
@@ -496,15 +499,19 @@ class OutlineNode extends TempNode {
 
 		this._selectionCache.clear();
 
+		scene.name = currentSceneName;
+
 		// 3. Downsample to (at least) half resolution
 
 		_quadMesh.material = this._materialCopy;
+		_quadMesh.name = 'Outline [ Downsample ]';
 		renderer.setRenderTarget( this._renderTargetMaskDownSampleBuffer );
 		_quadMesh.render( renderer );
 
 		// 4. Perform edge detection (half resolution)
 
 		_quadMesh.material = this._edgeDetectionMaterial;
+		_quadMesh.name = 'Outline [ Edge Detection ]';
 		renderer.setRenderTarget( this._renderTargetEdgeBuffer1 );
 		_quadMesh.render( renderer );
 
@@ -514,6 +521,7 @@ class OutlineNode extends TempNode {
 		this._blurDirection.value.copy( _BLUR_DIRECTION_X );
 
 		_quadMesh.material = this._separableBlurMaterial;
+		_quadMesh.name = 'Outline [ Blur Half Resolution ]';
 		renderer.setRenderTarget( this._renderTargetBlurBuffer1 );
 		_quadMesh.render( renderer );
 
@@ -529,6 +537,7 @@ class OutlineNode extends TempNode {
 		this._blurDirection.value.copy( _BLUR_DIRECTION_X );
 
 		_quadMesh.material = this._separableBlurMaterial2;
+		_quadMesh.name = 'Outline [ Blur Quarter Resolution ]';
 		renderer.setRenderTarget( this._renderTargetBlurBuffer2 );
 		_quadMesh.render( renderer );
 
@@ -541,6 +550,7 @@ class OutlineNode extends TempNode {
 		// 7. Composite
 
 		_quadMesh.material = this._compositeMaterial;
+		_quadMesh.name = 'Outline [ Blur Quarter Resolution ]';
 		renderer.setRenderTarget( this._renderTargetComposite );
 		_quadMesh.render( renderer );
 
@@ -738,14 +748,15 @@ export default OutlineNode;
 /**
  * TSL function for creating an outline effect around selected objects.
  *
+ * @tsl
  * @function
  * @param {Scene} scene - A reference to the scene.
  * @param {Camera} camera - The camera the scene is rendered with.
  * @param {Object} params - The configuration parameters.
- * @param {Array<Object3D>} params.selectedObjects - An array of selected objects.
+ * @param {Array<Object3D>} [params.selectedObjects] - An array of selected objects.
  * @param {Node<float>} [params.edgeThickness=float(1)] - The thickness of the edges.
  * @param {Node<float>} [params.edgeGlow=float(0)] - Can be used for animated glow/pulse effects.
- * @param {Number} [params.downSampleRatio=2] - The downsample ratio.
+ * @param {number} [params.downSampleRatio=2] - The downsample ratio.
  * @returns {OutlineNode}
  */
 export const outline = ( scene, camera, params ) => nodeObject( new OutlineNode( scene, camera, params ) );

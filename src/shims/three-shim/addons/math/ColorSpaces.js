@@ -1,4 +1,6 @@
-import { LinearTransfer, Matrix3, SRGBTransfer } from 'three';
+import { LinearTransfer, Matrix3, SRGBTransfer, SRGBColorSpace, ColorManagement } from 'three';
+
+/** @module ColorSpaces */
 
 // Reference: http://www.russellcottrell.com/photo/matrixCalculator.htm
 
@@ -24,9 +26,28 @@ const XYZ_TO_LINEAR_DISPLAY_P3 = /*@__PURE__*/ new Matrix3().set(
 	0.0358458, - 0.0761724, 0.9568845
 );
 
+/**
+ * Display-P3 color space.
+ *
+ * @type {string}
+ * @constant
+ */
 export const DisplayP3ColorSpace = 'display-p3';
+
+/**
+ * Display-P3-Linear color space.
+ *
+ * @type {string}
+ * @constant
+ */
 export const LinearDisplayP3ColorSpace = 'display-p3-linear';
 
+/**
+ * Implementation object for the Display-P3 color space.
+ *
+ * @type {module:ColorSpaces~ColorSpaceImpl}
+ * @constant
+ */
 export const DisplayP3ColorSpaceImpl = {
 	primaries: P3_PRIMARIES,
 	whitePoint: D65,
@@ -37,6 +58,12 @@ export const DisplayP3ColorSpaceImpl = {
 	outputColorSpaceConfig: { drawingBufferColorSpace: DisplayP3ColorSpace }
 };
 
+/**
+ * Implementation object for the Display-P3-Linear color space.
+ *
+ * @type {module:ColorSpaces~ColorSpaceImpl}
+ * @constant
+ */
 export const LinearDisplayP3ColorSpaceImpl = {
 	primaries: P3_PRIMARIES,
 	whitePoint: D65,
@@ -64,8 +91,20 @@ const XYZ_TO_LINEAR_REC2020 = /*@__PURE__*/ new Matrix3().set(
 	0.0176399, - 0.0427706, 0.9421031
 );
 
+/**
+ * Rec2020-Linear color space.
+ *
+ * @type {string}
+ * @constant
+ */
 export const LinearRec2020ColorSpace = 'rec2020-linear';
 
+/**
+ * Implementation object for the Rec2020-Linear color space.
+ *
+ * @type {module:ColorSpaces~ColorSpaceImpl}
+ * @constant
+ */
 export const LinearRec2020ColorSpaceImpl = {
 	primaries: REC2020_PRIMARIES,
 	whitePoint: D65,
@@ -74,3 +113,35 @@ export const LinearRec2020ColorSpaceImpl = {
 	fromXYZ: XYZ_TO_LINEAR_REC2020,
 	luminanceCoefficients: REC2020_LUMINANCE_COEFFICIENTS,
 };
+
+/**
+ * Extended-sRGB color space.
+ *
+ * @type {string}
+ * @constant
+ */
+export const ExtendedSRGBColorSpace = 'extended-srgb';
+
+/**
+ * Implementation object for the Extended-sRGB color space.
+ *
+ * @type {module:ColorSpaces~ColorSpaceImpl}
+ * @constant
+ */
+export const ExtendedSRGBColorSpaceImpl = {
+	...ColorManagement.spaces[ SRGBColorSpace ],
+	outputColorSpaceConfig: { drawingBufferColorSpace: SRGBColorSpace, toneMappingMode: 'extended' }
+};
+
+/**
+ * An object holding the color space implementation.
+ *
+ * @typedef {Object} module:ColorSpaces~ColorSpaceImpl
+ * @property {Array<number>} primaries - The primaries.
+ * @property {Array<number>} whitePoint - The white point.
+ * @property {Matrix3} toXYZ - A color space conversion matrix, converting to CIE XYZ.
+ * @property {Matrix3} fromXYZ - A color space conversion matrix, converting from CIE XYZ.
+ * @property {Array<number>} luminanceCoefficients - The luminance coefficients.
+ * @property {{unpackColorSpace:string}} [workingColorSpaceConfig] - The working color space config.
+ * @property {{drawingBufferColorSpace:string}} [outputColorSpaceConfig] - The drawing buffer color space config.
+ **/

@@ -8,8 +8,30 @@ import {
 	Color
 } from 'three';
 
+/**
+ * This class can be used to render a DOM element onto a canvas and use it as a texture
+ * for a plane mesh.
+ *
+ * A typical use case for this class is to render the GUI of `lil-gui` as a texture so it
+ * is compatible for VR.
+ *
+ * ```js
+ * const gui = new GUI( { width: 300 } ); // create lil-gui instance
+ *
+ * const mesh = new HTMLMesh( gui.domElement );
+ * scene.add( mesh );
+ * ```
+ *
+ * @augments Mesh
+ * @three_import import { HTMLMesh } from 'three/addons/interactive/HTMLMesh.js';
+ */
 class HTMLMesh extends Mesh {
 
+	/**
+	 * Constructs a new HTML mesh.
+	 *
+	 * @param {HTMLElement} dom - The DOM element to display as a plane mesh.
+	 */
 	constructor( dom ) {
 
 		const texture = new HTMLTexture( dom );
@@ -30,6 +52,10 @@ class HTMLMesh extends Mesh {
 		this.addEventListener( 'mouseup', onEvent );
 		this.addEventListener( 'click', onEvent );
 
+		/**
+		 * Frees the GPU-related resources allocated by this instance and removes all event listeners.
+		 * Call this method whenever this instance is no longer used in your app.
+		 */
 		this.dispose = function () {
 
 			geometry.dispose();
@@ -269,17 +295,12 @@ function html2canvas( element ) {
 		} else if ( element instanceof HTMLCanvasElement ) {
 
 			// Canvas element
-
 			const rect = element.getBoundingClientRect();
-
 			x = rect.left - offset.left - 0.5;
 			y = rect.top - offset.top - 0.5;
-
-		        context.save();
-			const dpr = window.devicePixelRatio;
-			context.scale( 1 / dpr, 1 / dpr );
-			context.drawImage( element, x, y );
-			context.restore();
+			const width = rect.width;
+			const height = rect.height;
+			context.drawImage( element, x, y, width, height );
 
 		} else if ( element instanceof HTMLImageElement ) {
 
@@ -452,11 +473,13 @@ function html2canvas( element ) {
 
 				}
 
-				if ( element.type === 'color' || element.type === 'text' || element.type === 'number' ) {
+				if ( element.type === 'color' || element.type === 'text' || element.type === 'number' || element.type === 'email' || element.type === 'password' ) {
 
 					clipper.add( { x: x, y: y, width: width, height: height } );
 
-					drawText( style, x + parseInt( style.paddingLeft ), y + parseInt( style.paddingTop ), element.value );
+					const displayValue = element.type === 'password' ? '*'.repeat( element.value.length ) : element.value;
+
+					drawText( style, x + parseInt( style.paddingLeft ), y + parseInt( style.paddingTop ), displayValue );
 
 					clipper.remove();
 
@@ -493,11 +516,12 @@ function html2canvas( element ) {
 	if ( canvas === undefined ) {
 
 		canvas = document.createElement( 'canvas' );
-		canvas.width = offset.width;
-		canvas.height = offset.height;
 		canvases.set( element, canvas );
 
 	}
+
+	canvas.width = offset.width;
+	canvas.height = offset.height;
 
 	const context = canvas.getContext( '2d'/*, { alpha: false }*/ );
 
@@ -549,6 +573,12 @@ function htmlevent( element, event, x, y ) {
 					const proportion = offsetX / width;
 					element.value = min + ( max - min ) * proportion;
 					element.dispatchEvent( new InputEvent( 'input', { bubbles: true } ) );
+
+				}
+
+				if ( element instanceof HTMLInputElement && ( element.type === 'text' || element.type === 'number' || element.type === 'email' || element.type === 'password' ) && ( event === 'mousedown' || event === 'click' ) ) {
+
+					element.focus();
 
 				}
 
