@@ -66,7 +66,12 @@ AFRAME.registerSystem('arena-jitsi', {
         this.hasAudio = false;
         this.hasVideo = false;
 
-        this.screenShareDict = {};
+        this.screenShareDict = {}; // participantId -> Set of object element ids they share on
+        this.screenShareOwners = {}; // object element id -> participantId currently displayed on it
+        this.screenShareSourceNames = new Set(); // jitsi video source names of active screenshares
+        this.screenShareRestore = {}; // object element id -> pristine state to restore when share ends
+        // last receiver video constraints set by avatars/defaults, re-applied when screenshares change
+        this.lastVideoConstraints = { colibriClass: 'ReceiverVideoConstraints' };
 
         /**
          * list of timers to send new user notifications; when a user enters jitsi, there is some delay until other
@@ -278,7 +283,8 @@ AFRAME.registerSystem('arena-jitsi', {
         if (!screenShareId) return;
 
         let screenShareEl = document.getElementById(screenShareId);
-        if (!screenShareEl) {
+        const created = !screenShareEl;
+        if (created) {
             const sceneEl = document.querySelector('a-scene');
             // create if doesn't exist
             screenShareEl = document.createElement('a-entity');
@@ -290,13 +296,35 @@ AFRAME.registerSystem('arena-jitsi', {
             screenShareEl.setAttribute('material', 'shader: flat; side: double');
             sceneEl.appendChild(screenShareEl);
         }
+
+        // Capture the object's pristine state once, before screenshare styling, so it can be
+        // restored when the share ends (otherwise the frozen last video frame stays on the object
+        // and there is no visual cue that sharing has stopped). Auto-created objects are removed
+        // on end; pre-existing scene objects (e.g. a 'screenshare' cube) revert to their material.
+        if (!this.screenShareRestore[screenShareId]) {
+            this.screenShareRestore[screenShareId] = {
+                created,
+                material: created ? null : { ...screenShareEl.getAttribute('material') },
+                hadExtras: !created && screenShareEl.hasAttribute('material-extras'),
+                hadLandmark: !created && screenShareEl.hasAttribute('landmark'),
+            };
+        }
+
         screenShareEl.setAttribute('muted', 'false');
         screenShareEl.setAttribute('autoplay', 'true');
         screenShareEl.setAttribute('playsinline', 'true');
         screenShareEl.setAttribute('material', 'src', `#${videoId}`);
         screenShareEl.setAttribute('material', 'shader', 'flat');
         screenShareEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
-        this.screenShareDict[participantId] = screenShareEl;
+
+        // Track which participant is currently displayed on this object, and the set of
+        // objects this participant shares on, so that when one sharer leaves we never clear
+        // another sharer's still-active video on a shared object (issue: same-object collision).
+        this.screenShareOwners[screenShareId] = participantId;
+        if (!this.screenShareDict[participantId]) {
+            this.screenShareDict[participantId] = new Set();
+        }
+        this.screenShareDict[participantId].add(screenShareId);
 
         // add a default landmark for any screen share object
         if (!screenShareEl.hasAttribute('landmark')) {
@@ -378,13 +406,39 @@ AFRAME.registerSystem('arena-jitsi', {
                         src: EVENT_SOURCES.JITSI,
                     });
 
+                    // Start decoding the screenshare video now. The `autoplay` attribute alone is
+                    // blocked by the browser until the viewer makes a user gesture, so without
+                    // this the video stays paused, `loadeddata` never fires, and the texture is
+                    // empty ("texImage2D: no video") -- which is why sharing only rendered after a
+                    // viewer enabled their own mic/camera. Mute so autoplay is always permitted
+                    // (screenshare audio, if any, rides a separate audio track) and play.
+                    vidEl[0].muted = true;
+                    if (vidEl[0].paused) {
+                        vidEl[0].play().catch((e) => console.warn('screenshare video play failed', e));
+                    }
+
+                    // Explicitly request this screenshare's video from the bridge. ARENA only builds
+                    // receiver constraints from [arena-user] avatars, so a screenshare endpoint (not an
+                    // avatar) is otherwise never requested and, with enableLayerSuspension, the bridge
+                    // forwards no frames -- the video element stays at readyState 0 / 0x0 and renders blank.
+                    this.screenShareSourceNames.add(`${participantId}-v0`);
+                    this.applyReceiverConstraints(this.lastVideoConstraints);
+
                     // handle screen share video
                     for (let i = 0; i < objectIds.length; i++) {
-                        if (objectIds[i]) {
-                            const video = $(`#${videoId}`);
-                            video.on('loadeddata', () => {
-                                this.updateScreenShareObject(objectIds[i], videoId, participantId);
-                            });
+                        const objectId = objectIds[i];
+                        if (objectId) {
+                            // if the video already has data (loadeddata fired before we could
+                            // attach the listener), render now; otherwise wait for it once.
+                            // Mirrors the readyState guard in the jitsi-video component and
+                            // avoids the race that left named objects unrendered.
+                            if (vidEl[0].readyState >= 2) {
+                                this.updateScreenShareObject(objectId, videoId, participantId);
+                            } else {
+                                $(`#${videoId}`).one('loadeddata', () => {
+                                    this.updateScreenShareObject(objectId, videoId, participantId);
+                                });
+                            }
                         }
                     }
                 } else {
@@ -528,10 +582,39 @@ AFRAME.registerSystem('arena-jitsi', {
         if (!arenaId) arenaId = id; // this was a jitsi-only user
 
         if (!this.remoteTracks[id]) return;
-        const screenShareEl = this.screenShareDict[id];
-        if (screenShareEl) {
-            screenShareEl.setAttribute('material', 'src', null);
+        const sharedObjIds = this.screenShareDict[id];
+        if (sharedObjIds) {
+            sharedObjIds.forEach((objId) => {
+                // only restore the object if THIS leaving participant still owns it; if another
+                // sharer has since taken it over, leave their video intact (same-object collision).
+                if (this.screenShareOwners[objId] === id) {
+                    const screenShareEl = document.getElementById(objId);
+                    const restore = this.screenShareRestore[objId];
+                    if (screenShareEl) {
+                        if (restore && restore.created) {
+                            // ARENA created this object for the share; remove it so it clearly ends
+                            screenShareEl.remove();
+                        } else {
+                            // pre-existing scene object: clear the frozen video frame and revert to
+                            // its original material/look so it's obvious the share has stopped
+                            if (restore && restore.material) {
+                                screenShareEl.setAttribute('material', restore.material);
+                            } else {
+                                screenShareEl.removeAttribute('material', 'src');
+                            }
+                            if (restore && !restore.hadExtras) screenShareEl.removeAttribute('material-extras');
+                            if (restore && !restore.hadLandmark) screenShareEl.removeAttribute('landmark');
+                        }
+                    }
+                    delete this.screenShareRestore[objId];
+                    delete this.screenShareOwners[objId];
+                }
+            });
             delete this.screenShareDict[id];
+        }
+        // stop requesting this endpoint's screenshare video from the bridge
+        if (this.screenShareSourceNames.delete(`${id}-v0`)) {
+            this.applyReceiverConstraints(this.lastVideoConstraints);
         }
         $(`#video${id}`).remove();
         $(`#audio${id}`).remove();
@@ -1042,7 +1125,7 @@ AFRAME.registerSystem('arena-jitsi', {
             videoConstraints.onStageEndpoints = panoIds;
         }
         videoConstraints.constraints = constraints;
-        this.conference.setReceiverConstraints(videoConstraints);
+        this.applyReceiverConstraints(videoConstraints);
     },
 
     setDefaultResolutionRemotes(resolution) {
@@ -1051,7 +1134,33 @@ AFRAME.registerSystem('arena-jitsi', {
         videoConstraints.defaultConstraints = {
             maxHeight: resolution,
         };
-        this.conference.setReceiverConstraints(videoConstraints);
+        this.applyReceiverConstraints(videoConstraints);
+    },
+
+    /**
+     * Apply receiver video constraints to the bridge, always keeping any active screenshares
+     * requested at full resolution. ARENA builds constraints only from [arena-user] avatars and
+     * each call replaces the whole set; a screenshare endpoint (not an avatar) would otherwise be
+     * dropped and, with enableLayerSuspension, suspended by the bridge so it renders blank. The
+     * base constraints are remembered so screenshare add/remove can re-apply them.
+     * @param {object} videoConstraints ReceiverVideoConstraints object (avatar/default constraints)
+     */
+    applyReceiverConstraints(videoConstraints) {
+        if (!this.conference) return;
+        this.lastVideoConstraints = videoConstraints;
+        // shallow-clone so the screenshare additions don't mutate the remembered base constraints
+        const merged = { ...videoConstraints };
+        if (this.screenShareSourceNames.size > 0) {
+            const onStageSources = [...(merged.onStageSources || [])];
+            const constraints = { ...(merged.constraints || {}) };
+            this.screenShareSourceNames.forEach((sourceName) => {
+                if (!onStageSources.includes(sourceName)) onStageSources.push(sourceName);
+                constraints[sourceName] = { maxHeight: 2160 };
+            });
+            merged.onStageSources = onStageSources;
+            merged.constraints = constraints;
+        }
+        this.conference.setReceiverConstraints(merged);
     },
 
     /**
