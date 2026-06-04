@@ -31,18 +31,80 @@ const STATE = {
 	ROTATE: 1
 };
 
+/**
+ * This class can be used to provide a drag'n'drop interaction.
+ *
+ * ```js
+ * const controls = new DragControls( objects, camera, renderer.domElement );
+ *
+ * // add event listener to highlight dragged objects
+ * controls.addEventListener( 'dragstart', function ( event ) {
+ *
+ * 	event.object.material.emissive.set( 0xaaaaaa );
+ *
+ * } );
+ *
+ * controls.addEventListener( 'dragend', function ( event ) {
+ *
+ * 	event.object.material.emissive.set( 0x000000 );
+ *
+ * } );
+ * ```
+ *
+ * @augments Controls
+ * @three_import import { DragControls } from 'three/addons/controls/DragControls.js';
+ */
 class DragControls extends Controls {
 
+	/**
+	 * Constructs a new controls instance.
+	 *
+	 * @param {Array<Object3D>} objects - An array of draggable 3D objects.
+	 * @param {Camera} camera - The camera of the rendered scene.
+	 * @param {?HTMLElement} [domElement=null] - The HTML DOM element used for event listeners.
+	 */
 	constructor( objects, camera, domElement = null ) {
 
 		super( camera, domElement );
 
+		/**
+		 * An array of draggable 3D objects.
+		 *
+		 * @type {Array<Object3D>}
+		 */
 		this.objects = objects;
 
+		/**
+		 * Whether children of draggable objects can be dragged independently from their parent.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.recursive = true;
+
+		/**
+		 * This option only works if the `objects` array contains a single draggable  group object.
+		 * If set to `true`, the controls does not transform individual objects but the entire group.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.transformGroup = false;
+
+		/**
+		 * The speed at which the object will rotate when dragged in `rotate` mode.
+		 * The higher the number the faster the rotation.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.rotateSpeed = 1;
 
+		/**
+		 * The raycaster used for detecting 3D objects.
+		 *
+		 * @type {Raycaster}
+		 */
 		this.raycaster = new Raycaster();
 
 		// interaction
@@ -61,13 +123,15 @@ class DragControls extends Controls {
 
 		if ( domElement !== null ) {
 
-			this.connect();
+			this.connect( domElement );
 
 		}
 
 	}
 
-	connect() {
+	connect( element ) {
+
+		super.connect( element );
 
 		this.domElement.addEventListener( 'pointermove', this._onPointerMove );
 		this.domElement.addEventListener( 'pointerdown', this._onPointerDown );
@@ -170,56 +234,6 @@ class DragControls extends Controls {
 
 	}
 
-	getRaycaster() {
-
-		console.warn( 'THREE.DragControls: getRaycaster() has been deprecated. Use controls.raycaster instead.' ); // @deprecated r169
-
-		return this.raycaster;
-
-	}
-
-	setObjects( objects ) {
-
-		console.warn( 'THREE.DragControls: setObjects() has been deprecated. Use controls.objects instead.' ); // @deprecated r169
-
-		this.objects = objects;
-
-	}
-
-	getObjects() {
-
-		console.warn( 'THREE.DragControls: getObjects() has been deprecated. Use controls.objects instead.' ); // @deprecated r169
-
-		return this.objects;
-
-	}
-
-	activate() {
-
-		console.warn( 'THREE.DragControls: activate() has been renamed to connect().' ); // @deprecated r169
-		this.connect();
-
-	}
-
-	deactivate() {
-
-		console.warn( 'THREE.DragControls: deactivate() has been renamed to disconnect().' ); // @deprecated r169
-		this.disconnect();
-
-	}
-
-	set mode( value ) {
-
-		console.warn( 'THREE.DragControls: The .mode property has been removed. Define the type of transformation via the .mouseButtons or .touches properties.' ); // @deprecated r169
-
-	}
-
-	get mode() {
-
-		console.warn( 'THREE.DragControls: The .mode property has been removed. Define the type of transformation via the .mouseButtons or .touches properties.' ); // @deprecated r169
-
-	}
-
 }
 
 function onPointerMove( event ) {
@@ -241,6 +255,7 @@ function onPointerMove( event ) {
 			if ( raycaster.ray.intersectPlane( _plane, _intersection ) ) {
 
 				_selected.position.copy( _intersection.sub( _offset ).applyMatrix4( _inverseMatrix ) );
+				this.dispatchEvent( { type: 'drag', object: _selected } );
 
 			}
 
@@ -249,10 +264,9 @@ function onPointerMove( event ) {
 			_diff.subVectors( _pointer, _previousPointer ).multiplyScalar( this.rotateSpeed );
 			_selected.rotateOnWorldAxis( _up, _diff.x );
 			_selected.rotateOnWorldAxis( _right.normalize(), - _diff.y );
+			this.dispatchEvent( { type: 'drag', object: _selected } );
 
 		}
-
-		this.dispatchEvent( { type: 'drag', object: _selected } );
 
 		_previousPointer.copy( _pointer );
 
@@ -350,20 +364,20 @@ function onPointerDown( event ) {
 
 				_inverseMatrix.copy( _selected.parent.matrixWorld ).invert();
 				_offset.copy( _intersection ).sub( _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
+				domElement.style.cursor = 'move';
+				this.dispatchEvent( { type: 'dragstart', object: _selected } );
 
 			} else if ( this.state === STATE.ROTATE ) {
 
 				// the controls only support Y+ up
 				_up.set( 0, 1, 0 ).applyQuaternion( camera.quaternion ).normalize();
 				_right.set( 1, 0, 0 ).applyQuaternion( camera.quaternion ).normalize();
+				domElement.style.cursor = 'move';
+				this.dispatchEvent( { type: 'dragstart', object: _selected } );
 
 			}
 
 		}
-
-		domElement.style.cursor = 'move';
-
-		this.dispatchEvent( { type: 'dragstart', object: _selected } );
 
 	}
 
@@ -406,5 +420,33 @@ function findGroup( obj, group = null ) {
 	return findGroup( obj.parent, group );
 
 }
+
+/**
+ * Fires when the user drags a 3D object.
+ *
+ * @event DragControls#drag
+ * @type {Object}
+ */
+
+/**
+ * Fires when the user has finished dragging a 3D object.
+ *
+ * @event DragControls#dragend
+ * @type {Object}
+ */
+
+/**
+ * Fires when the pointer is moved onto a 3D object, or onto one of its children.
+ *
+ * @event DragControls#hoveron
+ * @type {Object}
+ */
+
+/**
+ * Fires when the pointer is moved out of a 3D object.
+ *
+ * @event DragControls#hoveroff
+ * @type {Object}
+ */
 
 export { DragControls };

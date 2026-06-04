@@ -73,8 +73,8 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     tick() {
-        this.raf = this.el.sceneEl.components.stats?.stats('rAF')?.value() ?? 0;
-        this.fps = this.el.sceneEl.components.stats?.stats('FPS')?.value() ?? 0;
+        this.cpu = this.el.sceneEl.components.stats?.stats.lastValue.CPU ?? 0;
+        this.fps = this.el.sceneEl.components.stats?.stats.lastValue.FPS ?? 0;
 
         if (window.performance && window.performance.memory) {
             const { memory } = window.performance;
@@ -107,7 +107,7 @@ AFRAME.registerComponent('stats-monitor', {
                         arenaId: ARENA.idTag,
                         jitsiId: ARENA.jitsi.jitsiId,
                         renderFps: this.fps,
-                        requestAnimationFrame: this.raf,
+                        cpu: this.cpu,
                         stats: this.callStats,
                     },
                 };
@@ -124,7 +124,7 @@ AFRAME.registerComponent('stats-monitor', {
             const pctHeap = Math.trunc((this.usedJSHeapSize / this.jsHeapSizeLimit) * 100).toFixed(0);
             let str = `
             [Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\n
-            RAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}
+            CPU: ${this.cpu}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}
             `;
             if (ARENA && ARENA.jitsi && this.callStats) {
                 str += `\n\n[Jitsi]\n${ARENA.jitsi.getConnectionText(

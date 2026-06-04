@@ -1,8 +1,6 @@
 import { HalfFloatType, RenderTarget, Vector2, Vector3, TempNode, QuadMesh, NodeMaterial, RendererUtils, NodeUpdateType } from 'three/webgpu';
 import { nodeObject, Fn, float, uv, passTexture, uniform, Loop, texture, luminance, smoothstep, mix, vec4, uniformArray, add, int } from 'three/tsl';
 
-/** @module BloomNode **/
-
 const _quadMesh = /*@__PURE__*/ new QuadMesh();
 const _size = /*@__PURE__*/ new Vector2();
 
@@ -42,6 +40,7 @@ let _rendererState;
  * postProcessing.outputNode = scenePassColor.add( bloomPass );
  * ```
  * @augments TempNode
+ * @three_import import { bloom } from 'three/addons/tsl/display/BloomNode.js';
  */
 class BloomNode extends TempNode {
 
@@ -55,9 +54,9 @@ class BloomNode extends TempNode {
 	 * Constructs a new bloom node.
 	 *
 	 * @param {Node<vec4>} inputNode - The node that represents the input of the effect.
-	 * @param {Number} [strength=1] - The strength of the bloom.
-	 * @param {Number} [radius=0] - The radius of the bloom.
-	 * @param {Number} [threshold=0] - The luminance threshold limits which bright areas contribute to the bloom effect.
+	 * @param {number} [strength=1] - The strength of the bloom.
+	 * @param {number} [radius=0] - The radius of the bloom.
+	 * @param {number} [threshold=0] - The luminance threshold limits which bright areas contribute to the bloom effect.
 	 */
 	constructor( inputNode, strength = 1, radius = 0, threshold = 0 ) {
 
@@ -118,7 +117,7 @@ class BloomNode extends TempNode {
 		 * The number if blur mips.
 		 *
 		 * @private
-		 * @type {Number}
+		 * @type {number}
 		 */
 		this._nMips = 5;
 
@@ -156,7 +155,7 @@ class BloomNode extends TempNode {
 		 * The material for the composite pass.
 		 *
 		 * @private
-		 * @type {NodeMaterial?}
+		 * @type {?NodeMaterial}
 		 */
 		this._compositeMaterial = null;
 
@@ -164,7 +163,7 @@ class BloomNode extends TempNode {
 		 * The material for the luminance pass.
 		 *
 		 * @private
-		 * @type {NodeMaterial?}
+		 * @type {?NodeMaterial}
 		 */
 		this._highPassFilterMaterial = null;
 
@@ -236,7 +235,7 @@ class BloomNode extends TempNode {
 		 * The `updateBeforeType` is set to `NodeUpdateType.FRAME` since the node renders
 		 * its effect once per frame in `updateBefore()`.
 		 *
-		 * @type {String}
+		 * @type {string}
 		 * @default 'frame'
 		 */
 		this.updateBeforeType = NodeUpdateType.FRAME;
@@ -257,8 +256,8 @@ class BloomNode extends TempNode {
 	/**
 	 * Sets the size of the effect.
 	 *
-	 * @param {Number} width - The width of the effect.
-	 * @param {Number} height - The height of the effect.
+	 * @param {number} width - The width of the effect.
+	 * @param {number} height - The height of the effect.
 	 */
 	setSize( width, height ) {
 
@@ -301,6 +300,7 @@ class BloomNode extends TempNode {
 
 		renderer.setRenderTarget( this._renderTargetBright );
 		_quadMesh.material = this._highPassFilterMaterial;
+		_quadMesh.name = 'Bloom [ High Pass ]';
 		_quadMesh.render( renderer );
 
 		// 2. Blur all the mips progressively
@@ -314,11 +314,13 @@ class BloomNode extends TempNode {
 			this._separableBlurMaterials[ i ].colorTexture.value = inputRenderTarget.texture;
 			this._separableBlurMaterials[ i ].direction.value = _BlurDirectionX;
 			renderer.setRenderTarget( this._renderTargetsHorizontal[ i ] );
+			_quadMesh.name = `Bloom [ Blur Horizontal - ${ i } ]`;
 			_quadMesh.render( renderer );
 
 			this._separableBlurMaterials[ i ].colorTexture.value = this._renderTargetsHorizontal[ i ].texture;
 			this._separableBlurMaterials[ i ].direction.value = _BlurDirectionY;
 			renderer.setRenderTarget( this._renderTargetsVertical[ i ] );
+			_quadMesh.name = `Bloom [ Blur Vertical - ${ i } ]`;
 			_quadMesh.render( renderer );
 
 			inputRenderTarget = this._renderTargetsVertical[ i ];
@@ -329,6 +331,7 @@ class BloomNode extends TempNode {
 
 		renderer.setRenderTarget( this._renderTargetsHorizontal[ 0 ] );
 		_quadMesh.material = this._compositeMaterial;
+		_quadMesh.name = 'Bloom [ Composite ]';
 		_quadMesh.render( renderer );
 
 		// restore
@@ -365,7 +368,9 @@ class BloomNode extends TempNode {
 
 		// gaussian blur materials
 
-		const kernelSizeArray = [ 3, 5, 7, 9, 11 ];
+		// These sizes have been changed to account for the altered coefficients-calculation to avoid blockiness,
+		// while retaining the same blur-strength. For details see https://github.com/mrdoob/three.js/pull/31528
+		const kernelSizeArray = [ 6, 10, 14, 18, 22 ];
 
 		for ( let i = 0; i < this._nMips; i ++ ) {
 
@@ -444,22 +449,23 @@ class BloomNode extends TempNode {
 	 * Create a separable blur material for the given kernel radius.
 	 *
 	 * @param {NodeBuilder} builder - The current node builder.
-	 * @param {Number} kernelRadius - The kernel radius.
+	 * @param {number} kernelRadius - The kernel radius.
 	 * @return {NodeMaterial}
 	 */
 	_getSeparableBlurMaterial( builder, kernelRadius ) {
 
 		const coefficients = [];
+		const sigma = kernelRadius / 3;
 
 		for ( let i = 0; i < kernelRadius; i ++ ) {
 
-			coefficients.push( 0.39894 * Math.exp( - 0.5 * i * i / ( kernelRadius * kernelRadius ) ) / kernelRadius );
+			coefficients.push( 0.39894 * Math.exp( - 0.5 * i * i / ( sigma * sigma ) ) / sigma );
 
 		}
 
 		//
 
-		const colorTexture = texture();
+		const colorTexture = texture( null );
 		const gaussianCoefficients = uniformArray( coefficients );
 		const invSize = uniform( new Vector2() );
 		const direction = uniform( new Vector2( 0.5, 0.5 ) );
@@ -469,8 +475,7 @@ class BloomNode extends TempNode {
 
 		const separableBlurPass = Fn( () => {
 
-			const weightSum = gaussianCoefficients.element( 0 ).toVar();
-			const diffuseSum = sampleTexel( uvNode ).rgb.mul( weightSum ).toVar();
+			const diffuseSum = sampleTexel( uvNode ).rgb.mul( gaussianCoefficients.element( 0 ) ).toVar();
 
 			Loop( { start: int( 1 ), end: int( kernelRadius ), type: 'int', condition: '<' }, ( { i } ) => {
 
@@ -480,11 +485,10 @@ class BloomNode extends TempNode {
 				const sample1 = sampleTexel( uvNode.add( uvOffset ) ).rgb;
 				const sample2 = sampleTexel( uvNode.sub( uvOffset ) ).rgb;
 				diffuseSum.addAssign( add( sample1, sample2 ).mul( w ) );
-				weightSum.addAssign( float( 2.0 ).mul( w ) );
 
 			} );
 
-			return vec4( diffuseSum.div( weightSum ), 1.0 );
+			return vec4( diffuseSum, 1.0 );
 
 		} );
 
@@ -507,11 +511,12 @@ class BloomNode extends TempNode {
 /**
  * TSL function for creating a bloom effect.
  *
+ * @tsl
  * @function
  * @param {Node<vec4>} node - The node that represents the input of the effect.
- * @param {Number} [strength=1] - The strength of the bloom.
- * @param {Number} [radius=0] - The radius of the bloom.
- * @param {Number} [threshold=0] - The luminance threshold limits which bright areas contribute to the bloom effect.
+ * @param {number} [strength=1] - The strength of the bloom.
+ * @param {number} [radius=0] - The radius of the bloom.
+ * @param {number} [threshold=0] - The luminance threshold limits which bright areas contribute to the bloom effect.
  * @returns {BloomNode}
  */
 export const bloom = ( node, strength, radius, threshold ) => nodeObject( new BloomNode( nodeObject( node ), strength, radius, threshold ) );

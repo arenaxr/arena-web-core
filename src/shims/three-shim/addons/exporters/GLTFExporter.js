@@ -24,7 +24,8 @@ import {
 	CompressedTexture,
 	Vector3,
 	Quaternion,
-	REVISION
+	REVISION,
+	ImageUtils
 } from 'three';
 
 /**
@@ -61,11 +62,57 @@ const KHR_mesh_quantization_ExtraAttrTypes = {
 	],
 };
 
-
+/**
+ * An exporter for `glTF` 2.0.
+ *
+ * glTF (GL Transmission Format) is an [open format specification](https://github.com/KhronosGroup/glTF/tree/master/specification/2.0)
+ * for efficient delivery and loading of 3D content. Assets may be provided either in JSON (.gltf)
+ * or binary (.glb) format. External files store textures (.jpg, .png) and additional binary
+ * data (.bin). A glTF asset may deliver one or more scenes, including meshes, materials,
+ * textures, skins, skeletons, morph targets, animations, lights, and/or cameras.
+ *
+ * GLTFExporter supports the [glTF 2.0 extensions](https://github.com/KhronosGroup/glTF/tree/master/extensions/):
+ *
+ * - KHR_lights_punctual
+ * - KHR_materials_clearcoat
+ * - KHR_materials_dispersion
+ * - KHR_materials_emissive_strength
+ * - KHR_materials_ior
+ * - KHR_materials_iridescence
+ * - KHR_materials_specular
+ * - KHR_materials_sheen
+ * - KHR_materials_transmission
+ * - KHR_materials_unlit
+ * - KHR_materials_volume
+ * - KHR_mesh_quantization
+ * - KHR_texture_transform
+ * - EXT_materials_bump
+ * - EXT_mesh_gpu_instancing
+ *
+ * The following glTF 2.0 extension is supported by an external user plugin:
+ *
+ * - [KHR_materials_variants](https://github.com/takahirox/three-gltf-extensions)
+ *
+ * ```js
+ * const exporter = new GLTFExporter();
+ * const data = await exporter.parseAsync( scene, options );
+ * ```
+ *
+ * @three_import import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+ */
 class GLTFExporter {
 
+	/**
+	 * Constructs a new glTF exporter.
+	 */
 	constructor() {
 
+		/**
+		 * A reference to a texture utils module.
+		 *
+		 * @type {?(WebGLTextureUtils|WebGPUTextureUtils)}
+		 * @default null
+		 */
 		this.textureUtils = null;
 
 		this.pluginCallbacks = [];
@@ -156,6 +203,14 @@ class GLTFExporter {
 
 	}
 
+	/**
+	 * Registers a plugin callback. This API is internally used to implement the various
+	 * glTF extensions but can also used by third-party code to add additional logic
+	 * to the exporter.
+	 *
+	 * @param {function(writer:GLTFWriter)} callback - The callback function to register.
+	 * @return {GLTFExporter} A reference to this exporter.
+	 */
 	register( callback ) {
 
 		if ( this.pluginCallbacks.indexOf( callback ) === - 1 ) {
@@ -168,6 +223,12 @@ class GLTFExporter {
 
 	}
 
+	/**
+	 * Unregisters a plugin callback.
+	 *
+	 * @param {Function} callback - The callback function to unregister.
+	 * @return {GLTFExporter} A reference to this exporter.
+	 */
 	unregister( callback ) {
 
 		if ( this.pluginCallbacks.indexOf( callback ) !== - 1 ) {
@@ -180,6 +241,15 @@ class GLTFExporter {
 
 	}
 
+	/**
+	 * Sets the texture utils for this exporter. Only relevant when compressed textures have to be exported.
+	 *
+	 * Depending on whether you use {@link WebGLRenderer} or {@link WebGPURenderer}, you must inject the
+	 * corresponding texture utils {@link WebGLTextureUtils} or {@link WebGPUTextureUtils}.
+	 *
+	 * @param {WebGLTextureUtils|WebGPUTextureUtils} utils - The texture utils.
+	 * @return {GLTFExporter} A reference to this exporter.
+	 */
 	setTextureUtils( utils ) {
 
 		this.textureUtils = utils;
@@ -189,12 +259,12 @@ class GLTFExporter {
 	}
 
 	/**
-	 * Parse scenes and generate GLTF output
+	 * Parses the given scenes and generates the glTF output.
 	 *
-	 * @param  {Scene|Array<Scene>} input   Scene or Array of THREE.Scenes
-	 * @param  {Function} onDone  Callback on completed
-	 * @param  {Function} onError  Callback on errors
-	 * @param  {Object} options options
+	 * @param {Scene|Array<Scene>} input - A scene or an array of scenes.
+	 * @param {GLTFExporter~OnDone} onDone - A callback function that is executed when the export has finished.
+	 * @param {GLTFExporter~OnError} onError - A callback function that is executed when an error happens.
+	 * @param {GLTFExporter~Options} options - options
 	 */
 	parse( input, onDone, onError, options ) {
 
@@ -213,6 +283,13 @@ class GLTFExporter {
 
 	}
 
+	/**
+	 * Async version of {@link GLTFExporter#parse}.
+	 *
+	 * @param {Scene|Array<Scene>} input - A scene or an array of scenes.
+	 * @param {GLTFExporter~Options} options - options.
+	 * @return {Promise<ArrayBuffer|string>} A Promise that resolved with the exported glTF data.
+	 */
 	parseAsync( input, options ) {
 
 		const scope = this;
@@ -304,9 +381,11 @@ const GLB_CHUNK_TYPE_BIN = 0x004E4942;
 
 /**
  * Compare two arrays
- * @param  {Array} array1 Array 1 to compare
- * @param  {Array} array2 Array 2 to compare
- * @return {Boolean}        Returns true if both arrays are equal
+ *
+ * @private
+ * @param {Array} array1 Array 1 to compare
+ * @param {Array} array2 Array 2 to compare
+ * @return {boolean}        Returns true if both arrays are equal
  */
 function equalArray( array1, array2 ) {
 
@@ -320,7 +399,9 @@ function equalArray( array1, array2 ) {
 
 /**
  * Converts a string to an ArrayBuffer.
- * @param  {string} text
+ *
+ * @private
+ * @param {string} text
  * @return {ArrayBuffer}
  */
 function stringToArrayBuffer( text ) {
@@ -332,8 +413,9 @@ function stringToArrayBuffer( text ) {
 /**
  * Is identity matrix
  *
+ * @private
  * @param {Matrix4} matrix
- * @returns {Boolean} Returns true, if parameter is identity matrix
+ * @returns {boolean} Returns true, if parameter is identity matrix
  */
 function isIdentityMatrix( matrix ) {
 
@@ -344,9 +426,10 @@ function isIdentityMatrix( matrix ) {
 /**
  * Get the min and max vectors from the given attribute
  *
- * @param  {BufferAttribute} attribute Attribute to find the min/max in range from start to start + count
- * @param  {Number} start Start index
- * @param  {Number} count Range to cover
+ * @private
+ * @param {BufferAttribute} attribute Attribute to find the min/max in range from start to start + count
+ * @param {number} start Start index
+ * @param {number} count Range to cover
  * @return {Object} Object containing the `min` and `max` values (As an array of attribute.itemSize components)
  */
 function getMinMax( attribute, start, count ) {
@@ -400,8 +483,9 @@ function getMinMax( attribute, start, count ) {
  * Get the required size + padding for a buffer, rounded to the next 4-byte boundary.
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#data-alignment
  *
- * @param {Number} bufferSize The size the original buffer. Should be an integer.
- * @returns {Number} new buffer size with required padding as an integer.
+ * @private
+ * @param {number} bufferSize The size the original buffer. Should be an integer.
+ * @returns {number} new buffer size with required padding as an integer.
  *
  */
 function getPaddedBufferSize( bufferSize ) {
@@ -413,8 +497,9 @@ function getPaddedBufferSize( bufferSize ) {
 /**
  * Returns a buffer aligned to 4-byte boundary.
  *
+ * @private
  * @param {ArrayBuffer} arrayBuffer Buffer to pad
- * @param {Number} [paddingByte=0] Should be an integer
+ * @param {number} [paddingByte=0] Should be an integer
  * @returns {ArrayBuffer} The same buffer if it's already aligned to 4-byte boundary or a new buffer
  */
 function getPaddedArrayBuffer( arrayBuffer, paddingByte = 0 ) {
@@ -458,37 +543,43 @@ function getCanvas() {
 
 function getToBlobPromise( canvas, mimeType ) {
 
-	if ( canvas.toBlob !== undefined ) {
+	if ( typeof OffscreenCanvas !== 'undefined' && canvas instanceof OffscreenCanvas ) {
+
+		let quality;
+
+		// Blink's implementation of convertToBlob seems to default to a quality level of 100%
+		// Use the Blink default quality levels of toBlob instead so that file sizes are comparable.
+		if ( mimeType === 'image/jpeg' ) {
+
+			quality = 0.92;
+
+		} else if ( mimeType === 'image/webp' ) {
+
+			quality = 0.8;
+
+		}
+
+		return canvas.convertToBlob( {
+
+			type: mimeType,
+			quality: quality
+
+		} );
+
+	} else {
+
+		// HTMLCanvasElement code path
 
 		return new Promise( ( resolve ) => canvas.toBlob( resolve, mimeType ) );
 
 	}
 
-	let quality;
-
-	// Blink's implementation of convertToBlob seems to default to a quality level of 100%
-	// Use the Blink default quality levels of toBlob instead so that file sizes are comparable.
-	if ( mimeType === 'image/jpeg' ) {
-
-		quality = 0.92;
-
-	} else if ( mimeType === 'image/webp' ) {
-
-		quality = 0.8;
-
-	}
-
-	return canvas.convertToBlob( {
-
-		type: mimeType,
-		quality: quality
-
-	} );
-
 }
 
 /**
  * Writer
+ *
+ * @private
  */
 class GLTFWriter {
 
@@ -670,7 +761,7 @@ class GLTFWriter {
 	/**
 	 * Serializes a userData.
 	 *
-	 * @param {THREE.Object3D|THREE.Material} object
+	 * @param {THREE.Object3D|THREE.Material|THREE.BufferGeometry|THREE.AnimationClip} object
 	 * @param {Object} objectDef
 	 */
 	serializeUserData( object, objectDef ) {
@@ -713,9 +804,9 @@ class GLTFWriter {
 	/**
 	 * Returns ids for buffer attributes.
 	 *
-	 * @param  {Object} attribute
+	 * @param {Object} attribute
 	 * @param {boolean} [isRelativeCopy=false]
-	 * @return {Number} An integer
+	 * @return {number} An integer
 	 */
 	getUID( attribute, isRelativeCopy = false ) {
 
@@ -740,7 +831,7 @@ class GLTFWriter {
 	 * Checks if normal attribute values are normalized.
 	 *
 	 * @param {BufferAttribute} normal
-	 * @returns {Boolean}
+	 * @returns {boolean}
 	 */
 	isNormalizedNormalAttribute( normal ) {
 
@@ -968,7 +1059,7 @@ class GLTFWriter {
 
 	/**
 	 * Process a buffer to append to the default one.
-	 * @param  {ArrayBuffer} buffer
+	 * @param {ArrayBuffer} buffer
 	 * @return {0}
 	 */
 	processBuffer( buffer ) {
@@ -987,11 +1078,11 @@ class GLTFWriter {
 
 	/**
 	 * Process and generate a BufferView
-	 * @param  {BufferAttribute} attribute
-	 * @param  {number} componentType
-	 * @param  {number} start
-	 * @param  {number} count
-	 * @param  {number?} target Target usage of the BufferView
+	 * @param {BufferAttribute} attribute
+	 * @param {number} componentType
+	 * @param {number} start
+	 * @param {number} count
+	 * @param {number} [target] Target usage of the BufferView
 	 * @return {Object}
 	 */
 	processBufferView( attribute, componentType, start, count, target ) {
@@ -1145,7 +1236,7 @@ class GLTFWriter {
 	/**
 	 * Process and generate a BufferView from an image Blob.
 	 * @param {Blob} blob
-	 * @return {Promise<Number>} An integer
+	 * @return {Promise<number>} An integer
 	 */
 	processBufferViewImage( blob ) {
 
@@ -1179,11 +1270,11 @@ class GLTFWriter {
 
 	/**
 	 * Process attribute to generate an accessor
-	 * @param  {BufferAttribute} attribute Attribute to process
-	 * @param  {THREE.BufferGeometry?} geometry Geometry used for truncated draw range
-	 * @param  {Number} [start=0]
-	 * @param  {Number} [count=Infinity]
-	 * @return {Number?} Index of the processed accessor on the "accessors" array
+	 * @param {BufferAttribute} attribute Attribute to process
+	 * @param {?BufferGeometry} [geometry] Geometry used for truncated draw range
+	 * @param {number} [start=0]
+	 * @param {number} [count=Infinity]
+	 * @return {?number} Index of the processed accessor on the "accessors" array
 	 */
 	processAccessor( attribute, geometry, start, count ) {
 
@@ -1277,11 +1368,11 @@ class GLTFWriter {
 
 	/**
 	 * Process image
-	 * @param  {Image} image to process
-	 * @param  {Number} format Identifier of the format (RGBAFormat)
-	 * @param  {Boolean} flipY before writing out the image
-	 * @param  {String} mimeType export format
-	 * @return {Number}     Index of the processed texture in the "images" array
+	 * @param {Image} image to process
+	 * @param {number} format Identifier of the format (RGBAFormat)
+	 * @param {boolean} flipY before writing out the image
+	 * @param {string} mimeType export format
+	 * @return {number}     Index of the processed texture in the "images" array
 	 */
 	processImage( image, format, flipY, mimeType = 'image/png' ) {
 
@@ -1381,25 +1472,7 @@ class GLTFWriter {
 
 			} else {
 
-				if ( canvas.toDataURL !== undefined ) {
-
-					imageDef.uri = canvas.toDataURL( mimeType );
-
-				} else {
-
-					pending.push(
-
-						getToBlobPromise( canvas, mimeType )
-							.then( blob => new FileReader().readAsDataURL( blob ) )
-							.then( dataURL => {
-
-								imageDef.uri = dataURL;
-
-							} )
-
-					);
-
-				}
+				imageDef.uri = ImageUtils.getDataURL( canvas, mimeType );
 
 			}
 
@@ -1417,8 +1490,8 @@ class GLTFWriter {
 
 	/**
 	 * Process sampler
-	 * @param  {Texture} map Texture to process
-	 * @return {Number}      Index of the processed texture in the "samplers" array
+	 * @param {Texture} map Texture to process
+	 * @return {number}      Index of the processed texture in the "samplers" array
 	 */
 	processSampler( map ) {
 
@@ -1439,8 +1512,8 @@ class GLTFWriter {
 
 	/**
 	 * Process texture
-	 * @param  {Texture} map Map to process
-	 * @return {Promise<Number>} Index of the processed texture in the "textures" array
+	 * @param {Texture} map Map to process
+	 * @return {Promise<number>} Index of the processed texture in the "textures" array
 	 */
 	async processTextureAsync( map ) {
 
@@ -1485,8 +1558,8 @@ class GLTFWriter {
 
 	/**
 	 * Process material
-	 * @param  {THREE.Material} material Material to process
-	 * @return {Promise<Number|null>} Index of the processed material in the "materials" array
+	 * @param {THREE.Material} material Material to process
+	 * @return {Promise<?number>} Index of the processed material in the "materials" array
 	 */
 	async processMaterialAsync( material ) {
 
@@ -1661,8 +1734,8 @@ class GLTFWriter {
 
 	/**
 	 * Process mesh
-	 * @param  {THREE.Mesh} mesh Mesh to process
-	 * @return {Promise<Number|null>} Index of the processed mesh in the "meshes" array
+	 * @param {THREE.Mesh} mesh Mesh to process
+	 * @return {Promise<?number>} Index of the processed mesh in the "meshes" array
 	 */
 	async processMeshAsync( mesh ) {
 
@@ -2066,8 +2139,8 @@ class GLTFWriter {
 
 	/**
 	 * Process camera
-	 * @param  {THREE.Camera} camera Camera to process
-	 * @return {Number} Index of the processed mesh in the "camera" array
+	 * @param {THREE.Camera} camera Camera to process
+	 * @return {number} Index of the processed mesh in the "camera" array
 	 */
 	processCamera( camera ) {
 
@@ -2116,7 +2189,7 @@ class GLTFWriter {
 	 *
 	 * @param {THREE.AnimationClip} clip
 	 * @param {THREE.Object3D} root
-	 * @return {number|null}
+	 * @return {?number}
 	 */
 	processAnimation( clip, root ) {
 
@@ -2210,11 +2283,15 @@ class GLTFWriter {
 
 		}
 
-		json.animations.push( {
+		const animationDef = {
 			name: clip.name || 'clip_' + json.animations.length,
 			samplers: samplers,
 			channels: channels
-		} );
+		};
+
+		this.serializeUserData( clip, animationDef );
+
+		json.animations.push( animationDef );
 
 		return json.animations.length - 1;
 
@@ -2222,7 +2299,7 @@ class GLTFWriter {
 
 	/**
 	 * @param {THREE.Object3D} object
-	 * @return {number|null}
+	 * @return {?number}
 	 */
 	 processSkin( object ) {
 
@@ -2267,8 +2344,8 @@ class GLTFWriter {
 
 	/**
 	 * Process Object3D node
-	 * @param  {THREE.Object3D} object Object3D to processNodeAsync
-	 * @return {Promise<Number>} Index of the node in the nodes list
+	 * @param {THREE.Object3D} object Object3D to processNodeAsync
+	 * @return {Promise<number>} Index of the node in the nodes list
 	 */
 	async processNodeAsync( object ) {
 
@@ -2339,6 +2416,9 @@ class GLTFWriter {
 
 		if ( object.isSkinnedMesh ) this.skins.push( object );
 
+		const nodeIndex = json.nodes.push( nodeDef ) - 1;
+		nodeMap.set( object, nodeIndex );
+
 		if ( object.children.length > 0 ) {
 
 			const children = [];
@@ -2349,9 +2429,9 @@ class GLTFWriter {
 
 				if ( child.visible || options.onlyVisible === false ) {
 
-					const nodeIndex = await this.processNodeAsync( child );
+					const childNodeIndex = await this.processNodeAsync( child );
 
-					if ( nodeIndex !== null ) children.push( nodeIndex );
+					if ( childNodeIndex !== null ) children.push( childNodeIndex );
 
 				}
 
@@ -2367,15 +2447,13 @@ class GLTFWriter {
 
 		} );
 
-		const nodeIndex = json.nodes.push( nodeDef ) - 1;
-		nodeMap.set( object, nodeIndex );
 		return nodeIndex;
 
 	}
 
 	/**
 	 * Process Scene
-	 * @param  {Scene} scene Scene to process
+	 * @param {Scene} scene Scene to process
 	 */
 	async processSceneAsync( scene ) {
 
@@ -2419,7 +2497,7 @@ class GLTFWriter {
 
 	/**
 	 * Creates a Scene to hold a list of objects and parse it
-	 * @param  {Array<THREE.Object3D>} objects List of objects to process
+	 * @param {Array<THREE.Object3D>} objects List of objects to process
 	 */
 	async processObjectsAsync( objects ) {
 
@@ -2511,6 +2589,8 @@ class GLTFWriter {
  * Punctual Lights Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
+ *
+ * @private
  */
 class GLTFLightExtension {
 
@@ -2606,6 +2686,8 @@ class GLTFLightExtension {
  * Unlit Materials Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit
+ *
+ * @private
  */
 class GLTFMaterialsUnlitExtension {
 
@@ -2639,6 +2721,8 @@ class GLTFMaterialsUnlitExtension {
  * Clearcoat Materials Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
+ *
+ * @private
  */
 class GLTFMaterialsClearcoatExtension {
 
@@ -2712,6 +2796,8 @@ class GLTFMaterialsClearcoatExtension {
  * Materials dispersion Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_dispersion
+ *
+ * @private
  */
 class GLTFMaterialsDispersionExtension {
 
@@ -2746,6 +2832,8 @@ class GLTFMaterialsDispersionExtension {
  * Iridescence Materials Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_iridescence
+ *
+ * @private
  */
 class GLTFMaterialsIridescenceExtension {
 
@@ -2806,6 +2894,8 @@ class GLTFMaterialsIridescenceExtension {
  * Transmission Materials Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_transmission
+ *
+ * @private
  */
 class GLTFMaterialsTransmissionExtension {
 
@@ -2851,6 +2941,8 @@ class GLTFMaterialsTransmissionExtension {
  * Materials Volume Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_volume
+ *
+ * @private
  */
 class GLTFMaterialsVolumeExtension {
 
@@ -2904,6 +2996,8 @@ class GLTFMaterialsVolumeExtension {
  * Materials ior Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_ior
+ *
+ * @private
  */
 class GLTFMaterialsIorExtension {
 
@@ -2938,6 +3032,8 @@ class GLTFMaterialsIorExtension {
  * Materials specular Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_specular
+ *
+ * @private
  */
 class GLTFMaterialsSpecularExtension {
 
@@ -2997,6 +3093,8 @@ class GLTFMaterialsSpecularExtension {
  * Sheen Materials Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_sheen
+ *
+ * @private
  */
 class GLTFMaterialsSheenExtension {
 
@@ -3054,6 +3152,8 @@ class GLTFMaterialsSheenExtension {
  * Anisotropy Materials Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_anisotropy
+ *
+ * @private
  */
 class GLTFMaterialsAnisotropyExtension {
 
@@ -3097,6 +3197,8 @@ class GLTFMaterialsAnisotropyExtension {
  * Materials Emissive Strength Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/blob/5768b3ce0ef32bc39cdf1bef10b948586635ead3/extensions/2.0/Khronos/KHR_materials_emissive_strength/README.md
+ *
+ * @private
  */
 class GLTFMaterialsEmissiveStrengthExtension {
 
@@ -3132,6 +3234,8 @@ class GLTFMaterialsEmissiveStrengthExtension {
  * Materials bump Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/EXT_materials_bump
+ *
+ * @private
  */
 class GLTFMaterialsBumpExtension {
 
@@ -3179,6 +3283,8 @@ class GLTFMaterialsBumpExtension {
  * GPU Instancing Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_mesh_gpu_instancing
+ *
+ * @private
  */
 class GLTFMeshGpuInstancing {
 
@@ -3238,6 +3344,8 @@ class GLTFMeshGpuInstancing {
 
 /**
  * Static utility functions
+ *
+ * @private
  */
 GLTFExporter.Utils = {
 
@@ -3457,5 +3565,31 @@ GLTFExporter.Utils = {
 	}
 
 };
+
+/**
+ * Export options of `GLTFExporter`.
+ *
+ * @typedef {Object} GLTFExporter~Options
+ * @property {boolean} [trs=false] - Export position, rotation and scale instead of matrix per node.
+ * @property {boolean} [onlyVisible=true] - Export only visible 3D objects.
+ * @property {boolean} [binary=false] - Export in binary (.glb) format, returning an ArrayBuffer.
+ * @property {number} [maxTextureSize=Infinity] - Restricts the image maximum size (both width and height) to the given value.
+ * @property {Array<AnimationClip>} [animations=[]] - List of animations to be included in the export.
+ * @property {boolean} [includeCustomExtensions=false] - Export custom glTF extensions defined on an object's `userData.gltfExtensions` property.
+ **/
+
+/**
+ * onDone callback of `GLTFExporter`.
+ *
+ * @callback GLTFExporter~OnDone
+ * @param {ArrayBuffer|string} result - The generated .gltf (JSON) or .glb (binary).
+ */
+
+/**
+ * onError callback of `GLTFExporter`.
+ *
+ * @callback GLTFExporter~OnError
+ * @param {Error} error - The error object.
+ */
 
 export { GLTFExporter };
