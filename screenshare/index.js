@@ -15,17 +15,50 @@ let conference = null;
 
 let localTracks = [];
 const remoteTracks = {};
+let unloaded = false; // guard against re-entrant / repeated teardown (issue #616)
 
 /**
- *
+ * Release tracks, leave the conference, and disconnect. Idempotent and single-pass:
+ * safe to call from the Exit button, the LOCAL_TRACK_STOPPED handler, and the window
+ * unload events without re-entrant double teardown that would knock out other users'
+ * screenshares (issue #616). Does NOT close the window; callers close it once.
  */
 function unload() {
+    if (unloaded) return;
+    unloaded = true;
     for (let i = 0; i < localTracks.length; i++) {
-        localTracks[i].dispose();
+        try {
+            localTracks[i].dispose();
+        } catch (e) {
+            console.warn('screenshare track dispose failed', e);
+        }
     }
-    conference.leave();
-    connection.disconnect();
-    window.close();
+    if (conference) {
+        try {
+            conference.leave();
+        } catch (e) {
+            console.warn('screenshare conference.leave failed', e);
+        }
+    }
+    if (connection) {
+        try {
+            connection.disconnect();
+        } catch (e) {
+            console.warn('screenshare connection.disconnect failed', e);
+        }
+    }
+}
+
+/**
+ * Handles the browser's native "Stop sharing" chrome: tear down once, then close.
+ * Skipped while our own unload() is running to avoid re-entrant teardown (issue #616).
+ */
+function onLocalTrackStopped() {
+    console.log('local track stopped');
+    if (!unloaded) {
+        unload();
+        window.close();
+    }
 }
 
 // create exit button
@@ -34,7 +67,10 @@ exitButton.id = 'exitButton';
 exitButton.className = 'leave-button';
 exitButton.title = 'End Screen Sharing';
 exitButton.innerHTML = 'Exit';
-exitButton.onclick = unload;
+exitButton.onclick = () => {
+    unload();
+    window.close();
+};
 
 /**
  * Handles local tracks.
@@ -49,10 +85,7 @@ function onLocalTracks(tracks) {
         localTracks[i].addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () =>
             console.log('local track muted')
         );
-        localTracks[i].addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () => {
-            console.log('local track stopped');
-            window.close();
-        });
+        localTracks[i].addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, onLocalTrackStopped);
         localTracks[i].addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED, (deviceId) =>
             console.log(`track audio output device was changed to ${deviceId}`)
         );
