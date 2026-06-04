@@ -453,6 +453,7 @@ AFRAME.registerSystem('arena-jitsi', {
                         dn,
                         scene: ARENA.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
+                        arena: false,
                     });
                     return;
                 }
@@ -542,6 +543,7 @@ AFRAME.registerSystem('arena-jitsi', {
                 dn: arenaDisplayName,
                 scene: ARENA.namespacedScene,
                 src: EVENT_SOURCES.JITSI,
+                arena: true,
             });
         } else {
             let dn = this.conference.getParticipantById(id).getDisplayName(); // get display name
@@ -559,12 +561,17 @@ AFRAME.registerSystem('arena-jitsi', {
             // this might be a jitsi-only user; emit event if name does not have the arena tag
             if (!dn.includes(data.arenaUserPrefix)) {
                 if (!dn.includes(data.screensharePrefix)) {
-                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, userJoinedArgs);
+                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, { ...userJoinedArgs, arena: false });
                 }
             } else {
+                // This IS an ARENA user (display name carries the #4r3n4_ tag) whose arenaId
+                // property hasn't propagated yet. Notify after the timeout using the idTag parsed
+                // from the tag (the same key MQTT presence uses) and flag it as ARENA, so it is not
+                // mislabeled "(external)" when property propagation is slow.
+                const tagMatch = dn.match(new RegExp(`${data.arenaUserPrefix}([^)]*)\\)`));
+                const parsedIdTag = tagMatch ? tagMatch[1] : id;
                 this.newUserTimers[id] = setTimeout(() => {
-                    // emit event anyway in newUserTimeoutMs if we dont hear from this user
-                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, userJoinedArgs);
+                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, { ...userJoinedArgs, id: parsedIdTag, arena: true });
                 }, data.newUserTimeoutMs);
             }
         }
@@ -747,6 +754,7 @@ AFRAME.registerSystem('arena-jitsi', {
                             dn: arenaDisplayName,
                             scene: this.conferenceName,
                             src: EVENT_SOURCES.JITSI,
+                            arena: true,
                         });
                     }
                 }

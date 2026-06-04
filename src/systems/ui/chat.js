@@ -536,11 +536,12 @@ AFRAME.registerSystem('arena-chat-ui', {
         const args = e.detail;
         args.pl.forEach((user) => {
             // console.log('Jitsi User: ', user);
-            // check if jitsi knows about someone we don't; add to user list
+            // check if jitsi knows about someone we don't; add to user list. The connect
+            // participant list only contains users that reported an arenaId, so they are ARENA.
             const userObj = {
                 jid: user.jid,
                 dn: user.dn,
-                type: this.liveUsers[user.id] ? UserType.ARENA : UserType.EXTERNAL,
+                type: UserType.ARENA,
             };
             this.upsertLiveUser(user.id, userObj, true, true);
         });
@@ -554,10 +555,14 @@ AFRAME.registerSystem('arena-chat-ui', {
     onUserJitsiJoin(e) {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
+        // Trust the explicit arena flag from the jitsi system (it knows definitively via the
+        // arenaId property / display-name tag); only fall back to the liveUsers presence race
+        // for legacy events without the flag. Avoids labeling real ARENA users "(external)".
+        const isArena = user.arena === true || (user.arena === undefined && !!this.liveUsers[user.id]);
         this.upsertLiveUser(user.id, {
             jid: user.jid,
             dn: user.dn,
-            type: this.liveUsers[user.id] ? UserType.ARENA : UserType.EXTERNAL,
+            type: isArena ? UserType.ARENA : UserType.EXTERNAL,
         });
     },
 
