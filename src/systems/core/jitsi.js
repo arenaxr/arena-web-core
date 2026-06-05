@@ -387,6 +387,17 @@ AFRAME.registerSystem('arena-jitsi', {
             }
             track.attach(vidEl[0]);
 
+            // Autoplay of an unmuted MediaStream <video> is blocked by Firefox until a user
+            // gesture, so the element never decodes, `canplay`/`loadeddata` never fire, and the
+            // remote videosphere/avatar stays blank. Chrome's MediaStream autoplay is lenient and
+            // renders anyway -- which is why this only reproduced on Firefox receivers. Mute (this
+            // is the video-only track; audio rides the separate `audio<id>` element) and start
+            // playback immediately, mirroring the screenshare path below.
+            vidEl[0].muted = true;
+            if (vidEl[0].paused) {
+                vidEl[0].play().catch((e) => console.warn('jitsi-video: remote video play failed', e));
+            }
+
             const user = this.conference.getParticipantById(participantId);
             let idTags = user.getProperty('arenaId');
             if (!idTags) idTags = user.getDisplayName();
@@ -683,6 +694,18 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack);
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
             console.debug(`track removed!!!${track}`);
+        });
+        this.conference.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
+            // A remote source can stop/start its camera without leaving the conference, so no
+            // USER_LEFT fires. Surface remote video mute state so objects bound to that source
+            // (e.g. a videosphere via jitsi-video) can revert/re-render instead of freezing on
+            // the last decoded frame.
+            if (track.isLocal() || track.getType() !== 'video') return;
+            sceneEl.emit(JITSI_EVENTS.VIDEO_MUTE_CHANGED, {
+                jid: track.getParticipantId(),
+                muted: track.isMuted(),
+                src: EVENT_SOURCES.JITSI,
+            });
         });
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoined);
         this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined);

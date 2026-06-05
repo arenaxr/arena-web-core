@@ -572,12 +572,18 @@ AFRAME.registerComponent('arena-user', {
             }
             if (data.pano) {
                 if (this.distance < this.panoRadius) {
-                    // User is INSIDE the videosphere — always request full resolution
+                    // User is INSIDE the videosphere — always request full resolution.
+                    // unmuteVideo() is required here: muteVideo() pauses the shared video<id>
+                    // element that the videosphere texture reads from, and without un-pausing on
+                    // the visible paths the sphere stays frozen/blank once it has ever been culled
+                    // (the #430 missing-unmute bug, exposed once the remote element actually plays).
+                    this.unmuteVideo();
                     this.evaluateRemoteResolution(1920);
                 } else if (arenaCameraComponent && arenaCameraComponent.isVideoFrustumCullingEnabled() && this.panoEl) {
                     // User is OUTSIDE the videosphere — apply frustum culling
                     const panoInView = arenaCameraComponent.viewIntersectsObject3D(this.panoEl.object3D);
                     if (panoInView) {
+                        this.unmuteVideo();
                         this.evaluateRemoteResolution(480);
                     } else {
                         this.muteVideo();
@@ -585,6 +591,7 @@ AFRAME.registerComponent('arena-user', {
                     }
                 } else {
                     // User is OUTSIDE but frustum culling disabled — use reduced resolution
+                    this.unmuteVideo();
                     this.evaluateRemoteResolution(480);
                 }
             } else if (inFieldOfView === false) {
