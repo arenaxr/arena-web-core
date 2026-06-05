@@ -18,10 +18,28 @@
                                     "enum": ["gaussian_splatting"]
                                 },
                                 "src": {
-                                    "description": "Url of the splat file (.ply incl. compressed, .splat, .spz, .ksplat, or .sog). Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
+                                    "description": "Url of the splat file (.ply incl. compressed, .splat, .spz, .ksplat, .sog, or a pre-built .rad level-of-detail tree). Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
                                     "format": "uri",
                                     "title": "Url",
                                     "type": "string"
+                                },
+                                "lod": {
+                                    "description": "Build a level-of-detail tree at load time to improve performance on large/dense splats (processed in a background worker; no file conversion needed). For large scenes, prefer supplying a pre-built .rad source instead and leave this off.",
+                                    "type": "boolean",
+                                    "title": "Build LoD at load time",
+                                    "default": false
+                                },
+                                "paged": {
+                                    "description": "Stream a chunked, pre-built LoD tree (a .rad header plus .radc chunks). Splat data is fetched on demand as the viewer approaches rather than downloaded up front. Only meaningful with a chunked .rad src.",
+                                    "type": "boolean",
+                                    "title": "Stream chunked LoD (paged)",
+                                    "default": false
+                                },
+                                "lodScale": {
+                                    "description": "Per-object level-of-detail detail multiplier. Values above 1 render finer detail; below 1 render coarser/faster. Applies to a .rad LoD tree or a runtime LoD build; no effect otherwise.",
+                                    "type": "number",
+                                    "title": "LoD Detail Scale",
+                                    "default": 1.0
                                 },
                                 "cutoutEntity": {
                                     "description": "Selector to a box primitive that uses scale and position to define the bounds of splat points to render.",
