@@ -29,7 +29,7 @@
     "linkify-html": "4.3.3",
     "linkifyjs": "4.3.3",
     "mqtt-pattern": "2.1.1",
-    "msgpackr": "1.11.10",
+    "msgpackr": "2.0.2",
     "notiflix": "3.2.8",
     "paho-mqtt": "1.1.0",
     "three": "file:src/shims/three-shim",
