@@ -1,117 +1,41 @@
 <!doctype html>
-<html lang="en">
+<html>
     <head>
         <meta charset="utf-8" />
-        <meta content="IE=edge" http-equiv="X-UA-Compatible" />
-        <meta content="yes" name="apple-mobile-web-app-capable" />
         <meta
-            content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1"
             name="viewport"
+            content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui"
         />
-
-        <link href="../static/images/conix-x.png" rel="icon" type="image/png" />
-        <link rel="stylesheet" href="style.css" />
-
         <title>ARENA Lite</title>
-        <meta content="ARENA Lite — Lightweight 2D conference client with spatial audio" name="description" />
+        <link href="../static/images/conix-x.png" rel="icon" type="image/png" />
 
-        <!-- deploy-time defaults (jitsiHost, realm, persistHost, etc.) -->
+        <!-- login auth check, blocking on page load -->
         <script src="../conf/defaults.js"></script>
-
-        <!-- auth bootstrap (same flow as index.html) -->
         <script src="../static/auth.js"></script>
 
-        <!-- jQuery (required by lib-jitsi-meet) -->
+        <!-- Navbar Header -->
+        <link rel="stylesheet" href="../static/arenaxr-bootstrap/arenaxr-bootstrap.css" />
         <script src="../static/vendor/jquery-2.1.1.min.js"></script>
+        <script src="../static/arenaxr-bootstrap/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="../static/vendor/fontawesome-5/css/all.min.css" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet" />
+        <script src="../navbar.js" type="text/javascript"></script>
 
-        <!-- Jitsi SDK -->
-        <script src="../static/vendor/lib-jitsi-meet.min.js"></script>
-
-        <!-- Lite client logic (loaded after auth fires 'onauth' event) -->
-        <script src="index.js" defer></script>
+        <!-- Lite wrapper logic -->
+        <script src="wrapper.js" type="text/javascript"></script>
     </head>
+
     <body>
-        <!-- Header bar -->
-        <header id="lite-header">
-            <div class="header-left">
-                <img src="../static/images/conix-x.png" alt="ARENA" class="header-logo" />
-                <h1 id="scene-title">ARENA Lite</h1>
-            </div>
-            <div class="header-right">
-                <span id="user-badge" class="badge" title="Users in scene">1</span>
-                <button id="users-btn" class="header-btn" title="User List">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                    </svg>
-                </button>
-                <button id="chat-btn" class="header-btn" title="Chat">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                        <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
-                    </svg>
-                    <span id="chat-dot" class="dot" style="display:none">0</span>
-                </button>
-                <button id="mic-btn" class="header-btn mic-off" title="Toggle Microphone">
-                    <svg id="mic-icon-on" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:none">
-                        <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
-                    </svg>
-                    <svg id="mic-icon-off" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                        <path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/>
-                    </svg>
-                </button>
-                <button id="cam-btn" class="header-btn cam-off" title="Toggle Camera">
-                    <svg id="cam-icon-on" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:none">
-                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                    </svg>
-                    <svg id="cam-icon-off" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                        <path d="M21 6.5l-4 4V7c0-.55-.45-1-1-1H9.82L21 17.18V6.5zM3.27 2L2 3.27 4.73 6H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.21 0 .39-.08.54-.18L19.73 21 21 19.73 3.27 2z"/>
-                    </svg>
-                </button>
-            </div>
-        </header>
-
-        <!-- Main content area -->
-        <main id="lite-main">
-            <!-- Gallery of user video tiles -->
-            <section id="gallery" class="gallery">
-                <div id="gallery-empty" class="gallery-empty">
-                    <p>Connecting to scene...</p>
-                </div>
-            </section>
-
-            <!-- User list side panel (hidden by default) -->
-            <aside id="users-panel" class="side-panel" style="display:none">
-                <div class="panel-header">
-                    <h2>Users</h2>
-                    <button id="close-users" class="close-btn">&times;</button>
-                </div>
-                <div id="users-nearby" class="user-section">
-                    <h3 class="section-label nearby-label">Nearby</h3>
-                    <ul id="nearby-list" class="user-list"></ul>
-                </div>
-                <div id="users-far" class="user-section" style="display:none">
-                    <h3 class="section-label far-label">Out of Range</h3>
-                    <ul id="far-list" class="user-list"></ul>
-                </div>
-            </aside>
-
-            <!-- Chat side panel (hidden by default) -->
-            <aside id="chat-panel" class="side-panel" style="display:none">
-                <div class="panel-header">
-                    <h2>Chat</h2>
-                    <button id="close-chat" class="close-btn">&times;</button>
-                </div>
-                <div id="chat-messages" class="chat-messages"></div>
-                <div class="chat-input-area">
-                    <textarea id="chat-input" rows="1" placeholder="Type message..."></textarea>
-                    <button id="chat-send" class="send-btn">Send</button>
-                </div>
-            </aside>
-        </main>
-
-        <!-- Status bar -->
-        <footer id="lite-footer">
-            <span id="position-info" class="footer-info">Position: computing...</span>
-            <span id="connection-status" class="footer-info">Connecting...</span>
-        </footer>
+        <div id="header"></div>
+        <div id="container">
+            <iframe
+                id="lite-frame"
+                name="lite-frame"
+                style="width: 100%; height: calc(100vh - 60px); position: relative;"
+                frameborder="0"
+                allow="camera;microphone;display-capture;autoplay"
+            ></iframe>
+        </div>
     </body>
 </html>

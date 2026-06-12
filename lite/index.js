@@ -1372,7 +1372,7 @@ function updateGalleryTile(jid) {
 
 function sortGalleryTiles() {
     const tiles = Array.from(ui.gallery.querySelectorAll('.video-tile'));
-    tiles.sort((a, b) => {
+    const sorted = [...tiles].sort((a, b) => {
         const aJid = a.id.replace('tile-', '');
         const bJid = b.id.replace('tile-', '');
         const aUser = remoteUsers.get(aJid);
@@ -1381,7 +1381,11 @@ function sortGalleryTiles() {
         const bDist = bUser?.distance ?? Infinity;
         return aDist - bDist;
     });
-    tiles.forEach((tile) => ui.gallery.appendChild(tile));
+    // Only move DOM nodes if order actually changed (avoids re-layout flicker)
+    const orderChanged = sorted.some((tile, i) => tile !== tiles[i]);
+    if (orderChanged) {
+        sorted.forEach((tile) => ui.gallery.appendChild(tile));
+    }
 }
 
 function updateGalleryEmpty() {
