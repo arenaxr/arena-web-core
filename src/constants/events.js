@@ -28,6 +28,8 @@ export const JITSI_EVENTS = Object.freeze({
     CONNECTED: 'onarenajitsiconnected',
     USER_JOINED: 'onarenajitsiuserjoined',
     USER_LEFT: 'onarenajitsiuserleft',
+    CONF_USER_JOINED: 'onarenajitsiconfuserjoined',
+    CONF_USER_LEFT: 'onarenajitsiconfuserleft',
     SCREENSHARE: 'onarenajitsiscreenshare',
     DOMINANT_SPEAKER_CHANGED: 'onarenajitsidominantspeakerchanged',
     TALK_WHILE_MUTED: 'onarenajitsitalkwhilemuted',

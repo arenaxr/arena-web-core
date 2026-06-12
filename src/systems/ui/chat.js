@@ -17,6 +17,7 @@ const UserType = Object.freeze({
     EXTERNAL: 'external',
     SCREENSHARE: 'screenshare',
     ARENA: 'arena',
+    CONF: 'conf',
 });
 
 const notifyTypes = Object.freeze({
@@ -555,6 +556,15 @@ AFRAME.registerSystem('arena-chat-ui', {
     onUserJitsiJoin(e) {
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
+        // Check if this is a conf-only (lite 2D) user
+        if (user.confOnly) {
+            this.upsertLiveUser(user.id, {
+                jid: user.jid,
+                dn: user.dn,
+                type: UserType.CONF,
+            });
+            return;
+        }
         // Trust the explicit arena flag from the jitsi system (it knows definitively via the
         // arenaId property / display-name tag); only fall back to the liveUsers presence race
         // for legacy events without the flag. Avoids labeling real ARENA users "(external)".
@@ -903,11 +913,13 @@ AFRAME.registerSystem('arena-chat-ui', {
         }
 
         const _this = this;
-        const userList = [];
+        const nearbyUsers = [];
+        const farUsers = [];
         let nSceneUsers = 1;
+        let nNearbyUsers = 1; // self is always nearby
         Object.keys(this.liveUsers).forEach((key) => {
-            nSceneUsers++; // count all users
-            userList.push({
+            nSceneUsers++;
+            const userData = {
                 uid: key,
                 dn: _this.liveUsers[key].dn,
                 sid: _this.liveUsers[key].sid,
@@ -915,17 +927,42 @@ AFRAME.registerSystem('arena-chat-ui', {
                 speaker: _this.liveUsers[key].speaker,
                 stats: _this.liveUsers[key].stats,
                 status: _this.liveUsers[key].status,
-            });
+                distance: _this.liveUsers[key].distance,
+            };
+            // Split into nearby/far based on distance (if distance data is available)
+            if (userData.distance !== undefined && userData.distance > ARENA.maxAVDist) {
+                farUsers.push(userData);
+            } else {
+                nearbyUsers.push(userData);
+                nNearbyUsers++;
+            }
         });
 
-        userList.sort((a, b) => a.dn.localeCompare(b.dn));
+        // Sort each group by distance (nearest first), fall back to alphabetical
+        const sortByDistance = (a, b) => {
+            const da = a.distance !== undefined ? a.distance : Infinity;
+            const db = b.distance !== undefined ? b.distance : Infinity;
+            if (da !== db) return da - db;
+            return a.dn.localeCompare(b.dn);
+        };
+        nearbyUsers.sort(sortByDistance);
+        farUsers.sort(sortByDistance);
 
-        this.nSceneUserslabel.textContent = nSceneUsers;
-        this.usersDot.textContent = nSceneUsers < 100 ? nSceneUsers : '...';
+        // Badge: show N/M only when some users are out of range
+        if (farUsers.length > 0) {
+            this.nSceneUserslabel.textContent = `${nNearbyUsers}/${nSceneUsers}`;
+            this.usersDot.textContent = nSceneUsers < 100 ? `${nNearbyUsers}/${nSceneUsers}` : '...';
+        } else {
+            this.nSceneUserslabel.textContent = nSceneUsers;
+            this.usersDot.textContent = nSceneUsers < 100 ? nSceneUsers : '...';
+        }
+
         if (newUser) {
             let msg = '';
             if (newUser.type !== UserType.SCREENSHARE) {
-                msg = `${newUser.dn}${newUser.type === UserType.EXTERNAL ? ' (external)' : ''} joined.`;
+                const typeLabel = newUser.type === UserType.EXTERNAL ? ' (external)'
+                    : newUser.type === UserType.CONF ? ' (2D)' : '';
+                msg = `${newUser.dn}${typeLabel} joined.`;
             } else {
                 msg = `${newUser.dn} started screen sharing.`;
             }
@@ -958,14 +995,16 @@ AFRAME.registerSystem('arena-chat-ui', {
             }
         };
 
-        // list users
-        userList.forEach((user) => {
+        // Helper to render a user list item
+        const renderUser = (user) => {
             const uli = document.createElement('li');
             const name = user.type !== UserType.SCREENSHARE ? user.dn : `${user.dn}'s Screen Share`;
             if (user.speaker) {
                 uli.style.color = 'green';
             }
-            uli.textContent = `${decodeURI(name)}${user.type === UserType.EXTERNAL ? ' (external)' : ''}`;
+            const typeLabel = user.type === UserType.EXTERNAL ? ' (external)'
+                : user.type === UserType.CONF ? ' (2D)' : '';
+            uli.textContent = `${decodeURI(name)}${typeLabel}`;
             const uBtnCtnr = document.createElement('div');
             uBtnCtnr.className = 'users-list-btn-ctnr';
             uli.appendChild(uBtnCtnr);
@@ -987,15 +1026,13 @@ AFRAME.registerSystem('arena-chat-ui', {
                 sspan.title = 'Mute User';
                 uBtnCtnr.appendChild(sspan);
 
-                // span click event (send sound on/off msg to ussr)
+                // span click event (send sound on/off msg to user)
                 sspan.onclick = function muteUserClick() {
                     // message to target user
                     _this.ctrlMsg(user.uid, 'sound:off');
                 };
 
                 // Remove user to be rendered for all users, allowing full moderation for all.
-                // This follows Jitsi's philosophy that everyone should have the power to kick
-                // out inappropriate participants: https://jitsi.org/security/.
                 const kospan = document.createElement('span');
                 kospan.className = 'users-list-btn ko';
                 kospan.title = 'Remove User';
@@ -1020,6 +1057,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 };
 
                 if (user.type === UserType.EXTERNAL) uli.className = 'external';
+                if (user.type === UserType.CONF) uli.className = 'conf-user';
 
                 if (newUser) {
                     // only update 'to' select for new users
@@ -1031,7 +1069,21 @@ AFRAME.registerSystem('arena-chat-ui', {
             }
             _this.usersList.appendChild(uli);
             this.addJitsiStats(uli, user.stats, user.status, uli.textContent);
-        });
+        };
+
+        // Render nearby users
+        nearbyUsers.forEach(renderUser);
+
+        // Render separator + far users if any
+        if (farUsers.length > 0) {
+            const separator = document.createElement('li');
+            separator.className = 'user-list-separator';
+            separator.style.cssText = 'font-size: small; color: #888; padding: 8px 0 4px; border-top: 1px solid #333;';
+            separator.textContent = `— Out of Range (${farUsers.length}) —`;
+            _this.usersList.appendChild(separator);
+            farUsers.forEach(renderUser);
+        }
+
         this.toSel.value = selVal; // preserve selected value
     },
 

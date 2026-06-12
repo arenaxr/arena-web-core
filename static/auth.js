@@ -24,7 +24,7 @@
 
 // auth namespace
 window.ARENAAUTH = {
-    nonScenePaths: ['scenes', 'build', 'programs', 'network', 'files', 'dashboard', 'replay'],
+    nonScenePaths: ['scenes', 'build', 'programs', 'network', 'files', 'dashboard', 'replay', 'lite'],
     signInPath: `//${window.location.host}/user/v2/login`,
     signOutPath: `//${window.location.host}/user/v2/logout`,
     /**

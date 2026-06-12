@@ -546,6 +546,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
         const arenaDisplayName = this.conference.getParticipantById(id).getProperty('arenaDisplayName');
+        const isConfOnly = this.conference.getParticipantById(id).getProperty('confOnly') === 'true';
         if (arenaId && arenaDisplayName) {
             // emit user joined event in the off chance we know all properties of this arena user
             sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
@@ -555,7 +556,17 @@ AFRAME.registerSystem('arena-jitsi', {
                 scene: ARENA.namespacedScene,
                 src: EVENT_SOURCES.JITSI,
                 arena: true,
+                confOnly: isConfOnly,
             });
+            // If this is a conf-only (lite) user, also emit the dedicated event
+            if (isConfOnly) {
+                sceneEl.emit(JITSI_EVENTS.CONF_USER_JOINED, {
+                    jid: id,
+                    id: arenaId,
+                    dn: arenaDisplayName,
+                    src: EVENT_SOURCES.JITSI,
+                });
+            }
         } else {
             let dn = this.conference.getParticipantById(id).getDisplayName(); // get display name
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
@@ -641,6 +652,16 @@ AFRAME.registerSystem('arena-jitsi', {
         $(`#video${id}`).remove();
         $(`#audio${id}`).remove();
         delete this.remoteTracks[id];
+
+        // Check if this was a conf-only (lite) user before emitting
+        const wasConfOnly = user.getProperty('confOnly') === 'true';
+        if (wasConfOnly) {
+            sceneEl.emit(JITSI_EVENTS.CONF_USER_LEFT, {
+                jid: id,
+                id: arenaId,
+                src: EVENT_SOURCES.JITSI,
+            });
+        }
 
         // emit user left event
         sceneEl.emit(JITSI_EVENTS.USER_LEFT, {
@@ -770,6 +791,7 @@ AFRAME.registerSystem('arena-jitsi', {
                         // clear timeout for new user notification
                         clearInterval(this.newUserTimers[id]);
                         delete this.newUserTimers[id];
+                        const isConfOnly = this.conference.getParticipantById(id).getProperty('confOnly') === 'true';
                         // emit new user event
                         sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
                             jid: id,
@@ -778,7 +800,17 @@ AFRAME.registerSystem('arena-jitsi', {
                             scene: this.conferenceName,
                             src: EVENT_SOURCES.JITSI,
                             arena: true,
+                            confOnly: isConfOnly,
                         });
+                        // If this is a conf-only (lite) user, also emit the dedicated event
+                        if (isConfOnly) {
+                            sceneEl.emit(JITSI_EVENTS.CONF_USER_JOINED, {
+                                jid: id,
+                                id: arenaId,
+                                dn: arenaDisplayName,
+                                src: EVENT_SOURCES.JITSI,
+                            });
+                        }
                     }
                 }
             }
@@ -786,6 +818,25 @@ AFRAME.registerSystem('arena-jitsi', {
 
         this.conference.join(); // this.conference.join(password);
         this.health.removeError('connection.connectionFailed');
+    },
+
+    /**
+     * Get all conf-only (lite) participants, sorted by Jitsi participant ID for deterministic ordering.
+     * Used by the slot calculator to assign semicircle positions around the screenshare anchor.
+     * @return {Array<{jid: string, arenaId: string, displayName: string}>} Sorted array of conf-only participants
+     */
+    getConfOnlyParticipants() {
+        if (!this.conference) return [];
+        const participants = this.conference.getParticipants();
+        const confOnly = participants
+            .filter((p) => p.getProperty('confOnly') === 'true')
+            .map((p) => ({
+                jid: p.getId(),
+                arenaId: p.getProperty('arenaId') || p.getId(),
+                displayName: p.getProperty('arenaDisplayName') || p.getDisplayName() || p.getId(),
+            }))
+            .sort((a, b) => a.jid.localeCompare(b.jid));
+        return confOnly;
     },
 
     updateUserStatus() {

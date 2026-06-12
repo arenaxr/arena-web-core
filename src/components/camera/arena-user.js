@@ -562,6 +562,11 @@ AFRAME.registerComponent('arena-user', {
             this.distance = myCamPos.distanceTo(this.entityPos);
         }
 
+        // Report distance to the chat system for proximity-based user list grouping
+        if (this.chat && this.chat.liveUsers && this.chat.liveUsers[this.idTag]) {
+            this.chat.liveUsers[this.idTag].distance = this.distance;
+        }
+
         // frustum culling for WebRTC video streams;
         if (this.videoID && this.videoCube && ARENA.jitsi?.conference) {
             let inFieldOfView = true;
