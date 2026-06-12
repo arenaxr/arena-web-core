@@ -71,41 +71,53 @@
 
         <!-- Main content area -->
         <main id="lite-main">
-            <!-- Gallery of user video tiles -->
-            <section id="gallery" class="gallery">
-                <div id="gallery-empty" class="gallery-empty">
-                    <p>Connecting to scene...</p>
+            <!-- Scene View panel (auto-shown when a 3D user shares their canvas) -->
+            <section id="scene-view-panel" class="scene-view-panel" style="display:none">
+                <div class="scene-view-header">
+                    <span class="scene-view-label">🎬 Scene View</span>
+                    <span id="scene-view-user" class="scene-view-user"></span>
                 </div>
+                <video id="scene-view-video" autoplay playsinline muted></video>
             </section>
 
-            <!-- User list side panel (hidden by default) -->
-            <aside id="users-panel" class="side-panel" style="display:none">
-                <div class="panel-header">
-                    <h2>Users</h2>
-                    <button id="close-users" class="close-btn">&times;</button>
-                </div>
-                <div id="users-nearby" class="user-section">
-                    <h3 class="section-label nearby-label">Nearby</h3>
-                    <ul id="nearby-list" class="user-list"></ul>
-                </div>
-                <div id="users-far" class="user-section" style="display:none">
-                    <h3 class="section-label far-label">Out of Range</h3>
-                    <ul id="far-list" class="user-list"></ul>
-                </div>
-            </aside>
+            <!-- Gallery + side panels row -->
+            <div class="main-content-row">
+                <!-- Gallery of user video tiles -->
+                <section id="gallery" class="gallery">
+                    <div id="gallery-empty" class="gallery-empty">
+                        <p>Connecting to scene...</p>
+                    </div>
+                </section>
 
-            <!-- Chat side panel (hidden by default) -->
-            <aside id="chat-panel" class="side-panel" style="display:none">
-                <div class="panel-header">
-                    <h2>Chat</h2>
-                    <button id="close-chat" class="close-btn">&times;</button>
-                </div>
-                <div id="chat-messages" class="chat-messages"></div>
-                <div class="chat-input-area">
-                    <textarea id="chat-input" rows="1" placeholder="Type message..."></textarea>
-                    <button id="chat-send" class="send-btn">Send</button>
-                </div>
-            </aside>
+                <!-- User list side panel (hidden by default) -->
+                <aside id="users-panel" class="side-panel" style="display:none">
+                    <div class="panel-header">
+                        <h2>Users</h2>
+                        <button id="close-users" class="close-btn">&times;</button>
+                    </div>
+                    <div id="users-nearby" class="user-section">
+                        <h3 class="section-label nearby-label">Nearby</h3>
+                        <ul id="nearby-list" class="user-list"></ul>
+                    </div>
+                    <div id="users-far" class="user-section" style="display:none">
+                        <h3 class="section-label far-label">Out of Range</h3>
+                        <ul id="far-list" class="user-list"></ul>
+                    </div>
+                </aside>
+
+                <!-- Chat side panel (hidden by default) -->
+                <aside id="chat-panel" class="side-panel" style="display:none">
+                    <div class="panel-header">
+                        <h2>Chat</h2>
+                        <button id="close-chat" class="close-btn">&times;</button>
+                    </div>
+                    <div id="chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-area">
+                        <textarea id="chat-input" rows="1" placeholder="Type message..."></textarea>
+                        <button id="chat-send" class="send-btn">Send</button>
+                    </div>
+                </aside>
+            </div>
         </main>
 
         <!-- Status bar -->

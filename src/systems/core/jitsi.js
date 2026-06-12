@@ -73,6 +73,9 @@ AFRAME.registerSystem('arena-jitsi', {
         // last receiver video constraints set by avatars/defaults, re-applied when screenshares change
         this.lastVideoConstraints = { colibriClass: 'ReceiverVideoConstraints' };
 
+        // Scene-view canvas capture (Phase 2a)
+        this.sceneViewTrack = null; // JitsiLocalTrack for captured canvas
+
         /**
          * list of timers to send new user notifications; when a user enters jitsi, there is some delay until other
          * participants receive data about its properties (e.g. arenaDisplayName and arenaUserName).
@@ -337,6 +340,119 @@ AFRAME.registerSystem('arena-jitsi', {
                 `label: Screen: ${screenShareId} (nearby); randomRadiusMin: 2; randomRadiusMax: 3`
             );
         }
+    },
+
+    // ================================================================
+    // Scene View — canvas capture for lite 2D users
+    // ================================================================
+
+    /**
+     * Start sharing the A-Frame canvas as a scene-view stream.
+     * Captures the WebGL canvas at 10fps and replaces the user's video track
+     * on the PeerConnection so lite 2D users can watch the 3D scene.
+     */
+    async startSceneView() {
+        if (this.sceneViewTrack) {
+            console.warn('[SceneView] Already sharing scene view');
+            return;
+        }
+
+        const canvas = document.querySelector('a-scene canvas');
+        if (!canvas) {
+            console.error('[SceneView] No A-Frame canvas found');
+            return;
+        }
+
+        try {
+            // Capture the WebGL canvas at 10fps
+            const canvasStream = canvas.captureStream(10);
+            const canvasVideoTrack = canvasStream.getVideoTracks()[0];
+            if (!canvasVideoTrack) {
+                console.error('[SceneView] No video track from canvas capture');
+                return;
+            }
+
+            // Create a temporary camera JitsiLocalTrack — we need a real JitsiLocalTrack
+            // wrapper that Jitsi's conference can manage
+            const tmpTracks = await JitsiMeetJS.createLocalTracks({ devices: ['video'] });
+            const canvasJitsiTrack = tmpTracks.find((t) => t.getType() === 'video');
+            if (!canvasJitsiTrack) {
+                console.error('[SceneView] Failed to create video track wrapper');
+                return;
+            }
+
+            // Stop the temporary camera track — we only needed the JitsiLocalTrack wrapper
+            const tmpCameraTrack = canvasJitsiTrack.getTrack();
+            if (tmpCameraTrack) {
+                tmpCameraTrack.stop();
+            }
+
+            // Replace the wrapper's underlying stream with our canvas stream
+            // JitsiLocalTrack stores the stream and gets the track from it
+            canvasJitsiTrack.stream = canvasStream;
+            canvasJitsiTrack.track = canvasVideoTrack;
+
+            if (this.jitsiVideoTrack) {
+                // User has an active webcam — save it and swap
+                this._savedVideoTrack = this.jitsiVideoTrack;
+                const cornerVidEl = document.getElementById('cornerVideo');
+                if (cornerVidEl) {
+                    this._savedVideoTrack.detach(cornerVidEl);
+                }
+                await this.conference.replaceTrack(this._savedVideoTrack, canvasJitsiTrack);
+                this.jitsiVideoTrack = canvasJitsiTrack;
+            } else {
+                // No active webcam — just add the canvas track
+                this._savedVideoTrack = null;
+                await this.conference.addTrack(canvasJitsiTrack);
+                this.jitsiVideoTrack = canvasJitsiTrack;
+            }
+
+            this.sceneViewTrack = canvasJitsiTrack;
+            this.conference.setLocalParticipantProperty('sceneView', 'true');
+            console.info('[SceneView] Started sharing scene view');
+        } catch (err) {
+            console.error('[SceneView] Failed to start scene view:', err);
+            this.sceneViewTrack = null;
+        }
+    },
+
+    /**
+     * Stop sharing the scene-view canvas stream.
+     */
+    async stopSceneView() {
+        if (!this.sceneViewTrack) return;
+
+        try {
+            if (this._savedVideoTrack) {
+                // Swap back to the original webcam track
+                await this.conference.replaceTrack(this.sceneViewTrack, this._savedVideoTrack);
+                this.jitsiVideoTrack = this._savedVideoTrack;
+
+                // Re-attach to corner video preview
+                const cornerVidEl = document.getElementById('cornerVideo');
+                if (cornerVidEl) {
+                    this._savedVideoTrack.attach(cornerVidEl);
+                }
+                this._savedVideoTrack = null;
+            } else {
+                // No saved camera — just remove the track entirely
+                await this.conference.removeTrack(this.sceneViewTrack);
+                this.jitsiVideoTrack = null;
+            }
+
+            // Dispose the canvas track wrapper
+            this.sceneViewTrack.dispose();
+        } catch (err) {
+            console.warn('[SceneView] Error stopping scene view:', err);
+        }
+
+        this.sceneViewTrack = null;
+        if (this.conference) {
+            this.conference.setLocalParticipantProperty('sceneView', '');
+        }
+
+        console.info('[SceneView] Stopped sharing scene view');
     },
 
     /**

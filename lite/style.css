@@ -134,6 +134,51 @@ body {
 #lite-main {
     flex: 1;
     display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ---------- Scene View Panel ---------- */
+.scene-view-panel {
+    flex-shrink: 0;
+    background: rgba(15, 15, 22, 0.95);
+    border-bottom: 1px solid rgba(38, 192, 211, 0.2);
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    overflow: hidden;
+}
+
+.scene-view-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+}
+
+.scene-view-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #26c0d3;
+    letter-spacing: 0.02em;
+}
+
+.scene-view-user {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.scene-view-panel video {
+    width: 100%;
+    max-height: 40vh;
+    object-fit: contain;
+    background: #000;
+    display: block;
+}
+
+/* ---------- Main Content Row (gallery + side panels) ---------- */
+.main-content-row {
+    flex: 1;
+    display: flex;
     overflow: hidden;
     position: relative;
 }

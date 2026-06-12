@@ -670,67 +670,80 @@ AFRAME.registerSystem('arena-side-menu-ui', {
 
         if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
 
+        const isSceneViewActive = !!this.jitsi.sceneViewTrack;
+
         Swal.fire({
-            title: 'You clicked on screen share! Are you sure you want to share your screen?',
-            html: `In order to share your screen, ARENA will open a small popup window.<br>
-                <i>Make sure you have screen share permissions enabled for this browser!</i>`,
+            title: 'Screen Share Options',
+            html: `Choose how to share:<br>
+                <b>Share Screen</b> — share your screen on an object in the scene.<br>
+                <b>${isSceneViewActive ? 'Stop Scene View' : 'Share Scene View'}</b> — ${isSceneViewActive ? 'stop sharing your 3D canvas view.' : 'stream your 3D canvas view so Lite 2D users can watch.'}`,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'Yes',
+            showDenyButton: true,
+            confirmButtonText: 'Share Screen',
+            denyButtonText: isSceneViewActive ? 'Stop Scene View' : 'Share Scene View',
             reverseButtons: true,
         }).then((result) => {
-            if (!result.isConfirmed) return;
+            if (result.isConfirmed) {
+                // Original screenshare-to-object flow
+                Swal.fire({
+                    title: 'Select the object(s) you want to screenshare on:',
+                    html: document.querySelector('a-scene').systems.screenshareable.asHTMLSelect(),
+                    focusConfirm: false,
+                    preConfirm: () =>
+                        Array.from(
+                            document.getElementById('screenshareables').querySelectorAll('option:checked'),
+                            (e) => e.value
+                        ),
+                    showCancelButton: true,
+                    reverseButtons: true,
+                }).then((res) => {
+                    if (!res.isConfirmed || res.value.length === 0) return;
+                    const objectIds = res.value;
 
-            Swal.fire({
-                title: 'Select the object(s) you want to screenshare on:',
-                html: document.querySelector('a-scene').systems.screenshareable.asHTMLSelect(),
-                focusConfirm: false,
-                preConfirm: () =>
-                    Array.from(
-                        document.getElementById('screenshareables').querySelectorAll('option:checked'),
-                        (e) => e.value
-                    ),
-                showCancelButton: true,
-                reverseButtons: true,
-            }).then((res) => {
-                if (!res.isConfirmed || res.value.length === 0) return;
-                const objectIds = res.value;
-
-                // Open as a popup window (not a _blank tab). When sharing a Chrome "tab",
-                // Chrome auto-focuses the shared tab; a separate popup window keeps the ARENA
-                // tab from being backgrounded, which otherwise blacks out the 3D canvas. Size it
-                // to a large, centered fraction of the screen so the share preview is usable
-                // (the window only needs to be separate, not small, to avoid the black canvas).
-                const sw = window.screen.availWidth;
-                const sh = window.screen.availHeight;
-                const w = Math.round(sw * 0.7);
-                const h = Math.round(sh * 0.7);
-                const left = Math.round((sw - w) / 2);
-                const top = Math.round((sh - h) / 2);
-                const screenshareWindow = window.open(
-                    './screenshare',
-                    'ARENAScreenShare',
-                    `popup,width=${w},height=${h},left=${left},top=${top}`
-                );
-                if (!screenshareWindow) {
-                    Swal.fire({
-                        title: 'Popup blocked',
-                        text: 'Please allow popups for ARENA to share your screen.',
-                        icon: 'warning',
-                    });
-                    return;
+                    // Open as a popup window (not a _blank tab). When sharing a Chrome "tab",
+                    // Chrome auto-focuses the shared tab; a separate popup window keeps the ARENA
+                    // tab from being backgrounded, which otherwise blacks out the 3D canvas. Size it
+                    // to a large, centered fraction of the screen so the share preview is usable
+                    // (the window only needs to be separate, not small, to avoid the black canvas).
+                    const sw = window.screen.availWidth;
+                    const sh = window.screen.availHeight;
+                    const w = Math.round(sw * 0.7);
+                    const h = Math.round(sh * 0.7);
+                    const left = Math.round((sw - w) / 2);
+                    const top = Math.round((sh - h) / 2);
+                    const screenshareWindow = window.open(
+                        './screenshare',
+                        'ARENAScreenShare',
+                        `popup,width=${w},height=${h},left=${left},top=${top}`
+                    );
+                    if (!screenshareWindow) {
+                        Swal.fire({
+                            title: 'Popup blocked',
+                            text: 'Please allow popups for ARENA to share your screen.',
+                            icon: 'warning',
+                        });
+                        return;
+                    }
+                    screenshareWindow.params = {
+                        connectOptions: this.jitsi.connectOptions,
+                        appID: this.jitsi.data.arenaAppId,
+                        token: this.arena.mqttToken,
+                        screenSharePrefix: this.jitsi.data.screensharePrefix,
+                        conferenceName: this.jitsi.conferenceName,
+                        displayName: cameraEl.getAttribute('arena-camera').displayName,
+                        idTag: this.arena.idTag,
+                        objectIds: objectIds.join(),
+                    };
+                });
+            } else if (result.isDenied) {
+                // Scene View toggle
+                if (isSceneViewActive) {
+                    this.jitsi.stopSceneView();
+                } else {
+                    this.jitsi.startSceneView();
                 }
-                screenshareWindow.params = {
-                    connectOptions: this.jitsi.connectOptions,
-                    appID: this.jitsi.data.arenaAppId,
-                    token: this.arena.mqttToken,
-                    screenSharePrefix: this.jitsi.data.screensharePrefix,
-                    conferenceName: this.jitsi.conferenceName,
-                    displayName: cameraEl.getAttribute('arena-camera').displayName,
-                    idTag: this.arena.idTag,
-                    objectIds: objectIds.join(),
-                };
-            });
+            }
         });
     },
 

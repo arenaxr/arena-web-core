@@ -84,6 +84,9 @@ let hasVideo = false;
 // MQTT subscription state
 let mqttConnected = false;
 
+// Scene-view state (Phase 2a)
+let sceneViewSourceJid = null; // Jitsi participant ID currently sharing scene view
+
 // UI element refs (populated in initUI)
 const ui = {};
 
@@ -849,6 +852,9 @@ function onJitsiConnectionSuccess() {
         if (track.getType() === 'audio') {
             removeAudioGain(jid);
         }
+        // Note: do NOT hide scene-view panel on track removal — Jitsi reconnections
+        // cause transient track removal/re-add. The panel hides only when the
+        // sceneView property is cleared or the user leaves.
         updateGalleryTile(jid);
     });
     conference.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
@@ -872,6 +878,25 @@ function onJitsiConnectionSuccess() {
         if (key === 'arenaId') userData.arenaId = newVal;
         if (key === 'arenaDisplayName') userData.displayName = newVal;
         if (key === CONF_ONLY_TAG) userData.confOnly = newVal === 'true' || newVal === true;
+
+        // Scene View detection
+        if (key === 'sceneView') {
+            if (newVal === 'true') {
+                sceneViewSourceJid = jid;
+                showSceneViewPanel(jid);
+                // Try attaching any existing video track from this user
+                const participant = conference.getParticipantById(jid);
+                if (participant) {
+                    const tracks = participant.getTracks();
+                    const videoTrack = tracks.find((t) => t.getType() === 'video');
+                    if (videoTrack) {
+                        videoTrack.attach(ui.sceneViewVideo);
+                    }
+                }
+            } else if (sceneViewSourceJid === jid) {
+                hideSceneViewPanel();
+            }
+        }
 
         updateGalleryTile(jid);
         updateUserList();
@@ -1037,6 +1062,11 @@ function onUserLeft(jid) {
     const tile = document.getElementById(`tile-${jid}`);
     if (tile) tile.remove();
 
+    // Clean up scene view if source left
+    if (sceneViewSourceJid === jid) {
+        hideSceneViewPanel();
+    }
+
     updateGalleryEmpty();
     updateUserList();
     recomputeConfOnlySlots();
@@ -1051,7 +1081,13 @@ function onRemoteTrack(track) {
         // Route audio through Web Audio GainNode for distance-based volume
         setupAudioGain(jid, track);
     } else if (track.getType() === 'video') {
-        // Attach video to gallery tile
+        // If this user is sharing scene view, also attach to the scene-view panel
+        if (jid === sceneViewSourceJid) {
+            track.attach(ui.sceneViewVideo);
+            showSceneViewPanel(jid);
+        }
+
+        // Attach video to gallery tile (always — user still appears in gallery)
         const tile = document.getElementById(`tile-${jid}`);
         if (tile) {
             let videoEl = tile.querySelector('video');
@@ -1256,6 +1292,11 @@ function initUI() {
     ui.chatInput = document.getElementById('chat-input');
     ui.chatDot = document.getElementById('chat-dot');
 
+    // Scene View panel
+    ui.sceneViewPanel = document.getElementById('scene-view-panel');
+    ui.sceneViewVideo = document.getElementById('scene-view-video');
+    ui.sceneViewUser = document.getElementById('scene-view-user');
+
     // Button handlers
     document.getElementById('users-btn').addEventListener('click', toggleUsersPanel);
     document.getElementById('chat-btn').addEventListener('click', toggleChatPanel);
@@ -1381,6 +1422,25 @@ function updateGalleryEmpty() {
             ui.galleryEmpty.style.display = 'none';
         }
     }
+}
+
+// ============================================================
+// UI — Scene View Panel
+// ============================================================
+
+function showSceneViewPanel(jid) {
+    if (!ui.sceneViewPanel) return;
+    const user = remoteUsers.get(jid);
+    const name = user ? decodeURIComponent(user.displayName || jid) : jid;
+    ui.sceneViewUser.textContent = `shared by ${name}`;
+    ui.sceneViewPanel.style.display = 'block';
+}
+
+function hideSceneViewPanel() {
+    if (!ui.sceneViewPanel) return;
+    ui.sceneViewPanel.style.display = 'none';
+    ui.sceneViewVideo.srcObject = null;
+    sceneViewSourceJid = null;
 }
 
 // ============================================================
