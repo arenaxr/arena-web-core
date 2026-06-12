@@ -296,30 +296,20 @@ function computeFrontFace(objects) {
     /**
      * Classify a reference point to one side and add its weight.
      */
-    function addReference(label, px, py, pz, weight) {
+    function addReference(px, py, pz, weight) {
         const dx = px - screensharePosition.x;
         const dy = py - screensharePosition.y;
         const dz = pz - screensharePosition.z;
         const dot = dx * worldNormal.x + dy * worldNormal.y + dz * worldNormal.z;
-        const side = dot >= 0 ? '+normal' : '-normal';
         if (dot >= 0) {
             posWeight += weight;
         } else {
             negWeight += weight;
         }
-        console.log(`[Lite]   ref "${label}": pos=(${px.toFixed(2)}, ${py.toFixed(2)}, ${pz.toFixed(2)}) w=${weight} dot=${dot.toFixed(3)} → ${side}`);
     }
 
-    console.log('[Lite] Front-face inputs:', {
-        screensharePos: screensharePosition,
-        screenshareRot: screenshareRotation,
-        screenshareScale,
-        geomType: screenshareGeomType,
-        worldNormal,
-    });
-
     // Scene origin (weight 1.0)
-    addReference('origin', 0, 0, 0, 1.0);
+    addReference(0, 0, 0, 1.0);
 
     // Process persist objects — only startPosition landmarks matter
     if (objects && objects.length > 0) {
@@ -331,7 +321,7 @@ function computeFrontFace(objects) {
             // Only startPosition landmarks contribute (weight 2.0)
             const lm = attr.landmark;
             if (lm && lm.startingPosition === true) {
-                addReference(`landmark:${obj.object_id}`, pos.x ?? 0, pos.y ?? 0, pos.z ?? 0, 2.0);
+                addReference(pos.x ?? 0, pos.y ?? 0, pos.z ?? 0, 2.0);
             }
         }
     }
@@ -353,14 +343,6 @@ function computeFrontFace(objects) {
         z: 0,
         w: Math.cos(yaw / 2),
     };
-
-    console.log('[Lite] Front-face result:', {
-        posWeight: posWeight.toFixed(1),
-        negWeight: negWeight.toFixed(1),
-        frontSide: posWeight >= negWeight ? '+normal' : '-normal',
-        frontNormal,
-        yawDeg: (yaw * 180 / Math.PI).toFixed(1),
-    });
 }
 
 // ============================================================
