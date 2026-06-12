@@ -8,6 +8,7 @@
 
 import './ar-hit-test-listener';
 import './attribution';
+import './audience-cam';
 import './screenshare';
 import './spark';
 import './stats-monitor';

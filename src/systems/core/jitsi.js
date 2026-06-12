@@ -347,50 +347,65 @@ AFRAME.registerSystem('arena-jitsi', {
     // ================================================================
 
     /**
-     * Start sharing the A-Frame canvas as a scene-view stream.
-     * Captures the WebGL canvas at 10fps and replaces the user's video track
-     * on the PeerConnection so lite 2D users can watch the 3D scene.
+     * Start sharing a scene-view stream to lite 2D users.
+     * @param {'canvas'|'audience'} mode
+     *   - 'canvas': captures the user's own A-Frame canvas (Phase 2a)
+     *   - 'audience': uses a fixed audience-cam facing the screenshare (Phase 2b)
      */
-    async startSceneView() {
+    async startSceneView(mode = 'canvas') {
         if (this.sceneViewTrack) {
             console.warn('[SceneView] Already sharing scene view');
             return;
         }
 
-        const canvas = document.querySelector('a-scene canvas');
-        if (!canvas) {
-            console.error('[SceneView] No A-Frame canvas found');
-            return;
-        }
-
         try {
-            // Capture the WebGL canvas at 10fps
-            const canvasStream = canvas.captureStream(10);
-            const canvasVideoTrack = canvasStream.getVideoTracks()[0];
-            if (!canvasVideoTrack) {
-                console.error('[SceneView] No video track from canvas capture');
+            let sourceStream;
+
+            if (mode === 'audience') {
+                // Phase 2b: use the audience-cam system
+                const audienceCamSys = document.querySelector('a-scene').systems['audience-cam'];
+                if (!audienceCamSys) {
+                    console.error('[SceneView] audience-cam system not found');
+                    return;
+                }
+                await audienceCamSys.start();
+                sourceStream = audienceCamSys.getStream();
+                this._sceneViewMode = 'audience';
+            } else {
+                // Phase 2a: capture the user's main canvas
+                const canvas = document.querySelector('a-scene canvas');
+                if (!canvas) {
+                    console.error('[SceneView] No A-Frame canvas found');
+                    return;
+                }
+                sourceStream = canvas.captureStream(10);
+                this._sceneViewMode = 'canvas';
+            }
+
+            const sourceVideoTrack = sourceStream.getVideoTracks()[0];
+            if (!sourceVideoTrack) {
+                console.error('[SceneView] No video track from source stream');
                 return;
             }
 
             // Create a temporary camera JitsiLocalTrack — we need a real JitsiLocalTrack
             // wrapper that Jitsi's conference can manage
             const tmpTracks = await JitsiMeetJS.createLocalTracks({ devices: ['video'] });
-            const canvasJitsiTrack = tmpTracks.find((t) => t.getType() === 'video');
-            if (!canvasJitsiTrack) {
+            const jitsiTrack = tmpTracks.find((t) => t.getType() === 'video');
+            if (!jitsiTrack) {
                 console.error('[SceneView] Failed to create video track wrapper');
                 return;
             }
 
             // Stop the temporary camera track — we only needed the JitsiLocalTrack wrapper
-            const tmpCameraTrack = canvasJitsiTrack.getTrack();
+            const tmpCameraTrack = jitsiTrack.getTrack();
             if (tmpCameraTrack) {
                 tmpCameraTrack.stop();
             }
 
-            // Replace the wrapper's underlying stream with our canvas stream
-            // JitsiLocalTrack stores the stream and gets the track from it
-            canvasJitsiTrack.stream = canvasStream;
-            canvasJitsiTrack.track = canvasVideoTrack;
+            // Replace the wrapper's underlying stream with our source stream
+            jitsiTrack.stream = sourceStream;
+            jitsiTrack.track = sourceVideoTrack;
 
             if (this.jitsiVideoTrack) {
                 // User has an active webcam — save it and swap
@@ -399,18 +414,18 @@ AFRAME.registerSystem('arena-jitsi', {
                 if (cornerVidEl) {
                     this._savedVideoTrack.detach(cornerVidEl);
                 }
-                await this.conference.replaceTrack(this._savedVideoTrack, canvasJitsiTrack);
-                this.jitsiVideoTrack = canvasJitsiTrack;
+                await this.conference.replaceTrack(this._savedVideoTrack, jitsiTrack);
+                this.jitsiVideoTrack = jitsiTrack;
             } else {
-                // No active webcam — just add the canvas track
+                // No active webcam — just add the track
                 this._savedVideoTrack = null;
-                await this.conference.addTrack(canvasJitsiTrack);
-                this.jitsiVideoTrack = canvasJitsiTrack;
+                await this.conference.addTrack(jitsiTrack);
+                this.jitsiVideoTrack = jitsiTrack;
             }
 
-            this.sceneViewTrack = canvasJitsiTrack;
+            this.sceneViewTrack = jitsiTrack;
             this.conference.setLocalParticipantProperty('sceneView', 'true');
-            console.info('[SceneView] Started sharing scene view');
+            console.info(`[SceneView] Started sharing scene view (mode: ${mode})`);
         } catch (err) {
             console.error('[SceneView] Failed to start scene view:', err);
             this.sceneViewTrack = null;
@@ -418,7 +433,7 @@ AFRAME.registerSystem('arena-jitsi', {
     },
 
     /**
-     * Stop sharing the scene-view canvas stream.
+     * Stop sharing the scene-view stream.
      */
     async stopSceneView() {
         if (!this.sceneViewTrack) return;
@@ -441,13 +456,22 @@ AFRAME.registerSystem('arena-jitsi', {
                 this.jitsiVideoTrack = null;
             }
 
-            // Dispose the canvas track wrapper
+            // Dispose the track wrapper
             this.sceneViewTrack.dispose();
         } catch (err) {
             console.warn('[SceneView] Error stopping scene view:', err);
         }
 
+        // Stop audience-cam system if it was active
+        if (this._sceneViewMode === 'audience') {
+            const audienceCamSys = document.querySelector('a-scene')?.systems?.['audience-cam'];
+            if (audienceCamSys) {
+                audienceCamSys.stop();
+            }
+        }
+
         this.sceneViewTrack = null;
+        this._sceneViewMode = null;
         if (this.conference) {
             this.conference.setLocalParticipantProperty('sceneView', '');
         }

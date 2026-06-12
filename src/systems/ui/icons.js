@@ -671,20 +671,73 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
 
         const isSceneViewActive = !!this.jitsi.sceneViewTrack;
+        const activeMode = this.jitsi._sceneViewMode || null;
+
+        // Build option list — if scene view is active, show a stop option instead
+        let optionsHtml;
+        if (isSceneViewActive) {
+            const modeLabel = activeMode === 'audience' ? 'Audience View' : 'My View';
+            optionsHtml = `
+                <p style="margin-bottom:12px">Currently sharing: <b>${modeLabel}</b></p>
+                <div style="text-align:left; margin:0 auto; max-width:320px">
+                    <label style="display:block; padding:8px 0; cursor:pointer">
+                        <input type="radio" name="sv-action" value="stop" checked>
+                        <b>Stop Scene View</b> — stop sharing your view
+                    </label>
+                    <label style="display:block; padding:8px 0; cursor:pointer">
+                        <input type="radio" name="sv-action" value="screen">
+                        <b>Share Screen</b> — share your screen on a scene object
+                    </label>
+                </div>`;
+        } else {
+            optionsHtml = `
+                <div style="text-align:left; margin:0 auto; max-width:340px">
+                    <label style="display:block; padding:8px 0; cursor:pointer">
+                        <input type="radio" name="sv-action" value="screen" checked>
+                        <b>Share Screen</b> — share your screen on a scene object
+                    </label>
+                    <label style="display:block; padding:8px 0; cursor:pointer">
+                        <input type="radio" name="sv-action" value="myview">
+                        <b>Share My View</b> — stream your 3D canvas to Lite users
+                    </label>
+                    <label style="display:block; padding:8px 0; cursor:pointer">
+                        <input type="radio" name="sv-action" value="audience">
+                        <b>Share Audience View</b> — fixed camera facing the screenshare
+                    </label>
+                </div>`;
+        }
 
         Swal.fire({
             title: 'Screen Share Options',
-            html: `Choose how to share:<br>
-                <b>Share Screen</b> — share your screen on an object in the scene.<br>
-                <b>${isSceneViewActive ? 'Stop Scene View' : 'Share Scene View'}</b> — ${isSceneViewActive ? 'stop sharing your 3D canvas view.' : 'stream your 3D canvas view so Lite 2D users can watch.'}`,
+            html: optionsHtml,
             icon: 'question',
             showCancelButton: true,
-            showDenyButton: true,
-            confirmButtonText: 'Share Screen',
-            denyButtonText: isSceneViewActive ? 'Stop Scene View' : 'Share Scene View',
+            confirmButtonText: 'Continue',
             reverseButtons: true,
+            preConfirm: () => {
+                const checked = document.querySelector('input[name="sv-action"]:checked');
+                return checked ? checked.value : null;
+            },
         }).then((result) => {
-            if (result.isConfirmed) {
+            if (!result.isConfirmed || !result.value) return;
+
+            const action = result.value;
+
+            if (action === 'stop') {
+                // Stop active scene view
+                this.jitsi.stopSceneView();
+            } else if (action === 'myview') {
+                // Phase 2a: share user's canvas
+                this.jitsi.startSceneView('canvas');
+            } else if (action === 'audience') {
+                // Phase 2b: share fixed audience cam
+                this.jitsi.startSceneView('audience');
+            } else if (action === 'screen') {
+                // If scene view is active, stop it first
+                if (isSceneViewActive) {
+                    this.jitsi.stopSceneView();
+                }
+
                 // Original screenshare-to-object flow
                 Swal.fire({
                     title: 'Select the object(s) you want to screenshare on:',
@@ -701,11 +754,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     if (!res.isConfirmed || res.value.length === 0) return;
                     const objectIds = res.value;
 
-                    // Open as a popup window (not a _blank tab). When sharing a Chrome "tab",
-                    // Chrome auto-focuses the shared tab; a separate popup window keeps the ARENA
-                    // tab from being backgrounded, which otherwise blacks out the 3D canvas. Size it
-                    // to a large, centered fraction of the screen so the share preview is usable
-                    // (the window only needs to be separate, not small, to avoid the black canvas).
                     const sw = window.screen.availWidth;
                     const sh = window.screen.availHeight;
                     const w = Math.round(sw * 0.7);
@@ -736,13 +784,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                         objectIds: objectIds.join(),
                     };
                 });
-            } else if (result.isDenied) {
-                // Scene View toggle
-                if (isSceneViewActive) {
-                    this.jitsi.stopSceneView();
-                } else {
-                    this.jitsi.startSceneView();
-                }
             }
         });
     },
