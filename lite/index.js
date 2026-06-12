@@ -60,8 +60,13 @@ let maxAVDist = DEFAULT_MAX_AV_DIST;
 let refDistance = DEFAULT_REF_DISTANCE;
 let rolloffFactor = DEFAULT_ROLLOFF_FACTOR;
 
-// Screenshare anchor position
+// Screenshare anchor — position, geometry, and orientation
 let screensharePosition = { ...DEFAULT_SCREENSHARE_POS };
+let screenshareRotation = { x: 0, y: 0, z: 0, w: 1 }; // quaternion
+let screenshareScale = { x: 8, y: 6, z: 0.01 };         // default plane size (jitsi.js L298)
+let screenshareGeomType = 'plane';                       // 'plane' or 'box'
+let frontNormal = { x: 0, y: 0, z: 1 };                 // world-space front face normal
+let userFacingRotation = { x: 0, y: 0, z: 0, w: 1 };    // quaternion: users face 180° from front
 
 // Track all remote users: jitsiId -> { arenaId, displayName, position, distance, confOnly, jitsiUser }
 const remoteUsers = new Map();
@@ -188,60 +193,242 @@ async function loadSceneOptions() {
             if (opts.rolloffFactor !== undefined) rolloffFactor = opts.rolloffFactor;
         }
 
-        // Find screenshareable/screenshare object position for slot anchor
-        // Prefer the oldest screenshareable object; fall back to default
+        // Find screenshareable/screenshare object — prefer oldest; extract full geometry
         const screenshareableObjs = objects
             .filter((o) => o.attributes?.screenshareable || o.object_id === 'screenshare')
             .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
         if (screenshareableObjs.length > 0) {
-            const pos = screenshareableObjs[0].attributes?.position;
+            const ss = screenshareableObjs[0];
+            const attr = ss.attributes || {};
+            const pos = attr.position;
             if (pos) {
-                screensharePosition = { x: pos.x || 0, y: pos.y || 3.1, z: pos.z || -3 };
+                screensharePosition = { x: pos.x ?? 0, y: pos.y ?? 3.1, z: pos.z ?? -3 };
+            }
+            // Geometry type: object_type (preferred) > geometry.primitive > default 'plane'
+            const objType = attr.object_type || attr.geometry?.primitive || 'plane';
+            screenshareGeomType = (objType === 'box' || objType === 'cube') ? 'box' : 'plane';
+            // Rotation (quaternion or euler)
+            const rot = attr.rotation;
+            if (rot && rot.w !== undefined) {
+                screenshareRotation = { x: rot.x ?? 0, y: rot.y ?? 0, z: rot.z ?? 0, w: rot.w };
+            } else if (rot) {
+                // Convert euler (degrees) to quaternion
+                const ex = (rot.x ?? 0) * Math.PI / 180;
+                const ey = (rot.y ?? 0) * Math.PI / 180;
+                const ez = (rot.z ?? 0) * Math.PI / 180;
+                const cy = Math.cos(ey / 2), sy = Math.sin(ey / 2);
+                const cp = Math.cos(ex / 2), sp = Math.sin(ex / 2);
+                const cr = Math.cos(ez / 2), sr = Math.sin(ez / 2);
+                screenshareRotation = {
+                    x: sp * cy * cr + cp * sy * sr,
+                    y: cp * sy * cr - sp * cy * sr,
+                    z: cp * cy * sr + sp * sy * cr,
+                    w: cp * cy * cr - sp * sy * sr,
+                };
+            }
+            // Scale
+            const scl = attr.scale;
+            if (scl) {
+                screenshareScale = { x: scl.x ?? 8, y: scl.y ?? 6, z: scl.z ?? 0.01 };
             }
         }
+
+        // Compute weighted reference centroid for front-face detection
+        computeFrontFace(objects);
     } catch (err) {
         console.warn('[Lite] Failed to load scene options from persistence:', err);
     }
 }
 
 // ============================================================
-// Slot Position Calculator
+// Front-Face Detection
 // ============================================================
 
-function computeSlotPosition() {
-    // For now, use the screenshare position directly.
-    // When multiple lite users join, 3D clients compute a semicircle deterministically.
-    // The lite client uses its own index in the sorted confOnly participant list.
-    myPosition = {
-        x: screensharePosition.x,
-        y: screensharePosition.y - 1.5, // slightly below the screenshare (audience level)
-        z: screensharePosition.z + 2,   // 2m in front of the screenshare
+/**
+ * Rotate a vector by a quaternion: v' = q * v * q^-1
+ */
+function rotateVecByQuat(v, q) {
+    // Quaternion-vector multiplication (optimized)
+    const ix = q.w * v.x + q.y * v.z - q.z * v.y;
+    const iy = q.w * v.y + q.z * v.x - q.x * v.z;
+    const iz = q.w * v.z + q.x * v.y - q.y * v.x;
+    const iw = -q.x * v.x - q.y * v.y - q.z * v.z;
+    return {
+        x: ix * q.w + iw * -q.x + iy * -q.z - iz * -q.y,
+        y: iy * q.w + iw * -q.y + iz * -q.x - ix * -q.z,
+        z: iz * q.w + iw * -q.z + ix * -q.y - iy * -q.x,
     };
+}
+
+/**
+ * Determine which side of the screenshare is the "front" by accumulating
+ * weighted reference points on each side of the object's flat face.
+ *
+ * Algorithm:
+ * 1. Determine local normal: plane → +Z, box → axis with smallest scale
+ * 2. Rotate local normal to world space using screenshare quaternion
+ * 3. For each reference point, compute dot product of (point − screensharePos)
+ *    with worldNormal. Add that point's weight to the positive or negative side.
+ * 4. The side with greater total weight is the front.
+ * 5. Compute userFacingRotation (yaw so users face away from the front face)
+ */
+function computeFrontFace(objects) {
+    // 1. Determine local normal based on geometry type
+    let localNormal;
+    if (screenshareGeomType === 'box') {
+        // Thin axis = axis with smallest scale → normal points along that axis
+        const { x: sx, y: sy, z: sz } = screenshareScale;
+        if (sx <= sy && sx <= sz) localNormal = { x: 1, y: 0, z: 0 };
+        else if (sy <= sx && sy <= sz) localNormal = { x: 0, y: 1, z: 0 };
+        else localNormal = { x: 0, y: 0, z: 1 };
+    } else {
+        // Plane: normal is always local +Z
+        localNormal = { x: 0, y: 0, z: 1 };
+    }
+
+    // 2. Rotate local normal to world space
+    const worldNormal = rotateVecByQuat(localNormal, screenshareRotation);
+
+    // 3. Accumulate weight on each side (+normal vs −normal)
+    let posWeight = 0; // weight on +normal side
+    let negWeight = 0; // weight on −normal side
+
+    /**
+     * Classify a reference point to one side and add its weight.
+     */
+    function addReference(label, px, py, pz, weight) {
+        const dx = px - screensharePosition.x;
+        const dy = py - screensharePosition.y;
+        const dz = pz - screensharePosition.z;
+        const dot = dx * worldNormal.x + dy * worldNormal.y + dz * worldNormal.z;
+        const side = dot >= 0 ? '+normal' : '-normal';
+        if (dot >= 0) {
+            posWeight += weight;
+        } else {
+            negWeight += weight;
+        }
+        console.log(`[Lite]   ref "${label}": pos=(${px.toFixed(2)}, ${py.toFixed(2)}, ${pz.toFixed(2)}) w=${weight} dot=${dot.toFixed(3)} → ${side}`);
+    }
+
+    console.log('[Lite] Front-face inputs:', {
+        screensharePos: screensharePosition,
+        screenshareRot: screenshareRotation,
+        screenshareScale,
+        geomType: screenshareGeomType,
+        worldNormal,
+    });
+
+    // Scene origin (weight 1.0)
+    addReference('origin', 0, 0, 0, 1.0);
+
+    // Process persist objects — only startPosition landmarks matter
+    if (objects && objects.length > 0) {
+        for (const obj of objects) {
+            const attr = obj.attributes || {};
+            const pos = attr.position;
+            if (!pos || (pos.x === undefined && pos.y === undefined && pos.z === undefined)) continue;
+
+            // Only startPosition landmarks contribute (weight 2.0)
+            const lm = attr.landmark;
+            if (lm && lm.startingPosition === true) {
+                addReference(`landmark:${obj.object_id}`, pos.x ?? 0, pos.y ?? 0, pos.z ?? 0, 2.0);
+            }
+        }
+    }
+
+    // 4. The side with greater weight is the front
+    if (posWeight >= negWeight) {
+        frontNormal = { x: worldNormal.x, y: worldNormal.y, z: worldNormal.z };
+    } else {
+        frontNormal = { x: -worldNormal.x, y: -worldNormal.y, z: -worldNormal.z };
+    }
+
+    // 5. Compute userFacingRotation: face AWAY from front (toward audience)
+    // frontNormal points from screenshare toward audience.
+    // ARENA camera forward is -Z, so to face in +frontNormal direction, add PI to yaw.
+    const yaw = Math.atan2(frontNormal.x, frontNormal.z) + Math.PI;
+    userFacingRotation = {
+        x: 0,
+        y: Math.sin(yaw / 2),
+        z: 0,
+        w: Math.cos(yaw / 2),
+    };
+
+    console.log('[Lite] Front-face result:', {
+        posWeight: posWeight.toFixed(1),
+        negWeight: negWeight.toFixed(1),
+        frontSide: posWeight >= negWeight ? '+normal' : '-normal',
+        frontNormal,
+        yawDeg: (yaw * 180 / Math.PI).toFixed(1),
+    });
+}
+
+// ============================================================
+// Slot Position Calculator — Bottom-Edge Row
+// ============================================================
+
+/**
+ * Compute the width axis of the screenshare (perpendicular to front normal, horizontal).
+ * This is the cross product of frontNormal × up, normalized.
+ */
+function getWidthAxis() {
+    const up = { x: 0, y: 1, z: 0 };
+    // cross(frontNormal, up)
+    let wx = frontNormal.y * up.z - frontNormal.z * up.y;
+    let wy = frontNormal.z * up.x - frontNormal.x * up.z;
+    let wz = frontNormal.x * up.y - frontNormal.y * up.x;
+    const len = Math.sqrt(wx * wx + wy * wy + wz * wz);
+    if (len > 0.001) {
+        wx /= len; wy /= len; wz /= len;
+    } else {
+        // Degenerate case: normal is vertical, pick arbitrary horizontal
+        wx = 1; wy = 0; wz = 0;
+    }
+    return { x: wx, y: wy, z: wz };
+}
+
+/**
+ * Compute position for a single slot in the bottom-edge row.
+ * @param {number} index Slot index (0-based)
+ * @param {number} total Total number of slots
+ * @returns {{ x: number, y: number, z: number }}
+ */
+function computeRowSlotPosition(index, total) {
+    const FRONT_OFFSET = 1.0; // 1m in front of screenshare
+    const USER_SPACING = 0.6; // ~shoulder width between users
+
+    const bottomY = screensharePosition.y - screenshareScale.y / 2;
+    const widthAxis = getWidthAxis();
+
+    // Users cluster centered: total span = (N-1) * spacing, centered on screenshare
+    let widthOffset = 0;
+    if (total > 1) {
+        const totalSpan = (total - 1) * USER_SPACING;
+        widthOffset = -totalSpan / 2 + index * USER_SPACING;
+    }
+
+    return {
+        x: screensharePosition.x + frontNormal.x * FRONT_OFFSET + widthAxis.x * widthOffset,
+        y: bottomY,
+        z: screensharePosition.z + frontNormal.z * FRONT_OFFSET + widthAxis.z * widthOffset,
+    };
+}
+
+function computeSlotPosition() {
+    // Single user: centered at bottom edge, 1m in front
+    myPosition = computeRowSlotPosition(0, 1);
     updateFooter();
 }
 
 /**
  * Recompute our slot position based on current confOnly participants.
  * All clients (3D and lite) must produce the same result for the same inputs.
- * @param {string[]} sortedConfOnlyIds Sorted array of Jitsi participant IDs of confOnly users
- * @param {string} myJitsiId Our own Jitsi participant ID
  */
 function recomputeSlotFromParticipants(sortedConfOnlyIds, myJitsiId) {
     const myIndex = sortedConfOnlyIds.indexOf(myJitsiId);
     if (myIndex < 0) return;
 
-    const totalSlots = sortedConfOnlyIds.length;
-    const arcAngle = Math.PI * 0.6; // 108 degrees semicircle
-    const radius = 3; // 3m radius from screenshare anchor
-    const angleStep = totalSlots > 1 ? arcAngle / (totalSlots - 1) : 0;
-    const startAngle = -arcAngle / 2;
-    const angle = startAngle + angleStep * myIndex;
-
-    myPosition = {
-        x: screensharePosition.x + Math.sin(angle) * radius,
-        y: screensharePosition.y - 1.5,
-        z: screensharePosition.z + Math.cos(angle) * radius,
-    };
+    myPosition = computeRowSlotPosition(myIndex, sortedConfOnlyIds.length);
     updateFooter();
 }
 
@@ -493,7 +680,7 @@ function processMessage(topic, msg) {
                 // Update position in remoteUsers if we have a matching user
                 for (const [jid, user] of remoteUsers) {
                     if (user.arenaId === arenaIdTag) {
-                        user.position = { x: pos.x || 0, y: pos.y || 0, z: pos.z || 0 };
+                        user.position = { x: pos.x ?? 0, y: pos.y ?? 0, z: pos.z ?? 0 };
                         break;
                     }
                 }
@@ -569,7 +756,12 @@ function publishCameraPosition(action = 'update') {
                 y: Math.round(myPosition.y * 1000) / 1000,
                 z: Math.round(myPosition.z * 1000) / 1000,
             },
-            rotation: { x: 0, y: 0, z: 0, w: 1 }, // facing forward
+            rotation: {
+                x: Math.round(userFacingRotation.x * 1000) / 1000,
+                y: Math.round(userFacingRotation.y * 1000) / 1000,
+                z: Math.round(userFacingRotation.z * 1000) / 1000,
+                w: Math.round(userFacingRotation.w * 1000) / 1000,
+            },
             'arena-user': {
                 displayName: `${displayName} (Lite)`,
                 color: myColor,
