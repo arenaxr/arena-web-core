@@ -378,7 +378,7 @@ AFRAME.registerSystem('arena-jitsi', {
                     console.error('[SceneView] No A-Frame canvas found');
                     return;
                 }
-                sourceStream = canvas.captureStream(10);
+                sourceStream = canvas.captureStream(15);
                 this._sceneViewMode = 'canvas';
             }
 
@@ -388,42 +388,58 @@ AFRAME.registerSystem('arena-jitsi', {
                 return;
             }
 
-            // Create a temporary camera JitsiLocalTrack — we need a real JitsiLocalTrack
-            // wrapper that Jitsi's conference can manage
-            const tmpTracks = await JitsiMeetJS.createLocalTracks({ devices: ['video'] });
-            const jitsiTrack = tmpTracks.find((t) => t.getType() === 'video');
+            // Ensure we have a video track in the conference to swap on
+            let jitsiTrack = this.jitsiVideoTrack;
             if (!jitsiTrack) {
-                console.error('[SceneView] Failed to create video track wrapper');
-                return;
-            }
-
-            // Stop the temporary camera track — we only needed the JitsiLocalTrack wrapper
-            const tmpCameraTrack = jitsiTrack.getTrack();
-            if (tmpCameraTrack) {
-                tmpCameraTrack.stop();
-            }
-
-            // Replace the wrapper's underlying stream with our source stream
-            jitsiTrack.stream = sourceStream;
-            jitsiTrack.track = sourceVideoTrack;
-
-            if (this.jitsiVideoTrack) {
-                // User has an active webcam — save it and swap
-                this._savedVideoTrack = this.jitsiVideoTrack;
-                const cornerVidEl = document.getElementById('cornerVideo');
-                if (cornerVidEl) {
-                    this._savedVideoTrack.detach(cornerVidEl);
+                // No active webcam — create one so we have a sender
+                const tmpTracks = await JitsiMeetJS.createLocalTracks({ devices: ['video'] });
+                jitsiTrack = tmpTracks.find((t) => t.getType() === 'video');
+                if (!jitsiTrack) {
+                    console.error('[SceneView] Failed to create video track wrapper');
+                    return;
                 }
-                await this.conference.replaceTrack(this._savedVideoTrack, jitsiTrack);
-                this.jitsiVideoTrack = jitsiTrack;
-            } else {
-                // No active webcam — just add the track
-                this._savedVideoTrack = null;
                 await this.conference.addTrack(jitsiTrack);
                 this.jitsiVideoTrack = jitsiTrack;
             }
 
-            this.sceneViewTrack = jitsiTrack;
+            // Save current state for restore
+            this._savedVideoTrack = jitsiTrack;
+            const cornerVidEl = document.getElementById('cornerVideo');
+            if (cornerVidEl) {
+                jitsiTrack.detach(cornerVidEl);
+            }
+
+            // Use the standard WebRTC RTCRtpSender.replaceTrack() API to swap
+            // what's actually sent over the wire. This keeps the JitsiLocalTrack
+            // wrapper alive — Jitsi never sees the swap, so no disposal.
+            const pc = this.conference.jvbJingleSession?.peerconnection?.peerconnection;
+            if (!pc) {
+                console.error('[SceneView] No peer connection available');
+                return;
+            }
+
+            const sender = pc.getSenders().find((s) => s.track && s.track.kind === 'video');
+            if (!sender) {
+                console.error('[SceneView] No video sender found');
+                return;
+            }
+
+            // Save the original sender track so we can restore later
+            this._savedSenderTrack = sender.track;
+
+            // Swap the actual media being sent
+            await sender.replaceTrack(sourceVideoTrack);
+
+            // Monitor source track for unexpected endings
+            this._sceneViewEndedHandler = () => {
+                console.warn(`[SceneView] Source video track ended (mode: ${mode}), auto-restoring`);
+                this.stopSceneView();
+            };
+            sourceVideoTrack.addEventListener('ended', this._sceneViewEndedHandler);
+
+            this.sceneViewTrack = jitsiTrack; // reference to Jitsi wrapper (for stopSceneView)
+            this._sceneViewSourceTrack = sourceVideoTrack;
+            this._sceneViewSender = sender;
             this.conference.setLocalParticipantProperty('sceneView', 'true');
             console.info(`[SceneView] Started sharing scene view (mode: ${mode})`);
         } catch (err) {
@@ -439,25 +455,30 @@ AFRAME.registerSystem('arena-jitsi', {
         if (!this.sceneViewTrack) return;
 
         try {
-            if (this._savedVideoTrack) {
-                // Swap back to the original webcam track
-                await this.conference.replaceTrack(this.sceneViewTrack, this._savedVideoTrack);
-                this.jitsiVideoTrack = this._savedVideoTrack;
+            // Remove the ended listener from the source track
+            if (this._sceneViewSourceTrack && this._sceneViewEndedHandler) {
+                this._sceneViewSourceTrack.removeEventListener('ended', this._sceneViewEndedHandler);
+            }
 
-                // Re-attach to corner video preview
+            // Restore the original video track on the sender via WebRTC API
+            if (this._sceneViewSender && this._savedSenderTrack) {
+                await this._sceneViewSender.replaceTrack(this._savedSenderTrack);
+            }
+
+            // Re-attach the saved Jitsi track to corner video preview
+            if (this._savedVideoTrack) {
+                this.jitsiVideoTrack = this._savedVideoTrack;
                 const cornerVidEl = document.getElementById('cornerVideo');
                 if (cornerVidEl) {
                     this._savedVideoTrack.attach(cornerVidEl);
                 }
                 this._savedVideoTrack = null;
-            } else {
-                // No saved camera — just remove the track entirely
-                await this.conference.removeTrack(this.sceneViewTrack);
-                this.jitsiVideoTrack = null;
             }
 
-            // Dispose the track wrapper
-            this.sceneViewTrack.dispose();
+            // Stop the source stream tracks (canvas capture or audience cam)
+            if (this._sceneViewSourceTrack) {
+                this._sceneViewSourceTrack.stop();
+            }
         } catch (err) {
             console.warn('[SceneView] Error stopping scene view:', err);
         }
@@ -471,6 +492,10 @@ AFRAME.registerSystem('arena-jitsi', {
         }
 
         this.sceneViewTrack = null;
+        this._sceneViewSourceTrack = null;
+        this._sceneViewSender = null;
+        this._savedSenderTrack = null;
+        this._sceneViewEndedHandler = null;
         this._sceneViewMode = null;
         if (this.conference) {
             this.conference.setLocalParticipantProperty('sceneView', '');

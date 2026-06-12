@@ -2,18 +2,19 @@
  * @fileoverview Audience Camera System — renders a fixed off-screen camera
  * positioned in front of the screenshare for streaming to 2D lite users.
  *
- * Uses a second lightweight WebGLRenderer at 640×480 @ 10fps, rendering the
- * same Three.js scene from a fixed audience-perspective camera. The off-screen
- * canvas feeds a captureStream() MediaStream directly.
+ * Uses the MAIN A-Frame renderer with a WebGLRenderTarget at 1280×720 @ 15fps.
+ * Renders the scene from the audience camera into the render target, then blits
+ * to a 2D canvas for captureStream(). This shares all compiled shaders/textures
+ * with the main renderer — no second WebGL context needed.
  *
  * Screenshare position is resolved via the persist API (same source as the
  * lite client) to ensure both sides agree on which object is the "lead"
  * screenshare and where it is.
  */
 
-const AUDIENCE_CAM_WIDTH = 640;
-const AUDIENCE_CAM_HEIGHT = 480;
-const AUDIENCE_CAM_FPS = 10;
+const AUDIENCE_CAM_WIDTH = 1280;
+const AUDIENCE_CAM_HEIGHT = 720;
+const AUDIENCE_CAM_FPS = 15;
 const AUDIENCE_CAM_INTERVAL = 1000 / AUDIENCE_CAM_FPS; // ms between renders
 const FRONT_OFFSET = 3.0; // metres in front of screenshare
 const DEFAULT_SCREENSHARE_POS = { x: 0, y: 3.1, z: -3 };
@@ -24,15 +25,17 @@ AFRAME.registerSystem('audience-cam', {
 
     init() {
         this.audienceCam = null; // THREE.PerspectiveCamera
-        this.offCanvas = null; // HTMLCanvasElement (hidden, WebGL)
-        this.offRenderer = null; // THREE.WebGLRenderer (separate context)
+        this.renderTarget = null; // THREE.WebGLRenderTarget
+        this.canvas2d = null; // HTMLCanvasElement (2D blit target)
+        this.ctx2d = null; // CanvasRenderingContext2D
+        this.pixelBuffer = null; // Uint8Array for readRenderTargetPixels
         this.stream = null; // MediaStream
         this.active = false;
         this.lastRenderTime = 0;
     },
 
     /**
-     * Start the audience camera — creates the off-screen renderer and
+     * Start the audience camera — creates the render target and
      * positions the camera facing the screenshare.
      */
     async start() {
@@ -46,29 +49,37 @@ AFRAME.registerSystem('audience-cam', {
             1000
         );
 
-        // 2. Position the camera facing the screenshare (async — fetches persist data)
+        // 2. Position the camera (async — fetches persist data)
         await this.updatePosition();
 
-        // 3. Create off-screen WebGL canvas + renderer
-        this.offCanvas = document.createElement('canvas');
-        this.offCanvas.width = AUDIENCE_CAM_WIDTH;
-        this.offCanvas.height = AUDIENCE_CAM_HEIGHT;
-        this.offCanvas.style.display = 'none';
-        document.body.appendChild(this.offCanvas);
-
-        this.offRenderer = new THREE.WebGLRenderer({
-            canvas: this.offCanvas,
-            antialias: false,
-            preserveDrawingBuffer: true, // required for captureStream
+        // 3. Create WebGLRenderTarget (shares the main renderer's GL context)
+        this.renderTarget = new THREE.WebGLRenderTarget(AUDIENCE_CAM_WIDTH, AUDIENCE_CAM_HEIGHT, {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.LinearFilter,
+            format: THREE.RGBAFormat,
+            type: THREE.UnsignedByteType,
         });
-        this.offRenderer.setSize(AUDIENCE_CAM_WIDTH, AUDIENCE_CAM_HEIGHT);
-        this.offRenderer.setPixelRatio(1);
 
-        // 4. Create stream (manual frame capture mode)
-        this.stream = this.offCanvas.captureStream(0);
+        // 4. Create 2D canvas for blit + captureStream
+        this.canvas2d = document.createElement('canvas');
+        this.canvas2d.width = AUDIENCE_CAM_WIDTH;
+        this.canvas2d.height = AUDIENCE_CAM_HEIGHT;
+        this.canvas2d.style.display = 'none';
+        document.body.appendChild(this.canvas2d);
+        this.ctx2d = this.canvas2d.getContext('2d');
+
+        // 5. Pixel buffer for readRenderTargetPixels
+        this.pixelBuffer = new Uint8Array(AUDIENCE_CAM_WIDTH * AUDIENCE_CAM_HEIGHT * 4);
+
+        // 6. ImageData for putImageData (reuse to avoid GC)
+        this.imageData = new ImageData(AUDIENCE_CAM_WIDTH, AUDIENCE_CAM_HEIGHT);
+
+        // 7. Create stream (manual frame capture mode)
+        this.stream = this.canvas2d.captureStream(0);
 
         this.active = true;
         this.lastRenderTime = 0;
+        this._frameCount = 0;
 
         console.info('[AudienceCam] Started');
     },
@@ -85,17 +96,20 @@ AFRAME.registerSystem('audience-cam', {
             this.stream = null;
         }
 
-        // Dispose off-screen renderer
-        if (this.offRenderer) {
-            this.offRenderer.dispose();
-            this.offRenderer = null;
+        // Dispose render target
+        if (this.renderTarget) {
+            this.renderTarget.dispose();
+            this.renderTarget = null;
         }
 
-        // Remove off-screen canvas
-        if (this.offCanvas && this.offCanvas.parentNode) {
-            this.offCanvas.parentNode.removeChild(this.offCanvas);
+        // Remove 2D canvas
+        if (this.canvas2d && this.canvas2d.parentNode) {
+            this.canvas2d.parentNode.removeChild(this.canvas2d);
         }
-        this.offCanvas = null;
+        this.canvas2d = null;
+        this.ctx2d = null;
+        this.pixelBuffer = null;
+        this.imageData = null;
         this.audienceCam = null;
         this.active = false;
 
@@ -103,19 +117,15 @@ AFRAME.registerSystem('audience-cam', {
     },
 
     /**
-     * Return the MediaStream from the off-screen canvas.
+     * Return the MediaStream from the 2D canvas.
      */
     getStream() {
         return this.stream;
     },
 
     /**
-     * Compute the audience camera position facing the screenshare.
-     * Uses the SAME data source and algorithm as the lite client:
-     *   1. Fetch persist objects from the REST API
-     *   2. Find the lead screenshareable object (oldest with screenshareable or id='screenshare')
-     *   3. Compute front face using weighted references: origin (1.0), startPosition landmarks (2.0)
-     *   4. Position camera FRONT_OFFSET metres in front of the screenshare
+     * Compute the audience camera position.
+     * Uses persist API (same data source as lite client).
      */
     async updatePosition() {
         if (!this.audienceCam) return;
@@ -126,7 +136,7 @@ AFRAME.registerSystem('audience-cam', {
         let geomType = 'plane';
         let persistObjects = [];
 
-        // --- 1. Fetch persist objects (same API as lite client) ---
+        // --- 1. Fetch persist objects ---
         try {
             const persistHost = ARENA?.defaults?.persistHost || window.location.hostname;
             const persistPath = ARENA?.defaults?.persistPath || '/persist';
@@ -145,7 +155,7 @@ AFRAME.registerSystem('audience-cam', {
             console.warn('[AudienceCam] Failed to fetch persist objects:', err);
         }
 
-        // --- 2. Find lead screenshareable object (same logic as lite client) ---
+        // --- 2. Find lead screenshareable object ---
         const screenshareableObjs = persistObjects
             .filter((o) => o.attributes?.screenshareable || o.object_id === 'screenshare')
             .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -160,7 +170,6 @@ AFRAME.registerSystem('audience-cam', {
             const objType = attr.object_type || attr.geometry?.primitive || 'plane';
             geomType = (objType === 'box' || objType === 'cube') ? 'box' : 'plane';
 
-            // Rotation
             const rot = attr.rotation;
             if (rot && rot.w !== undefined) {
                 ssQuat = new THREE.Quaternion(rot.x ?? 0, rot.y ?? 0, rot.z ?? 0, rot.w);
@@ -174,7 +183,6 @@ AFRAME.registerSystem('audience-cam', {
                 ssQuat = new THREE.Quaternion().setFromEuler(euler);
             }
 
-            // Scale
             const scl = attr.scale;
             if (scl) {
                 ssScale = { x: scl.x ?? 8, y: scl.y ?? 6, z: scl.z ?? 0.01 };
@@ -182,10 +190,10 @@ AFRAME.registerSystem('audience-cam', {
 
             console.info(`[AudienceCam] Found persist object "${ss.object_id}", pos=(${ssPos.x}, ${ssPos.y}, ${ssPos.z}), scale=(${ssScale.x}, ${ssScale.y}, ${ssScale.z}), geom=${geomType}`);
         } else {
-            console.info(`[AudienceCam] No screenshare in persist, using defaults: pos=(${ssPos.x}, ${ssPos.y}, ${ssPos.z})`);
+            console.info(`[AudienceCam] No screenshare in persist, using defaults`);
         }
 
-        // --- 3. Compute front face (same algorithm as lite client) ---
+        // --- 3. Compute front face ---
         let localNormal;
         if (geomType === 'box') {
             const { x: sx, y: sy, z: sz } = ssScale;
@@ -210,10 +218,8 @@ AFRAME.registerSystem('audience-cam', {
             else negWeight += weight;
         };
 
-        // Scene origin (weight 1.0)
         classify(0, 0, 0, 1.0);
 
-        // startPosition landmarks from persist (weight 2.0)
         for (const obj of persistObjects) {
             const attr = obj.attributes || {};
             const pos = attr.position;
@@ -247,10 +253,10 @@ AFRAME.registerSystem('audience-cam', {
 
     /**
      * Throttled render pass — renders the scene from the audience camera
-     * using the off-screen WebGL renderer.
+     * into the render target, then blits to the 2D canvas.
      */
     tick(t) {
-        if (!this.active || !this.audienceCam || !this.offRenderer) return;
+        if (!this.active || !this.audienceCam || !this.renderTarget) return;
 
         // Throttle to target FPS
         if (t - this.lastRenderTime < AUDIENCE_CAM_INTERVAL) return;
@@ -259,8 +265,52 @@ AFRAME.registerSystem('audience-cam', {
         const scene = this.el.object3D;
         if (!scene) return;
 
-        // Render scene from audience camera using the separate renderer
-        this.offRenderer.render(scene, this.audienceCam);
+        const renderer = this.el.renderer;
+        if (!renderer) return;
+
+        const W = AUDIENCE_CAM_WIDTH;
+        const H = AUDIENCE_CAM_HEIGHT;
+
+        // Save renderer state
+        const currentRenderTarget = renderer.getRenderTarget();
+        const currentXrEnabled = renderer.xr.enabled;
+        const savedClearColor = new THREE.Color();
+        renderer.getClearColor(savedClearColor);
+        const savedClearAlpha = renderer.getClearAlpha();
+
+        // Disable XR for the off-screen render
+        renderer.xr.enabled = false;
+
+        // Set clear color to match scene background
+        if (scene.background && scene.background.isColor) {
+            renderer.setClearColor(scene.background, 1);
+        } else {
+            renderer.setClearColor(0x000000, 1);
+        }
+
+        // Render scene from audience camera into render target
+        renderer.setRenderTarget(this.renderTarget);
+        renderer.clear(true, true, true);
+        renderer.render(scene, this.audienceCam);
+
+        // Read pixels from render target
+        renderer.readRenderTargetPixels(this.renderTarget, 0, 0, W, H, this.pixelBuffer);
+
+        // Restore renderer state
+        renderer.setRenderTarget(currentRenderTarget);
+        renderer.xr.enabled = currentXrEnabled;
+        renderer.setClearColor(savedClearColor, savedClearAlpha);
+
+        // Blit to 2D canvas (flip Y — WebGL reads bottom-to-top)
+        const src = this.pixelBuffer;
+        const dst = this.imageData.data;
+        const rowBytes = W * 4;
+        for (let y = 0; y < H; y++) {
+            const srcOffset = (H - 1 - y) * rowBytes;
+            const dstOffset = y * rowBytes;
+            dst.set(src.subarray(srcOffset, srcOffset + rowBytes), dstOffset);
+        }
+        this.ctx2d.putImageData(this.imageData, 0, 0);
 
         // Request frame capture from captureStream
         const videoTrack = this.stream?.getVideoTracks()[0];
@@ -269,7 +319,7 @@ AFRAME.registerSystem('audience-cam', {
         }
 
         // Debug: log frame count
-        this._frameCount = (this._frameCount || 0) + 1;
+        this._frameCount++;
         if (this._frameCount <= 3 || this._frameCount % 100 === 0) {
             console.info(`[AudienceCam] Frame ${this._frameCount} rendered`);
         }
