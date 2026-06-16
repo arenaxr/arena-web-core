@@ -159,11 +159,17 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                                 Object.keys(node.components).length === 0
                             ) {
                                 if (!node.id) {
-                                    let promptId = prompt('Provide a unique ID for this new object (e.g., my-entity):');
+                                    const promptId = prompt(
+                                        'Provide a unique ID for this new object (e.g., my-entity):'
+                                    );
                                     if (promptId) {
-                                        node.id = promptId.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                                        node.id = promptId
+                                            .trim()
+                                            .toLowerCase()
+                                            .replace(/[^a-z0-9_-]/g, '');
                                     }
                                 }
+                                node.dataset.isNewInspectorObject = 'true';
                                 // console.debug('add build3d-mqtt-object:');
                                 node.setAttribute('build3d-mqtt-object', 'enabled', true);
                             }
@@ -323,12 +329,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                             // query active components
                             const actions = getArenaComponentActions();
                             Object.keys(actions).forEach((key) => {
-                                addComponentAction(
-                                    key,
-                                    actions[key].action,
-                                    actions[key].label,
-                                    actions[key].icon
-                                );
+                                addComponentAction(key, actions[key].action, actions[key].label, actions[key].icon);
                             });
                         });
                     });

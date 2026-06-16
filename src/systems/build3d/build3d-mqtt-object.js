@@ -9,10 +9,21 @@
 import { TOPICS } from '../../constants';
 
 const OBJECT_TYPE_COMPONENTS = new Set([
-    'arenaui-button-panel', 'arenaui-card', 'arenaui-prompt',
-    'gaussian_splatting', 'gltf-model', 'image', 'light', 'line',
-    'obj-model', 'ocean', 'pcd-model', 'text', 'thickline',
-    'threejs-scene', 'urdf-model',
+    'arenaui-button-panel',
+    'arenaui-card',
+    'arenaui-prompt',
+    'gaussian_splatting',
+    'gltf-model',
+    'image',
+    'light',
+    'line',
+    'obj-model',
+    'ocean',
+    'pcd-model',
+    'text',
+    'thickline',
+    'threejs-scene',
+    'urdf-model',
 ]);
 
 function coerceVisible(value) {
@@ -177,18 +188,22 @@ function extractDataUpdates(mutation, attribute, changes) {
             break;
         default:
             // handle special cases of boolean as string first
-            if (changes === null) data[mutation.attributeName] = null; // component was removed
+            if (changes === null)
+                data[mutation.attributeName] = null; // component was removed
             else if (changes === 'true' || changes === 'false') data[mutation.attributeName] = JSON.parse(changes);
             else data[mutation.attributeName] = changes || {};
             // Guard spe-particles fog crash: mirror create-update.js workaround
-            if (mutation.attributeName.startsWith('spe-particles') && typeof data[mutation.attributeName] === 'object' && data[mutation.attributeName] !== null) {
+            if (
+                mutation.attributeName.startsWith('spe-particles') &&
+                typeof data[mutation.attributeName] === 'object' &&
+                data[mutation.attributeName] !== null
+            ) {
                 if (!Object.hasOwn(data[mutation.attributeName], 'affectedByFog')) {
                     data[mutation.attributeName].affectedByFog = false;
                 }
             }
             break;
     }
-
 
     return data;
 }
@@ -239,7 +254,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
 
         const msg = {
             object_id: this.el.id === 'env' ? 'scene-options' : this.el.id,
-            action: 'update',
+            action: !this.hasBeenPublished ? 'create' : 'update',
             type: this.el.id === 'env' ? 'scene-options' : 'object',
             persist: true,
             data: { ...this.changedData },
@@ -258,12 +273,12 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             const attrName = mutation.attributeName;
 
             // Skip transforms (handled by tick) and self-referencing component
-            if (['position', 'rotation', 'scale', 'build3d-mqtt-object', 'class', 'attribution'].includes(attrName)) return;
+            if (['position', 'rotation', 'scale', 'build3d-mqtt-object', 'class', 'attribution'].includes(attrName))
+                return;
 
             if (attrName === 'id') {
                 // console.debug(`The id attribute was modified.`, mutation.target.id, mutation.oldValue);
                 if (mutation.oldValue && mutation.target.id !== mutation.oldValue) {
-
                     // Capture the original ID only at the beginning of the typing sequence
                     if (!this.renameOldId) {
                         this.renameOldId = mutation.oldValue;
@@ -399,7 +414,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             this.changedData.position = {
                 x: this.el.object3D.position.x,
                 y: this.el.object3D.position.y,
-                z: this.el.object3D.position.z
+                z: this.el.object3D.position.z,
             };
             this.lastTransform.position.copy(this.el.object3D.position);
             transformChanged = true;
@@ -414,7 +429,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             this.changedData.scale = {
                 x: this.el.object3D.scale.x,
                 y: this.el.object3D.scale.y,
-                z: this.el.object3D.scale.z
+                z: this.el.object3D.scale.z,
             };
             this.lastTransform.scale.copy(this.el.object3D.scale);
             transformChanged = true;
@@ -431,9 +446,33 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             this.el.addEventListener('componentchanged', this.onComponentChanged);
             this.el.addEventListener('componentremoved', this.onComponentRemoved);
             // Entities loaded from persistence have an ID when first enabled; new Inspector entities don't
-            if (this.el.id) {
+            if (this.el.id && !this.el.dataset.isNewInspectorObject) {
                 this.hasBeenPublished = true;
+            } else if (this.el.dataset.isNewInspectorObject) {
+                this.changedData.object_type = 'entity';
+                if (this.el.object3D) {
+                    this.changedData.position = {
+                        x: this.el.object3D.position.x,
+                        y: this.el.object3D.position.y,
+                        z: this.el.object3D.position.z,
+                    };
+                    const { quaternion } = this.el.object3D;
+                    this.changedData.rotation = {
+                        x: quaternion._x,
+                        y: quaternion._y,
+                        z: quaternion._z,
+                        w: quaternion._w,
+                    };
+                    this.changedData.scale = {
+                        x: this.el.object3D.scale.x,
+                        y: this.el.object3D.scale.y,
+                        z: this.el.object3D.scale.z,
+                    };
+                }
+                this.debouncePublish();
             }
+            delete this.el.dataset.isNewInspectorObject;
+
             if (this.el.object3D) {
                 this.lastTransform.position.copy(this.el.object3D.position);
                 this.lastTransform.rotation.copy(this.el.object3D.quaternion);
