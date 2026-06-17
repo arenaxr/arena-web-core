@@ -334,7 +334,7 @@ AFRAME.registerSystem('face-tracking', {
                 cameraOptions = { deviceId: { exact: perfVideoInput } };
             }
             const shapePredURL =
-                'https://arena-cdn.conix.io/store/face-tracking/shape_predictor_68_face_landmarks_compressed.dat';
+                'https://arenaxr.org/store/face-tracking/shape_predictor_68_face_landmarks_compressed.dat';
             this.faceTracker.init(shapePredURL, cameraOptions);
             this.initialized = true;
         } else {
