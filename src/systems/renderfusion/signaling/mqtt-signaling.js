@@ -20,6 +20,10 @@ export default class MQTTSignaling {
     }
 
     publish(topic, msg) {
+        if (!this.client || !this.client.isConnected()) {
+            console.warn('[render-client] MQTT not connected, skipping publish');
+            return;
+        }
         const message = new Paho.Message(msg);
         message.destinationName = topic;
         this.client.send(message);
@@ -56,6 +60,10 @@ export default class MQTTSignaling {
     }
 
     subscribe(topic) {
+        if (!this.client || !this.client.isConnected()) {
+            console.warn(`[render-client] MQTT not connected, skipping subscribe to: ${topic}`);
+            return;
+        }
         const logOptions = {
             onSuccess: () => {
                 if (this.dbg === true) console.debug(`Subscribe success to: ${topic}`);
@@ -65,6 +73,10 @@ export default class MQTTSignaling {
             },
         };
         this.client.subscribe(topic, logOptions);
+    }
+
+    isConnected() {
+        return this.client && this.client.isConnected();
     }
 
     mqttOnConnectionLost(responseObject) {
