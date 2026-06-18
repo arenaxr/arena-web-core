@@ -84,7 +84,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.isSpeaker = false;
         this.stats = {};
         this.status = {};
-        this.muted = undefined;
+
 
         // users list
         this.liveUsers = {};
@@ -713,10 +713,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      */
     onJitsiTrackMuteChanged(e) {
         const arenaId = e.detail.id;
-        // local
-        if (this.userId === arenaId) {
-            this.muted = e.detail.muted;
-        }
         // remote
         if (this.liveUsers[arenaId]) {
             this.liveUsers[arenaId].muted = e.detail.muted;
@@ -816,7 +812,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             if (msg.text === 'sound:off') {
                 // console.log('muteAudio', this.jitsi.hasAudio);
                 // only mute
-                if (this.jitsi.hasAudio && !this.muted) {
+                if (this.jitsi.hasAudio && this.jitsi.jitsiAudioTrack && !this.jitsi.jitsiAudioTrack.isMuted()) {
                     const sideMenu = sceneEl.systems['arena-side-menu-ui'];
                     sideMenu.clickButton(sideMenu.buttons.AUDIO);
                 }
@@ -967,9 +963,11 @@ AFRAME.registerSystem('arena-chat-ui', {
         meUli.appendChild(myUBtnCtnr);
 
         const usspan = document.createElement('span');
+        // Pull local audio mute state directly from jitsi track to avoid race conditions
         let myBtnClass = 'uk';
-        if (this.muted === true) myBtnClass = 'ns';
-        else if (this.muted === false) myBtnClass = 's';
+        if (this.jitsi && this.jitsi.jitsiAudioTrack) {
+            myBtnClass = this.jitsi.jitsiAudioTrack.isMuted() ? 'ns' : 's';
+        }
         usspan.className = `users-list-btn ${myBtnClass}`;
         usspan.title = 'Mute Myself';
         myUBtnCtnr.appendChild(usspan);
