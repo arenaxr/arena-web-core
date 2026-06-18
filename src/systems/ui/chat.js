@@ -715,11 +715,11 @@ AFRAME.registerSystem('arena-chat-ui', {
         const arenaId = e.detail.id;
         // local
         if (this.userId === arenaId) {
-            this.muted = e.muted;
+            this.muted = e.detail.muted;
         }
         // remote
         if (this.liveUsers[arenaId]) {
-            this.liveUsers[arenaId].muted = e.muted;
+            this.liveUsers[arenaId].muted = e.detail.muted;
         }
         this.populateUserList();
     },
