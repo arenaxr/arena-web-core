@@ -713,9 +713,17 @@ AFRAME.registerSystem('arena-chat-ui', {
      */
     onJitsiTrackMuteChanged(e) {
         const arenaId = e.detail.id;
-        // remote
+        const jid = e.detail.jid;
+        // Try to find user by arenaId first, then fall back to jid
         if (this.liveUsers[arenaId]) {
             this.liveUsers[arenaId].muted = e.detail.muted;
+        } else if (jid) {
+            // arenaId property may not be set yet on the Jitsi participant;
+            // search liveUsers by their stored jid
+            const key = Object.keys(this.liveUsers).find((k) => this.liveUsers[k].jid === jid);
+            if (key) {
+                this.liveUsers[key].muted = e.detail.muted;
+            }
         }
         this.populateUserList();
     },
@@ -963,10 +971,11 @@ AFRAME.registerSystem('arena-chat-ui', {
         meUli.appendChild(myUBtnCtnr);
 
         const usspan = document.createElement('span');
-        // Pull local audio mute state directly from jitsi track to avoid race conditions
+        // Use hasAudio as the source of truth for the local user's mute state.
+        // ARENA considers users muted until they click the audio button (hasAudio=true).
         let myBtnClass = 'uk';
         if (this.jitsi && this.jitsi.jitsiAudioTrack) {
-            myBtnClass = this.jitsi.jitsiAudioTrack.isMuted() ? 'ns' : 's';
+            myBtnClass = this.jitsi.hasAudio ? 's' : 'ns';
         }
         usspan.className = `users-list-btn ${myBtnClass}`;
         usspan.title = 'Mute Myself';
