@@ -84,7 +84,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.isSpeaker = false;
         this.stats = {};
         this.status = {};
-        this.muted = true;
+        this.muted = undefined;
 
         // users list
         this.liveUsers = {};
@@ -967,7 +967,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         meUli.appendChild(myUBtnCtnr);
 
         const usspan = document.createElement('span');
-        usspan.className = this.muted ? 'users-list-btn ns' : 'users-list-btn s';
+        let myBtnClass = 'uk';
+        if (this.muted === true) myBtnClass = 'ns';
+        else if (this.muted === false) myBtnClass = 's';
+        usspan.className = `users-list-btn ${myBtnClass}`;
         usspan.title = 'Mute Myself';
         myUBtnCtnr.appendChild(usspan);
         // span click event (sound off)

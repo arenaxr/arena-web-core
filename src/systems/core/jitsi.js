@@ -236,9 +236,9 @@ AFRAME.registerSystem('arena-jitsi', {
                 this.el.sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
                     jid: this.jitsiId,
                     id: ARENA.idTag,
-                    muted: track.muted,
+                    muted: track.isMuted(),
                 });
-                console.warn('local track mute changed', participantId, track1.muted, track1);
+                // console.warn('local track mute changed', participantId, track.isMuted(), track);
             });
             track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () =>
                 console.debug('local track stopped')
@@ -494,9 +494,9 @@ AFRAME.registerSystem('arena-jitsi', {
             sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
                 jid: participantId,
                 id: arenaId,
-                muted: track.muted,
+                muted: track.isMuted(),
             });
-            console.warn('jitsi remote track mute changed', participantId, track.muted, track);
+            // console.warn('jitsi remote track mute changed', participantId, track.isMuted(), track);
         });
     },
 
