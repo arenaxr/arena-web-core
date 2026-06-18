@@ -1004,7 +1004,11 @@ AFRAME.registerSystem('arena-chat-ui', {
 
             if (user.type !== UserType.SCREENSHARE) {
                 const sspan = document.createElement('span');
-                sspan.className = user.muted ? 'users-list-btn ns' : 'users-list-btn s';
+                let btnClass = 'uk';
+                if (user.muted === true) btnClass = 'ns';
+                else if (user.muted === false) btnClass = 's';
+                
+                sspan.className = `users-list-btn ${btnClass}`;
                 sspan.title = 'Mute User';
                 uBtnCtnr.appendChild(sspan);
 
