@@ -973,13 +973,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         usspan.className = `users-list-btn ${myBtnClass}`;
         usspan.title = 'Mute Myself';
         myUBtnCtnr.appendChild(usspan);
-        // span click event (sound off)
+        // span click event (toggle mute/unmute)
         usspan.onclick = () => {
-            // only mute
-            if (this.jitsi.hasAudio) {
-                const sideMenu = sceneEl.systems['arena-side-menu-ui'];
-                sideMenu.clickButton(sideMenu.buttons.AUDIO);
-            }
+            const sideMenu = sceneEl.systems['arena-side-menu-ui'];
+            sideMenu.clickButton(sideMenu.buttons.AUDIO);
         };
 
         // list users

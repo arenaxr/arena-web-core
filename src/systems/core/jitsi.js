@@ -232,6 +232,7 @@ AFRAME.registerSystem('arena-jitsi', {
             );
             track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, (track1) => {
                 // console.debug('local track state changed', track1.track.muted);
+                if (track.getType() !== 'audio') return;
                 const participantId = track1.getParticipantId();
                 this.el.sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
                     jid: this.jitsiId,
@@ -240,12 +241,14 @@ AFRAME.registerSystem('arena-jitsi', {
                 });
                 // console.warn('local track mute changed', participantId, track.isMuted(), track);
             });
-            // Emit initial state
-            this.el.sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
-                jid: this.jitsiId,
-                id: ARENA.idTag,
-                muted: track.isMuted(),
-            });
+            // Emit initial state for audio tracks only
+            if (track.getType() === 'audio') {
+                this.el.sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
+                    jid: this.jitsiId,
+                    id: ARENA.idTag,
+                    muted: track.isMuted(),
+                });
+            }
             track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () =>
                 console.debug('local track stopped')
             );
@@ -495,6 +498,7 @@ AFRAME.registerSystem('arena-jitsi', {
         );
         track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () => {
             // console.log('remote track muted')
+            if (track.getType() !== 'audio') return;
             const participant = this.conference.getParticipantById(participantId);
             const arenaId = participant ? participant.getProperty('arenaId') : participantId;
             sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
@@ -505,14 +509,16 @@ AFRAME.registerSystem('arena-jitsi', {
             // console.warn('jitsi remote track mute changed', participantId, track.isMuted(), track);
         });
         
-        // Emit initial state
-        const participant = this.conference.getParticipantById(participantId);
-        const arenaId = participant ? participant.getProperty('arenaId') : participantId;
-        sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
-            jid: participantId,
-            id: arenaId,
-            muted: track.isMuted(),
-        });
+        // Emit initial state for audio tracks only
+        if (track.getType() === 'audio') {
+            const participant = this.conference.getParticipantById(participantId);
+            const arenaId = participant ? participant.getProperty('arenaId') : participantId;
+            sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
+                jid: participantId,
+                id: arenaId,
+                muted: track.isMuted(),
+            });
+        }
     },
 
     /**
