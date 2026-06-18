@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
 
-/* global AFRAME, THREE */
-
 import { FullScreenQuad, Pass } from './pass';
 import SimplexNoise from '../math/SimplexNoise';
 import { SSAOBlurShader, SSAODepthShader, SSAOShader } from '../shaders/SSAOShader';

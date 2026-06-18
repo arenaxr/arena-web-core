@@ -3,7 +3,7 @@
     "description": "Load a PCD model.\n\nFormat: <a href='https://pointclouds.org/documentation/tutorials/index.html'>Point Clouds</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -34,15 +34,21 @@
                                     "title": "Points Color",
                                     "format": "color",
                                     "type": "string",
-                                    "default": "#7f7f7f"
+                                    "default": ""
+                                },
+                                "opacity": {
+                                    "description": "Opacity of all points.",
+                                    "title": "Opacity",
+                                    "type": "number",
+                                    "default": 1
                                 }
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-common.json#properties"
                         }
                     ],
                     "title": "PCD Model Data",
@@ -50,7 +56,7 @@
                     "default": {
                         "object_type": "pcd-model"
                     },
-                    "required": ["object_type", "url", "pointColor", "pointSize", "position", "rotation", "scale"]
+                    "required": ["object_type", "url", "pointSize", "opacity", "position", "rotation", "scale"]
                 }
             }
         }

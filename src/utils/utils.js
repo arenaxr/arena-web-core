@@ -6,16 +6,17 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, THREE */
-
-import MQTTPattern from 'mqtt-pattern';
-
 const { isIOS, isTablet, isR7, isMobileVR } = AFRAME.utils.device;
+const { TOPICS } = '../constants';
+
+const DEBOUNCE_CLIENT_TIME = 10; // Ms
 
 /**
  * Wrapper class for various utility functions
  */
 export default class ARENAUtils {
+    static lastClientEvent = ['', 0];
+
     /**
      * Extracts URL params
      * @param {string} parameter URL parameter
@@ -79,7 +80,7 @@ export default class ARENAUtils {
             action: 'update',
             data: msg,
         };
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}/debug`, message);
+        ARENA.Mqtt.publish(TOPICS.PUBLISH.SCENE_DEBUG.formatStr(ARENA.topicParams), message);
     }
 
     /**
@@ -89,9 +90,9 @@ export default class ARENAUtils {
      */
     static setCoordsData(evt) {
         return {
-            x: parseFloat(evt.currentTarget.object3D.position.x.toFixed(3)),
-            y: parseFloat(evt.currentTarget.object3D.position.y.toFixed(3)),
-            z: parseFloat(evt.currentTarget.object3D.position.z.toFixed(3)),
+            x: this.round3(evt.currentTarget.object3D.position.x),
+            y: this.round3(evt.currentTarget.object3D.position.y),
+            z: this.round3(evt.currentTarget.object3D.position.z),
         };
     }
 
@@ -103,23 +104,23 @@ export default class ARENAUtils {
     static setClickData(evt) {
         if (evt.detail.intersection) {
             return {
-                x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
-                y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
-                z: parseFloat(evt.detail.intersection.point.z.toFixed(3)),
+                x: this.round3(evt.detail.intersection.point.x),
+                y: this.round3(evt.detail.intersection.point.y),
+                z: this.round3(evt.detail.intersection.point.z),
             };
         }
         if (evt.detail.position && evt.detail.orientation) {
             return {
                 position: {
-                    x: parseFloat(evt.detail.position.x.toFixed(3)),
-                    y: parseFloat(evt.detail.position.y.toFixed(3)),
-                    z: parseFloat(evt.detail.position.z.toFixed(3)),
+                    x: this.round3(evt.detail.position.x),
+                    y: this.round3(evt.detail.position.y),
+                    z: this.round3(evt.detail.position.z),
                 },
                 rotation: {
-                    x: parseFloat(evt.detail.orientation.x.toFixed(3)),
-                    y: parseFloat(evt.detail.orientation.y.toFixed(3)),
-                    z: parseFloat(evt.detail.orientation.z.toFixed(3)),
-                    w: parseFloat(evt.detail.orientation.w.toFixed(3)),
+                    x: this.round3(evt.detail.orientation.x),
+                    y: this.round3(evt.detail.orientation.y),
+                    z: this.round3(evt.detail.orientation.z),
+                    w: this.round3(evt.detail.orientation.w),
                 },
             };
         }
@@ -138,9 +139,9 @@ export default class ARENAUtils {
      */
     static vec3ToObject(vec) {
         return {
-            x: parseFloat(vec.x.toFixed(3)),
-            y: parseFloat(vec.y.toFixed(3)),
-            z: parseFloat(vec.z.toFixed(3)),
+            x: this.round3(vec.x),
+            y: this.round3(vec.y),
+            z: this.round3(vec.z),
         };
     }
 
@@ -151,10 +152,10 @@ export default class ARENAUtils {
      */
     static quatToObject(q) {
         return {
-            x: parseFloat(q.x.toFixed(3)),
-            y: parseFloat(q.y.toFixed(3)),
-            z: parseFloat(q.z.toFixed(3)),
-            w: parseFloat(q.w.toFixed(3)),
+            x: this.round3(q.x),
+            y: this.round3(q.y),
+            z: this.round3(q.z),
+            w: this.round3(q.w),
         };
     }
 
@@ -216,24 +217,6 @@ export default class ARENAUtils {
         if (!dropboxShareUrl) return undefined;
         // eslint-disable-next-line max-len
         return dropboxShareUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
-    }
-
-    /**
-     * Utility to match MQTT topic within permissions.
-     * @param {string} topic The MQTT topic to test.
-     * @param {string[]} rights The list of topic wild card permissions.
-     * @return {boolean} True if the topic matches the list of topic wildcards.
-     */
-    static matchJWT(topic, rights) {
-        const len = rights.length;
-        let valid = false;
-        for (let i = 0; i < len; i++) {
-            if (MQTTPattern.matches(rights[i], topic)) {
-                valid = true;
-                break;
-            }
-        }
-        return valid;
     }
 
     /**
@@ -425,6 +408,29 @@ export default class ARENAUtils {
 
     static overrideEuler = new THREE.Euler();
 
+    static twistQuat = new THREE.Quaternion();
+
+    static twistEuler = new THREE.Euler();
+
+    /*
+     * Decompose a quaternion into yaw and pitch, discarding roll
+     */
+    static decomposeYawPitch(q) {
+        if ('w' in q) {
+            this.twistQuat.set(0, q.y, 0, q.w);
+        } else {
+            // Passed in as a {x,y,z}, euler-like dict
+            this.twistEuler.set(q.x, q.y, q.z);
+            this.twistQuat.setFromEuler(this.twistEuler);
+            this.twistQuat.set(0, this.twistQuat.y, 0, this.twistQuat.w);
+        }
+        this.twistQuat.normalize();
+        const swing = this.twistQuat.clone().conjugate().multiply(q);
+        const yaw = 2 * Math.atan2(this.twistQuat.y, this.twistQuat.w);
+        const pitch = 2 * Math.atan2(swing.x, swing.w);
+        return { yaw, pitch };
+    }
+
     /**
      * Camera relocation, handles both desktop and XR session (requires rig and spinner offset)
      * @param {{x, y, z}} [position] - new  position
@@ -456,29 +462,175 @@ export default class ARENAUtils {
                     }
                 }
             }
+            // If we've been localized, don't allow teleport controls to mess with our position
+            const leftHand = document.getElementById('leftHand');
+            leftHand.removeAttribute('blink-controls');
         } else {
+            if (!position && !rotation && poseMatrix) {
+                position = new THREE.Vector3();
+                rotation = new THREE.Quaternion();
+                poseMatrix.decompose(position, rotation, new THREE.Vector3());
+            }
             if (position) userCamera.object3D.position.set(position.x, position.y, position.z);
             if (rotation) {
                 const lookComponent = userCamera.components['look-controls'];
                 const userCamRotationObj = userCamera.object3D.rotation;
-                if (Object.hasOwn(rotation, 'w')) {
+                if ('w' in rotation) {
                     this.overrideQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
-                    this.overrideEuler.setFromQuaternion(this.overrideQuat);
                     if (lookComponent) {
+                        const { yaw, pitch } = this.decomposeYawPitch(this.overrideQuat);
                         // Modify look component axes separately
-                        lookComponent.yawObject.rotation.y = this.overrideEuler.y;
-                        lookComponent.pitchObject.rotation.x = this.overrideEuler.x;
+                        lookComponent.yawObject.rotation.y = yaw;
+                        lookComponent.pitchObject.rotation.x = pitch;
+                        lookComponent.updateOrientation();
                     } else {
                         // Directly mod camera rotation
                         userCamRotationObj.setFromQuaternion(this.overrideQuat);
                     }
                 } else if (lookComponent) {
-                    lookComponent.yawObject.rotation.y = rotation.y;
-                    lookComponent.pitchObject.rotation.x = rotation.x;
+                    this.overrideEuler.set(rotation.x, rotation.y, rotation.z);
+                    const { yaw, pitch } = this.decomposeYawPitch(this.overrideEuler);
+                    lookComponent.yawObject.rotation.y = yaw;
+                    lookComponent.pitchObject.rotation.x = pitch;
+                    lookComponent.updateOrientation();
                 } else {
                     userCamRotationObj.copy(rotation);
                 }
             }
         }
+        AFRAME.scenes[0].systems['arena-chat-ui'].relocalizedMsg();
+    }
+
+    /**
+     * Publishes clientEvent when interacting with objects. This can be directed to several possible topics
+     * depending on the object being a private object.
+     * @param {HTMLElement} objectEl - object element
+     * @param {object} msg - message to publish
+     * @param {string} scenePublic - public scene topic to publish to
+     * @param {string} scenePrivate - private scene topic to publish to
+     * @param {string} programPrivate - private program topic to publish to
+     */
+    static publishClientEvent(objectEl, msg, scenePublic, scenePrivate, programPrivate) {
+        let pubTopic;
+        const privateAttr = objectEl.getAttribute('private');
+        const programIdAttr = objectEl.getAttribute('program_id');
+        if (privateAttr) {
+            if (programIdAttr) {
+                pubTopic = programPrivate.formatStr({ toUid: programIdAttr }); // Send to the target object itself
+            } else {
+                pubTopic = scenePrivate.formatStr({ toUid: objectEl.id }); // Send to the specified program
+            }
+        } else {
+            pubTopic = scenePublic; // Public client event
+        }
+        const now = new Date().getTime();
+        const [lastMsg, lastTime] = this.lastClientEvent;
+        const strMsg = JSON.stringify(msg);
+        if (now - lastTime > DEBOUNCE_CLIENT_TIME || lastMsg !== strMsg) {
+            ARENA.Mqtt.publish(pubTopic, msg);
+        }
+        this.lastClientEvent = [strMsg, now];
+    }
+
+    /**
+     * Get username from idTag, which may or may not have a prefixed set of random digits to dedupe multiple connections
+     * from a single username. If the first underscore-delimited token is all digits, assume is that prefix and
+     * return the remainder. If there are no underscores, assume that the entire string is the username.
+     * @param {string} idTag - most likely extracted from a pubsub msg
+     * @return {string} username
+     */
+    static getUsernameFromIdTag(idTag) {
+        const idParts = idTag.split('_');
+        return idParts.length > 1 && /^\d+$/.test(idParts[0]) ? idParts.slice(1).join('_') : idTag;
+    }
+
+    static round3(num) {
+        return Math.round(num * 1000) / 1000;
+    }
+
+    static round5(num) {
+        return Math.round(num * 100000) / 100000;
+    }
+
+    static worldPosA = new THREE.Vector3();
+
+    static worldPosB = new THREE.Vector3();
+
+    /**
+     * Returns the distance between two objects in world space
+     * @param elA element a
+     * @param elB element b
+     * @returns {number} euclidean distance
+     */
+    static distanceWorld(elA, elB) {
+        elA.object3D.getWorldPosition(this.worldPosA);
+        elB.object3D.getWorldPosition(this.worldPosB);
+        return this.worldPosA.distanceTo(this.worldPosB);
+    }
+
+    static posVect3 = new THREE.Vector3();
+
+    static rotQuat = new THREE.Quaternion();
+
+    /**
+     * Extracts pose of an element with reused vector3 and quaternion, rounded for mqtt publishing
+     * @param el - AFRAME element with an object3d
+     */
+    static getPose(el) {
+        if (!el?.object3D) {
+            return null;
+        }
+        el.object3D.getWorldPosition(this.posVect3);
+        el.object3D.getWorldQuaternion(this.rotQuat);
+        return {
+            position: {
+                x: ARENAUtils.round3(this.posVect3.x),
+                y: ARENAUtils.round3(this.posVect3.y),
+                z: ARENAUtils.round3(this.posVect3.z),
+            },
+            rotation: {
+                x: ARENAUtils.round3(this.rotQuat.x),
+                y: ARENAUtils.round3(this.rotQuat.y),
+                z: ARENAUtils.round3(this.rotQuat.z),
+                w: ARENAUtils.round3(this.rotQuat.w),
+            },
+        };
+    }
+
+    /**
+     * Extracts pose and velocities from a PhysX body el for MQTT publishing. Use threejs pose to save on wasm calls
+     * but still need PhysX velocity for the linear and angular velocities.
+     * @param body
+     * @return {Null|Object} pose and velocities
+     */
+    static getPhysXBodyData(el) {
+        const body = el?.components['physx-body']?.rigidBody;
+        if (!body) {
+            return null;
+        }
+        const { posVect3, rotQuat } = this;
+        const linVel = body.getLinearVelocity();
+        const angVel = body.getAngularVelocity();
+        return {
+            pose: this.getPose(el),
+            velocities: {
+                linear: {
+                    x: ARENAUtils.round3(linVel.x),
+                    y: ARENAUtils.round3(linVel.y),
+                    z: ARENAUtils.round3(linVel.z),
+                },
+                angular: {
+                    x: ARENAUtils.round3(angVel.x),
+                    y: ARENAUtils.round3(angVel.y),
+                    z: ARENAUtils.round3(angVel.z),
+                },
+            },
+        };
     }
 }
+
+// eslint-disable-next-line no-extend-native
+String.prototype.formatStr = function formatStr(...args) {
+    const params = arguments.length === 1 && typeof args[0] === 'object' ? args[0] : args;
+    return this.replace(/\{([^}]+)\}/g, (match, key) => (typeof params[key] !== 'undefined' ? params[key] : match));
+};

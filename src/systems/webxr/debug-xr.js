@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 import { ARENA_EVENTS } from '../../constants';
 
 AFRAME.registerSystem('debug-ui', {

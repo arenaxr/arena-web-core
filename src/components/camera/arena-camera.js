@@ -6,29 +6,23 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, THREE */
-
-import { ARENA_EVENTS } from '../../constants';
+import { ARENA_EVENTS, TOPICS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
 /**
  * Tracking camera movement in real time. Emits camera pose change and VIO change events.
  * @module arena-camera
  * @property {boolean} enabled - Indicates whether camera tracking is enabled.
- * @property {boolean} vioEnabled - Indicates whether to publish VIO on every tick (if true).
  * @property {string} displayName - User display name (used to publish camera data).
  * @property {string} color - Head text color.
  * @property {number[]} rotation - Last camera rotation value.
  * @property {number[]} position - Last camera position value.
- * @property {number[]} vioRotation - Last VIO rotation value.
- * @property {number[]} vioPosition - Last VIO position value.
  * @property {boolean} showStats - Display camera position on the screen.
  *
  */
 AFRAME.registerComponent('arena-camera', {
     schema: {
         enabled: { type: 'boolean', default: false },
-        vioEnabled: { type: 'boolean', default: false },
         displayName: { type: 'string', default: 'No Name' },
         color: { type: 'string', default: `#${ARENAUtils.numToPaddedHex(Math.floor(Math.random() * 16777215), 6)}` },
         showStats: { type: 'boolean', default: false },
@@ -39,12 +33,17 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     init() {
-        this.initialized = false;
+        this.isReady = false;
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
-        this.vioRotation = new THREE.Quaternion();
-        this.vioPosition = new THREE.Vector3();
+
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.params.camUpdateIntervalMs, this);
+        this.el.sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, (e) => {
+            const args = e.detail;
+            if (!args.userName) return; // only handle a user name change
+            this.data.displayName = args.userName;
+        });
     },
 
     ready() {
@@ -52,15 +51,10 @@ AFRAME.registerComponent('arena-camera', {
 
         const { sceneEl } = el;
 
-        this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
 
         this.lastPos = new THREE.Vector3();
-        this.vioMatrix = new THREE.Matrix4();
-        this.camParent = new THREE.Matrix4();
-        this.cam = new THREE.Matrix4();
-        this.cpi = new THREE.Matrix4();
 
         // instantiate frustum objs
         this.frustum = new THREE.Frustum();
@@ -70,12 +64,20 @@ AFRAME.registerComponent('arena-camera', {
         this.lastPose = '';
         this.videoDefaultResolutionSet = false;
 
+        // default is reverse of aframe's default - we want to "drag world to pan"
+        if (localStorage.getItem('prefReverseMouseDrag'))
+            el.setAttribute(
+                'look-controls',
+                'reverseMouseDrag',
+                !(localStorage.getItem('prefReverseMouseDrag') === 'true')
+            );
+
         this.heartBeatCounter = 0;
-        this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.params.camUpdateIntervalMs, this);
+
+        this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
 
         // send initial create
         this.publishPose('create');
-        this.publishVio('create');
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
@@ -99,7 +101,7 @@ AFRAME.registerComponent('arena-camera', {
         if (this.data.showStats) {
             document.getElementById('pose-stats').style.display = 'block';
         }
-        this.initialized = true;
+        this.isReady = true;
     },
 
     /**
@@ -108,35 +110,40 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     publishPose(action = 'update') {
-        const { data, position, rotation } = this;
+        const { data } = this;
+        let { position, rotation } = this;
+        if (ARENA.params.orbit && this.el.sceneEl.components['camera-orbit']?.attached) {
+            position = this.el.sceneEl.camera.position;
+            rotation = this.el.sceneEl.camera.quaternion;
+        }
 
         if (!data.enabled) return;
 
         const arenaUser = { displayName: data.displayName, color: data.color };
         const msg = {
-            object_id: this.arena.camName,
+            object_id: ARENA.idTag,
             action,
             type: 'object',
+            ttl: 30,
             data: {
                 object_type: 'camera',
                 position: {
-                    x: parseFloat(position.x.toFixed(3)),
-                    y: parseFloat(position.y.toFixed(3)),
-                    z: parseFloat(position.z.toFixed(3)),
+                    x: ARENAUtils.round3(position.x),
+                    y: ARENAUtils.round3(position.y),
+                    z: ARENAUtils.round3(position.z),
                 },
                 rotation: {
                     // always send quaternions over the wire
-                    x: parseFloat(rotation._x.toFixed(3)),
-                    y: parseFloat(rotation._y.toFixed(3)),
-                    z: parseFloat(rotation._z.toFixed(3)),
-                    w: parseFloat(rotation._w.toFixed(3)),
+                    x: ARENAUtils.round3(rotation._x),
+                    y: ARENAUtils.round3(rotation._y),
+                    z: ARENAUtils.round3(rotation._z),
+                    w: ARENAUtils.round3(rotation._w),
                 },
                 'arena-user': arenaUser,
             },
         };
-        const presence = document.getElementById('presence');
-        if (presence) {
-            arenaUser.presence = presence.value;
+        if (localStorage.getItem('prefPresence')) {
+            arenaUser.presence = localStorage.getItem('prefPresence');
         }
 
         if (this.jitsi.initialized) {
@@ -145,51 +152,23 @@ AFRAME.registerComponent('arena-camera', {
             arenaUser.hasVideo = this.jitsi.hasVideo;
         }
 
-        const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
+        const faceTracker = this.el.sceneEl.systems['face-tracking'];
         if (faceTracker && faceTracker.isEnabled()) {
             arenaUser.hasAvatar = faceTracker.isRunning();
         }
 
-        const headModelPathSelect = document.getElementById('headModelPathSelect');
-        if (headModelPathSelect) {
-            arenaUser.headModelPath = headModelPathSelect.value;
-        } else {
-            arenaUser.headModelPath = this.arena.defaults.headModelPath;
+        if (ARENA.sceneHeadModels) {
+            const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+            const sceneHeadModelPath = sceneHist[ARENA.namespacedScene]?.headModelPath;
+            if (sceneHeadModelPath !== undefined) {
+                arenaUser.headModelPath = sceneHeadModelPath;
+            }
+        } else if (localStorage.getItem('prefHeadModelPath')) {
+            arenaUser.headModelPath = localStorage.getItem('prefHeadModelPath');
         }
 
-        this.mqtt.publish(`${this.arena.outputTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
-    },
-
-    /**
-     * Publish user VIO
-     * @param {string} action One of 'update' or 'create' actions sent in the publish message
-     * @ignore
-     */
-    publishVio(action = 'update') {
-        const { data, vioPosition, vioRotation } = this;
-
-        const msg = {
-            object_id: this.arena.camName,
-            action,
-            type: 'object',
-            data: {
-                object_type: 'camera',
-                position: {
-                    x: parseFloat(vioPosition.x.toFixed(3)),
-                    y: parseFloat(vioPosition.y.toFixed(3)),
-                    z: parseFloat(vioPosition.z.toFixed(3)),
-                },
-                rotation: {
-                    // always send quaternions over the wire
-                    x: parseFloat(vioRotation._x.toFixed(3)),
-                    y: parseFloat(vioRotation._y.toFixed(3)),
-                    z: parseFloat(vioRotation._z.toFixed(3)),
-                    w: parseFloat(vioRotation._w.toFixed(3)),
-                },
-                color: data.color,
-            },
-        };
-        this.mqtt.publish(`${this.arena.vioTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
+        // extra timestamp info at end for debugging
+        this.mqtt.publish(this.pubTopic, msg);
     },
 
     /**
@@ -217,26 +196,17 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     tick() {
-        if (!this.initialized) return;
-        const { data, el, position, rotation, vioPosition, vioRotation } = this;
+        if (!this.isReady) return;
+        const { el, position, rotation } = this;
 
         this.heartBeatCounter++;
 
-        rotation.setFromRotationMatrix(el.object3D.matrixWorld);
-        position.setFromMatrixPosition(el.object3D.matrixWorld);
-
-        this.camParent = el.object3D.parent.matrixWorld;
-        this.cam = el.object3D.matrixWorld;
-
-        this.cpi.copy(this.camParent).invert();
-        // this.cpi.getInverse(this.camParent);
-        this.cpi.multiply(this.cam);
-
-        if (data.vioEnabled) {
-            this.vioMatrix.copy(this.cpi);
-            vioRotation.setFromRotationMatrix(this.cpi);
-            vioPosition.setFromMatrixPosition(this.cpi);
-            this.publishVio(); // publish vio on every tick (if enabled)
+        if (ARENA.params.orbit && this.el.sceneEl.components['camera-orbit']?.attached) {
+            rotation.setFromRotationMatrix(this.el.sceneEl.camera.matrixWorld);
+            position.setFromMatrixPosition(this.el.sceneEl.camera.matrixWorld);
+        } else {
+            rotation.setFromRotationMatrix(el.object3D.matrixWorld);
+            position.setFromMatrixPosition(el.object3D.matrixWorld);
         }
 
         const rotationCoords = ARENAUtils.rotToText(rotation);
@@ -244,14 +214,14 @@ AFRAME.registerComponent('arena-camera', {
         const newPose = `${rotationCoords} ${positionCoords}`;
 
         // update position if pose changed, or every 1 sec heartbeat
-        if (this.heartBeatCounter % (1000 / this.arena.params.camUpdateIntervalMs) === 0) {
+        if (this.heartBeatCounter % (1000 / ARENA.params.camUpdateIntervalMs) === 0) {
             // heartbeats are sent as create; TMP: sending as updates
             this.publishPose();
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
             this.lastPos.copy(this.el.object3D.position);
-            this.lastPos.y -= this.arena.defaults.camHeight;
-            sceneHist[this.arena.namespacedScene] = {
-                ...sceneHist[this.arena.namespacedScene],
+            this.lastPos.y -= ARENA.defaults.camHeight;
+            sceneHist[ARENA.namespacedScene] = {
+                ...sceneHist[ARENA.namespacedScene],
                 lastPos: this.lastPos,
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
@@ -274,24 +244,19 @@ AFRAME.registerComponent('arena-camera', {
         }
         this.lastPose = newPose;
 
-        if (
-            !this.videoDefaultResolutionSet &&
-            ARENA &&
-            this.jitsi.initialized &&
-            this.arena.videoDefaultResolutionConstraint
-        ) {
+        if (!this.videoDefaultResolutionSet && this.jitsi.initialized && ARENA?.videoDefaultResolutionConstraint) {
             // set scene-options, videoDefaultResolutionConstraint, only once
-            this.jitsi.setDefaultResolutionRemotes(this.arena.videoDefaultResolutionConstraint);
+            this.jitsi.setDefaultResolutionRemotes(ARENA.videoDefaultResolutionConstraint);
             this.videoDefaultResolutionSet = true;
         }
     },
 
     isVideoFrustumCullingEnabled() {
-        return ARENA && this.arena.videoFrustumCulling;
+        return ARENA?.videoFrustumCulling;
     },
 
     isVideoDistanceConstraintsEnabled() {
-        return ARENA && this.arena.videoDistanceConstraints;
+        return ARENA?.videoDistanceConstraints;
     },
 
     viewIntersectsObject3D(obj3D) {

@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA */
-
 import { ARENA_EVENTS } from '../../constants';
 
 const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
@@ -26,7 +24,7 @@ AFRAME.registerComponent('network-latency', {
     },
 
     init() {
-        this.initialized = false;
+        this.isReady = false;
         ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.ready.bind(this));
     },
     ready() {
@@ -46,11 +44,11 @@ AFRAME.registerComponent('network-latency', {
         this.qos = 2;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, data.updateIntervalMs, this);
-        this.initialized = true;
+        this.isReady = true;
     },
 
     tick() {
-        if (!this.initialized || !this.enabled) return;
+        if (!this.isReady || !this.enabled) return;
 
         // publish empty message with qos of 2 for network graph to update latency
         if (ARENA.events.eventData[ARENA_EVENTS.MQTT_LOADED] && this.mqtt.isConnected()) {

@@ -3,7 +3,7 @@
     "description": "Cone Geometry.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -60,17 +60,16 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-common.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                            "$ref": "./schemas/definitions-geometry.json#properties"
                         }
                     ],
                     "title": "Cone Data",
-                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "cone",

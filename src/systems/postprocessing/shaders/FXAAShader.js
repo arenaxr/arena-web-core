@@ -6,8 +6,6 @@
  * Further improved by Daniel Sturk
  */
 
-/* global THREE */
-
 const FXAAShader = {
     uniforms: {
         tDiffuse: { value: null },

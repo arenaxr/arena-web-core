@@ -8,8 +8,9 @@
 
 /* global Alert, ARENAAUTH, ARENADefaults, Swal, THREE */
 /* eslint-disable import/extensions */
+import TOPICS from '../src/constants/topics.js';
 import MqttClient from './mqtt-client.js';
-import ARENAUserAccount from './arena-account.js';
+import { TTLCache } from './ttl-cache.js';
 
 let persist;
 
@@ -44,13 +45,23 @@ export async function init(settings) {
         objList: settings.objList,
         addEditSection: settings.addEditSection,
         editObjHandler: settings.editObjHandler,
+        visObjHandler: settings.visObjHandler,
+        programList: settings.programList,
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
+        userClient: settings.userClient,
         exportSceneButton: settings.exportSceneButton,
+        dbg: settings.dbg,
     };
 
     persist.currentSceneObjs = [];
+    persist.programs = new TTLCache({
+        mutationCall: () => {
+            console.log('mutation');
+            populateProgramInstanceList();
+        },
+    });
 
     // set select when clicking on a list item
     persist.objList.addEventListener(
@@ -63,37 +74,12 @@ export async function init(settings) {
         false
     );
 
-    // start mqtt client
-    persist.mc = new MqttClient({
-        uri: persist.mqttUri,
-        onMessageCallback: onMqttMessage,
-        mqtt_username: persist.mqttUsername,
-        mqtt_token: persist.mqttToken,
-        dbg: true,
-    });
-
-    console.info(`Starting connection to ${persist.mqttUri}...`);
-
-    // connect
-    try {
-        persist.mc.connect();
-    } catch (error) {
-        console.error(error); // Failure!
-        Alert.fire({
-            icon: 'error',
-            title: `Error connecting to MQTT: ${JSON.stringify(error)}`,
-            timer: 5000,
-        });
-        return;
-    }
-
-    persist.mqttConnected = true;
-    console.info('Connected.');
+    await mqttReconnect();
 }
 
 export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, sceneList) {
     try {
-        persist.authState = await ARENAUserAccount.userAuthState();
+        persist.authState = await ARENAAUTH.userAuthState();
     } catch (err) {
         Swal.fire({
             icon: 'Error',
@@ -155,7 +141,7 @@ export async function fetchSceneObjects(scene) {
     let sceneObjs;
     try {
         const persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
-        const data = await fetch(persist.persistUri + scene, persistOpt);
+        const data = await fetch(`${persist.persistUri}${scene}`, persistOpt);
         if (!data) {
             throw 'Could not fetch data';
         }
@@ -167,6 +153,11 @@ export async function fetchSceneObjects(scene) {
         throw `${err}`;
     }
     return sceneObjs;
+}
+
+export function updateListItemVisibility(visible, li, iconVis) {
+    iconVis.className = visible ? 'fas fa-eye' : 'fas fa-eye-slash';
+    li.style.color = visible ? 'black' : 'gray';
 }
 
 export async function populateObjectList(scene, filter, objTypeFilter, focusObjectId = undefined) {
@@ -194,14 +185,8 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         if (type_order(a.type) > type_order(b.type)) {
             return 1;
         }
-        // then by object_id
-        if (a.object_id < b.object_id) {
-            return -1;
-        }
-        if (a.object_id > b.object_id) {
-            return 1;
-        }
-        return 0;
+        // then by object_id, case insensitive
+        return a.object_id.localeCompare(b.object_id, 'en', { sensitivity: 'base' });
     });
 
     // console.log(sceneobjs);
@@ -251,26 +236,28 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
 
         // save obj json so we can use later in selected object actions (delete/copy)
         li.setAttribute('data-obj', JSON.stringify(sceneObjs[i]));
-        let inputValue = '';
+        let objectDisplay = '';
 
         if (sceneObjs[i].attributes === undefined) continue;
         if (objTypeFilter[sceneObjs[i].type] === false) continue;
         if (re.test(sceneObjs[i].object_id) === false) continue;
 
         if (sceneObjs[i].type === 'object') {
-            inputValue = `${sceneObjs[i].object_id} ( ${sceneObjs[i].attributes.object_type} )`;
+            objectDisplay = `${sceneObjs[i].object_id} ( ${sceneObjs[i].attributes.object_type} )`;
             img.src = 'assets/3dobj-icon.png';
             if (objTypeFilter[sceneObjs[i].attributes.object_type] === false) continue;
         } else if (sceneObjs[i].type === 'program') {
-            const ptype = sceneObjs[i].attributes.filetype === 'WA' ? 'WASM program' : 'python program';
-            inputValue = `${sceneObjs[i].object_id} ( ${ptype}: ${sceneObjs[i].attributes.filename} )`;
-            img.src = 'assets/program-icon.png';
+            const program = sceneObjs[i].attributes;
+            objectDisplay = `${sceneObjs[i].object_id} (${program.name}): ${program.file}`;
+            img.src = 'assets/prog-icon.png';
         } else if (sceneObjs[i].type === 'scene-options') {
-            inputValue = `${sceneObjs[i].object_id} ( scene options )`;
+            objectDisplay = `${sceneObjs[i].object_id} ( scene options )`;
             img.src = 'assets/options-icon.png';
         } else if (sceneObjs[i].type === 'landmarks') {
-            inputValue = `${sceneObjs[i].object_id} ( landmarks )`;
+            objectDisplay = `${sceneObjs[i].object_id} ( landmarks )`;
             img.src = 'assets/map-icon.png';
+        } else {
+            objectDisplay = `${sceneObjs[i].object_id} ( ${sceneObjs[i].type} )`; // display unknown type
         }
 
         const r = sceneObjs[i].attributes.rotation;
@@ -293,7 +280,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             }
         }
 
-        const t = document.createTextNode(inputValue);
+        const t = document.createTextNode(objectDisplay);
         li.appendChild(t);
 
         // add image
@@ -305,7 +292,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         // add edit "button"
         const editspan = document.createElement('span');
         const ielem = document.createElement('i');
-        ielem.className = 'icon-edit';
+        ielem.className = 'fas fa-edit';
         editspan.className = 'edit';
         editspan.title = 'Edit JSON';
         editspan.appendChild(ielem);
@@ -326,13 +313,13 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         if (sceneObjs[i].type !== 'program') {
             const editspan3d = document.createElement('span');
             const ielem3d = document.createElement('i');
-            ielem3d.className = 'icon-fullscreen';
+            ielem3d.className = 'fas fa-globe';
             editspan3d.className = 'edit3d';
             editspan3d.title = 'Edit 3D';
             editspan3d.appendChild(ielem3d);
             li.appendChild(editspan3d);
 
-            editspan3d.onclick = function onEditClick() {
+            editspan3d.onclick = function () {
                 if (sceneObjs[i].type === 'scene-options') {
                     window.open(`/${scene}?build3d=1&objectId=env`, 'Arena3dEditor');
                 } else {
@@ -341,9 +328,54 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             };
         }
 
+        // add visibility convenience "button"
+        if (sceneObjs[i].type === 'object') {
+            let visible = Object.hasOwn(sceneObjs[i].attributes, 'visible') ? sceneObjs[i].attributes.visible : true;
+            const visspan = document.createElement('span');
+            const iconVis = document.createElement('i');
+            updateListItemVisibility(visible, li, iconVis);
+            visspan.className = 'visible';
+            visspan.title = 'Toggle Visible';
+            visspan.appendChild(iconVis);
+            li.appendChild(visspan);
+
+            visspan.onclick = function () {
+                visible = !visible;
+                updateListItemVisibility(visible, li, iconVis);
+                persist.visObjHandler(sceneObjs[i], visible);
+            };
+        }
+
+        // highlight object type errors
+        const schemaType = sceneObjs[i].type === 'object' ? sceneObjs[i].attributes.object_type : sceneObjs[i].type;
+        if (!objTypeFilter[schemaType]) {
+            li.style.color = 'red';
+        }
+
         persist.objList.appendChild(li);
     }
     persist.addEditSection.style = 'display:block';
+
+    updateSubscribeTopic(scene);
+}
+
+export function updateSubscribeTopic(scene) {
+    if (persist.currentScene === scene) return;
+    if (!persist.mqttConnected) {
+        persist.pendingSubscribeUpdate = () => updateSubscribeTopic(scene);
+        return;
+    }
+
+    if (persist.currentScene) persist.mc.unsubscribe(persist.currentScene);
+    if (scene) {
+        const topic = TOPICS.SUBSCRIBE.SCENE_PUBLIC.formatStr({
+            nameSpace: scene.split('/')[0],
+            sceneName: scene.split('/')[1],
+        });
+        persist.mc.subscribe(topic);
+        persist.currentScene = scene;
+        populateProgramInstanceList();
+    }
 }
 
 export async function populateNamespaceList(nsInput, nsList) {
@@ -352,7 +384,7 @@ export async function populateNamespaceList(nsInput, nsList) {
     let scenes = [];
     // get editable scenes...
     try {
-        const uScenes = await ARENAUserAccount.userScenes();
+        const uScenes = await ARENAAUTH.userScenes();
         uScenes.forEach((uScene) => {
             scenes.push(uScene.name);
         });
@@ -372,11 +404,7 @@ export async function populateNamespaceList(nsInput, nsList) {
     }
     let sceneObjs;
     try {
-        const persistOpt = ARENADefaults.disallowJWT
-            ? {}
-            : {
-                  credentials: 'include',
-              };
+        const persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
         const data = await fetch(`${persist.persistUri}public/!allscenes`, persistOpt);
         if (!data) {
             throw 'Could not fetch data';
@@ -507,7 +535,7 @@ export async function addNewScene(ns, sceneName, newObjs) {
     const exists = persist.scenes.find((scene) => scene.ns === ns && scene.name === sceneName);
     if (!exists) {
         try {
-            const result = await ARENAUserAccount.requestUserNewScene(`${ns}/${sceneName}`);
+            const result = await ARENAAUTH.requestUserNewScene(`${ns}/${sceneName}`);
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -526,7 +554,7 @@ export async function addNewScene(ns, sceneName, newObjs) {
 
     // add objects to the new scene
     newObjs.forEach((obj) => {
-        addObject(obj, `${ns}/${sceneName}`);
+        addObject(obj, ns, sceneName);
     });
     return exists;
 }
@@ -535,7 +563,7 @@ export async function deleteScene(ns, sceneName) {
     selectedObjsPerformAction('delete', `${ns}/${sceneName}`, true);
     let result;
     try {
-        result = await ARENAUserAccount.requestDeleteUserScene(`${ns}/${sceneName}`);
+        result = await ARENAAUTH.requestDeleteUserScene(`${ns}/${sceneName}`);
     } catch (err) {
         Alert.fire({
             icon: 'error',
@@ -574,7 +602,12 @@ export function performActionArgObjList(action, scene, objList, json = true) {
             scene = `${obj.namespace}/${obj.sceneId}`;
             theNewScene = obj.sceneId;
         }
-        const topic = `realm/s/${scene}/${obj.object_id}`;
+        const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+            nameSpace: theNewScene.split('/')[0],
+            sceneName: theNewScene.split('/')[1],
+            userClient: persist.userClient,
+            objectId: obj.object_id,
+        });
         console.info(`Publish [ ${topic}]: ${actionObj}`);
         try {
             persist.mc.publish(topic, actionObj);
@@ -604,7 +637,7 @@ export function clearSelected() {
     }
 }
 
-export async function addObject(obj, scene) {
+export async function addObject(obj, nameSpace, sceneName) {
     let found = false;
     if (!persist.mqttConnected) mqttReconnect();
 
@@ -625,7 +658,6 @@ export async function addObject(obj, scene) {
                 confirmButtonText: `Create`,
                 denyButtonText: `Update (i'm sure)`,
             });
-            console.log(result);
             if (result.isConfirmed) {
                 obj.action = 'create';
             } else if (result.isDismissed) {
@@ -645,7 +677,12 @@ export async function addObject(obj, scene) {
 
     const persistAlert = obj.persist === false ? '<br/><strong>Object not persisted.</strong>' : '';
     const objJson = JSON.stringify(obj);
-    const topic = `realm/s/${scene}/${obj.object_id}`;
+    const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+        nameSpace,
+        sceneName,
+        userClient: persist.userClient,
+        objectId: obj.object_id,
+    });
     console.info(`Publish [ ${topic}]: ${objJson}`);
     try {
         persist.mc.publish(topic, objJson);
@@ -677,10 +714,10 @@ export async function addObject(obj, scene) {
     }
 }
 
-export function mqttReconnect(settings) {
-    settings = settings || {};
+export async function mqttReconnect(settings = undefined) {
+    settings = settings || persist;
 
-    persist.mqttUri = settings.mqtt_uri !== undefined ? settings.mqtt_uri : 'wss://arena.andrew.cmu.edu/mqtt/';
+    persist.mqttUri = settings.mqttUri !== undefined ? settings.mqttUri : 'wss://arena.andrew.cmu.edu/mqtt/';
 
     if (persist.mc) persist.mc.disconnect();
 
@@ -688,15 +725,16 @@ export function mqttReconnect(settings) {
 
     // start mqtt client
     persist.mc = new MqttClient({
-        uri: persist.mqttUri,
+        uri: settings.mqttUri,
         onMessageCallback: onMqttMessage,
         onConnectionLost: onMqttConnectionLost,
-        mqtt_username: persist.mqttUsername,
-        mqtt_token: persist.mqttToken,
+        mqtt_username: settings.mqttUsername,
+        mqtt_token: settings.mqttToken,
+        dbg: settings.dbg,
     });
 
     try {
-        persist.mc.connect();
+        await settings.mc.connect();
     } catch (error) {
         Alert.fire({
             icon: 'error',
@@ -705,13 +743,123 @@ export function mqttReconnect(settings) {
         });
         return;
     }
-    persist.mqttConnected = true;
-    console.info(`Connected to ${persist.mqttUri}`);
+    settings.mqttConnected = true;
+    console.info(`Connected to ${settings.mqttUri}`);
+    if (persist.pendingSubscribeUpdate) {
+        persist.pendingSubscribeUpdate();
+        persist.pendingSubscribeUpdate = undefined;
+    }
 }
 
 // callback from mqttclient; on reception of message
-function onMqttMessage(message) {}
+function onMqttMessage(message) {
+    const payload = message.payloadString; // .split("\\").join("");
+    const obj = JSON.parse(payload);
+    if (obj.type === 'program') {
+        if (obj.data) {
+            persist.programs.set(obj.object_id, { ...{ uuid: obj.object_id }, ...obj.data });
+        }
+    }
+}
 
 function onMqttConnectionLost() {
     persist.mqttConnected = false;
+}
+
+export function pubProgramMsg(action, obj) {
+    if (!persist.currentScene) return;
+    const programTopic = `realm/s/${persist.currentScene}/p/${persist.userClient}/build`;
+    const programObj = JSON.stringify({
+        object_id: ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+        ),
+        action,
+        type: 'req',
+        data: {
+            type: 'module',
+            uuid: obj.object_id ? obj.object_id : obj.uuid,
+            name: obj.name,
+            parent: obj.parent,
+            file: obj.file,
+            location: obj.location,
+            filetype: obj.filetype,
+            env: obj.env,
+            args: obj.args ? obj.args : [],
+            channels: obj.channels ? obj.channels : {},
+            apis: obj.apis ? obj.apis : [],
+        },
+    });
+    console.log('publishing:', programTopic, programObj);
+    persist.mc.publish(programTopic, programObj);
+}
+
+export function populateProgramInstanceList() {
+    const { programList } = persist;
+
+    // if (persist.programs == undefined) return;
+
+    while (programList.firstChild) {
+        programList.removeChild(programList.firstChild);
+    }
+
+    const programs = persist.programs.list();
+
+    if (programs.length == 0) {
+        const li = document.createElement('li');
+        const t = document.createTextNode('No running programs found in the scene');
+        li.appendChild(t);
+        programList.appendChild(li);
+    }
+
+    programs.forEach((program) => {
+        console.log(program);
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        const img = document.createElement('img');
+
+        img.src = 'assets/prog-icon.png';
+        li.title = `Run info:\n${JSON.stringify(program.run_info, undefined, 2).replace('{', '', -1).slice(0, -1)}`;
+        const t = document.createTextNode(
+            `${program.uuid.substr(0, 8)}... (${program.name}): ${program.file}@${program.parent} (${program.state}) ${program.display_msg ? `- ${program.display_msg}` : ''}`
+        );
+        li.appendChild(t);
+
+        // add image
+        img.width = 16;
+        span.className = 'objtype';
+        span.appendChild(img);
+        li.appendChild(span);
+
+        // add stop "button"
+        const stopspan = document.createElement('span');
+        const ielem = document.createElement('i');
+        ielem.className = 'icon-trash';
+        stopspan.className = 'edit';
+        stopspan.title = 'Stop Program';
+        stopspan.appendChild(ielem);
+        stopspan.style.backgroundColor = '#da4f49';
+        li.appendChild(stopspan);
+
+        console.log(JSON.stringify(program));
+        stopspan.onclick = function () {
+            Swal.fire({
+                title: 'Stop Program ?',
+                text: "You won't be able to revert this.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, stop it!',
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    pubProgramMsg('delete', { ...program });
+                    persist.programs.set(program.uuid, { ...program, ...{ display_msg: 'deleting...' } }, true, true);
+                }
+            });
+        };
+
+        programList.appendChild(li);
+    });
+
+    programList.style.visibility = 'visible';
 }

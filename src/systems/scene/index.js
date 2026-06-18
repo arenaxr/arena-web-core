@@ -9,4 +9,5 @@
 import './ar-hit-test-listener';
 import './attribution';
 import './screenshare';
+import './spark';
 import './stats-monitor';

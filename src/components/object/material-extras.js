@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-/* global AFRAME, THREE */
 
 import { ARENAUtils } from '../../utils';
 
@@ -33,7 +32,6 @@ AFRAME.registerComponent('material-extras', {
         },
         colorWrite: { default: true },
         renderOrder: { default: 1 },
-        occluderRenderOrder: { default: -1 },
         transparentOccluder: { default: false },
         gltfOpacity: { default: 1 },
     },

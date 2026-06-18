@@ -1,5 +1,3 @@
-/* global ARENA, THREE */
-
 import vertGLSL from './glsl/compositor/vert.glsl';
 import fragGLSL from './glsl/compositor/frag.glsl';
 
@@ -7,6 +5,7 @@ const CompositorShader = {
     defines: {
         IS_SRGB: true,
         DO_ASYNC_TIMEWARP: ARENA.params.atw === undefined ? 1 : ARENA.params.atw,
+        DO_TRANSLATION_WARPING: ARENA.params.reprojectMovement === undefined ? 0 : ARENA.params.reprojectMovement,
     },
     uniforms: {
         tLocalColor: {

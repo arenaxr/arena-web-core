@@ -11,8 +11,6 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, THREE, XRRigidTransform */
-
 import WebXRCameraCapture from './camera-capture/ccwebxr';
 import WebARCameraCapture from './camera-capture/ccwebar';
 import ARHeadsetCameraCapture from './camera-capture/ccarheadset';
@@ -85,10 +83,10 @@ AFRAME.registerSystem('armarker', {
         this.arena = sceneEl.systems['arena-scene'];
 
         // init this.ATLASMarkers with list of markers within range
-        this.getARMArkersFromATLAS(true);
+        // this.getARMArkersFromATLAS(true);
 
         // init networkedLocationSolver flag from ARENA scene options
-        this.data.networkedLocationSolver = !!this.arena.sceneOptions.networkedLocationSolver;
+        this.data.networkedLocationSolver = !!this.arena.networkedLocationSolver;
 
         // request camera access features
         if (!ARENA.params.camFollow) {
@@ -484,13 +482,13 @@ AFRAME.registerSystem('armarker', {
             };
         }
         if (!this.ATLASMarkers[markerid]) {
-            if (ARENA.clientCoords === undefined) {
-                ARENAUtils.getLocation((coords, err) => {
-                    if (!err) ARENA.clientCoords = coords;
-                });
-            }
+            // if (ARENA.clientCoords === undefined) {
+            //     ARENAUtils.getLocation((coords, err) => {
+            //         if (!err) ARENA.clientCoords = coords;
+            //     });
+            // }
             // force update from ATLAS if not found
-            this.getARMArkersFromATLAS();
+            // this.getARMArkersFromATLAS();
         }
         return this.ATLASMarkers[String(markerid)];
     },

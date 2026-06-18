@@ -4,8 +4,6 @@
  * https://github.com/iryoku/smaa/releases/tag/v2.8
  */
 
-/* global THREE */
-
 const SMAAEdgesShader = {
     defines: {
         SMAA_THRESHOLD: '0.1',

@@ -1,9 +1,10 @@
+/**
+ * @module create-update
+ */
 /* eslint-disable no-case-declarations */
 
-/* global AFRAME, ARENA, THREE */
-
 import { ARENAUtils } from '../../../utils';
-import { ACTIONS } from '../../../constants';
+import { ACTIONS, ARENA_EVENTS } from '../../../constants';
 
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
@@ -42,22 +43,26 @@ export default class CreateUpdate {
         function enableBuildWatchObject(entityEl, msg, enable) {
             if (msg.persist) {
                 entityEl.setAttribute('build3d-mqtt-object', 'enabled', enable);
+                if (enable && AFRAME.INSPECTOR && AFRAME.INSPECTOR.inspectorActive) {
+                    // refresh inside-out view
+                    AFRAME.INSPECTOR.selectEntity(AFRAME.INSPECTOR.selectedEntity);
+                }
             }
         }
 
         switch (message.type) {
-            case 'object':
+            case 'object': {
                 // our own camera/controllers: bail, this message is meant for all other viewers
-                if (id === ARENA.camName) {
+                if (typeof ARENA !== 'undefined' && id === ARENA.idTag) {
                     return;
                 }
-                if (id === ARENA.handLName) {
+                if (typeof ARENA !== 'undefined' && id === ARENA.handLName) {
                     return;
                 }
-                if (id === ARENA.handRName) {
+                if (typeof ARENA !== 'undefined' && id === ARENA.handRName) {
                     return;
                 }
-                if (id === ARENA.faceName) {
+                if (typeof ARENA !== 'undefined' && id === ARENA.faceName) {
                     return;
                 }
 
@@ -97,7 +102,7 @@ export default class CreateUpdate {
                 if (addObj) {
                     // Parent/Child handling
                     if (parentName) {
-                        if (ARENA.camName === message.data.parent) {
+                        if (typeof ARENA !== 'undefined' && ARENA.idTag === message.data.parent) {
                             // our camera is named 'my-camera'
                             if (!message.data.camera) {
                                 // Don't attach extra cameras, use own id to skip
@@ -133,26 +138,43 @@ export default class CreateUpdate {
                     }
                 }
 
-                if (message.ttl !== undefined) {
-                    // Allow falsy value of 0
-                    entityEl.setAttribute('ttl', { seconds: message.ttl });
+                if (message.ttl !== undefined && message.ttl >= 0) {
+                    // Allow -1 to bypass TTL update, retains previous timeout
+                    entityEl.setAttribute('ttl', { expireAt: Date.now() + message.ttl * 1000 });
+                }
+
+                // Private and program_id flags. Falsy values unset (undefined, null, 0, '')
+                if (message.private) {
+                    entityEl.setAttribute('private', message.private);
+                } else if (message.private === false) {
+                    entityEl.removeAttribute('private');
+                }
+
+                if (message.program_id) {
+                    entityEl.setAttribute('program_id', message.program_id);
+                } else if (message.program_id === null) {
+                    entityEl.removeAttribute('program_id');
                 }
 
                 // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
                 if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
 
-                if (id === ARENA.params.camFollow) {
-                    ARENAUtils.relocateUserCamera(entityEl.object3D.position, entityEl.object3D.rotation);
+                if (typeof ARENA !== 'undefined' && ARENA.params?.camFollow && id === ARENA.params.camFollow) {
+                    ARENAUtils.relocateUserCamera(undefined, undefined, entityEl.object3D.matrixWorld);
+                } else if (typeof ARENA !== 'undefined' && ARENA.params?.orbit && id === ARENA.params.orbit && action === ACTIONS.CREATE) {
+                    // set camera to orbit around this object
+                    entityEl.sceneEl.setAttribute('camera-orbit', { target: entityEl });
                 }
                 return;
+            }
 
             case 'camera-override':
-                if (id !== ARENA.camName) return; // bail if not for us
+                if (typeof ARENA === 'undefined' || id !== ARENA.idTag) return; // bail if not for us
                 this.handleCameraOverride(action, message);
                 return;
 
-            case 'rig':
-                if (id === ARENA.camName) {
+            case 'rig': {
+                if (typeof ARENA !== 'undefined' && id === ARENA.idTag) {
                     // our camera Rig
                     const cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
                     const cameraRigObj3D = document.getElementById('cameraRig').object3D;
@@ -174,38 +196,51 @@ export default class CreateUpdate {
                         cameraRigObj3D.position.set(position.x, position.y, position.z);
                     }
                     const { xrSession } = AFRAME.scenes[0];
-                    if (xrSession?.persistentAnchors) {
-                        /*
-                        Only add if persist anchor support, which implies a device (e.g. quest)
-                        that retains map of area. Otherwise, there is no guarantee that the device
-                        has any feature data of that location for this anchor
-                         */
-                        let rotQuat;
-                        const { armarker: arMarkerSys } = AFRAME.scenes[0].systems;
-                        if (!Object.hasOwn(rotation, 'w')) {
-                            rotQuat = new THREE.Quaternion();
-                            rotQuat.setFromEuler(cameraSpinnerObj3D.rotation);
-                        } else {
-                            rotQuat = rotation;
+                    if (xrSession) {
+                        // If we've been localized, don't allow teleport controls to mess with our position
+                        const leftHand = document.getElementById('leftHand');
+                        if (leftHand.components['blink-controls']) {
+                            leftHand.removeAttribute('blink-controls');
                         }
-                        xrSession.requestAnimationFrame((time, frame) => {
-                            arMarkerSys.setOriginAnchor({ position, rotation }, frame);
-                        });
+                        if (xrSession.persistentAnchors) {
+                            /*
+                            Only add if persist anchor support, which implies a device (e.g. quest)
+                            that retains map of area. Otherwise, there is no guarantee that the device
+                            has any feature data of that location for this anchor
+                             */
+                            let rotQuat;
+                            const { armarker: arMarkerSys } = AFRAME.scenes[0].systems;
+                            if (!Object.hasOwn(rotation, 'w')) {
+                                rotQuat = new THREE.Quaternion();
+                                rotQuat.setFromEuler(cameraSpinnerObj3D.rotation);
+                            } else {
+                                rotQuat = rotation;
+                            }
+                            xrSession.requestAnimationFrame((time, frame) => {
+                                arMarkerSys.setOriginAnchor({ position, rotation }, frame);
+                            });
+                        }
                     }
+                    AFRAME.scenes[0].systems['arena-chat-ui'].relocalizedMsg();
                 }
                 return;
+            }
 
-            case 'scene-options':
+            case 'scene-options': {
                 // update env-presets section in real-time
-                const environmentOld = document.getElementById('env');
-                const environment = document.createElement('a-entity');
-                environment.id = 'env';
                 const envPresets = message.data['env-presets'];
-                Object.entries(envPresets).forEach(([attribute, value]) => {
-                    environment.setAttribute('environment', attribute, value);
-                });
-                environmentOld.parentNode.replaceChild(environment, environmentOld);
+                if (envPresets) {
+                    let environment = document.getElementById('env');
+                    if (!environment) {
+                        environment = document.createElement('a-entity');
+                        environment.id = 'env';
+                        sceneRoot.appendChild(environment);
+                    }
+                    // Pass the object directly with the clobber flag (true) to replace instead of merge
+                    environment.setAttribute('environment', envPresets, true);
+                }
                 return;
+            }
 
             case 'face-features':
             case 'landmarks':
@@ -246,20 +281,33 @@ export default class CreateUpdate {
         // TODO: using components (e.g. for image, ...) that handle these would allow to remove most of the
         // special cases
         let isGeometry = false;
+        let newAttributes;
         switch (type) {
             case 'camera':
-                this.setEntityAttributes(entityEl, {
+                // Only set permitted camera attributes, return
+                newAttributes = {
                     position: data.position,
                     rotation: data.rotation,
                     'arena-user': data['arena-user'],
-                }); // Only set permitted camera attributes, return
+                };
+                if (typeof ARENA !== 'undefined' && ARENA.sceneEl?.systems?.physx) {
+                    newAttributes = {
+                        // 'physx-body': { type: 'kinematic' },
+                        // 'physx-material': { restitution: 0 },
+                        'physx-remote-pusher': true,
+                        ...newAttributes,
+                    };
+                }
+                this.setEntityAttributes(entityEl, newAttributes);
+                // Merge-update live users, but don't repopulate userlist
+                AFRAME.scenes?.[0]?.systems?.chat?.upsertLiveUser(message.id, { dn: data['arena-user']?.displayName }, true);
                 return true;
             case 'gltf-model':
-                if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
+                if (typeof ARENA !== 'undefined' && ARENA.params?.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
                     warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                     return false; // do not add this object
                 }
-                if (ARENA.params.vrmode && Object.hasOwn(data, 'hide-on-enter-vr')) {
+                if (typeof ARENA !== 'undefined' && ARENA.params?.vrmode && Object.hasOwn(data, 'hide-on-enter-vr')) {
                     warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                     return false; // do not add this object
                 }
@@ -312,11 +360,10 @@ export default class CreateUpdate {
                 if (!Object.hasOwn(data, 'material-extras')) {
                     // default images to SRGBColorSpace, if not specified
                     entityEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
-                    entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
                 }
                 delete data.image; // no other properties applicable to image; delete it
                 break;
-            case 'text':
+            case 'text': {
                 // Support legacy `data: { text: 'STRING TEXT' }`
                 const theText = data.text;
                 if (typeof theText === 'string' || theText instanceof String) {
@@ -327,15 +374,28 @@ export default class CreateUpdate {
                 if (!Object.hasOwn(data, 'width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)
                 if (!Object.hasOwn(data, 'align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
                 break;
+            }
             case 'handLeft':
             case 'handRight':
-                this.setEntityAttributes(entityEl, {
+                newAttributes = {
                     position: data.position,
                     rotation: data.rotation,
-                    scale: data.scale,
                     'gltf-model': data.url,
                     // TODO: Add support new component for arena-other-user-hand for grab handling
-                }); // Only set permitted hands attributes, return
+                };
+                if (typeof ARENA !== 'undefined' && ARENA.sceneEl?.systems?.physx) {
+                    newAttributes = {
+                        'physx-body': { type: 'kinematic' },
+                        'physx-remote-grabber': true,
+                        'physx-remote-pusher': true,
+                        'physx-material': { restitution: 0 },
+                        ...newAttributes,
+                    };
+                }
+                if (data.scale !== undefined) {
+                    newAttributes.scale = data.scale;
+                }
+                this.setEntityAttributes(entityEl, newAttributes); // Only set permitted hands attributes, return
                 return true;
             case 'cube':
                 type = 'box'; // arena legacy! new libraries/persist objects should use box!
@@ -381,7 +441,7 @@ export default class CreateUpdate {
         // what remains in data are components we set as attributes of the entity
         this.setEntityAttributes(entityEl, data);
 
-        if (typeof ARENA.clickableOnlyEvents !== 'undefined' && !ARENA.clickableOnlyEvents) {
+        if (typeof ARENA !== 'undefined' && typeof ARENA.clickableOnlyEvents !== 'undefined' && !ARENA.clickableOnlyEvents) {
             // unusual case: clickableOnlyEvents = true by default
             if (!Object.hasOwn(entityEl, 'click-listener')) {
                 // attach click-listener to all objects that don't already have them
@@ -420,7 +480,7 @@ export default class CreateUpdate {
         Object.entries(data).forEach(([attribute, value]) => {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {
                 // replace dropbox links in any 'src' or 'url' attributes
-                if (attribute === 'src' || attribute === 'url') {
+                if (attribute === 'src' || attribute === 'url' || attribute === 'obj' || attribute === 'mtl') {
                     // eslint-disable-next-line no-param-reassign
                     value = ARENAUtils.crossOriginDropboxSrc(value);
                 }
@@ -474,17 +534,25 @@ export default class CreateUpdate {
                     }
                     break;
                 case 'scale':
-                    // scale is set directly in the THREE.js object, for performance reasons
-                    entityEl.object3D.scale.set(value.x, value.y, value.z);
+                    if ('model-container' in entityEl.components) {
+                        // Defer to model-container component to handle sizing
+                        entityEl.components['model-container'].resize();
+                    } else {
+                        // scale is set directly in the THREE.js object, for performance reasons
+                        entityEl.object3D.scale.set(value.x, value.y, value.z);
+                    }
                     break;
-                case 'ttl':
-                    // ttl is applied to property 'seconds' of ttl component
-                    entityEl.setAttribute('ttl', { seconds: value });
-                    break;
+                case 'obj':
+                case 'mtl':
                 case 'src':
                 case 'url':
                     // replace dropbox links in any 'src'/'url' attributes that get here
                     entityEl.setAttribute(attribute, ARENAUtils.crossOriginDropboxSrc(value));
+                    break;
+                case 'spe-particles':
+                    // conflicts with env-presets THREE.js fog defaults ATM, so disable fog/particle interaction
+                    if (!Object.hasOwn(value, 'affectedByFog')) value.affectedByFog = false;
+                    entityEl.setAttribute(attribute, value);
                     break;
                 default:
                     // all other attributes are pushed directly to aframe
@@ -494,6 +562,8 @@ export default class CreateUpdate {
                     } else {
                         // replace dropbox links in any url or src attribute inside value
                         /* eslint-disable no-param-reassign */
+                        if (Object.hasOwn(value, 'mtl')) value.mtl = ARENAUtils.crossOriginDropboxSrc(value.mtl);
+                        if (Object.hasOwn(value, 'obj')) value.obj = ARENAUtils.crossOriginDropboxSrc(value.obj);
                         if (Object.hasOwn(value, 'src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
                         if (Object.hasOwn(value, 'url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
                         entityEl.setAttribute(attribute, value);
@@ -522,7 +592,7 @@ export default class CreateUpdate {
                 data: { position, rotation },
             } = message;
 
-            const target = document.getElementById(ARENA.params.camFollow);
+            const target = typeof ARENA !== 'undefined' && ARENA.params?.camFollow ? document.getElementById(ARENA.params.camFollow) : null;
             if (target) {
                 ARENAUtils.relocateUserCamera(undefined, undefined, target.object3D.matrixWorld);
             } else {

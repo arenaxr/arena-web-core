@@ -1,4 +1,4 @@
-/* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal */
+/* global ARENAAUTH, ARENADefaults */
 
 // auth.js
 //
@@ -6,7 +6,6 @@
 // - MQTT broker
 //
 // Required:
-//  <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="../conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
 //  <script src="../static/auth.js"></script>  <!-- browser authorization flow -->
 //
@@ -25,8 +24,9 @@
 
 // auth namespace
 window.ARENAAUTH = {
-    signInPath: `//${window.location.host}/user/login`,
-    signOutPath: `//${window.location.host}/user/logout`,
+    nonScenePaths: ['scenes', 'build', 'programs', 'network', 'files', 'dashboard', 'replay'],
+    signInPath: `//${window.location.host}/user/v2/login`,
+    signOutPath: `//${window.location.host}/user/v2/logout`,
     /**
      * Merge defaults and any URL params into single ARENA.params obj. Nonexistent keys should be checked as undefined.
      */
@@ -45,6 +45,7 @@ window.ARENAAUTH = {
             username: this.user_username,
             fullname: this.user_fullname,
             email: this.user_email,
+            is_staff: this.user_is_staff,
         };
     },
     authCheck() {
@@ -68,7 +69,10 @@ window.ARENAAUTH = {
             Swal.fire({
                 icon: 'error',
                 title,
-                html: text,
+                text,
+                allowEscapeKey: false,
+                allowOutsideClick: true,
+                showConfirmButton: false,
             });
         }
     },
@@ -79,12 +83,11 @@ window.ARENAAUTH = {
      * @return {string} A username suitable for auth requests
      */
     processUserNames(authName, prefix = null) {
-        // var processedName = encodeURI(authName);
-        let processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
+        let processedName = authName ? authName.replace(/[^a-zA-Z0-9]/g, '') : '';
         if (ARENA.userName !== ARENADefaults?.userName) {
             // userName set? persist to storage
             localStorage.setItem('display_name', decodeURI(ARENA.userName));
-            processedName = ARENA.userName;
+            processedName = ARENA.userName.replace(/[^a-zA-Z0-9]/g, '');
         }
         const savedName = localStorage.getItem('display_name');
         if (savedName === null || !savedName || savedName === 'undefined') {
@@ -101,63 +104,49 @@ window.ARENAAUTH = {
      * Request user state data for client-side state management.
      * This is a blocking request
      */
-    requestAuthState() {
+    async requestAuthState() {
         // 'remember' uri for post-login, just before login redirect
         localStorage.setItem('request_uri', window.location.href);
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', `/user/user_state`, false); // Blocking call
-        xhr.setRequestHeader('X-CSRFToken', this.getCookie('csrftoken'));
-        xhr.send();
-        // Block on this request
-        if (xhr.status !== 200) {
-            const title = 'Error loading user state';
-            const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
-            this.authError(title, text);
-        } else {
-            let userStateRes;
-            try {
-                userStateRes = JSON.parse(xhr.response);
-            } catch (e) {
-                const title = 'Error parsing user state';
-                const text = `${e}: ${xhr.response}`;
-                this.authError(title, text);
-            }
-            this.authenticated = userStateRes.authenticated;
-            this.user_type = userStateRes.type; // user database auth state
-            const urlAuthType = ARENA.params.auth;
-            if (urlAuthType !== undefined) {
-                localStorage.setItem('auth_choice', urlAuthType);
-            }
+        const res = await this.makeUserRequest('GET', '/user/v2/user_state');
+        if (!res) return;
+        const userStateRes = await res.json();
+        this.authenticated = userStateRes.authenticated;
+        this.user_type = userStateRes.type; // user database auth state
+        const urlAuthType = ARENA.params.auth;
+        if (urlAuthType !== undefined) {
+            localStorage.setItem('auth_choice', urlAuthType);
+        }
 
-            const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
-            if (this.authenticated) {
-                // auth user login
-                localStorage.setItem('auth_choice', userStateRes.type);
-                this.processUserNames(userStateRes.fullname ? userStateRes.fullname : userStateRes.username);
-                this.user_username = userStateRes.username;
-                this.user_fullname = userStateRes.fullname;
-                this.user_email = userStateRes.email;
-                this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
-            } else if (savedAuthType === 'anonymous') {
-                const urlName = ARENA.params.userName;
-                const savedName = localStorage.getItem('display_name');
-                if (savedName === null) {
-                    if (urlName !== null) {
-                        localStorage.setItem('display_name', urlName);
-                    } else {
-                        localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
-                    }
+        const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
+        if (this.authenticated) {
+            // auth user login
+            localStorage.setItem('auth_choice', userStateRes.type);
+            this.processUserNames(userStateRes.fullname ? userStateRes.fullname : userStateRes.username);
+            this.user_username = userStateRes.username;
+            this.user_fullname = userStateRes.fullname;
+            this.user_email = userStateRes.email;
+            this.user_is_staff = userStateRes.is_staff;
+            await this.requestMqttToken(userStateRes.type, userStateRes.username, true);
+        } else if (savedAuthType === 'anonymous') {
+            const urlName = ARENA.params.userName;
+            const savedName = localStorage.getItem('display_name');
+            if (savedName === null) {
+                if (urlName !== null) {
+                    localStorage.setItem('display_name', urlName);
+                } else {
+                    localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
                 }
-                const anonName = this.processUserNames(localStorage.getItem('display_name'), 'anonymous-');
-                this.user_username = anonName;
-                this.user_fullname = localStorage.getItem('display_name');
-                this.user_email = 'N/A';
-                this.requestMqttToken('anonymous', anonName, true).then();
-            } else {
-                // user is logged out or new and not logged in
-                window.location.href = this.signInPath;
             }
+            const anonName = this.processUserNames(localStorage.getItem('display_name'), 'anonymous-');
+            this.user_username = anonName;
+            this.user_fullname = localStorage.getItem('display_name');
+            this.user_email = 'N/A';
+            this.user_is_staff = userStateRes.is_staff;
+            await this.requestMqttToken('anonymous', anonName, true);
+        } else {
+            // user is logged out or new and not logged in
+            window.location.href = this.signInPath;
         }
     },
     /**
@@ -196,50 +185,40 @@ window.ARENAAUTH = {
      * @param {boolean} completeOnload wait for page load before firing callback
      */
     async requestMqttToken(authType, mqttUsername, completeOnload = false) {
-        const nonScenePaths = ['/scenes/', '/build/', '/programs/', '/network/', '/files/'];
         const authParams = {
             username: mqttUsername,
             id_auth: authType,
+            client: 'web',
         };
         if (ARENA.params.realm) {
             authParams.realm = ARENA.params.realm;
         }
 
-        if (ARENA.params.scene) {
-            authParams.scene = decodeURIComponent(ARENA.params.scene);
-        } else if (!nonScenePaths.includes(window.location.pathname)) {
+        // only request single-scene specific perms when rendering scene
+        // other functional pages should have general permissions for the user's scene objects
+        if (!this.nonScenePaths.includes(window.location.pathname.split('/')[1])) {
             // handle full ARENA scene
             if (ARENA.sceneName) {
                 authParams.scene = ARENA.namespacedScene;
             }
-            authParams.userid = true;
             authParams.camid = true;
             authParams.handleftid = true;
             authParams.handrightid = true;
         }
         try {
-            const authRes = await fetch('/user/mqtt_auth', {
-                headers: {
-                    'X-CSRFToken': this.getCookie('csrftoken'),
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                method: 'POST',
-                body: new URLSearchParams(authParams),
-            });
-            if (!authRes.ok) {
-                const title = 'Error loading MQTT token';
-                const text = `${authRes.status}: ${authRes.statusText} ${JSON.stringify(authRes.response)}`;
-                this.authError(title, text);
-                return;
-            }
-
-            const authData = await authRes.json();
+            const res = await this.makeUserRequest(
+                'POST',
+                '/user/v2/mqtt_auth',
+                authParams,
+                'application/x-www-form-urlencoded'
+            );
+            if (!res) return;
+            const authData = await res.json();
             this.user_type = authType;
             this.user_username = authData.username;
             // keep payload for later viewing
-            const tokenObj = KJUR.jws.JWS.parse(authData.token);
-            this.token_payload = tokenObj.payloadObj;
-            authData.token_payload = tokenObj.payloadObj;
+            this.token_payload = this.parseJwt(authData.token);
+            authData.token_payload = this.token_payload;
             if (!completeOnload || document.readyState === 'complete') {
                 // Also handle crazy case page already loaded
                 this.completeAuth(authData);
@@ -250,6 +229,44 @@ window.ARENAAUTH = {
             }
         } catch (e) {
             throw Error(`Error requesting auth token: ${e.message}`);
+        }
+    },
+    /**
+     * Re-request the MQTT auth token scoped to a specific scene.
+     * Use this when the current JWT may not have subscribe/publish rights for a
+     * particular namespace/scene (e.g., switching scenes in the Build page or
+     * Replay viewer). This updates the mqtt_token cookie server-side.
+     * @param {string} namespacedScene - Scene in "namespace/sceneName" format
+     * @return {Promise<{mqtt_username: string, mqtt_token: string}>}
+     */
+    async refreshSceneAuth(namespacedScene) {
+        if (!this.user_type || !this.user_username) {
+            console.warn('[Auth] Cannot refresh scene auth: user not authenticated yet');
+            return null;
+        }
+        const authParams = {
+            username: this.user_username,
+            id_auth: this.user_type,
+            client: 'web',
+            realm: ARENA.params?.realm || (typeof ARENADefaults !== 'undefined' ? ARENADefaults.realm : 'realm'),
+            scene: namespacedScene,
+        };
+        try {
+            const res = await this.makeUserRequest(
+                'POST',
+                '/user/v2/mqtt_auth',
+                authParams,
+                'application/x-www-form-urlencoded'
+            );
+            if (!res) return null;
+            const authData = await res.json();
+            this.user_username = authData.username;
+            this.token_payload = this.parseJwt(authData.token);
+            console.log(`[Auth] Refreshed JWT for scene: ${namespacedScene}`);
+            return { mqtt_username: authData.username, mqtt_token: authData.token, ids: authData.ids };
+        } catch (e) {
+            console.error(`[Auth] Failed to refresh scene auth: ${e.message}`);
+            return null;
         }
     },
     /**
@@ -317,10 +334,70 @@ window.ARENAAUTH = {
         return lines.join('\r\n');
     },
     /**
+     * Parse the JWT payload into a JSON object.
+     * @param {*} jwt The JWT
+     * @return {Object} the JSON payload
+     */
+    parseJwt(jwt) {
+        const parts = jwt.split('.');
+        if (parts.length !== 3) {
+            throw new Error('JWT format invalid!');
+        }
+        const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    },
+    /**
+     * Checks loaded MQTT token for full scene object write permissions.
+     * @param {string} token The JWT token for the user to connect to MQTT.
+     * @param {string} objectsTopic
+     * @return {boolean} True if the user has permission to write in this scene.
+     */
+    isUserSceneEditor(token, objectsTopic) {
+        if (token) {
+            const perms = this.parseJwt(token);
+            if (this.matchJWT(objectsTopic, perms.publ)) {
+                return true;
+            }
+        }
+        return false;
+    },
+    isTokenUsable(token) {
+        if (token) {
+            const payloadObj = this.parseJwt(token);
+            const exp = payloadObj.exp * 1000;
+            const now = new Date().getTime();
+            return now < exp;
+        }
+        return false;
+    },
+    /**
+     * Utility to match MQTT topic within permissions.
+     * @param {string} topic The MQTT topic to test.
+     * @param {string[]} rights The list of topic wild card permissions.
+     * @return {boolean} True if the topic matches the list of topic wildcards.
+     */
+    matchJWT(topic, rights) {
+        const len = rights.length;
+        let valid = false;
+        for (let i = 0; i < len; i++) {
+            if (this.mqttPatternMatches(rights[i], topic)) {
+                valid = true;
+                break;
+            }
+        }
+        return valid;
+    },
+    /**
      * Open profile in new page to avoid mqtt disconnect.
      */
     showProfile() {
-        window.open(`${window.location.protocol}//${window.location.host}/user/profile`);
+        window.open(`${window.location.protocol}//${window.location.host}/user/v2/profile`);
     },
 
     /**
@@ -332,8 +409,10 @@ window.ARENAAUTH = {
             html: `<pre style='text-align: left;'>${ARENAAUTH.formatPerms(ARENAAUTH.token_payload)}</pre>`,
         });
     },
+    /**
+     * Private function to set scenename, namespacedScene and namespace.
+     */
     setSceneName() {
-        // private function to set scenename, namespacedScene and namespace
         const _setNames = (ns, sn) => {
             ARENA.namespacedScene = `${ns}/${sn}`;
             ARENA.sceneName = sn;
@@ -354,7 +433,8 @@ window.ARENAAUTH = {
         } else {
             try {
                 const r = /^(?<namespace>[^/]+)(\/(?<sceneName>[^/]+))?/g;
-                const matches = r.exec(path).groups;
+                const matches = r.exec(path)?.groups;
+                if (!matches) throw new Error('No matches');
                 // Only first group is given, namespace is actually the scene name
                 if (matches.sceneName === undefined) {
                     _setNames(namespace, matches.namespace);
@@ -367,6 +447,100 @@ window.ARENAAUTH = {
                 _setNames(namespace, sceneName);
             }
         }
+    },
+    /**
+     * Internal call to perform fetch request
+     */
+    /**
+     * Request user state data for client-side state management
+     * @return {Promise<object>} object with user account data
+     */
+    async userAuthState() {
+        const res = await this.makeUserRequest('GET', `/user/v2/user_state`);
+        if (!res) return null;
+        return res.json();
+    },
+    /**
+     * Request scene names which the user has permission to from user database
+     * @return {Promise<string[]>} list of scene names
+     */
+    async userScenes() {
+        const res = await this.makeUserRequest('GET', '/user/v2/my_scenes');
+        if (!res) return null;
+        return res.json();
+    },
+    /**
+     * Request a scene is added to the user database.
+     * @param {string} sceneNamespace name of the scene without namespace
+     * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
+     */
+    async requestUserNewScene(sceneNamespace, isPublic = false) {
+        // TODO: add public parameter
+        const res = await this.makeUserRequest('POST', `/user/v2/scenes/${sceneNamespace}`);
+        if (!res) return null;
+        return res.json();
+    },
+    /**
+     * Request to delete scene permissions from user db
+     * @param {string} sceneNamespace name of the scene without namespace
+     */
+    async requestDeleteUserScene(sceneNamespace) {
+        const res = await this.makeUserRequest('DELETE', `/user/v2/scenes/${sceneNamespace}`);
+        if (!res) return null;
+        return res.json();
+    },
+    async makeUserRequest(method, url, params = undefined, contentType = undefined) {
+        return fetch(url, {
+            headers: {
+                'X-CSRFToken': this.getCookie('csrftoken'),
+                'Content-Type': contentType || null,
+            },
+            method,
+            body: params ? new URLSearchParams(params) : null,
+        })
+            .then((response) => {
+                if (response.ok || (method === 'DELETE' && response.status === 404)) {
+                    return response;
+                }
+                throw new Error(
+                    `${response.status}: ${response.statusText} - ${url} - ${response.response ? response.response : ''}`
+                );
+            })
+            .catch((error) => {
+                this.authError('Request Error', error.message);
+            });
+    },
+    /**
+     * MQTTPattern matches from: https://github.com/RangerMauve/mqtt-pattern/blob/master/index.js
+     * @param {string} pattern
+     * @param {string} topic
+     * @returns {boolean}
+     */
+    mqttPatternMatches(pattern, topic) {
+        const SEPARATOR = '/';
+        const SINGLE = '+';
+        const ALL = '#';
+        const patternSegments = pattern.split(SEPARATOR);
+        const topicSegments = topic.split(SEPARATOR);
+
+        const patternLength = patternSegments.length;
+        const topicLength = topicSegments.length;
+        const lastIndex = patternLength - 1;
+
+        for (let i = 0; i < patternLength; i++) {
+            const currentPattern = patternSegments[i];
+            const patternChar = currentPattern[0];
+            const currentTopic = topicSegments[i];
+
+            if (!currentTopic && !currentPattern) continue;
+            if (!currentTopic && currentPattern !== ALL) return false;
+
+            // Only allow # at end
+            if (patternChar === ALL) return i === lastIndex;
+            if (patternChar !== SINGLE && currentPattern !== currentTopic) return false;
+        }
+
+        return patternLength === topicLength;
     },
 };
 
@@ -383,7 +557,7 @@ window.onload = function authOnLoad() {
         const head = document.getElementsByTagName('head')[0];
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = 'static/vendor/sweetalert2.all.min.js';
+        script.src = '/static/vendor/sweetalert2.all.min.js';
         head.appendChild(script);
     }
 };

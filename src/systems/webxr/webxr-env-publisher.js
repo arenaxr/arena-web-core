@@ -1,16 +1,11 @@
-/* global AFRAME, ARENA */
-
 import { Packr } from 'msgpackr';
+import { TOPICS } from '../../constants';
 
 AFRAME.registerSystem('xr-env-publisher', {
     schema: {
         publishMeshes: { type: 'boolean', default: true },
         onlyGlobalMesh: { type: 'boolean', default: true },
         publishPlanes: { type: 'boolean', default: false },
-        publishTopicBase: {
-            type: 'string',
-            default: `${ARENA.defaults.realm}/env/`,
-        },
     },
     init() {
         const { sceneEl } = this;
@@ -18,7 +13,7 @@ AFRAME.registerSystem('xr-env-publisher', {
         this.onRAF = this.onRAF.bind(this);
         this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
 
-        sceneEl.renderer.xr.addEventListener('sessionstart', () => {
+        sceneEl.addEventListener('enter-vr', () => {
             if (sceneEl.is('ar-mode')) {
                 const { xrSession } = sceneEl;
                 this.webXRSessionStarted(xrSession).then(() => {});
@@ -36,7 +31,7 @@ AFRAME.registerSystem('xr-env-publisher', {
     },
     async onRAF(_time, frame) {
         const {
-            data: { publishMeshes, publishPlanes, publishTopicBase, onlyGlobalMesh },
+            data: { publishMeshes, publishPlanes, onlyGlobalMesh },
         } = this;
         if (
             // No mesh or plane support
@@ -56,6 +51,7 @@ AFRAME.registerSystem('xr-env-publisher', {
                         return;
                     }
                     const msg = this.packr.pack({
+                        type: 'mesh',
                         vertices: Object.values(mesh.vertices),
                         indices: Object.values(mesh.indices),
                         semanticLabel: mesh.semanticLabel,
@@ -63,7 +59,7 @@ AFRAME.registerSystem('xr-env-publisher', {
                     });
                     ARENA.debugXR(`Packing and publishing ${mesh.semanticLabel}`);
                     ARENA.Mqtt.publish(
-                        `${publishTopicBase}${ARENA.namespacedScene}/${ARENA.camName}/meshes`,
+                        TOPICS.PUBLISH.SCENE_ENV_PRIVATE.formatStr(ARENA.topicParams),
                         msg,
                         undefined,
                         undefined,
@@ -74,6 +70,7 @@ AFRAME.registerSystem('xr-env-publisher', {
             if (publishPlanes) {
                 frame.detectedPlanes.forEach((plane) => {
                     const msg = this.packr.pack({
+                        type: 'plane',
                         polygon: plane.polygon,
                         orientation: plane.orientation,
                         semanticLabel: plane.semanticLabel,
@@ -81,7 +78,7 @@ AFRAME.registerSystem('xr-env-publisher', {
                     });
                     ARENA.debugXR(`Packing and publishing ${plane.semanticLabel}`);
                     ARENA.Mqtt.publish(
-                        `${publishTopicBase}${ARENA.namespacedScene}/${ARENA.camName}/planes`,
+                        TOPICS.PUBLISH.SCENE_ENV_PRIVATE.formatStr(ARENA.topicParams),
                         msg,
                         undefined,
                         undefined,

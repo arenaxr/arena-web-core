@@ -1,4 +1,3 @@
-/* global AFRAME, THREE */
 import { Pass, FullScreenQuad } from './pass';
 import { SMAAEdgesShader, SMAAWeightsShader, SMAABlendShader } from '../shaders/SMAAShader';
 

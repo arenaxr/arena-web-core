@@ -10,7 +10,8 @@ export const ARENA_EVENTS = Object.freeze({
     ON_AUTH: 'onauth',
     USER_PARAMS_LOADED: 'onarenauserparamsloaded',
     MQTT_LOADED: 'onarenamqttloaded',
-    JITSI_LOADED: 'onarenajitsiloaded',
+    MQTT_SUBSCRIBED: 'onarenamqttsubscribed', // For listeners sensitive to actual msg flow
+    JITSI_LOADED: 'onarenajitsiLoaded',
     SCENE_OPT_LOADED: 'onarenasceneoptionsloaded',
     SCENE_OBJ_LOADED: 'onarenasceneobjectsloaded',
     ARENA_LOADED: 'onarenaloaded',
@@ -20,6 +21,7 @@ export const ARENA_EVENTS = Object.freeze({
     STARTPOS_LOADED: 'onarenastartposloaded',
     RUNTIME_MNGR_LOADED: 'onarenaruntimemanagerloaded',
     CV_INITIALIZED: 'onarenacvinitialized',
+    PHYSICS_LOADED: 'onarenaphysicsinitialized',
 });
 
 export const JITSI_EVENTS = Object.freeze({
@@ -33,8 +35,8 @@ export const JITSI_EVENTS = Object.freeze({
     STATS_LOCAL: 'onarenajitsistatslocal',
     STATS_REMOTE: 'onarenajitsistatsremote',
     STATUS: 'onarenajitsistatus',
+    VIDEO_MUTE_CHANGED: 'onarenajitsivideomutechanged',
     CONFERENCE_ERROR: 'onarenajitsierror',
-    TRACK_MUTE_CHANGED: 'onarenajitsitrackmutechanged',
 });
 
 export const EVENT_SOURCES = Object.freeze({

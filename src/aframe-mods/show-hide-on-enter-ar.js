@@ -7,8 +7,6 @@
  * @date 2023
  */
 
-/* global AFRAME */
-
 // AFRAME Monkeypatch (src/components/hide-on-enter-ar.js)
 AFRAME.components['hide-on-enter-ar'].Component.prototype.init = function init() {
     this.gltfAttributes = null;

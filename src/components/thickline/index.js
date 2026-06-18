@@ -1,4 +1,6 @@
-/* global AFRAME, THREE */
+// Modified from: https://github.com/andreasplesch/aframe-meshline-component
+// - Modified lineWidthStylers to white list known functions only for security (ivan).
+// - Fixed crash from AFRAME 1.6, calling AFRAME.utils.coordinates.parse twice (ivan/mwfarb).
 
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');
@@ -33,8 +35,6 @@ AFRAME.registerComponent('thickline', {
         lineWidth: { default: 10 },
         lineWidthStyler: { default: '' }, // One of lineWidthStyles above
         sizeAttenuation: { default: 0 },
-        near: { default: 0.1 },
-        far: { default: 1000 },
         path: {
             default: [
                 { x: -0.5, y: 0, z: 0 },
@@ -42,7 +42,11 @@ AFRAME.registerComponent('thickline', {
             ],
             // Deserialize path in the form of comma-separated vec3s: `0 0 0, 1 1 1, 2 0 3`.
             parse(value) {
-                return value.split(',').map(AFRAME.utils.coordinates.parse);
+                // AFRAME 1.6, now calls AFRAME.utils.coordinates.parse twice, modify to check type first.
+                if (typeof value === 'string' && AFRAME) {
+                    return value.split(',').map((val) => AFRAME.utils.coordinates.parse(val));
+                }
+                return value.map((val) => AFRAME.utils.coordinates.parse(val));
             },
             // Serialize array of vec3s in case someone does setAttribute('line', 'path', [...]).
             stringify(data) {
@@ -79,22 +83,18 @@ AFRAME.registerComponent('thickline', {
             resolution: this.resolution,
             sizeAttenuation: this.data.sizeAttenuation,
             lineWidth: this.data.lineWidth,
-            near: this.data.near,
-            far: this.data.far,
         });
 
-        const geometry = new THREE.BufferGeometry();
-        const positions = [];
+        const vertices = [];
+
         this.data.path.forEach((vec3) => {
-            positions.push(vec3.x, vec3.y, vec3.z);
+            vertices.push(vec3.x || 0, vec3.y || 0, vec3.z || 0);
         });
-
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 
         const widthFn = lineWidthStylers[this.data.lineWidthStyler] ?? (() => 1);
         // ? try {var w = widthFn(0);} catch(e) {warn(e);}
         const line = new THREE.MeshLine();
-        line.setGeometry(geometry, widthFn);
+        line.setGeometry(new Float32Array(vertices), widthFn);
 
         this.el.setObject3D('mesh', new THREE.Mesh(line.geometry, material));
     },

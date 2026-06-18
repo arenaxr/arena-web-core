@@ -6,11 +6,11 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, Swal, THREE, $ */
+/* global ARENAAUTH, $ */
 
 import { ARENAMqttConsole, ARENAUtils } from '../../utils';
 import ARENAWebARUtils from '../webar';
-import { ARENA_EVENTS, JITSI_EVENTS } from '../../constants';
+import { ARENA_EVENTS, JITSI_EVENTS, TOPICS } from '../../constants';
 import RuntimeMngr from './runtime-mngr';
 
 AFRAME.registerSystem('arena-scene', {
@@ -23,6 +23,12 @@ AFRAME.registerSystem('arena-scene', {
     },
 
     init() {
+        // Skip full ARENA bootstrap in replay mode
+        if (this.el.hasAttribute('arena-replay')) {
+            console.log('[arena-scene] Replay mode detected, skipping MQTT/Jitsi/scene bootstrap');
+            return;
+        }
+
         this.utils = ARENAUtils;
 
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
@@ -36,7 +42,7 @@ AFRAME.registerSystem('arena-scene', {
             // replace console with our logging
             if (!ARENA.defaults.devInstance || ARENA.params.debug) {
                 ARENAMqttConsole.init({
-                    dbgTopic: `${ARENA.params.realm}/proc/debug/stdout/${ARENA.camName}`,
+                    dbgTopic: TOPICS.PUBLISH.SCENE_DEBUG.formatStr(ARENA.topicParams),
                     publish: ARENA.Mqtt.publish.bind(ARENA.Mqtt),
                 });
             }
@@ -62,11 +68,8 @@ AFRAME.registerSystem('arena-scene', {
         this.nameSpace = ARENA.nameSpace;
         this.namespacedScene = ARENA.namespacedScene;
 
-        // Sets persistenceUrl, outputTopic, renderTopic, vioTopic
+        // Sets persistenceUrl, outputTopic
         this.persistenceUrl = `//${this.params.persistHost}${this.params.persistPath}${this.namespacedScene}`;
-        this.outputTopic = `${this.params.realm}/s/${this.namespacedScene}/`;
-        this.renderTopic = `${this.outputTopic}#`;
-        this.vioTopic = `${this.params.realm}/vio/${this.namespacedScene}/`;
 
         this.events = sceneEl.systems['arena-event-manager'];
         this.health = sceneEl.systems['arena-health-ui'];
@@ -86,11 +89,23 @@ AFRAME.registerSystem('arena-scene', {
         this.privateScene = false;
         this.videoFrustumCulling = true;
         this.videoDistanceConstraints = true;
+        this.videoDefaultResolutionConstraint = 180;
+        this.physics = false;
 
         this.mqttToken = evt.detail;
 
         // id tag including name is set from authentication service
         this.setIdTag(this.mqttToken.ids.userid);
+        this.userClient = this.mqttToken.ids.userclient;
+
+        // Reuse object for topic parameters
+        this.topicParams = {
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            userClient: this.userClient,
+            idTag: this.idTag,
+            userObj: this.idTag,
+        };
 
         if (this.isUsersPermitted()) {
             this.showEchoDisplayName();
@@ -215,6 +230,11 @@ AFRAME.registerSystem('arena-scene', {
             name: `rt-${this.idTag}`,
             mqttUsername: this.mqttToken.mqtt_username,
             mqttToken: this.mqttToken.mqtt_token,
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            idTag: this.idTag,
+            userClient: this.userClient,
+            debug: Boolean(ARENA.params.debug), // deterministic truthy/falsy boolean
         });
         this.RuntimeManager.init();
     },
@@ -241,6 +261,7 @@ AFRAME.registerSystem('arena-scene', {
             sceneEl.enterVR();
         }
 
+        // add build3d
         if (this.isBuild3dEnabled()) {
             sceneEl.setAttribute('build3d-mqtt-scene', true);
             sceneEl.setAttribute('debug', true);
@@ -251,8 +272,26 @@ AFRAME.registerSystem('arena-scene', {
         // setup webar session
         ARENAWebARUtils.handleARButtonForNonWebXRMobile();
 
+        const immersiveStartup = this.params.armode !== 'undefined' || this.params.vrmode !== 'undefined';
+        // TODO: set this in scene options so content creators tune this
+        const disableRenderFusion = this.params.disableRenderFusion !== undefined;
+        const disableRenderFusionXR = this.params.disableRenderFusionVR !== undefined;
+        const allowRenderFusion =
+            !this.isBuild3dEnabled() && // Never allow with build 3d
+            !disableRenderFusion && // Explicit disable
+            !(disableRenderFusionXR && immersiveStartup); // Auto-enter immersive, don't bother attaching in first place
+        if (allowRenderFusion) {
+            sceneEl.setAttribute('arena-hybrid-render-client', true);
+            if (disableRenderFusionXR) {
+                sceneEl.addEventListener('enter-vr', () => {
+                    sceneEl.removeAttribute('arena-hybrid-render-client');
+                });
+                sceneEl.addEventListener('exit-vr', () => {
+                    sceneEl.setAttribute('arena-hybrid-render-client', true);
+                });
+            }
+        }
         console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
-
         this.events.emit(ARENA_EVENTS.ARENA_LOADED, true);
     },
 
@@ -264,13 +303,6 @@ AFRAME.registerSystem('arena-scene', {
     setIdTag(idTag) {
         if (idTag === undefined) throw new Error('setIdTag: idTag not defined.'); // idTag must be set
         this.idTag = idTag;
-
-        // set camName
-        this.camName = `camera_${this.idTag}`; // e.g. camera_1234_eric
-        // if fixedCamera is given, then camName must be set accordingly
-        if (this.params.fixedCamera) {
-            this.camName = this.params.fixedCamera;
-        }
 
         // set faceName, avatarName, handLName, handRName which depend on user name
         this.faceName = `face_${this.idTag}`; // e.g. face_9240_X
@@ -299,21 +331,58 @@ AFRAME.registerSystem('arena-scene', {
 
     /**
      * Checks loaded MQTT/Jitsi token for user interaction permission.
-     * TODO: This should perhaps use another flag, more general, not just chat.
-     * @return {boolean} True if the user has permission to send/receive chats in this scene.
+     * @return {boolean} True if the user has permission to send/receive presence in this scene.
      */
     isUsersPermitted() {
         if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
-        return ARENAUtils.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
+        const usersTopic = TOPICS.PUBLISH.SCENE_PRESENCE.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            userClient: this.userClient,
+            idTag: this.idTag,
+        });
+        return ARENAAUTH.matchJWT(usersTopic, this.mqttToken.token_payload.publ);
     },
 
     /**
      * Checks token for full scene object write permissions.
-     // * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      // * @return {boolean} True if the user has permission to write in this scene.
      */
     isUserSceneWriter() {
-        return ARENAUtils.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
+        const writeTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            userClient: this.userClient,
+            idTag: '+',
+        });
+        return ARENAAUTH.matchJWT(writeTopic, this.mqttToken.token_payload.publ);
+    },
+
+    /**
+     * Checks token for scene chat write permissions.
+     // * @return {boolean} True if the user has permission to chat in this scene.
+     */
+    isUserChatWriter() {
+        if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
+        /*
+        This now checks if the public scene topic, which all users currently can *subscribe* to
+        for all message types, is also *writable* for this JWT token.
+        */
+        const chatTopic = TOPICS.PUBLISH.SCENE_CHAT.formatStr({
+            nameSpace: this.nameSpace,
+            sceneName: this.sceneName,
+            userClient: this.userClient,
+            idTag: this.idTag,
+        });
+        return ARENAAUTH.matchJWT(chatTopic, this.mqttToken.token_payload.publ);
     },
 
     /**
@@ -379,6 +448,9 @@ AFRAME.registerSystem('arena-scene', {
         const { landmark } = systems;
 
         ARENA.events.addEventListener(ARENA_EVENTS.STARTPOS_LOADED, () => {
+            if (ARENA.params.camFollow || ARENA.params.orbit) {
+                return; // defer to other starting movement
+            }
             // Fallthrough failure if startLastPos fails
             if (!this.startCoords && landmark) {
                 // Try to define starting position if the scene has startPosition objects
@@ -409,11 +481,6 @@ AFRAME.registerSystem('arena-scene', {
                 cameraEl.object3D.position.y += data.camHeight;
             }
 
-            // enable vio if fixedCamera is given
-            if (this.params.fixedCamera) {
-                cameraEl.setAttribute('arena-camera', 'vioEnabled', true);
-            }
-
             // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
             if (this.health) {
                 this.health.removeError('slow.network');
@@ -436,29 +503,33 @@ AFRAME.registerSystem('arena-scene', {
         sceneEl.components.inspector.openInspector(el || null);
         console.log('build3d', 'A-Frame Inspector loaded');
 
-        function updateInspectorPanel(perm, jqSelect) {
+        // auto-start build3d scene when pause occurs, activate play
+        document.querySelector('a-scene').addEventListener('pause', (evt) => {
+            if (evt.target === sceneEl) {
+                document.querySelector('a-scene').play();
+                console.log('build3d', 'scene is playing...');
+            }
+            // TODO (mwfarb): would be nice to update play button visually to pause, to reflect current state
+        });
+
+        function updateInspectorPanel(perm, jqSelect, permColor = false) {
             $(jqSelect).css('opacity', '.75');
+            if (permColor) {
+                $(jqSelect).css('background-color', perm ? 'darkgreen' : 'darkorange');
+            }
         }
 
         setTimeout(() => {
             const perm = this.isUserSceneWriter();
             updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
-            updateInspectorPanel(perm, '#inspectorContainer #viewportBar #transformToolbar');
+            updateInspectorPanel(perm, '#inspectorContainer #viewportBar', true);
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
-
-            const scene = document.querySelector('a-scene');
-            scene.play();
-            console.log('build3d', 'scene.play()');
-
-            // <a id="playPauseScene" class="button fa fa-pause" title="Pause scene"></a>
-            $('#playPauseScene').triggerHandler('click');
-            console.log('build3d', 'playPauseScene click');
 
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(() => {
                 this.removeBuild3d();
             });
-        }, 2000);
+        }, 500);
     },
 
     /**
@@ -481,7 +552,7 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * loads scene objects from specified persistence URL if specified,
      * or this.persistenceUrl if not
-     * @param {[{Object}]} [sceneObjs] Objects to load
+     * @param {Object[]} [sceneObjs] Objects to load
      * @param {string} [parentName] parentObject to attach sceneObjects to
      * @param {string} [prefixName] prefix to add to container
      */
@@ -510,7 +581,7 @@ AFRAME.registerSystem('arena-scene', {
                 type: 'object',
                 data: { parent: parentName },
             };
-            mqtt.processMessage(msg);
+            mqtt.handleSceneObjectMessage(msg);
         }
 
         const arenaObjects = new Map(sceneObjs.map((object) => [object.object_id, object]));
@@ -522,9 +593,17 @@ AFRAME.registerSystem('arena-scene', {
          */
         const createObj = (obj, descendants = []) => {
             const { parent } = obj.attributes;
-            if (obj.object_id === this.camName) {
+            if (obj.object_id === this.idTag) {
                 arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
                 return;
+            }
+            // add a default landmark for any screen share object
+            if (obj.object_id === 'screenshare' && !obj.attributes?.landmark) {
+                obj.attributes.landmark = {
+                    label: `Screen: ${obj.object_id} (nearby)`,
+                    randomRadiusMin: 2,
+                    randomRadiusMax: 3,
+                };
             }
             // if parent is specified, but doesn't yet exist
             if (parent && document.getElementById(parent) === null) {
@@ -553,7 +632,7 @@ AFRAME.registerSystem('arena-scene', {
                 persist: true,
                 data: obj.attributes,
             };
-            mqtt.processMessage(msg);
+            mqtt.handleSceneObjectMessage(msg);
             arenaObjects.delete(obj.object_id);
         };
 
@@ -582,13 +661,13 @@ AFRAME.registerSystem('arena-scene', {
             }
         }
         ARENA.events.addEventListener(ARENA_EVENTS.RUNTIME_MNGR_LOADED, () => {
-            // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
+            // arena variables that are replaced; keys are the variable names e.g. ${scene},${userid}, ...
             const avars = {
                 scene: this.sceneName,
                 namespace: this.nameSpace,
-                cameraid: this.camName,
+                userid: this.idTag,
                 username: this.getDisplayName(),
-                mqtth: mqtt.mqttHost,
+                mqtth: ARENA.Mqtt.mqttHost,
             };
             programs.forEach((program) => {
                 // ask runtime manager to start this program
@@ -629,7 +708,7 @@ AFRAME.registerSystem('arena-scene', {
     //             const l = arenaObjects.length;
     //             for (let i = 0; i < l; i++) {
     //                 const obj = arenaObjects[i];
-    //                 if (obj.object_id === this.camName) {
+    //                 if (obj.object_id === this.idTag) {
     //                     // don't load our own camera/head assembly
     //                 } else {
     //                     const msg = {
@@ -652,8 +731,6 @@ AFRAME.registerSystem('arena-scene', {
 
         const { sceneEl } = el;
 
-        const sceneOptions = {};
-
         // we add all elements to our scene root
         const sceneRoot = document.getElementById('sceneRoot');
 
@@ -661,74 +738,123 @@ AFRAME.registerSystem('arena-scene', {
         const { renderer } = sceneEl;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
 
+        // always include the default environment, users can remove in scene-options.env-presets.active=false if desired
         const environment = document.createElement('a-entity');
         environment.id = 'env';
+        environment.setAttribute('environment', true); // always ensure the component is added
 
         if (sceneData) {
             const options = sceneData.attributes;
-            Object.assign(sceneOptions, options['scene-options']);
 
-            if (sceneOptions.physics) {
-                // physics system, build with cannon-js: https://github.com/c-frame/aframe-physics-system
-                import('../vendor/aframe-physics-system.min');
-                const physicsWait = setInterval(() => {
-                    // wait for physics system and static-body component to be registered, needs 15-30 ms
-                    if (AFRAME.components['static-body']) {
-                        clearInterval(physicsWait);
-                        document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
+            const sceneOptions = options['scene-options'];
+            if (sceneOptions) {
+                // save scene-options
+                Object.entries(sceneOptions).forEach(([attribute, value]) => {
+                    ARENA[attribute] = value;
+                });
+
+                // process special handling of scene-options properties...
+
+                if (sceneOptions.physics?.enabled) {
+                    delete sceneOptions.physics.enabled;
+                    // physx physics system, https://github.com/c-frame/physx
+                    const leftHand = document.getElementById('leftHand');
+                    const rightHand = document.getElementById('rightHand');
+                    sceneEl.addEventListener('componentregistered', (evt) => {
+                        if (evt.detail.name === 'physx-contact-sound') {
+                            // Wait for last physx main component loaded
+                            sceneEl.setAttribute('physx', {
+                                autoLoad: true,
+                                wasmUrl: './static/vendor/physx.release.wasm',
+                                ...sceneOptions.physics,
+                            });
+                            leftHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
+                            leftHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
+                            leftHand.setAttribute('physx-material', { restitution: 0 });
+                            rightHand.setAttribute('geometry', { primitive: 'sphere', radius: 0.02 });
+                            rightHand.setAttribute('physx-body', { type: 'kinematic', emitCollisionEvents: true });
+                            rightHand.setAttribute('physx-material', { restitution: 0 });
+                            this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
+                        } else if (evt.detail.name === 'physx-grab') {
+                            leftHand.setAttribute('physx-grab', { proximity: 0.25 });
+                            rightHand.setAttribute('physx-grab', { proximity: 0.25 });
+                        }
+                    });
+                    import('../vendor/physx.min').then(() => {
+                        import('../../components/vendor/physx/grab');
+                        import('../../components/vendor/physx/force-pushable');
+                    });
+                }
+
+                if (sceneOptions['ar-hit-test']?.enabled !== false) {
+                    sceneEl.setAttribute('ar-hit-test', {
+                        enabled: true,
+                        src: 'static/images/blank-pixel.png',
+                        mapSize: { x: 0.005, y: 0.005 },
+                    });
+                    sceneEl.setAttribute('ar-hit-test-listener', { enabled: true });
+                }
+
+                const { enabled, imageUrl, meshUrl, interval } = sceneOptions.openvps || {};
+                if (enabled && (imageUrl || meshUrl)) {
+                    if (
+                        ARENAUtils.isMobile() ||
+                        ARENAUtils.isWebXRViewer() ||
+                        ARENAUtils.detectARHeadset() !== 'unknown'
+                    ) {
+                        sceneEl.setAttribute('openvps', { imageUrl, meshUrl, interval });
                     }
-                }, 10);
-            }
+                    delete sceneOptions.openvps;
+                }
 
-            if (sceneOptions['ar-hit-test']?.enabled !== false) {
-                sceneEl.setAttribute('ar-hit-test', {
-                    enabled: true,
-                    src: 'static/images/blank-pixel.png',
-                    mapSize: { x: 0.005, y: 0.005 },
-                });
-                sceneEl.setAttribute('ar-hit-test-listener', { enabled: true });
-            }
+                // deal with scene attribution
+                if (sceneOptions.attribution) {
+                    const sceneAttr = document.createElement('a-entity');
+                    sceneAttr.setAttribute('id', 'scene-options-attribution');
+                    sceneAttr.setAttribute('attribution', sceneOptions.attribution);
+                    sceneRoot.appendChild(sceneAttr);
+                    delete sceneOptions.attribution;
+                }
 
-            // deal with scene attribution
-            if (sceneOptions.attribution) {
-                const sceneAttr = document.createElement('a-entity');
-                sceneAttr.setAttribute('id', 'scene-options-attribution');
-                sceneAttr.setAttribute('attribution', sceneOptions.attribution);
-                sceneRoot.appendChild(sceneAttr);
-                delete sceneOptions.attribution;
-            }
+                if (sceneOptions.navMesh) {
+                    sceneOptions.navMesh = ARENAUtils.crossOriginDropboxSrc(sceneOptions.navMesh);
+                    const navMesh = document.createElement('a-entity');
+                    navMesh.id = 'navMesh';
+                    navMesh.setAttribute('gltf-model', sceneOptions.navMesh);
+                    navMesh.setAttribute('nav-mesh', '');
+                    sceneRoot.appendChild(navMesh);
+                }
 
-            if (sceneOptions.navMesh) {
-                sceneOptions.navMesh = ARENAUtils.crossOriginDropboxSrc(sceneOptions.navMesh);
-                const navMesh = document.createElement('a-entity');
-                navMesh.id = 'navMesh';
-                navMesh.setAttribute('gltf-model', sceneOptions.navMesh);
-                navMesh.setAttribute('nav-mesh', '');
-                sceneRoot.appendChild(navMesh);
-            }
+                if (sceneOptions.sceneHeadModels) {
+                    // add scene custom scene heads to selection list
+                    this.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
+                        this.setupSceneHeadModels(sceneOptions.sceneHeadModels);
+                    });
+                }
 
-            if (sceneOptions.sceneHeadModels) {
-                // add scene custom scene heads to selection list
-                this.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
-                    this.setupSceneHeadModels(sceneOptions.sceneHeadModels);
-                });
-            }
+                if (typeof sceneOptions.clickableOnlyEvents !== 'undefined' && !sceneOptions.clickableOnlyEvents) {
+                    // unusual case: clickableOnlyEvents = true by default, add warning...
+                    this.health.addError('scene-options.allObjectsClickable');
+                }
 
-            if (!sceneOptions.clickableOnlyEvents) {
-                // unusual case: clickableOnlyEvents = true by default, add warning...
-                this.health.addError('scene-options.allObjectsClickable');
+                if (sceneOptions.originMarker) {
+                    const originMarker = document.createElement('a-entity');
+                    originMarker.setAttribute('gltf-model', './static/models/origin_marker.glb');
+                    originMarker.setAttribute('id', 'scene_default_originMarker');
+                    originMarker.object3D.position.set(0, 0.01, 0);
+                    originMarker.object3D.rotation.set(-Math.PI / 2, 0, 0);
+                    originMarker.object3D.scale.set(0.15, 0.15, 0.15);
+                    sceneRoot.appendChild(originMarker);
+                }
             }
-
-            // save scene options
-            Object.entries(sceneOptions).forEach(([attribute, value]) => {
-                ARENA[attribute] = value;
-            });
 
             const envPresets = options['env-presets'];
-            Object.entries(envPresets).forEach(([attribute, value]) => {
-                environment.setAttribute('environment', attribute, value);
-            });
-            sceneRoot.appendChild(environment);
+            if (envPresets) {
+                // update default environment with specific requests
+                Object.entries(envPresets).forEach(([attribute, value]) => {
+                    environment.setAttribute('environment', attribute, value);
+                });
+            }
 
             const rendererSettings = options['renderer-settings'];
             if (rendererSettings) {
@@ -753,33 +879,40 @@ AFRAME.registerSystem('arena-scene', {
                     });
                 });
             }
-        } else {
-            environment.setAttribute('environment', 'preset', 'default');
-            environment.setAttribute('environment', 'seed', 3);
-            environment.setAttribute('environment', 'flatShading', true);
-            environment.setAttribute('environment', 'groundTexture', 'squares');
-            environment.setAttribute('environment', 'grid', 'none');
-            environment.setAttribute('environment', 'fog', 0);
-            environment.setAttribute('environment', 'fog', 0);
-            sceneRoot.appendChild(environment);
-
-            // make default env have lights
-            const light = document.createElement('a-light');
-            light.id = 'ambient-light';
-            light.setAttribute('type', 'ambient');
-            light.setAttribute('color', '#363942');
-
-            const light1 = document.createElement('a-light');
-            light1.id = 'point-light';
-            light1.setAttribute('type', 'point');
-            light1.setAttribute('position', '-0.272 0.39 1.25');
-            light1.setAttribute('color', '#C2E6C7');
-
-            sceneRoot.appendChild(light);
-            sceneRoot.appendChild(light1);
         }
-        this.sceneOptions = sceneOptions;
+
+        // include desired environment, and make default env have lights
+        sceneRoot.appendChild(environment);
+        this.addDefaultLights();
+
         this.events.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
+    },
+
+    /**
+     * Add default lights to the scene
+     * @param {boolean} [ifNoNonEnv=false] - add lights only if no non-environment lights are present
+     */
+    addDefaultLights(ifNoNonEnv = false) {
+        const sceneRoot = document.getElementById('sceneRoot');
+        if (document.getElementById('ambient-light') && document.getElementById('point-light')) {
+            return; // already have default lights
+        }
+        if (ifNoNonEnv && document.querySelectorAll('[light]:not([class=environment])').length > 0) {
+            return; // already have non-environment lights
+        }
+        const light = document.createElement('a-light');
+        light.id = 'ambient-light';
+        light.setAttribute('type', 'ambient');
+        light.setAttribute('color', '#363942');
+
+        const light1 = document.createElement('a-light');
+        light1.id = 'point-light';
+        light1.setAttribute('type', 'point');
+        light1.setAttribute('position', '-0.272 0.39 1.25');
+        light1.setAttribute('color', '#C2E6C7');
+
+        sceneRoot.appendChild(light);
+        sceneRoot.appendChild(light1);
     },
 
     /**
@@ -794,17 +927,15 @@ AFRAME.registerSystem('arena-scene', {
             opt.text = `${head.name} (scene-options)`;
             headModelPathSelect.add(opt, null);
         });
-        let headModelPathIdx = 0;
         const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-        const sceneHeadModelPathIdx = sceneHist[this.namespacedScene]?.headModelPathIdx;
-        if (sceneHeadModelPathIdx !== undefined) {
-            headModelPathIdx = sceneHeadModelPathIdx;
+        const sceneHeadModelPath = sceneHist[this.namespacedScene]?.headModelPath;
+        if (sceneHeadModelPath !== undefined) {
+            headModelPathSelect.value = sceneHeadModelPath;
         } else if (headModelPathSelect.selectedIndex === 0) {
             // if default ARENA head used, replace with default scene head
-            headModelPathIdx = defaultHeadsLen;
-        } else if (localStorage.getItem('headModelPathIdx')) {
-            headModelPathIdx = localStorage.getItem('headModelPathIdx');
+            headModelPathSelect.value = sceneHeads[0].url;
+        } else if (localStorage.getItem('prefHeadModelPath')) {
+            headModelPathSelect.value = localStorage.getItem('prefHeadModelPath');
         }
-        headModelPathSelect.selectedIndex = headModelPathIdx < headModelPathSelect.length ? headModelPathIdx : 0;
     },
 });

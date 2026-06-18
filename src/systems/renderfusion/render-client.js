@@ -1,8 +1,6 @@
-/* global AFRAME, ARENA, THREE */
-
 import MQTTSignaling from './signaling/mqtt-signaling';
 import WebRTCStatsLogger from './webrtc-stats';
-import HybridRenderingUtils from './utils';
+import RenderFusionUtils from './utils';
 import { ARENA_EVENTS } from '../../constants';
 
 const info = AFRAME.utils.debug('ARENA:render-client:info');
@@ -48,7 +46,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     async init() {
-        this.initialized = false;
+        this.isReady = false;
         ARENA.events.addMultiEventListener(
             [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.MQTT_LOADED],
             this.ready.bind(this)
@@ -80,8 +78,9 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         const host = this.mqtt.mqttHostURI;
         const username = this.mqtt.userName;
         const token = this.arena.mqttToken.mqtt_token;
+        const dbg = Boolean(ARENA.params.debug); // deterministic truthy/falsy boolean
 
-        this.signaler = new MQTTSignaling(this.id, host, username, token);
+        this.signaler = new MQTTSignaling(this.id, host, username, token, dbg);
         this.signaler.onOffer = this.gotOffer.bind(this);
         this.signaler.onHealthCheck = this.gotHealthCheck.bind(this);
         this.signaler.onAnswer = this.gotAnswer.bind(this);
@@ -100,7 +99,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         document.addEventListener('MSFullscreenChange', this.onEnterVR.bind(this));
         document.addEventListener('webkitfullscreenchange', this.onEnterVR.bind(this));
 
-        this.initialized = true;
+        this.isReady = true;
     },
 
     connectToCloud() {
@@ -112,6 +111,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
     onRemoteTrack(evt) {
         info('Got remote stream! Hybrid Rendering session started.');
+
+        this.setupTransceiver(evt.transceiver);
 
         const stream = new MediaStream();
         stream.addTrack(evt.track);
@@ -173,11 +174,10 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         }
     },
 
-    setupTransceivers() {
+    setupTransceiver(transceiver) {
         if (supportsSetCodecPreferences) {
-            const transceiver = this.pc.getTransceivers()[0];
             // const transceiver = this.pc.addTransceiver('video', {direction: 'recvonly'});
-            const { codecs } = RTCRtpSender.getCapabilities('video');
+            const { codecs } = RTCRtpReceiver.getCapabilities('video');
             const validCodecs = codecs.filter((codec) => !invalidCodecs.includes(codec.mimeType));
             const preferredCodecs = validCodecs.sort((c1, c2) => {
                 if (c1.mimeType === preferredCodec && c1.sdpFmtpLine.includes(preferredSdpFmtpPrefix)) {
@@ -193,7 +193,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 preferredCodecs.splice(selectedCodecIndex, 1);
                 preferredCodecs.unshift(selectedCodec);
             }
-            // console.debug('codecs', preferredCodecs);
+            console.log('codecs', preferredCodecs);
             transceiver.setCodecPreferences(preferredCodecs);
         }
     },
@@ -275,8 +275,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
                 const env = document.getElementById('env');
                 env.setAttribute('visible', false);
-                const groundPlane = document.getElementById('groundPlane');
-                groundPlane.setAttribute('visible', false);
 
                 this.checkStats();
             })
@@ -287,8 +285,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
     createAnswer() {
         // console.debug('creating answer.');
-
-        this.setupTransceivers();
 
         this.pc
             .createAnswer()
@@ -329,8 +325,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
         const env = document.getElementById('env');
         env.setAttribute('visible', true);
-        const groundPlane = document.getElementById('groundPlane');
-        groundPlane.setAttribute('visible', true);
 
         // this.compositor.unbind();
         this.compositor.disable();
@@ -420,7 +414,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     tick(t) {
-        if (!this.initialized) return;
+        if (!this.isReady) return;
         const { data, el } = this;
 
         const { sceneEl } = el;
@@ -450,8 +444,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
             if (t < 1000 && changed === false) return;
 
-            const camMsg = HybridRenderingUtils.doublesToCamMsg(...camPose.elements, parseFloat(this.frameID));
-            this.inputDataChannel.send(camMsg);
+            const poseMsg = RenderFusionUtils.packPoseMsg(camPose.elements, parseFloat(this.frameID));
+            this.inputDataChannel.send(poseMsg);
 
             if (renderer.xr.enabled === true && renderer.xr.isPresenting === true) {
                 const camPoseL = new THREE.Matrix4();

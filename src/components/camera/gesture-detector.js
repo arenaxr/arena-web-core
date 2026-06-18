@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Component that detects multi-finger touch gestures.
  * Based off of work from 8th Wall at https://github.com/8thwall/web/tree/master/examples/aframe
@@ -7,6 +5,7 @@
  */
 
 import { ARENAUtils } from '../../utils';
+import { TOPICS } from '../../constants';
 
 /**
  * Detect multi-finger touch gestures. Publish events accordingly.
@@ -27,6 +26,10 @@ AFRAME.registerComponent('gesture-detector', {
             timer: null,
         };
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
+        this.sendGesture = this.sendGesture.bind(this);
+        this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
+        this.pubTopic = TOPICS.PUBLISH.SCENE_USER.formatStr(ARENA.topicParams);
+
         window.addEventListener('touchstart', this.emitGestureEvent);
         window.addEventListener('touchend', this.emitGestureEvent);
         window.addEventListener('touchmove', this.emitGestureEvent);
@@ -150,32 +153,31 @@ AFRAME.registerComponent('gesture-detector', {
         if (eventDetail.touchCount < 2) {
             return;
         }
-        // send through MQTT
-        const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'];
-        const clickPos = ARENAUtils.vec3ToObject(position);
+
+        if (!this.cameraPos) {
+            this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
+        }
 
         // generated finger move
         const thisMsg = {
-            object_id: 'my-camera',
+            object_id: ARENA.idTag,
             action: 'clientEvent',
             type: eventName,
             data: {
-                clickPos,
-                source: ARENA.camName,
-                position: {
-                    x: parseFloat(eventDetail.position.x.toFixed(5)),
-                    y: parseFloat(eventDetail.position.y.toFixed(5)),
+                originPosition: ARENAUtils.vec3ToObject(this.cameraPos),
+                targetPosition: {
+                    x: ARENAUtils.round5(eventDetail.position.x),
+                    y: ARENAUtils.round5(eventDetail.position.y),
                 },
-                positionStart: {
-                    x: parseFloat(eventDetail.positionStart.x.toFixed(5)),
-                    y: parseFloat(eventDetail.positionStart.y.toFixed(5)),
+                targetPositionStart: {
+                    x: ARENAUtils.round5(eventDetail.positionStart.x),
+                    y: ARENAUtils.round5(eventDetail.positionStart.y),
                 },
-                spread: parseFloat(eventDetail.spread.toFixed(5)),
-                spreadStart: parseFloat(eventDetail.spreadStart.toFixed(5)),
+                spread: ARENAUtils.round5(eventDetail.spread),
+                spreadStart: ARENAUtils.round5(eventDetail.spreadStart),
             },
         };
         // publishing events attached to user id objects allows sculpting security
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+        ARENA.Mqtt.publish(this.pubTopic, thisMsg);
     },
 });

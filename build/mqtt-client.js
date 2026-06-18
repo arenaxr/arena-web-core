@@ -23,8 +23,7 @@ export default class MqttClient {
             host: st.host !== undefined ? st.host : 'arena.andrew.cmu.edu',
             port: st.port !== undefined ? st.port : 8083,
             path: st.path !== undefined ? st.path : '/mqtt/',
-            clientid:
-                st.clientid !== undefined ? st.clientid : `this.mqttc-client-${Math.round(Math.random() * 10000)}`,
+            clientid: st.clientid !== undefined ? st.clientid : `build-client-${Math.round(Math.random() * 10000)}`,
             subscribeTopics: st.subscribeTopics,
             onConnectCallback: st.onConnectCallback,
             onConnectCallbackContext: st.onConnectCallbackContext,
@@ -42,7 +41,7 @@ export default class MqttClient {
 
     async connect() {
         if (this.settings.uri) {
-            if (this.settings.dbg === true) console.log('Connecting [uri]: ', this.settings.uri);
+            if (this.settings.dbg === true) console.debug('Connecting [uri]: ', this.settings.uri);
             // init Paho client connection
             this.mqttc = new Paho.Client(this.settings.uri, this.settings.clientid);
         } else {
@@ -72,8 +71,6 @@ export default class MqttClient {
                     if (_this.settings.subscribeTopics !== undefined) {
                         // Subscribe to the requested topic
                         if (_this.settings.subscribeTopics.length > 0) {
-                            if (_this.settings.dbg === true)
-                                console.log(`Subscribing to: ${_this.settings.subscribeTopics}\n`);
                             _this.mqttc.subscribe(_this.settings.subscribeTopics);
                         }
                     }
@@ -111,7 +108,7 @@ export default class MqttClient {
      * Callback; Called when the client loses its connection
      */
     onConnectionLost(responseObject) {
-        if (this.settings.dbg === true) console.log('Mqtt client disconnected...');
+        if (this.settings.dbg === true) console.debug('Mqtt client disconnected...');
 
         if (responseObject.errorCode !== 0) {
             if (this.settings.dbg === true) console.error(`Mqtt ERROR: ${responseObject.errorMessage}\n`);
@@ -123,20 +120,27 @@ export default class MqttClient {
      */
     onMessageArrived(message) {
         if (this.settings.dbg === true)
-            console.log(`Mqtt Msg [${message.destinationName}]: ${message.payloadString}\n`);
+            console.debug(`Mqtt Msg [${message.destinationName}]: ${message.payloadString}\n`);
 
         if (this.settings.onMessageCallback !== undefined) this.settings.onMessageCallback(message);
     }
 
     publish(topic, payload) {
         if (typeof payload !== 'string') payload = JSON.stringify(payload);
-        if (this.settings.dbg === true) console.log(`Publishing (${topic}):${payload}`);
+        if (this.settings.dbg === true) console.debug(`Publishing (${topic}):${payload}`);
         this.mqttc.send(topic, payload, 0, false);
     }
 
     subscribe(topic) {
-        if (this.settings.dbg === true) console.log(`Subscribing :${topic}`);
-        this.mqttc.subscribe(topic);
+        const logOptions = {
+            onSuccess: () => {
+                if (this.settings.dbg === true) console.debug(`Subscribe success to: ${topic}`);
+            },
+            onFailure: () => {
+                console.error(`Subscribe FAILED to: ${topic}`);
+            },
+        };
+        this.mqttc.subscribe(topic, logOptions);
     }
 
     unsubscribe(topic) {

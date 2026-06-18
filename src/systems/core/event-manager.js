@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Manager for ARENA events, particularly those related to AFRAME
  *               and ARENA loading sequence, in which scary async things happen
@@ -25,7 +23,7 @@ AFRAME.registerSystem('arena-event-manager', {
     addEventListener(key, callback, opts = { once: true }) {
         this.sceneEl.addEventListener(key, callback, opts);
         if (this.eventData[key] !== undefined) {
-            callback(this.eventData[key]); // Immediately fire callback
+            callback(new CustomEvent(key, { detail: this.eventData[key] })); // Immediately fire callback
         }
     },
     /**

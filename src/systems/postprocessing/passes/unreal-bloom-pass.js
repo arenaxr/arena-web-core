@@ -1,5 +1,3 @@
-/* global THREE */
-
 import { Pass, FullScreenQuad } from './pass';
 import CopyShader from '../shaders/CopyShader';
 import LuminosityHighPassShader from '../shaders/LuminosityHighPassShader';

@@ -6,8 +6,6 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, THREE */
-
 import { ARENA_EVENTS } from '../../constants';
 
 /**
@@ -92,6 +90,7 @@ async function enableChromeAEC(gainNode, spatialAudioOn) {
  * @property {string} [displayName] - User display name.
  * @property {boolean} [hasAudio=false] - Whether the user has audio on.
  * @property {boolean} [hasVideo=false] - Whether the user has video on.
+ * @property {boolean} [hasAvatar=false] - Whether the user has face tracking on.
  *
  */
 AFRAME.registerComponent('arena-user', {
@@ -103,8 +102,9 @@ AFRAME.registerComponent('arena-user', {
         displayName: { type: 'string', default: '' },
         hasAudio: { type: 'boolean', default: false },
         hasVideo: { type: 'boolean', default: false },
+        hasAvatar: { type: 'boolean', default: false },
         jitsiQuality: { type: 'number', default: 100.0 },
-        resolutionStep: { type: 'number', default: 180 },
+        resolution: { type: 'number', default: 180 },
         pano: { type: 'boolean', default: false },
         panoId: { type: 'string', default: '' },
     },
@@ -147,7 +147,7 @@ AFRAME.registerComponent('arena-user', {
         this.headModel.setAttribute('scale', '1 1 1');
         this.headModel.setAttribute('gltf-model', data.headModelPath);
         this.headModel.setAttribute('attribution', 'extractAssetExtras', true);
-        this.headModel.setAttribute('dynamic-body', 'type', 'static');
+        this.headModel.setAttribute('physx-body', 'type', 'kinematic');
 
         el.appendChild(this.headText);
         el.appendChild(this.headModel);
@@ -195,27 +195,27 @@ AFRAME.registerComponent('arena-user', {
         if (!micIconEl) {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
-            micIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
-            micIconEl.setAttribute('material', 'shader', 'flat');
-            micIconEl.setAttribute('scale', '0.2 0.2 0.2');
-            if (data.presence !== 'Portal') {
-                micIconEl.setAttribute('position', '0 0.3 0.045');
-            } else {
-                micIconEl.setAttribute('position', '-0.75 1.25 -0.035');
-            }
-            micIconEl.setAttribute('src', 'url(src/systems/ui/images/audio-off.png)');
             el.appendChild(micIconEl);
         }
+        micIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
+        micIconEl.setAttribute('material', 'shader', 'flat');
+        micIconEl.setAttribute('scale', '0.2 0.2 0.2');
+        if (data.presence !== 'Portal') {
+            micIconEl.setAttribute('position', `0 ${0.4 / 2 + 0.1} 0`);
+        } else {
+            micIconEl.setAttribute('position', `0 ${1.5 / 2 + 0.1} 0`);
+        }
+        micIconEl.setAttribute('src', 'url(src/systems/ui/images/audio-off.png)');
+        this.micIconEl = micIconEl;
     },
 
     removeMicrophone() {
         const { el } = this;
 
-        const name = `muted_${el.id}`;
-        const micIconEl = document.querySelector(`#${name}`);
-        if (micIconEl) {
-            el.removeChild(micIconEl);
+        if (el.contains(this.micIconEl)) {
+            el.removeChild(this.micIconEl);
         }
+        this.micIconEl = null;
     },
 
     drawQuality() {
@@ -227,28 +227,27 @@ AFRAME.registerComponent('arena-user', {
         if (!qualIconEl) {
             qualIconEl = document.createElement('a-image');
             qualIconEl.setAttribute('id', name);
-            qualIconEl.setAttribute('material', 'shader', 'flat');
-            qualIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
-            qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
-            if (data.presence !== 'Portal') {
-                qualIconEl.setAttribute('position', `${0 - 0.2} 0.3 0.045`);
-            } else {
-                qualIconEl.setAttribute('position', `${-0.75 - 0.2}-0.75 1.25 -0.035`);
-            }
             el.appendChild(qualIconEl);
         }
-        // update signal strength
-        qualIconEl.setAttribute('src', this.getQualityIcon(data.jitsiQuality));
+        qualIconEl.setAttribute('material', 'shader', 'flat');
+        qualIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
+        qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
+        if (data.presence !== 'Portal') {
+            qualIconEl.setAttribute('position', `${0 - 0.2} ${0.4 / 2 + 0.1} 0`);
+        } else {
+            qualIconEl.setAttribute('position', `${0 - 0.2} ${1.5 / 2 + 0.1} 0`);
+        }
+        qualIconEl.setAttribute('src', this.getQualityIcon(data.jitsiQuality)); // update signal
+        this.qualIconEl = qualIconEl;
     },
 
     removeQuality() {
         const { el } = this;
 
-        const name = `quality_${el.id}`;
-        const qualIconEl = document.querySelector(`#${name}`);
-        if (qualIconEl) {
-            el.removeChild(qualIconEl);
+        if (el.contains(this.qualIconEl)) {
+            el.removeChild(this.qualIconEl);
         }
+        this.qualIconEl = null;
     },
 
     getQualityIcon(quality) {
@@ -269,7 +268,12 @@ AFRAME.registerComponent('arena-user', {
         const { data } = this;
 
         // attach video to head
-        const videoCube = document.createElement('a-box');
+        let videoCube;
+        if (data.presence !== 'Portal') {
+            videoCube = document.createElement('a-box');
+        } else {
+            videoCube = document.createElement('a-plane');
+        }
         videoCube.setAttribute('id', `video-cube-${this.videoID}`);
         videoCube.setAttribute('position', '0 0 0');
         videoCube.setAttribute('material', 'shader', 'flat');
@@ -292,7 +296,9 @@ AFRAME.registerComponent('arena-user', {
             el.appendChild(videoCubeDark);
             this.videoCubeDark = videoCubeDark;
         } else {
-            videoCube.setAttribute('scale', '0.9 1.5 0.02');
+            videoCube.setAttribute('material', 'side', 'double');
+            videoCube.setAttribute('scale', '1.5 0.9 0');
+            videoCube.setAttribute('rotation', '0 0 90');
         }
 
         el.appendChild(videoCube);
@@ -393,7 +399,7 @@ AFRAME.registerComponent('arena-user', {
         const { el } = this;
         const jistiAudio = document.getElementById(this.audioID);
         if (jistiAudio) {
-            jistiAudio.srcObject.getTracks().forEach((t) => {
+            jistiAudio.srcObject?.getTracks().forEach((t) => {
                 t.enabled = false;
             });
         }
@@ -403,7 +409,7 @@ AFRAME.registerComponent('arena-user', {
     unmuteAudio() {
         const jistiAudio = document.getElementById(this.audioID);
         if (jistiAudio) {
-            jistiAudio.srcObject.getTracks().forEach((t) => {
+            jistiAudio.srcObject?.getTracks().forEach((t) => {
                 t.enabled = true;
             });
         }
@@ -413,7 +419,7 @@ AFRAME.registerComponent('arena-user', {
         const jistiVideo = document.getElementById(this.videoID);
         if (jistiVideo) {
             if (!jistiVideo.paused) jistiVideo.pause();
-            jistiVideo.srcObject.getTracks().forEach((t) => {
+            jistiVideo.srcObject?.getTracks().forEach((t) => {
                 t.enabled = false;
             });
         }
@@ -423,16 +429,16 @@ AFRAME.registerComponent('arena-user', {
         const jistiVideo = document.getElementById(this.videoID);
         if (jistiVideo) {
             if (jistiVideo.paused) jistiVideo.play();
-            jistiVideo.srcObject.getTracks().forEach((t) => {
+            jistiVideo.srcObject?.getTracks().forEach((t) => {
                 t.enabled = true;
             });
         }
     },
     /* eslint-disable  no-param-reassign */
 
-    evaluateRemoteResolution(resolutionStep) {
-        if (resolutionStep !== this.data.resolutionStep) {
-            this.data.resolutionStep = resolutionStep;
+    evaluateRemoteResolution(resolution) {
+        if (resolution !== this.data.resolution) {
+            this.data.resolution = resolution;
             const panoIds = [];
             const constraints = {};
             const users = document.querySelectorAll('[arena-user]');
@@ -445,61 +451,26 @@ AFRAME.registerComponent('arena-user', {
                         panoIds.push(jitsiSourceName);
                     }
                 }
-                if (data.resolutionStep > 0 && data.resolutionStep < 180) {
-                    constraints[jitsiSourceName] = {
-                        maxHeight: 180,
-                        maxFrameRate: data.resolutionStep,
-                    }; // start dropping FPS, not res
-                } else {
-                    constraints[jitsiSourceName] = {
-                        maxHeight: data.resolutionStep,
-                    }; // use distance based res for 0 and 180+
-                }
+                constraints[jitsiSourceName] = {
+                    maxHeight: data.resolution,
+                };
             });
             this.jitsi.setResolutionRemotes(panoIds, constraints);
         }
     },
 
-    getOptimalResolutionStep(distance, winHeight) {
-        // Option 1: videosphere W/H/D is panoRadius x 2
-        // Option 2: video cube W x H x D is 0.6m x 0.4m x 0.6m
+    getActualResolution(distance, winHeight) {
+        // Option 1: video cube W x H x D is 0.6m x 0.4m x 0.6m
+        // Option 2: portal W x H x D is 0.9m x 1.5m x 0m
         const fov = 80;
-        const cubeHeight = 0.4;
-        const cubeDepth = 0.6;
-        const actualDist = distance - (this.data.pano ? 0 : cubeDepth / 2);
+        const videoHeightMeters = this.data.presence !== 'Portal' ? 0.4 : 0.9;
+        const videoDepthMeters = this.data.presence !== 'Portal' ? 0.6 : 0;
+        const actualDist = distance - (this.data.pano ? 0 : videoDepthMeters / 2);
         const frustumHeightAtVideo = 2 * actualDist * Math.tan((fov * 0.5 * Math.PI) / 180);
-        const videoRatio2Window = (this.data.pano ? this.panoRadius * 2 : cubeHeight) / frustumHeightAtVideo;
+        const videoRatio2Window = videoHeightMeters / frustumHeightAtVideo;
         const actualCubeRes = winHeight * videoRatio2Window;
-        // provide max video resolution for distance and screen resolution,
-        // use approximate gradations of actual camera heights
-        if (actualCubeRes < 45) {
-            return 5; // below 180p, overload with FPS
-        }
-        if (actualCubeRes < 90) {
-            return 15; // below 180p, overload with FPS
-        }
-        if (actualCubeRes < 180) {
-            return 180; // Thumbnail
-        }
-        if (actualCubeRes < 360) {
-            return 360;
-        }
-        if (actualCubeRes < 480) {
-            return 480; // SD (standard definition)
-        }
-        if (actualCubeRes < 720) {
-            return 720; // HD (high definition)
-        }
-        if (actualCubeRes < 1080) {
-            return 1080; // Full HD
-        }
-        if (actualCubeRes < 1440) {
-            return 1440;
-        }
-        if (actualCubeRes < 1800) {
-            return 1800;
-        }
-        return 2160; // UHD/4K
+        // return actual height, since video constraints will use it
+        return actualCubeRes;
     },
 
     update(oldData) {
@@ -523,13 +494,13 @@ AFRAME.registerComponent('arena-user', {
                 case 'Standard':
                     this.headText.setAttribute('visible', true);
                     this.headModel.setAttribute('visible', true);
-                    this.headText.setAttribute('position', '0 0.45 0.05');
+                    this.headText.setAttribute('position', `0 ${0.4 / 2 + 0.25} 0`);
                     // redraw mic
                     this.removeMicrophone();
                     this.drawMicrophone();
                     break;
                 case 'Portal':
-                    this.headText.setAttribute('position', '0 1.7 0.05');
+                    this.headText.setAttribute('position', `0 ${1.5 / 2 + 0.25} 0`);
                     // redraw mic
                     this.removeMicrophone();
                     this.drawMicrophone();
@@ -539,7 +510,7 @@ AFRAME.registerComponent('arena-user', {
             }
         }
 
-        if (this.data.jitsiId) {
+        if (data.jitsiQuality !== oldData.jitsiQuality && this.data.jitsiId) {
             if (data.jitsiQuality < 66.7) {
                 this.drawQuality();
             } else {
@@ -554,9 +525,14 @@ AFRAME.registerComponent('arena-user', {
         if (elHandL) elHandL.remove();
         const elHandR = document.getElementById(`handRight_${this.idTag}`);
         if (elHandR) elHandR.remove();
-        // try to remove chat user
-        delete this.chat?.liveUsers[this.idTag];
-        this.chat?.populateUserList();
+        if (this.chat) {
+            if (this.chat.liveUsers) {
+                delete this.chat.liveUsers[this.idTag];
+            }
+            if (this.chat.usersList && this.chat.populateUserList) {
+                this.chat.populateUserList();
+            }
+        }
     },
 
     tick() {
@@ -595,8 +571,29 @@ AFRAME.registerComponent('arena-user', {
                 }
             }
             if (data.pano) {
-                const resolutionStep = this.getOptimalResolutionStep(this.distance, window.innerHeight);
-                this.evaluateRemoteResolution(resolutionStep);
+                if (this.distance < this.panoRadius) {
+                    // User is INSIDE the videosphere — always request full resolution.
+                    // unmuteVideo() is required here: muteVideo() pauses the shared video<id>
+                    // element that the videosphere texture reads from, and without un-pausing on
+                    // the visible paths the sphere stays frozen/blank once it has ever been culled
+                    // (the #430 missing-unmute bug, exposed once the remote element actually plays).
+                    this.unmuteVideo();
+                    this.evaluateRemoteResolution(1920);
+                } else if (arenaCameraComponent && arenaCameraComponent.isVideoFrustumCullingEnabled() && this.panoEl) {
+                    // User is OUTSIDE the videosphere — apply frustum culling
+                    const panoInView = arenaCameraComponent.viewIntersectsObject3D(this.panoEl.object3D);
+                    if (panoInView) {
+                        this.unmuteVideo();
+                        this.evaluateRemoteResolution(480);
+                    } else {
+                        this.muteVideo();
+                        this.evaluateRemoteResolution(0);
+                    }
+                } else {
+                    // User is OUTSIDE but frustum culling disabled — use reduced resolution
+                    this.unmuteVideo();
+                    this.evaluateRemoteResolution(480);
+                }
             } else if (inFieldOfView === false) {
                 this.muteVideo();
                 this.evaluateRemoteResolution(0);
@@ -607,8 +604,8 @@ AFRAME.registerComponent('arena-user', {
                     this.evaluateRemoteResolution(0);
                 } else {
                     this.unmuteVideo();
-                    const resolutionStep = this.getOptimalResolutionStep(this.distance, window.innerHeight);
-                    this.evaluateRemoteResolution(resolutionStep);
+                    const resolution = this.getActualResolution(this.distance, window.innerHeight);
+                    this.evaluateRemoteResolution(resolution);
                 }
             } else {
                 this.unmuteVideo();

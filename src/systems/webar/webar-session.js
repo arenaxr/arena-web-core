@@ -6,8 +6,6 @@
  * @date 2022
  */
 
-/* global AFRAME */
-
 import { ARENAUtils } from '../../utils';
 
 const HIDDEN_CLASS = 'a-hidden';
@@ -25,6 +23,7 @@ AFRAME.registerComponent('arena-webar-session', {
         // hide environment and make scene transparent
         const env = document.getElementById('env');
         env.setAttribute('visible', false);
+        ARENA.addDefaultLights(true);
 
         // hide ar/vr buttons
         this.hideVRButtons();
@@ -67,7 +66,8 @@ AFRAME.registerComponent('arena-webar-session', {
         this.onResize();
         window.addEventListener('resize', this.onResize.bind(this));
 
-        await document.querySelector('a-scene').systems.armarker.webXRSessionStarted();
+        await this.el.sceneEl.systems.armarker.webXRSessionStarted();
+        this.el.sceneEl.components.openvps?.webXRSessionStarted();
     },
 
     update() {

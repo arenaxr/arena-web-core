@@ -6,13 +6,126 @@
  * @date 2020
  */
 
-/* global AFRAME */
+/* global ARENAAUTH */
+
+import { ARENAUtils } from '../../utils/index.js';
+import * as FileStore from '../../utils/filestore-upload.js';
+import { TOPICS } from '../../constants';
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  * @module build3d-mqtt-scene
  */
-let toolbarName = 'translate';
+
+// register component actions
+const B3DACTIONS = {
+    JSON_EDIT: 'edit-json',
+    FS_UPLOAD: 'upload-to-filestore',
+};
+const arenaComponentActions = {
+    'build3d-mqtt-object': { action: B3DACTIONS.JSON_EDIT, label: 'Edit Json', icon: 'fa-code' },
+};
+let componentsPopulated = false;
+function getArenaComponentActions() {
+    if (!componentsPopulated && FileStore && FileStore.filestoreUploadSchema) {
+        Object.keys(FileStore.filestoreUploadSchema).forEach((props) => {
+            arenaComponentActions[props] = {
+                action: B3DACTIONS.FS_UPLOAD,
+                label: 'Upload to Filestore',
+                icon: 'fa-upload',
+            };
+        });
+        componentsPopulated = true;
+    }
+    return arenaComponentActions;
+}
+
+function updateMqttWidth() {
+    const inspectorMqttLogWrap = document.getElementById('inspectorMqttLogWrap');
+    const entire = window.innerWidth;
+    const left = document.getElementById('scenegraph').clientWidth;
+    const right = document.getElementById('rightPanel').clientWidth;
+    const correct = entire - left - right;
+    inspectorMqttLogWrap.style.width = `${correct}px`;
+}
+
+function publishUploadedFile(newObj) {
+    if (newObj) {
+        LogToUser(newObj);
+        const topicBase = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr(ARENA.topicParams);
+        const pubTopic = topicBase.formatStr({ objectId: newObj.object_id });
+        console.debug('publishing:', pubTopic, JSON.stringify(newObj));
+        ARENA.Mqtt.publish(pubTopic, newObj);
+
+        AFRAME.INSPECTOR.selectEntity(AFRAME.INSPECTOR.selectedEntity);
+    }
+}
+
+async function handleComponentUploadAction(selectedEntity, componentName) {
+    const objid = selectedEntity.id;
+    let objtype = componentName;
+    // merge only, leave as much of original wire format as possible, including object_type
+    const srcs = FileStore.filestoreUploadSchema[componentName];
+    if (srcs[0]) {
+        if (srcs[0].startsWith(`${componentName}.`)) {
+            // sub-component, test for geometry, if needed
+            if ('geometry' in selectedEntity.components) {
+                objtype = selectedEntity.components.geometry.primitive;
+            }
+        }
+    }
+    const newObj = await FileStore.uploadFileStoreDialog(
+        ARENA.nameSpace,
+        ARENA.sceneName,
+        objid,
+        objtype,
+        publishUploadedFile
+    );
+}
+
+function addComponentAction(componentName, dataAction, title, iconName) {
+    const thetitle = document.querySelector(`.component .componentHeader .componentTitle[title="${componentName}"]`);
+    if (!thetitle) return;
+    const actionsContainer = thetitle.parentElement.querySelector('.componentHeaderActions');
+    if (!actionsContainer) return;
+    const thebutton = actionsContainer.querySelector(`[data-action="${dataAction}"]`);
+
+    // does the graph have a new component?
+    // insert the upload link and and action listener
+    if (!thebutton) {
+        const buttonId = `${componentName}-${dataAction}`;
+        const actionButton = document.createElement('a');
+        actionButton.id = buttonId;
+        actionButton.title = title;
+        actionButton.classList.add('button', 'fa', iconName);
+        actionButton.dataset.action = dataAction;
+        actionButton.dataset.component = componentName;
+        actionButton.addEventListener(
+            'click',
+            async (e) => {
+                const { selectedEntity } = AFRAME.INSPECTOR;
+                switch (dataAction) {
+                    case B3DACTIONS.JSON_EDIT:
+                        window.open(
+                            `/build/?scene=${ARENA.namespacedScene}&objectId=${selectedEntity.id}`,
+                            'ArenaJsonEditor'
+                        );
+                        break;
+                    case B3DACTIONS.FS_UPLOAD: {
+                        await handleComponentUploadAction(selectedEntity, componentName);
+                        break;
+                    }
+                    default:
+                        console.error(`Build3d data-action '${dataAction}' unsupported!`);
+                        break;
+                }
+            },
+            false
+        );
+        actionsContainer.prepend(actionButton);
+    }
+}
+
 AFRAME.registerComponent('build3d-mqtt-scene', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     schema: {
@@ -21,11 +134,10 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             default: 'scene-options',
         },
     },
-    // TODO: reduce logging to a reasonable level, similar to build page
     multiple: false,
     init() {
         const observer = new MutationObserver(this.sceneNodesUpdate);
-        console.log('build3d watching scene children...');
+        // console.debug('build3d watching scene children...');
         observer.observe(this.el, {
             childList: true,
             subtree: true,
@@ -38,94 +150,33 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             switch (mutation.type) {
                 case 'childList':
                     if (mutation.addedNodes.length > 0) {
-                        console.log(`${mutation.addedNodes.length} child nodes have been added.`, mutation.addedNodes);
+                        // console.debug(`${mutation.addedNodes.length} child nodes have been added.`, mutation.addedNodes);
                         mutation.addedNodes.forEach((node) => {
-                            console.log('add node:', node.nodeName, node.components);
+                            // console.debug('add node:', node.nodeName, node.components);
                             // new blank entities are added by the user in the inspector
                             if (
                                 node.nodeName.toLowerCase() === 'a-entity' &&
                                 Object.keys(node.components).length === 0
                             ) {
-                                console.log('add build3d-mqtt-object:');
+                                if (!node.id) {
+                                    const promptId = prompt(
+                                        'Provide a unique ID for this new object (e.g., my-entity):'
+                                    );
+                                    if (promptId) {
+                                        node.id = promptId
+                                            .trim()
+                                            .toLowerCase()
+                                            .replace(/[^a-z0-9_-]/g, '');
+                                    }
+                                }
+                                node.dataset.isNewInspectorObject = 'true';
+                                // console.debug('add build3d-mqtt-object:');
                                 node.setAttribute('build3d-mqtt-object', 'enabled', true);
                             }
                         });
                     }
                     if (mutation.removedNodes.length > 0) {
-                        console.log(
-                            `${mutation.removedNodes.length} child nodes have been removed.`,
-                            mutation.removedNodes
-                        );
-                        mutation.removedNodes.forEach((node) => {
-                            console.log('delete node:', node.nodeName, node.components);
-                        });
-                    }
-                    break;
-                default:
-                // skip
-            }
-        });
-    },
-    cursorAttributesUpdate(mutationList, observer) {
-        mutationList.forEach((mutation) => {
-            switch (mutation.type) {
-                case 'attributes':
-                    console.log(
-                        `The ${mutation.attributeName} attribute was modified.`,
-                        mutation.target.id,
-                        mutation.oldValue
-                    );
-                    // TODO: we are writing to DOM to frequently, try diffing a change graph...
-                    // eslint-disable-next-line no-case-declarations
-                    let values;
-                    if (mutation.attributeName === 'class') {
-                        if (mutation.target.className.includes('a-mouse-cursor-hover')) {
-                            // flush selected attr to dom from grab cursor update
-                            const el = AFRAME.INSPECTOR.selectedEntity;
-                            if (el) {
-                                console.log('toolbar flush', el.id, toolbarName);
-                                switch (toolbarName) {
-                                    case 'translate':
-                                        values = el.getAttribute('position');
-                                        el.setAttribute('position', values);
-                                        AFRAME.INSPECTOR.selectedEntity.components.position.flushToDOM();
-                                        break;
-                                    case 'rotate':
-                                        values = el.getAttribute('rotation');
-                                        el.setAttribute('rotation', values);
-                                        AFRAME.INSPECTOR.selectedEntity.components.rotation.flushToDOM();
-                                        break;
-                                    case 'scale':
-                                        values = el.getAttribute('scale');
-                                        el.setAttribute('scale', values);
-                                        AFRAME.INSPECTOR.selectedEntity.components.scale.flushToDOM();
-                                        break;
-                                    default:
-                                    // skip
-                                }
-                            }
-                        }
-                    }
-                    break;
-                default:
-                // skip
-            }
-        });
-    },
-    transformToolbarUpdate(mutationList, observer) {
-        mutationList.forEach((mutation) => {
-            switch (mutation.type) {
-                case 'attributes':
-                    console.log(
-                        `The ${mutation.attributeName} attribute was modified.`,
-                        mutation.target.id,
-                        mutation.oldValue
-                    );
-                    if (mutation.attributeName === 'class') {
-                        if (mutation.target.classList.contains('active')) {
-                            toolbarName = mutation.target.title;
-                            console.log('toolbarName', toolbarName);
-                        }
+                        // Removed nodes are handled by each entity's build3d-mqtt-object remove() lifecycle
                     }
                     break;
                 default:
@@ -134,20 +185,67 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
         });
     },
     tick() {
-        // TODO: move these detectors out to a more reliable timing condition
+        // Auto-expand sceneRoot once on load
+        if (!this.sceneRootExpanded) {
+            const sceneRootNameEl = Array.from(document.querySelectorAll('.outliner .entity .entityName')).find(
+                (el) => el.textContent.trim() === 'sceneRoot'
+            );
+            if (sceneRootNameEl) {
+                const entityRow = sceneRootNameEl.closest('.entity');
+                if (entityRow) {
+                    const collapseSpan = entityRow.querySelector('.collapsespace');
+                    if (collapseSpan && collapseSpan.querySelector('.fa-caret-right')) {
+                        // The programmatic click will bubble up and accidentally select sceneRoot.
+                        // We must cache the current selection and URL target to restore it immediately.
+                        let targetEntity = AFRAME.INSPECTOR ? AFRAME.INSPECTOR.selectedEntity : null;
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const objectId = urlParams.get('objectId');
+                        if (objectId) {
+                            const urlEntity = document.getElementById(objectId);
+                            if (urlEntity) targetEntity = urlEntity;
+                        }
+
+                        collapseSpan.click();
+
+                        // Restore the actual targeted selection
+                        if (targetEntity && targetEntity.id !== 'sceneRoot' && AFRAME.INSPECTOR) {
+                            AFRAME.INSPECTOR.selectEntity(targetEntity);
+                        }
+
+                        this.sceneRootExpanded = true;
+                    } else if (collapseSpan && collapseSpan.querySelector('.fa-caret-down')) {
+                        this.sceneRootExpanded = true; // Already expanded
+                    }
+                }
+            }
+        }
+
+        // Auto-select objectId entity once sceneRoot is expanded.
+        // Deferred via setTimeout so the Inspector's async scene graph UI
+        // settles after the expand click before we override the selection.
+        if (this.sceneRootExpanded && !this.objectIdSelected) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const objectId = urlParams.get('objectId');
+            if (objectId) {
+                const targetEntity = document.getElementById(objectId);
+                if (targetEntity && AFRAME.INSPECTOR) {
+                    setTimeout(() => {
+                        AFRAME.INSPECTOR.selectEntity(targetEntity);
+                    }, 500);
+                    this.objectIdSelected = true;
+                }
+            } else {
+                this.objectIdSelected = true; // No objectId param, nothing to do
+            }
+        }
+
         if (!this.scenegraphDiv) {
-            // this.scenegraphDiv = document.getElementById('scenegraph');
-            // this.scenegraphDiv = document.getElementById('inspectorContainer');
             this.scenegraphDiv = document.getElementById('viewportBar');
             if (this.scenegraphDiv) {
-                console.log('scenegraphTest ok');
-
                 // container
                 const inspectorMqttLogWrap = document.createElement('div');
                 inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
-                inspectorMqttLogWrap.className = 'outliner';
                 inspectorMqttLogWrap.tabIndex = 2;
-                // inspectorMqttLogWrap.style.width = '100%';
                 inspectorMqttLogWrap.style.width = '-webkit-fill-available';
                 inspectorMqttLogWrap.style.bottom = '0';
                 inspectorMqttLogWrap.style.position = 'fixed';
@@ -155,33 +253,62 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttLogWrap.style.display = 'flex';
                 inspectorMqttLogWrap.style.flexDirection = 'column';
                 this.scenegraphDiv.appendChild(inspectorMqttLogWrap);
+                // update width as needed
+                const rightPanel = document.getElementById('rightPanel');
+                const resizeObserver = new ResizeObserver((entries) => {
+                    updateMqttWidth();
+                });
+                resizeObserver.observe(rightPanel);
+                window.onresize = updateMqttWidth;
 
                 // title
-                const inspectorMqttTitle = document.createElement('span');
+                const inspectorMqttTitle = document.createElement('div');
                 inspectorMqttTitle.id = 'inspectorMqttTitle';
-                inspectorMqttTitle.className = 'outliner';
                 inspectorMqttTitle.style.backgroundColor = 'darkgreen';
                 inspectorMqttTitle.style.color = 'white';
                 inspectorMqttTitle.style.opacity = '.75';
                 inspectorMqttTitle.style.width = '100%';
-                inspectorMqttTitle.style.paddingLeft = '10px';
-                inspectorMqttTitle.textContent = "ARENA's Build3D MQTT Publish Log";
+                inspectorMqttTitle.style.padding = '2px 10px';
+                inspectorMqttTitle.style.cursor = 'pointer';
+                inspectorMqttTitle.style.display = 'flex';
+                inspectorMqttTitle.style.justifyContent = 'space-between';
+                inspectorMqttTitle.style.alignItems = 'center';
+
+                const titleText = document.createElement('span');
+                titleText.textContent = `ARENA's Build3D MQTT Publish Log (user: ${ARENAAUTH.user_username})`;
+                inspectorMqttTitle.appendChild(titleText);
+
+                const chevron = document.createElement('i');
+                chevron.className = 'fa fa-chevron-down';
+                inspectorMqttTitle.appendChild(chevron);
+
                 inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
 
                 // log
                 const inspectorMqttLog = document.createElement('div');
                 inspectorMqttLog.id = 'inspectorMqttLog';
-                inspectorMqttLog.className = 'outliner';
                 inspectorMqttLog.style.overflowY = 'auto';
                 inspectorMqttLog.style.width = '100%';
                 inspectorMqttLog.style.height = '100%';
                 inspectorMqttLog.style.backgroundColor = '#242424';
-                inspectorMqttLog.style.color = 'c3c3c3';
+                inspectorMqttLog.style.color = '#c3c3c3';
                 inspectorMqttLog.style.opacity = '.75';
                 inspectorMqttLog.style.paddingLeft = '10px';
                 inspectorMqttLog.style.fontFamily = 'monospace,monospace';
                 inspectorMqttLog.style.fontSize = '10px';
                 inspectorMqttLogWrap.appendChild(inspectorMqttLog);
+
+                inspectorMqttTitle.onclick = () => {
+                    if (inspectorMqttLog.style.display === 'none') {
+                        inspectorMqttLog.style.display = 'block';
+                        chevron.className = 'fa fa-chevron-down';
+                        inspectorMqttLogWrap.style.height = '25%';
+                    } else {
+                        inspectorMqttLog.style.display = 'none';
+                        chevron.className = 'fa fa-chevron-up';
+                        inspectorMqttLogWrap.style.height = 'auto';
+                    }
+                };
 
                 const line = document.createElement('span');
                 line.innerHTML += `Watching for local changes...`;
@@ -189,46 +316,91 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttLog.appendChild(line);
             }
         }
-        if (!this.cursor) {
-            if (document.getElementsByClassName('a-grab-cursor').length > 0) {
-                console.log('cursorTest ok');
+        if (!this.components) {
+            if (document.getElementsByClassName('components').length > 0) {
                 // eslint-disable-next-line prefer-destructuring
-                this.cursor = document.getElementsByClassName('a-grab-cursor')[0];
-                if (this.cursor) {
-                    // watch for mouse down use of grab tools
-                    const observer = new MutationObserver(this.cursorAttributesUpdate);
-                    console.log('build3d watching cursor class attributes...');
-                    observer.observe(this.cursor, {
-                        attributeFilter: ['class'],
-                        attributes: true,
-                        attributeOldValue: true,
+                this.components = document.getElementsByClassName('components')[0];
+                if (this.components) {
+                    // handle selected entity
+                    const observer = new MutationObserver((mutationList) => {
+                        mutationList.forEach((mutation) => {
+                            // handle class change
+
+                            // query active components
+                            const actions = getArenaComponentActions();
+                            Object.keys(actions).forEach((key) => {
+                                addComponentAction(key, actions[key].action, actions[key].label, actions[key].icon);
+                            });
+                        });
                     });
-                }
-            }
-        }
-        // TODO: fix transformToolbar, is usually late and gets clipped from the global pause()
-        if (!this.transformToolbar) {
-            if (document.getElementsByClassName('toolbarButtons').length > 0) {
-                console.log('transformTest ok');
-                // eslint-disable-next-line prefer-destructuring
-                this.transformToolbar = document.getElementsByClassName('toolbarButtons')[0];
-                if (this.transformToolbar) {
-                    // watch for active toolbar grab tool change
-                    const observer = new MutationObserver(this.transformToolbarUpdate);
-                    console.log('build3d watching toolbar class attributes...');
-                    observer.observe(this.transformToolbar, {
+                    const options = {
                         attributeFilter: ['class'],
-                        attributes: true,
+                        childList: true,
                         subtree: true,
-                    });
+                    };
+                    observer.observe(this.components, options);
                 }
             }
+        } else if (!document.body.contains(this.components)) {
+            // inspector rebuilt the components panel; reset so we re-bind the observer
+            this.components = null;
         }
+
         if (!this.env) {
             this.env = document.getElementById('env');
             if (this.env) {
-                console.log('envTest ok');
                 this.env.setAttribute('build3d-mqtt-object', 'enabled', true);
+            }
+        }
+
+        // Apply UI lockout if selected entity is stateless
+        // We run this in tick() to automatically detect ID updates and un-lock the panel securely.
+        if (AFRAME.INSPECTOR) {
+            const { selectedEntity } = AFRAME.INSPECTOR;
+            if (selectedEntity) {
+                let warningBox = document.getElementById('build3d-id-warning');
+                const allComponentDivs = document.querySelectorAll('.components > div, .components > span');
+
+                if (!selectedEntity.id && selectedEntity.hasAttribute('build3d-mqtt-object')) {
+                    // Lockout: Hide component additions and specific components
+                    allComponentDivs.forEach((c) => {
+                        if (c.id !== 'componentEntityHeader' && c.id !== 'build3d-id-warning') {
+                            c.style.display = 'none';
+                        }
+                    });
+
+                    // Create warning box if it doesn't exist
+                    if (!warningBox) {
+                        warningBox = document.createElement('div');
+                        warningBox.id = 'build3d-id-warning';
+                        warningBox.style.padding = '15px';
+                        warningBox.style.margin = '15px';
+                        warningBox.style.backgroundColor = '#333';
+                        warningBox.style.border = '1px solid #ffeb3b';
+                        warningBox.style.borderRadius = '4px';
+                        warningBox.style.color = '#ffeb3b';
+                        warningBox.style.textAlign = 'center';
+                        warningBox.innerHTML =
+                            '<strong>⚠️ ID Required</strong><br/><br/>This object does not have an ID yet. A unique ID is required for ARENA MQTT state synchronization.<br/><br/>☝️ Please enter an ID in the box above to unlock component properties.';
+
+                        const commonComps = document.getElementById('componentEntityHeader');
+                        if (commonComps) {
+                            commonComps.after(warningBox);
+                        } else {
+                            const componentsContainer = document.querySelector('.components');
+                            if (componentsContainer) componentsContainer.prepend(warningBox);
+                        }
+                    }
+                    warningBox.style.display = 'block';
+                } else {
+                    // Unlock: Restore normal visibility
+                    allComponentDivs.forEach((c) => {
+                        if (c.id !== 'build3d-id-warning') {
+                            c.style.display = '';
+                        }
+                    });
+                    if (warningBox) warningBox.style.display = 'none';
+                }
             }
         }
     },

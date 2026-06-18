@@ -10,7 +10,7 @@
 
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
-export default class MQTTClient {
+export default class MqttClient {
     constructor(st) {
         // handle default this.settings
         // eslint-disable-next-line no-param-reassign
@@ -79,8 +79,16 @@ export default class MQTTClient {
         this.connected = false;
     }
 
-    subscribe(topic, opts) {
-        this.mqttc.subscribe(topic, opts);
+    subscribe(topic) {
+        const logOptions = {
+            onSuccess: () => {
+                if (this.settings.dbg === true) console.debug(`Subscribe success to: ${topic}`);
+            },
+            onFailure: () => {
+                console.error(`Subscribe FAILED to: ${topic}`);
+            },
+        };
+        this.mqttc.subscribe(topic, logOptions);
     }
 
     unsubscribe(topic, opts) {
@@ -88,7 +96,7 @@ export default class MQTTClient {
     }
 
     async publish(topic, payload, qos = 0, retained = false) {
-        if (this.settings.dbg) {
+        if (this.settings.dbg === true) {
             console.debug(`publish ${topic}: ${payload}`);
         }
         this.mqttc.send(topic, payload, qos, retained);
@@ -98,7 +106,7 @@ export default class MQTTClient {
      * Callback; Called when a message arrives
      */
     onMessageArrived(message) {
-        if (this.settings.dbg) {
+        if (this.settings.dbg === true) {
             console.debug(`Mqtt Msg [${message.destinationName}]: ${message.payloadString}`);
         }
 

@@ -3,7 +3,7 @@
     "description": "ARENAUI element which displays a vertical or horizontal panel of buttons.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -22,10 +22,10 @@
                                     "title": "Buttons",
                                     "default": [
                                         {
-                                            "name": "Option 1"
+                                            "name": "Confirm"
                                         },
                                         {
-                                            "name": "Option 2"
+                                            "name": "Cancel"
                                         }
                                     ],
                                     "uniqueItems": false,
@@ -90,6 +90,39 @@
                                     "default": "light",
                                     "enum": ["light", "dark"]
                                 },
+                                "themeOverride": {
+                                    "type": "array",
+                                    "title": "Color Theme Override",
+                                    "description": "Array of color override tuples e.g. [['textBg', '#000000']]",
+                                    "items": {
+                                        "type": "array",
+                                        "items": [
+                                            {
+                                                "type": "string",
+                                                "enum": [
+                                                    "text",
+                                                    "textBg",
+                                                    "captionBg",
+                                                    "textBgOpacity",
+                                                    "bg",
+                                                    "bgOpacity",
+                                                    "buttonText",
+                                                    "buttonBg",
+                                                    "buttonBgOpacity",
+                                                    "buttonBgHover",
+                                                    "buttonBgSelected"
+                                                ]
+                                            },
+                                            {
+                                                "type": "string",
+                                                "format": "color"
+                                            }
+                                        ],
+                                        "minItems": 2,
+                                        "maxItems": 2
+                                    },
+                                    "default": []
+                                },
                                 "materialSides": {
                                     "type": "string",
                                     "title": "Material Sides",
@@ -100,10 +133,10 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-common.json#properties"
                         }
                     ],
                     "title": "Button Panel Data",

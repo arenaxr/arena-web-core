@@ -65,17 +65,20 @@
             "properties": {
                 "x": {
                     "default": 1,
-                    "exclusiveMinimum": 0,
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
                     "type": "number"
                 },
                 "y": {
                     "default": 1,
-                    "exclusiveMinimum": 0,
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
                     "type": "number"
                 },
                 "z": {
                     "default": 1,
-                    "exclusiveMinimum": 0,
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
                     "type": "number"
                 }
             },
@@ -83,6 +86,12 @@
             "format": "grid",
             "type": "object",
             "title": "Scale"
+        },
+        "visible": {
+            "default": true,
+            "description": "Whether object is visible. Property is inherited.",
+            "type": "boolean",
+            "title": "Visible"
         }
     },
     "required": ["object_type", "position", "rotation"]

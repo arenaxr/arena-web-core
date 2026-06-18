@@ -5,6 +5,12 @@ module.exports = {
         es6: true,
     },
     extends: ['airbnb-base', 'prettier'],
+    globals: {
+        AFRAME: 'readonly',
+        ARENA: 'readonly',
+        THREE: 'readonly',
+        Swal: 'readonly',
+    },
     plugins: ['prettier'],
     parser: '@babel/eslint-parser',
     parserOptions: {

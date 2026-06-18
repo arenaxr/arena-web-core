@@ -13,6 +13,8 @@
 import './arena-camera';
 import './arena-hand';
 import './arena-user';
+import './camera-orbit';
 import './gesture-detector';
 import './network-latency';
 import './press-and-move';
+import './vr-thumbstick-fly';

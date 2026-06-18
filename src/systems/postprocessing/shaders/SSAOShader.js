@@ -5,8 +5,6 @@
  * https://github.com/McNopper/OpenGL/blob/master/Example28/shader/ssao.frag.glsl
  */
 
-/* global THREE */
-
 const SSAOShader = {
     defines: {
         PERSPECTIVE_CAMERA: 1,

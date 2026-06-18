@@ -7,8 +7,6 @@
  * @date 2023
  */
 
-/* global AFRAME */
-
 const IMG_EXTENSIONS = ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff'];
 
 function checkIsImageFallback(src, onResult) {

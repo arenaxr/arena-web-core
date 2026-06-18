@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+  <title>ARENA 3D Replay</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+
+  <!-- login auth check, blocking to page load -->
+  <script src="../conf/defaults.js"></script>
+  <script src="../static/auth.js"></script>
+
+  <!-- UI Dependencies -->
+  <link rel="stylesheet" href="../static/vendor/mdb/mdb.min.css" />
+  <link rel="stylesheet" href="../static/vendor/fontawesome-5/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet" />
+
+  <!-- Navbar Dependencies -->
+  <script src="../static/vendor/jquery-2.1.1.min.js"></script>
+  <script src="../static/arenaxr-bootstrap/bootstrap.min.js"></script>
+  <script src="../navbar.js" type="text/javascript"></script>
+
+  <!-- AFRAME base -->
+  <script src="../static/vendor/aframe/aframe-master.min.js"></script>
+  <script src="../static/vendor/lib-jitsi-meet.min.js"></script>
+
+  <!-- use the main parcel bundle (replay system is included; core systems skip init in replay mode) -->
+  <script src="../dist/index.js"></script>
+
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    #replay-title {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      pointer-events: none;
+    }
+
+    #scrubber {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      max-width: 900px;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 12px 18px;
+      border-radius: 10px;
+      color: white;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-family: sans-serif;
+    }
+
+    #scrubber input[type="range"] {
+      flex-grow: 1;
+      cursor: pointer;
+    }
+
+    #playBtn {
+      padding: 6px 14px;
+      border-radius: 5px;
+      border: none;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #playBtn:hover {
+      background: #0056b3;
+    }
+
+    #timeDisplay {
+      font-family: monospace;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    #recordingSelect {
+      max-width: 250px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="header"></div>
+  <div id="replay-title">ARENA 3D Replay</div>
+
+  <a-scene arena-replay physics="debug: false" renderer="colorManagement: true"
+    gltf-model="dracoDecoderPath: /static/vendor/draco/;">
+    <a-assets></a-assets>
+    <a-entity id="sceneRoot">
+      <a-entity id="cameraRig" position="0 1.6 0">
+        <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
+          <a-camera id="my-camera" look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 30"
+            arrow-controls></a-camera>
+        </a-entity>
+      </a-entity>
+    </a-entity>
+  </a-scene>
+
+  <div id="scrubber">
+    <select id="recordingSelect" class="form-select w-auto">
+      <option value="">Select a Recording</option>
+    </select>
+    <button id="playBtn">Play / Pause</button>
+    <div id="timeDisplay">--:-- / --:--</div>
+    <input type="range" id="timeline" min="0" max="100" value="0">
+  </div>
+</body>
+
+</html>

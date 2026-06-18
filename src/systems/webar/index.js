@@ -1,11 +1,13 @@
 /**
+ * @module webar
+ */
+/**
  * @fileoverview AR session handler for standard, non-webxr devices
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-/* global ARENA */
 
 import './webar-session';
 import WebARCameraCapture from '../armarker/camera-capture/ccwebar';
@@ -47,12 +49,12 @@ export default class ARENAWebARUtils {
      * Adds the AR button for non-WebXR devices
      */
     static handleARButtonForNonWebXRMobile() {
-        if (ARENA.params.camFollow) {
-            // Assume that all controls should be relinquished
-            const camera = document.getElementById('my-camera');
-            camera.setAttribute('look-controls', 'enabled', false);
-            camera.setAttribute('wasd-controls', 'enabled', false);
-        }
+        // if (ARENA.params.camFollow) {
+        //     // Assume that all controls should be relinquished
+        //     const camera = document.getElementById('my-camera');
+        //     camera.setAttribute('look-controls', 'enabled', false);
+        //     camera.setAttribute('wasd-controls', 'enabled', false);
+        // }
 
         if (ARENAUtils.isWebXRViewer()) {
             return;

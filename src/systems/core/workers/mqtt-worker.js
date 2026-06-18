@@ -8,6 +8,10 @@
 
 import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
+import { TOPICS } from '../../../constants';
+
+const MINTOCKINTERVAL = 3 * 1000;
+let lastTock = new Date().getTime();
 
 /**
  * Main ARENA MQTT webworker client
@@ -19,16 +23,24 @@ class MQTTWorker {
 
     connectionLostHandlers = [];
 
+    messageQueues = {};
+
+    messageQueueConf = {};
+
     /**
      * @param {object} ARENAConfig
      * @param {function} healthCheck
+     * @param {function} onSubscribed
      */
-    constructor(ARENAConfig, healthCheck) {
+    constructor(ARENAConfig, healthCheck, onSubscribed) {
         // this.restartJitsi = restartJitsi;
         this.config = ARENAConfig;
         this.healthCheck = healthCheck;
 
-        this.subscriptions = [this.config.renderTopic]; // Add main scene renderTopic by default to subs
+        this.subscriptions = this.config.subscriptions;
+        this.onSubscribed = onSubscribed;
+        this.subCount = 0;
+
         this.connectionLostHandlers = [
             (responseObject) => {
                 if (responseObject.errorCode !== 0) {
@@ -89,11 +101,12 @@ class MQTTWorker {
     /**
      * Subscribe to a topic and add it to list of subscriptions
      * @param {string} topic
+     * @param {object} opts
      */
-    subscribe(topic) {
+    subscribe(topic, opts) {
         if (!this.subscriptions.includes(topic)) {
             this.subscriptions.push(topic);
-            this.mqttClient.subscribe(topic);
+            this.mqttClient.subscribe(topic, opts);
         }
     }
 
@@ -114,34 +127,75 @@ class MQTTWorker {
      * @param {Paho.Message} message
      */
     onMessageArrivedDispatcher(message) {
+        const now = new Date().getTime();
         const topic = message.destinationName;
-        const topicCategory = topic.split('/')[1];
+        const topicSplit = topic.split('/');
+        const topicCategory = topicSplit[TOPICS.TOKENS.TYPE];
         const handler = this.messageHandlers[topicCategory];
-        if (handler) {
-            handler(message);
+        const trimmedMessage = {
+            destinationName: message.destinationName,
+            payloadString: message.payloadString,
+            workerTimestamp: now,
+        };
+        if (this.messageQueues[topicCategory]) {
+            const { isJson, validateUuid } = this.messageQueueConf[topicCategory] ?? {};
+            if (isJson) {
+                try {
+                    trimmedMessage.payloadObj = JSON.parse(message.payloadString);
+                    if (validateUuid) {
+                        const topicUuid = topicSplit[TOPICS.TOKENS.UUID];
+                        if (topicUuid !== trimmedMessage.payloadObj[validateUuid]) {
+                            return; // mismatched uuid
+                        }
+                    }
+                } catch (e) {
+                    return;
+                }
+            }
+            this.messageQueues[topicCategory].push(trimmedMessage);
+            // Been too long since last tock (lost focus?), flush queue to main thread instead of waiting for pull
+            if (now - lastTock > MINTOCKINTERVAL && handler) {
+                const batch = this.messageQueues[topicCategory];
+                this.messageQueues[topicCategory] = [];
+                lastTock = now;
+                console.log(`Worker flushing ${batch.length} messages for ${topicCategory}`);
+                handler(batch);
+            }
+        } else if (handler) {
+            handler(trimmedMessage);
         }
+    }
+
+    tock(topicCategory) {
+        const batch = this.messageQueues[topicCategory];
+        this.messageQueues[topicCategory] = [];
+        const now = new Date().getTime();
+        lastTock = now;
+        return batch;
+    }
+
+    /**
+     * Register a message handler for a given topic category beneath realm (second level). This is required even
+     * if a message is batch queued, as this we need this to flush the queue whenever the max interval is reached.
+     * @param {string} topicCategory - the topic category to register a handler for
+     * @param {function} mainHandler - main thread handler, pass in whatever expected format
+     */
+    registerMessageHandler(topicCategory, mainHandler) {
+        this.messageHandlers[topicCategory] = mainHandler;
     }
 
     /**
      * Register a message handler for a given topic category beneath realm (second level).
      * @param {string} topicCategory - the topic category to register a handler for
-     * @param {function} mainHandler - main thread handler, pass in whatever expected format
      * @param {boolean} isJson - whether the payload is expected to be well-formed json
+     * @param {string|null} validateUuid - object key to validate match to the topic uuid, nullish if no validation
      */
-    registerMessageHandler(topicCategory, mainHandler, isJson) {
-        if (isJson) {
-            // Parse json in worker
-            this.messageHandlers[topicCategory] = (message) => {
-                try {
-                    const jsonPayload = JSON.parse(message.payloadString);
-                    mainHandler({ ...message, payloadObj: jsonPayload });
-                } catch (e) {
-                    // Ignore
-                }
-            };
-        } else {
-            this.messageHandlers[topicCategory] = mainHandler;
-        }
+    registerMessageQueue(topicCategory, isJson = true, validateUuid = 'object_id') {
+        this.messageQueues[topicCategory] = [];
+        this.messageQueueConf[topicCategory] = {
+            isJson,
+            validateUuid,
+        };
     }
 
     /**
@@ -176,7 +230,19 @@ class MQTTWorker {
         });
 
         this.subscriptions.forEach((topic) => {
-            this.mqttClient.subscribe(topic);
+            this.mqttClient.subscribe(topic, {
+                onSuccess: () => {
+                    this.subCount += 1;
+                    if (this.subCount === this.subscriptions.length) {
+                        this.onSubscribed();
+                        this.subCount = 0;
+                    }
+                    if (this.config.dbg === true) console.debug(`Subscribe success to: ${topic}`);
+                },
+                onFailure: () => {
+                    console.error(`Subscribe FAILED to: ${topic}`);
+                },
+            });
         });
 
         if (reconnect) {

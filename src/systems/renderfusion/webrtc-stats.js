@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 const info = AFRAME.utils.debug('ARENA:webrtc-stats:info');
 
 export default class WebRTCStatsLogger {
@@ -104,7 +102,9 @@ export default class WebRTCStatsLogger {
                 info(`E2E Latency: ${stat.latency} ms`);
             }
 
-            this.signaler.sendStats(stat);
+            if (this.signaler.isConnected()) {
+                this.signaler.sendStats(stat); // TODO (elu2): causing some disconnects for renderfusion when heartbeats not high enough
+            }
         });
 
         this.lastReport = report;

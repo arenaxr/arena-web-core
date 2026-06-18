@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, JitsiMeetJS, $ */
+/* global JitsiMeetJS, $ */
 import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../../constants';
 
@@ -29,6 +29,9 @@ AFRAME.registerSystem('arena-jitsi', {
     },
 
     init() {
+        // Skip Jitsi in replay mode
+        if (this.el.hasAttribute('arena-replay')) return;
+
         const { data } = this;
 
         this.connectOptions = {
@@ -36,7 +39,8 @@ AFRAME.registerSystem('arena-jitsi', {
                 domain: data.jitsiHost.split(':')[0], // remove port, if exists.
                 muc: `conference.${data.jitsiHost.split(':')[0]}`, // remove port, if exists. FIXME: use XEP-0030
             },
-            bosh: `//${data.jitsiHost}/http-bind`, // FIXME: use xep-0156 for that
+            serviceUrl: `//${data.jitsiHost}/http-bind`, // FIXME: use xep-0156 for that
+            // TODO (mwfarb) for v1844 serviceUrl: `//${data.jitsiHost}/http-bind`, // FIXME: use xep-0156 for that
 
             // The name of client node advertised in XEP-0115 'c' stanza
             clientNode: 'http://jitsi.org/jitsimeet',
@@ -62,7 +66,12 @@ AFRAME.registerSystem('arena-jitsi', {
         this.hasAudio = false;
         this.hasVideo = false;
 
-        this.screenShareDict = {};
+        this.screenShareDict = {}; // participantId -> Set of object element ids they share on
+        this.screenShareOwners = {}; // object element id -> participantId currently displayed on it
+        this.screenShareSourceNames = new Set(); // jitsi video source names of active screenshares
+        this.screenShareRestore = {}; // object element id -> pristine state to restore when share ends
+        // last receiver video constraints set by avatars/defaults, re-applied when screenshares change
+        this.lastVideoConstraints = { colibriClass: 'ReceiverVideoConstraints' };
 
         /**
          * list of timers to send new user notifications; when a user enters jitsi, there is some delay until other
@@ -97,24 +106,24 @@ AFRAME.registerSystem('arena-jitsi', {
         const { el } = this;
         const { sceneEl } = el;
 
-        this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
 
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,/:;=?@[\]]/g, '_');
+        this.conferenceName = ARENA.namespacedScene.toLowerCase().replace(/[!#$&'()*+,/:;=?@[\]]/g, '_');
 
         JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
         // signal that jitsi is loaded. note: jitsi is not necessarily CONNECTED when this event is fired,
         ARENA.events.emit(ARENA_EVENTS.JITSI_LOADED, true);
 
-        if (!this.arena.params.noav && this.arena.isJitsiPermitted()) {
+        if (!ARENA.params.noav && ARENA.isJitsiPermitted()) {
             const _this = this;
-            ARENA.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
+            ARENA.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, async () => {
                 // Only show if no previous preferences were set / first time AV setup
                 if (ARENA.params.armode) {
                     ARENA.events.addEventListener(ARENA_EVENTS.CV_INITIALIZED, _this.connect.bind(_this));
-                } else if (localStorage.getItem('prefAudioInput') === null && ARENA.params.skipav === undefined) {
+                } else if (!(await _this.validateDeviceIds()) ||
+                           (localStorage.getItem('prefAudioInput') === null && ARENA.params.skipav === undefined)) {
                     window.setupAV(() => {
                         // Initialize Jitsi videoconferencing after A/V setup window
                         _this.connect();
@@ -123,6 +132,36 @@ AFRAME.registerSystem('arena-jitsi', {
                     ARENA.events.addEventListener(ARENA_EVENTS.SCENE_OBJ_LOADED, _this.connect.bind(_this));
                 }
             });
+        }
+    },
+
+    /**
+     * Validate saved device IDs against currently available devices.
+     * Clears only the preference(s) whose device is no longer available, leaving the rest intact.
+     * @return {Promise<boolean>} true if all saved devices are still valid
+     */
+    async validateDeviceIds() {
+        const prefKeys = ['prefAudioInput', 'prefVideoInput', 'prefAudioOutput'];
+        const prefs = prefKeys.map((key) => [key, localStorage.getItem(key)]);
+        if (prefs.every(([, value]) => !value)) return true;
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const deviceIds = new Set(devices.map((d) => d.deviceId));
+            let allValid = true;
+            prefs.forEach(([key, value]) => {
+                if (value && !deviceIds.has(value)) {
+                    // Only clear the specific device that is gone. macOS/Chrome rotates deviceIds
+                    // (sleep/wake, plug/unplug, the floating "default" entry); clearing all prefs
+                    // when any one is stale would discard the user's still-valid mic/camera choice
+                    // and fall back to the system default.
+                    console.warn(`Saved A/V device no longer available, clearing ${key}`);
+                    localStorage.removeItem(key);
+                    allValid = false;
+                }
+            });
+            return allValid;
+        } catch (e) {
+            return true; // Can't enumerate devices, assume valid
         }
     },
 
@@ -140,7 +179,10 @@ AFRAME.registerSystem('arena-jitsi', {
         // Firefox does not allow audio output device change
         try {
             const prefAudioOutput = localStorage.getItem('prefAudioOutput');
-            JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
+            // only set an explicit output device; passing null/'' would force the system default
+            if (prefAudioOutput) {
+                JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
+            }
         } catch {
             // empty
         }
@@ -150,7 +192,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         this.connection = new JitsiMeetJS.JitsiConnection(
             data.arenaAppId,
-            this.arena.mqttToken.mqtt_token,
+            ARENA.mqttToken.mqtt_token,
             this.connectOptions
         );
         this.connection.addEventListener(
@@ -178,7 +220,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
     /**
      * Handles local tracks.
-     * @param {[]} tracks Array with JitsiTrack objects
+     * @param {Array} tracks Array with JitsiTrack objects
      */
     async onLocalTracks(tracks) {
         this.localTracks = tracks;
@@ -252,7 +294,8 @@ AFRAME.registerSystem('arena-jitsi', {
         if (!screenShareId) return;
 
         let screenShareEl = document.getElementById(screenShareId);
-        if (!screenShareEl) {
+        const created = !screenShareEl;
+        if (created) {
             const sceneEl = document.querySelector('a-scene');
             // create if doesn't exist
             screenShareEl = document.createElement('a-entity');
@@ -264,14 +307,43 @@ AFRAME.registerSystem('arena-jitsi', {
             screenShareEl.setAttribute('material', 'shader: flat; side: double');
             sceneEl.appendChild(screenShareEl);
         }
+
+        // Capture the object's pristine state once, before screenshare styling, so it can be
+        // restored when the share ends (otherwise the frozen last video frame stays on the object
+        // and there is no visual cue that sharing has stopped). Auto-created objects are removed
+        // on end; pre-existing scene objects (e.g. a 'screenshare' cube) revert to their material.
+        if (!this.screenShareRestore[screenShareId]) {
+            this.screenShareRestore[screenShareId] = {
+                created,
+                material: created ? null : { ...screenShareEl.getAttribute('material') },
+                hadExtras: !created && screenShareEl.hasAttribute('material-extras'),
+                hadLandmark: !created && screenShareEl.hasAttribute('landmark'),
+            };
+        }
+
         screenShareEl.setAttribute('muted', 'false');
         screenShareEl.setAttribute('autoplay', 'true');
         screenShareEl.setAttribute('playsinline', 'true');
         screenShareEl.setAttribute('material', 'src', `#${videoId}`);
         screenShareEl.setAttribute('material', 'shader', 'flat');
         screenShareEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
-        screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
-        this.screenShareDict[participantId] = screenShareEl;
+
+        // Track which participant is currently displayed on this object, and the set of
+        // objects this participant shares on, so that when one sharer leaves we never clear
+        // another sharer's still-active video on a shared object (issue: same-object collision).
+        this.screenShareOwners[screenShareId] = participantId;
+        if (!this.screenShareDict[participantId]) {
+            this.screenShareDict[participantId] = new Set();
+        }
+        this.screenShareDict[participantId].add(screenShareId);
+
+        // add a default landmark for any screen share object
+        if (!screenShareEl.hasAttribute('landmark')) {
+            screenShareEl.setAttribute(
+                'landmark',
+                `label: Screen: ${screenShareId} (nearby); randomRadiusMin: 2; randomRadiusMax: 3`
+            );
+        }
     },
 
     /**
@@ -322,36 +394,73 @@ AFRAME.registerSystem('arena-jitsi', {
             }
             track.attach(vidEl[0]);
 
-            const user = this.conference.getParticipantById(participantId);
-            let camNames = user.getProperty('arenaCameraName');
-            if (!camNames) camNames = user.getDisplayName();
-            if (!camNames) return; // handle jitsi-only users that have not set the display name
+            // Autoplay of an unmuted MediaStream <video> is blocked by Firefox until a user
+            // gesture, so the element never decodes, `canplay`/`loadeddata` never fire, and the
+            // remote videosphere/avatar stays blank. Chrome's MediaStream autoplay is lenient and
+            // renders anyway -- which is why this only reproduced on Firefox receivers. Mute (this
+            // is the video-only track; audio rides the separate `audio<id>` element) and start
+            // playback immediately, mirroring the screenshare path below.
+            vidEl[0].muted = true;
+            if (vidEl[0].paused) {
+                vidEl[0].play().catch((e) => console.warn('jitsi-video: remote video play failed', e));
+            }
 
-            if (camNames.includes(data.screensharePrefix)) {
+            const user = this.conference.getParticipantById(participantId);
+            let idTags = user.getProperty('arenaId');
+            if (!idTags) idTags = user.getDisplayName();
+            if (!idTags) return; // handle jitsi-only users that have not set the display name
+
+            if (idTags.includes(data.screensharePrefix)) {
                 let dn = user.getProperty('screenshareDispName');
                 if (!dn) dn = user.getDisplayName();
                 if (!dn) dn = `No Name #${participantId}`;
-                const camName = user.getProperty('screenshareCamName');
+                const idTag = user.getProperty('screenshareidTag');
                 let objectIds = user.getProperty('screenshareObjIds');
 
-                if (camName && objectIds) {
+                if (idTag && objectIds) {
+                    objectIds = objectIds.split(',');
                     sceneEl.emit(JITSI_EVENTS.SCREENSHARE, {
                         jid: participantId,
                         id: participantId,
                         dn,
-                        cn: camName,
-                        scene: this.arena.namespacedScene,
+                        sn: objectIds[0],
+                        scene: ARENA.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
                     });
-                    objectIds = objectIds.split(',');
+
+                    // Start decoding the screenshare video now. The `autoplay` attribute alone is
+                    // blocked by the browser until the viewer makes a user gesture, so without
+                    // this the video stays paused, `loadeddata` never fires, and the texture is
+                    // empty ("texImage2D: no video") -- which is why sharing only rendered after a
+                    // viewer enabled their own mic/camera. Mute so autoplay is always permitted
+                    // (screenshare audio, if any, rides a separate audio track) and play.
+                    vidEl[0].muted = true;
+                    if (vidEl[0].paused) {
+                        vidEl[0].play().catch((e) => console.warn('screenshare video play failed', e));
+                    }
+
+                    // Explicitly request this screenshare's video from the bridge. ARENA only builds
+                    // receiver constraints from [arena-user] avatars, so a screenshare endpoint (not an
+                    // avatar) is otherwise never requested and, with enableLayerSuspension, the bridge
+                    // forwards no frames -- the video element stays at readyState 0 / 0x0 and renders blank.
+                    this.screenShareSourceNames.add(`${participantId}-v0`);
+                    this.applyReceiverConstraints(this.lastVideoConstraints);
 
                     // handle screen share video
                     for (let i = 0; i < objectIds.length; i++) {
-                        if (objectIds[i]) {
-                            const video = $(`#${videoId}`);
-                            video.on('loadeddata', () => {
-                                this.updateScreenShareObject(objectIds[i], videoId, participantId);
-                            });
+                        const objectId = objectIds[i];
+                        if (objectId) {
+                            // if the video already has data (loadeddata fired before we could
+                            // attach the listener), render now; otherwise wait for it once.
+                            // Mirrors the readyState guard in the jitsi-video component and
+                            // avoids the race that left named objects unrendered.
+                            if (vidEl[0].readyState >= 2) {
+                                this.updateScreenShareObject(objectId, videoId, participantId);
+                            } else {
+                                $(`#${videoId}`).one('loadeddata', () => {
+                                    this.updateScreenShareObject(objectId, videoId, participantId);
+                                });
+                            }
                         }
                     }
                 } else {
@@ -360,9 +469,9 @@ AFRAME.registerSystem('arena-jitsi', {
                         jid: participantId,
                         id: participantId,
                         dn,
-                        cn: undefined,
-                        scene: this.arena.namespacedScene,
+                        scene: ARENA.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
+                        arena: false,
                     });
                     return;
                 }
@@ -416,21 +525,19 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.getParticipants().forEach((user) => {
             const arenaId = user.getProperty('arenaId');
             const arenaDisplayName = user.getProperty('arenaDisplayName');
-            const arenaCameraName = user.getProperty('arenaCameraName');
             if (arenaId) {
                 pl.push({
                     jid: user._id,
                     id: arenaId,
                     dn: arenaDisplayName,
-                    cn: arenaCameraName,
                 });
             }
         });
 
         this.initialized = true;
 
-        sceneEl.emit(JITSI_EVENTS.CONNECTED, {
-            scene: this.arena.namespacedScene,
+        ARENA.events.emit(JITSI_EVENTS.CONNECTED, {
+            scene: ARENA.namespacedScene,
             pl,
         });
     },
@@ -450,16 +557,15 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
         const arenaDisplayName = this.conference.getParticipantById(id).getProperty('arenaDisplayName');
-        const arenaCameraName = this.conference.getParticipantById(id).getProperty('arenaCameraName');
-        if (arenaId && arenaDisplayName && arenaCameraName) {
+        if (arenaId && arenaDisplayName) {
             // emit user joined event in the off chance we know all properties of this arena user
             sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
                 jid: id,
                 id: arenaId,
                 dn: arenaDisplayName,
-                cn: arenaCameraName,
-                scene: this.arena.namespacedScene,
+                scene: ARENA.namespacedScene,
                 src: EVENT_SOURCES.JITSI,
+                arena: true,
             });
         } else {
             let dn = this.conference.getParticipantById(id).getDisplayName(); // get display name
@@ -470,20 +576,24 @@ AFRAME.registerSystem('arena-jitsi', {
                 jid: id,
                 id,
                 dn,
-                cn: undefined,
-                scene: this.arena.namespacedScene,
+                scene: ARENA.namespacedScene,
                 src: EVENT_SOURCES.JITSI,
             };
 
             // this might be a jitsi-only user; emit event if name does not have the arena tag
             if (!dn.includes(data.arenaUserPrefix)) {
                 if (!dn.includes(data.screensharePrefix)) {
-                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, userJoinedArgs);
+                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, { ...userJoinedArgs, arena: false });
                 }
             } else {
+                // This IS an ARENA user (display name carries the #4r3n4_ tag) whose arenaId
+                // property hasn't propagated yet. Notify after the timeout using the idTag parsed
+                // from the tag (the same key MQTT presence uses) and flag it as ARENA, so it is not
+                // mislabeled "(external)" when property propagation is slow.
+                const tagMatch = dn.match(new RegExp(`${data.arenaUserPrefix}([^)]*)\\)`));
+                const parsedIdTag = tagMatch ? tagMatch[1] : id;
                 this.newUserTimers[id] = setTimeout(() => {
-                    // emit event anyway in newUserTimeoutMs if we dont hear from this user
-                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, userJoinedArgs);
+                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, { ...userJoinedArgs, id: parsedIdTag, arena: true });
                 }, data.newUserTimeoutMs);
             }
         }
@@ -505,10 +615,39 @@ AFRAME.registerSystem('arena-jitsi', {
         if (!arenaId) arenaId = id; // this was a jitsi-only user
 
         if (!this.remoteTracks[id]) return;
-        const screenShareEl = this.screenShareDict[id];
-        if (screenShareEl) {
-            screenShareEl.setAttribute('material', 'src', null);
+        const sharedObjIds = this.screenShareDict[id];
+        if (sharedObjIds) {
+            sharedObjIds.forEach((objId) => {
+                // only restore the object if THIS leaving participant still owns it; if another
+                // sharer has since taken it over, leave their video intact (same-object collision).
+                if (this.screenShareOwners[objId] === id) {
+                    const screenShareEl = document.getElementById(objId);
+                    const restore = this.screenShareRestore[objId];
+                    if (screenShareEl) {
+                        if (restore && restore.created) {
+                            // ARENA created this object for the share; remove it so it clearly ends
+                            screenShareEl.remove();
+                        } else {
+                            // pre-existing scene object: clear the frozen video frame and revert to
+                            // its original material/look so it's obvious the share has stopped
+                            if (restore && restore.material) {
+                                screenShareEl.setAttribute('material', restore.material);
+                            } else {
+                                screenShareEl.removeAttribute('material', 'src');
+                            }
+                            if (restore && !restore.hadExtras) screenShareEl.removeAttribute('material-extras');
+                            if (restore && !restore.hadLandmark) screenShareEl.removeAttribute('landmark');
+                        }
+                    }
+                    delete this.screenShareRestore[objId];
+                    delete this.screenShareOwners[objId];
+                }
+            });
             delete this.screenShareDict[id];
+        }
+        // stop requesting this endpoint's screenshare video from the bridge
+        if (this.screenShareSourceNames.delete(`${id}-v0`)) {
+            this.applyReceiverConstraints(this.lastVideoConstraints);
         }
         $(`#video${id}`).remove();
         $(`#audio${id}`).remove();
@@ -567,6 +706,18 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
             console.debug(`track removed!!!${track}`);
         });
+        this.conference.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
+            // A remote source can stop/start its camera without leaving the conference, so no
+            // USER_LEFT fires. Surface remote video mute state so objects bound to that source
+            // (e.g. a videosphere via jitsi-video) can revert/re-render instead of freezing on
+            // the last decoded frame.
+            if (track.isLocal() || track.getType() !== 'video') return;
+            sceneEl.emit(JITSI_EVENTS.VIDEO_MUTE_CHANGED, {
+                jid: track.getParticipantId(),
+                muted: track.isMuted(),
+                src: EVENT_SOURCES.JITSI,
+            });
+        });
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoined);
         this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined);
         this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft);
@@ -595,7 +746,7 @@ AFRAME.registerSystem('arena-jitsi', {
             this.conference.sendEndpointStatsMessage(stats); // send to remote
             sceneEl.emit(JITSI_EVENTS.STATS_LOCAL, {
                 jid: this.jitsiId,
-                id: this.arena.idTag,
+                id: ARENA.idTag,
                 stats,
             });
         });
@@ -612,27 +763,21 @@ AFRAME.registerSystem('arena-jitsi', {
         });
 
         // set the ARENA user's name with a "unique" ARENA tag
-        this.conference.setDisplayName(`${this.arena.displayName} (${data.arenaUserPrefix}_${this.arena.idTag})`);
+        this.conference.setDisplayName(`${ARENA.displayName} (${data.arenaUserPrefix}_${ARENA.idTag})`);
 
         // set local properties
-        this.conference.setLocalParticipantProperty('arenaId', this.arena.idTag);
-        this.conference.setLocalParticipantProperty('arenaDisplayName', this.arena.displayName);
-        this.conference.setLocalParticipantProperty('arenaCameraName', this.arena.camName);
+        this.conference.setLocalParticipantProperty('arenaId', ARENA.idTag);
+        this.conference.setLocalParticipantProperty('arenaDisplayName', ARENA.displayName);
 
         this.conference.on(
             JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED,
             (user, propertyKey, oldPropertyValue, propertyValue) => {
                 // console.log(`Property changed: ${user.getId()} ${propertyKey} ${propertyValue} ${oldPropertyValue}`);
                 const id = user.getId();
-                if (
-                    propertyKey === 'arenaId' ||
-                    propertyKey === 'arenaDisplayName' ||
-                    propertyKey === 'arenaCameraName'
-                ) {
+                if (propertyKey === 'arenaId' || propertyKey === 'arenaDisplayName') {
                     const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
                     const arenaDisplayName = this.conference.getParticipantById(id).getProperty('arenaDisplayName');
-                    const arenaCameraName = this.conference.getParticipantById(id).getProperty('arenaCameraName');
-                    if (arenaId && arenaDisplayName && arenaCameraName) {
+                    if (arenaId && arenaDisplayName) {
                         // clear timeout for new user notification
                         clearInterval(this.newUserTimers[id]);
                         delete this.newUserTimers[id];
@@ -641,9 +786,9 @@ AFRAME.registerSystem('arena-jitsi', {
                             jid: id,
                             id: arenaId,
                             dn: arenaDisplayName,
-                            cn: arenaCameraName,
                             scene: this.conferenceName,
                             src: EVENT_SOURCES.JITSI,
+                            arena: true,
                         });
                     }
                 }
@@ -661,7 +806,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const statusPayload = {
             jid: this.jitsiId,
-            id: this.arena.idTag,
+            id: ARENA.idTag,
             status: {
                 role: this.conference.getRole(),
             },
@@ -816,7 +961,9 @@ AFRAME.registerSystem('arena-jitsi', {
                 }
             })
             .catch((err) => {
-                this.initialized = false;
+                // TODO (mwfarb): is this generic catch causing arena-camera to remove JitsiId from mqtt pub?
+                // err = gum.unsupported_resolution: Video resolution is not supported:
+                // this.initialized = false;
                 console.warn(err);
             });
     },
@@ -829,7 +976,13 @@ AFRAME.registerSystem('arena-jitsi', {
 
         // video window for jitsi
         this.jitsiVideoElem = document.getElementById('cornerVideo');
-        this.jitsiVideoElem.classList.add('flip-video');
+        if (localStorage.getItem('prefPresence') !== 'Portal') {
+            this.jitsiVideoElem.classList.remove('flip-video-portal');
+            this.jitsiVideoElem.classList.add('flip-video');
+        } else {
+            this.jitsiVideoElem.classList.remove('flip-video');
+            this.jitsiVideoElem.classList.add('flip-video-portal');
+        }
         this.jitsiVideoElem.classList.add('arena-corner-video');
         this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
         this.jitsiVideoElem.style.display = 'none';
@@ -839,6 +992,10 @@ AFRAME.registerSystem('arena-jitsi', {
          */
         function setCornerVideoHeight() {
             const videoWidth = localVideoWidth;
+            if (!this.jitsiVideoElem) {
+                console.error('Attempting to set cornerVideo size before element is available!');
+                return;
+            }
             const videoHeight = this.jitsiVideoElem.videoHeight / (this.jitsiVideoElem.videoWidth / videoWidth);
             this.jitsiVideoElem.style.width = `${videoWidth}px`;
             this.jitsiVideoElem.style.height = `${videoHeight}px`;
@@ -1014,7 +1171,7 @@ AFRAME.registerSystem('arena-jitsi', {
             videoConstraints.onStageEndpoints = panoIds;
         }
         videoConstraints.constraints = constraints;
-        this.conference.setReceiverConstraints(videoConstraints);
+        this.applyReceiverConstraints(videoConstraints);
     },
 
     setDefaultResolutionRemotes(resolution) {
@@ -1023,7 +1180,33 @@ AFRAME.registerSystem('arena-jitsi', {
         videoConstraints.defaultConstraints = {
             maxHeight: resolution,
         };
-        this.conference.setReceiverConstraints(videoConstraints);
+        this.applyReceiverConstraints(videoConstraints);
+    },
+
+    /**
+     * Apply receiver video constraints to the bridge, always keeping any active screenshares
+     * requested at full resolution. ARENA builds constraints only from [arena-user] avatars and
+     * each call replaces the whole set; a screenshare endpoint (not an avatar) would otherwise be
+     * dropped and, with enableLayerSuspension, suspended by the bridge so it renders blank. The
+     * base constraints are remembered so screenshare add/remove can re-apply them.
+     * @param {object} videoConstraints ReceiverVideoConstraints object (avatar/default constraints)
+     */
+    applyReceiverConstraints(videoConstraints) {
+        if (!this.conference) return;
+        this.lastVideoConstraints = videoConstraints;
+        // shallow-clone so the screenshare additions don't mutate the remembered base constraints
+        const merged = { ...videoConstraints };
+        if (this.screenShareSourceNames.size > 0) {
+            const onStageSources = [...(merged.onStageSources || [])];
+            const constraints = { ...(merged.constraints || {}) };
+            this.screenShareSourceNames.forEach((sourceName) => {
+                if (!onStageSources.includes(sourceName)) onStageSources.push(sourceName);
+                constraints[sourceName] = { maxHeight: 2160 };
+            });
+            merged.onStageSources = onStageSources;
+            merged.constraints = constraints;
+        }
+        this.conference.setReceiverConstraints(merged);
     },
 
     /**
@@ -1048,10 +1231,10 @@ AFRAME.registerSystem('arena-jitsi', {
     /**
      *
      * @param {*} participantJitsiId
-     * @returns
+     * @returns {String}
      */
     getUserId(participantJitsiId) {
-        if (this.jitsiId === participantJitsiId) return this.arena.camName;
+        if (this.jitsiId === participantJitsiId) return ARENA.idTag;
         // our arena id (camera name) is the jitsi display name
         return this.conference.getParticipantById(participantJitsiId)._displayName;
     },
@@ -1060,7 +1243,7 @@ AFRAME.registerSystem('arena-jitsi', {
      *
      * @param {*} participantJitsiId
      * @param {*} property
-     * @returns
+     * @returns {Object}
      */
     getProperty(participantJitsiId, property) {
         return this.conference.getParticipantById(participantJitsiId).getProperty(property);
@@ -1181,8 +1364,8 @@ AFRAME.registerSystem('arena-jitsi', {
     // https://github.com/jitsi/jitsi-meet/blob/master/config.js
     confOptions: {
         openBridgeChannel: true,
-        enableTalkWhileMuted: true,
-        enableNoisyMicDetection: true,
+        // enableTalkWhileMuted: true,
+        // enableNoisyMicDetection: true,
         p2p: {
             enabled: false,
         },
@@ -1193,5 +1376,88 @@ AFRAME.registerSystem('arena-jitsi', {
 
         // https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md.
         useNewBandwidthAllocationStrategy: true,
+
+        // TODO (mwfarb): resolve bitrate throttle in lib-jitsi-meet v1844, starts at v1654
+        // Current v1844 jitsi-meet client config.js:
+
+        // Specify the settings for video quality optimizations on the client.
+        // videoQuality: {
+        //
+        //    // Provides a way to set the codec preference on desktop based endpoints.
+        //    codecPreferenceOrder: [ 'VP9', 'VP8', 'H264' ],
+        //
+        //    // Provides a way to set the codec for screenshare.
+        //    screenshareCodec: 'AV1',
+        //    mobileScreenshareCodec: 'VP8',
+        //
+        //    // Codec specific settings for scalability modes and max bitrates.
+        //    av1: {
+        //      maxBitratesVideo: {
+        //          low: 100000,
+        //          standard: 300000,
+        //          high: 1000000,
+        //          fullHd: 2000000,
+        //          ultraHd: 4000000,
+        //          ssHigh: 2500000
+        //      },
+        //      scalabilityModeEnabled: true,
+        //      useSimulcast: false,
+        //      useKSVC: true
+        //    },
+        //    h264: {
+        //      maxBitratesVideo: {
+        //          low: 200000,
+        //          standard: 500000,
+        //          high: 1500000,
+        //          fullHd: 3000000,
+        //          ultraHd: 6000000,
+        //          ssHigh: 2500000
+        //      },
+        //      scalabilityModeEnabled: true
+        //    },
+        //    vp8: {
+        //      maxBitratesVideo: {
+        //          low: 200000,
+        //          standard: 500000,
+        //          high: 1500000,
+        //          fullHd: 3000000,
+        //          ultraHd: 6000000,
+        //          ssHigh: 2500000
+        //      },
+        //      scalabilityModeEnabled: false
+        //    },
+        //    vp9: {
+        //      maxBitratesVideo: {
+        //          low: 100000,
+        //          standard: 300000,
+        //          high: 1200000,
+        //          fullHd: 2500000,
+        //          ultraHd: 5000000,
+        //          ssHigh: 2500000
+        //      },
+        //      scalabilityModeEnabled: true,
+        //      useSimulcast: false,
+        //      useKSVC: true
+        //    },
+        //
+        //    // The options can be used to override default thresholds of video thumbnail heights corresponding to
+        //    // the video quality levels used in the application. At the time of this writing the allowed levels are:
+        //    //     'low' - for the low quality level (180p at the time of this writing)
+        //    //     'standard' - for the medium quality level (360p)
+        //    //     'high' - for the high quality level (720p)
+        //    // The keys should be positive numbers which represent the minimal thumbnail height for the quality level.
+        //    //
+        //    // With the default config value below the application will use 'low' quality until the thumbnails are
+        //    // at least 360 pixels tall. If the thumbnail height reaches 720 pixels then the application will switch to
+        //    // the high quality.
+        //    minHeightForQualityLvl: {
+        //        360: 'standard',
+        //        720: 'high',
+        //    },
+        //
+        //    // Provides a way to set the codec preference on mobile devices, both on RN and mobile browser based endpoint
+        //    mobileCodecPreferenceOrder: [ 'VP8', 'VP9', 'H264' ],
+        //
+        // },
     },
 });

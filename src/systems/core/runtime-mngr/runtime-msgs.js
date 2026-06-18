@@ -1,3 +1,6 @@
+/**
+ * @module runtime-msgs
+ */
 /* eslint-disable camelcase */
 
 /**
@@ -7,7 +10,7 @@
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
  * @date 2022
  */
-import UUID from 'uuidjs';
+import { UUID } from 'uuidjs';
 
 /**
  * Create runtime message requests for orchestrator
@@ -36,8 +39,8 @@ export default class RuntimeMsgs {
 
     /* message types */
     static Type = {
-        req: 'arts_req',
-        resp: 'arts_resp',
+        req: 'req',
+        resp: 'resp',
     };
 
     /* file types */
@@ -84,7 +87,7 @@ export default class RuntimeMsgs {
         return {
             object_id: UUID.generate(), // random uuid used as a transaction id
             action: msgAction,
-            type: 'arts_req',
+            type: RuntimeMsgs.Type.req,
         };
     }
 
@@ -132,7 +135,8 @@ export default class RuntimeMsgs {
             uuid = UUID.generate(),
             name = `mod-${Math.round(Math.random() * 10000)}@${navigator.product}`,
             parent = undefined,
-            filename = undefined,
+            file = undefined,
+            location = undefined,
             fileid = undefined,
             filetype = RuntimeMsgs.FileType.wasm,
             env = [],
@@ -151,7 +155,8 @@ export default class RuntimeMsgs {
             uuid,
             name,
             parent,
-            filename,
+            file,
+            location,
             fileid,
             filetype,
             env,
@@ -182,7 +187,7 @@ export default class RuntimeMsgs {
         const pdata = persistObj.attributes;
 
         // replaces variables given a dictionary of replacements; e.g:
-        // replaceVars('SCENE=${cameraid}', { cameraid: 'camera_1479408135_nuno' }) returns 'SCENE=camera_1479408135_nuno'
+        // replaceVars('SCENE=${userid}', { userid: '1479408135_nuno' }) returns 'SCENE=1479408135_nuno'
         const replaceVars = (tplText, args) => tplText.replace(/\${(\w+)}/g, (_, v) => args[v]);
 
         let muuid = UUID.generate(); // for per client, create a random uuid;
@@ -222,11 +227,15 @@ export default class RuntimeMsgs {
             }
         }
 
+        /*
         let fn;
         if (pdata.filetype === RuntimeMsgs.FileType.wasm) {
             // full filename using file store location, name (in the form namespace/program-folder), entry filename
-            fn = [this.rt.getFSLocation(), pdata.name, pdata.filename].join('/').replace(/([^:])(\/\/+)/g, '$1/');
-        } else fn = pdata.filename; // just the filename
+
+        fn = [this.rt.getFSLocation(), pdata.name, pdata.filename].join('/').replace(/([^:])(\/\/+)/g, '$1/');
+        } else fn = pdata.file; // just the filename
+         */
+        const fn = pdata.file !== undefined ? pdata.file : pdata.filename; // support both filename and file
 
         // check apis
         let apis = [];
@@ -243,7 +252,8 @@ export default class RuntimeMsgs {
                 uuid: muuid,
                 // parent is this runtime if affinity is client; otherwise, from request parent which can be undefined to let orchestrator decide
                 parent: pdata.affinity === 'client' ? { uuid: this.rt.getUuid() } : pdata.parent,
-                filename: fn,
+                file: fn,
+                location: pdata.location === undefined ? '' : pdata.location,
                 filetype: pdata.filetype,
                 channels: pdata.channels,
                 env,

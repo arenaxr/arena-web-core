@@ -1,3 +1,6 @@
+/**
+ * @module ccarheadset
+ */
 /* eslint-disable no-throw-literal */
 /**
  * @fileoverview Capture camera facing forward using getUserMedia
@@ -6,8 +9,6 @@
  * Copyright (c) 2022, The CONIX Research Center. All rights reserved.
  * @date 2022
  */
-
-/* global ARENA */
 
 import CVWorkerMsgs from '../worker-msgs';
 import { ARENAUtils } from '../../../utils';
@@ -100,6 +101,7 @@ export default class ARHeadsetCameraCapture {
         this.arMarkerSystem.initialLocalized = false;
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
+        this.canvas.id = 'cameraCanvas';
         if (ARENAUtils.isWebGLOffscreenCanvasSupported(this.canvas)) {
             this.canvas = this.canvas.transferControlToOffscreen();
         }

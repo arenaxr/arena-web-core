@@ -3,8 +3,6 @@
  * http://en.wikipedia.org/wiki/Luminosity
  */
 
-/* global THREE */
-
 const LuminosityHighPassShader = {
     shaderID: 'luminosityHighPass',
 

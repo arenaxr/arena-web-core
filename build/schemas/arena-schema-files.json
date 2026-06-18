@@ -61,8 +61,8 @@
     },
     "gaussian_splatting": {
         "description": "Load 3D Gaussian Splat.",
-        "file": "schemas/gaussian-splat.json",
-        "title": "3D Gaussian Splat"
+        "file": "schemas/gaussian_splatting.json",
+        "title": "Gaussian Splat"
     },
     "image": {
         "description": "Display an image on a plane.",
@@ -83,6 +83,11 @@
         "description": "Draw a line.",
         "file": "schemas/line.json",
         "title": "Line"
+    },
+    "obj-model": {
+        "description": "Load an OBJ model",
+        "file": "schemas/obj-model.json",
+        "title": "OBJ Model"
     },
     "ocean": {
         "description": "Draw a wave-form plane.",
@@ -106,7 +111,7 @@
     },
     "program": {
         "description": "ARENA program data.",
-        "file": "schemas/arena-program.json",
+        "file": "schemas/program.json",
         "title": "Program"
     },
     "ring": {
@@ -121,7 +126,7 @@
     },
     "scene-options": {
         "description": "ARENA scene options.",
-        "file": "schemas/arena-scene-options.json",
+        "file": "schemas/scene-options.json",
         "title": "Scene Options"
     },
     "sphere": {
@@ -163,6 +168,11 @@
         "description": "Triangle Geometry.",
         "file": "schemas/triangle.json",
         "title": "Triangle"
+    },
+    "urdf-model": {
+        "description": "Load a URFD model.",
+        "file": "schemas/urdf-model.json",
+        "title": "URDF Model"
     },
     "videosphere": {
         "description": "Videosphere 360 Video.",

@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Screen share System to keep track of all screenshareable objects.
  *
@@ -15,6 +13,13 @@ AFRAME.registerComponent('screenshareable', {
 
     init() {
         this.update();
+        // add a default landmark for any screen share object
+        if (!this.el.hasAttribute('landmark')) {
+            this.el.setAttribute(
+                'landmark',
+                `label: Screen: ${this.el.id} (nearby); randomRadiusMin: 2; randomRadiusMax: 3`
+            );
+        }
     },
 
     update(oldData) {
@@ -29,10 +34,14 @@ AFRAME.registerComponent('screenshareable', {
     },
 
     register() {
-        // this.system.registerComponent(this);
+        if (this.system?.registerComponent) {
+            this.system.registerComponent(this);
+        }
     },
 
     remove() {
-        this.system.unregisterComponent(this);
+        if (this.system?.unregisterComponent) {
+            this.system.unregisterComponent(this);
+        }
     },
 });

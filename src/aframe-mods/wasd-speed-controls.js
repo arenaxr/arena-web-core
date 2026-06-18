@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, THREE */
-
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;

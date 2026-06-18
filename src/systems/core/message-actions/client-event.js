@@ -1,5 +1,6 @@
-/* global AFRAME, ARENA, THREE */
-
+/**
+ * @module client-event
+ */
 const warn = AFRAME.utils.debug('ARENA:client-event:warn');
 const error = AFRAME.utils.debug('ARENA:client-event:error');
 
@@ -14,16 +15,15 @@ export default class ClientEvent {
     static handle(message) {
         const { id } = message;
         const { data } = message;
-        const clicker = data.source;
 
         // ignore events from ourselves
-        if (clicker === ARENA.camName) {
+        if (id === ARENA.idTag) {
             return;
         }
-        if (clicker === ARENA.handLName) {
+        if (id === ARENA.handLName) {
             return;
         }
-        if (clicker === ARENA.handRName) {
+        if (id === ARENA.handRName) {
             return;
         }
 
@@ -38,15 +38,13 @@ export default class ClientEvent {
             return;
         }
 
-        let point = null;
-        if (data.position) {
+        let point;
+        if (data.targetPosition) {
             point = new THREE.Vector3(
-                parseFloat(data.position.x),
-                parseFloat(data.position.y),
-                parseFloat(data.position.z)
+                parseFloat(data.targetPosition.x),
+                parseFloat(data.targetPosition.y),
+                parseFloat(data.targetPosition.z)
             );
-        } else {
-            warn('Malformed message (no data.position):', JSON.stringify(message));
         }
 
         switch (message.type) {
@@ -55,7 +53,7 @@ export default class ClientEvent {
                 entityEl.emit(
                     'mousedown',
                     {
-                        clicker,
+                        clicker: id,
                         intersection: {
                             point,
                         },
@@ -68,7 +66,7 @@ export default class ClientEvent {
                 entityEl.emit(
                     'mousedown',
                     {
-                        clicker,
+                        clicker: id,
                         intersection: {
                             point,
                         },
@@ -81,7 +79,7 @@ export default class ClientEvent {
                 entityEl.emit(
                     'mouseup',
                     {
-                        clicker,
+                        clicker: id,
                         intersection: {
                             point,
                         },
@@ -102,6 +100,27 @@ export default class ClientEvent {
             case 'soundstop':
                 if (entityEl.components.sound) {
                     entityEl.components.sound.stopSound();
+                }
+                break;
+            case 'physx-grabstart':
+                if (AFRAME.scenes[0].systems.physx) {
+                    entityEl.components['physx-remote-grabber']?.startGrab(data.target, data.pose, data.targetPose);
+                }
+                break;
+            case 'physx-grabend':
+                if (AFRAME.scenes[0].systems.physx) {
+                    entityEl.components['physx-remote-grabber']?.stopGrab(data.target, data.pose, data.targetPose);
+                }
+                break;
+            case 'physx-push':
+                if (AFRAME.scenes[0].systems.physx) {
+                    entityEl.components['physx-remote-pusher']?.emitPush(
+                        data.target,
+                        data.targetBodyData,
+                        data.impulse,
+                        data.point,
+                        data.sourcePose
+                    );
                 }
                 break;
             default: // handle others here like mouseenter / mouseleave

@@ -82,21 +82,28 @@
                 "loop": {
                     "default": 0,
                     "description": "How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
-                    "type": "string"
+                    "type": ["string", "integer", "boolean"]
                 },
                 "pauseEvents": {
                     "default": [],
                     "description": "Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
-                    "type": "array"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "property": {
+                    "default": "",
                     "description": "Property to animate. Can be a component name, a dot-delimited property of a component (e.g., material.color), or a plain attribute.",
                     "type": "string"
                 },
                 "resumeEvents": {
                     "default": [],
                     "description": "Comma-separated list of events to listen to trigger resume after pausing.",
-                    "type": "array"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "round": {
                     "default": false,
@@ -106,7 +113,10 @@
                 "startEvents": {
                     "default": [],
                     "description": "Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
-                    "type": "array"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "to": {
                     "default": "",
@@ -233,7 +243,7 @@
             "required": ["dynamic"]
         },
         "collision-listener": {
-            "description": "Name of the collision-listener, default can be empty string. Collisions trigger click events.",
+            "description": "Name of the collision-listener, default can be empty string. Collisions trigger click events. Requires `scene-options: physics`.",
             "title": "Collision Listener (legacy)",
             "type": "string"
         },
@@ -277,82 +287,320 @@
             },
             "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
-        "static-body": {
-            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
-            "properties": {
-                "shape": {
-                    "default": "auto",
-                    "type": "string",
-                    "enum": ["auto", "box", "cylinder", "sphere", "hull", "none"],
-                    "description": "Body components will attempt to find an appropriate CANNON.js shape to fit your model. When defining an object you may choose a shape or leave the default, auto. Select a shape carefully, as there are performance implications with different choices."
-                },
-                "cylinderAxis": {
-                    "default": "y",
-                    "enum": ["x", "y", "z"],
-                    "type": "string",
-                    "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
-                },
-                "sphereRadius": {
-                    "type": "number",
-                    "description": "Override default radius of bounding sphere. Requires shape:sphere. NaN by default."
-                },
-                "type": {
-                    "default": "static",
-                    "enum": ["dynamic", "static"],
-                    "type": "string",
-                    "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
-                }
-            },
-            "title": "Physics Static Body",
-            "type": "object"
-        },
         "dynamic-body": {
-            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
+            "title": "DEPRECATED (dynamic-body)",
+            "description": "DEPRECATED: data.dynamic-body is deprecated, use data.physx-body instead.",
+            "type": "object",
+            "deprecated": true
+        },
+        "static-body": {
+            "title": "DEPRECATED (static-body)",
+            "description": "DEPRECATED: data.static-body is deprecated, use data.physx-body instead.",
+            "type": "object",
+            "deprecated": true
+        },
+        "physx-body": {
+            "description": "Turns an entity into a PhysX rigid body. This is the main component for creating physics objects. There are 3 types of rigid bodies: dynamic objects that have physics simulated on them, static objects that cannot move, and kinematic objects that can be moved programmatically but not by simulation. Requires `scene-options: physics`.",
             "properties": {
-                "mass": {
-                    "default": 5,
-                    "exclusiveMinimum": 0,
-                    "type": "number",
-                    "description": "Simulated mass of the object, > 0."
-                },
-                "linearDamping": {
-                    "default": 0.01,
-                    "type": "number",
-                    "description": "Resistance to movement."
-                },
-                "angularDamping": {
-                    "default": 0.01,
-                    "type": "number",
-                    "description": "Resistance to rotation."
-                },
-                "shape": {
-                    "default": "auto",
-                    "type": "string",
-                    "enum": ["auto", "box", "cylinder", "sphere", "hull", "none"],
-                    "description": "Body components will attempt to find an appropriate CANNON.js shape to fit your model. When defining an object you may choose a shape or leave the default, auto. Select a shape carefully, as there are performance implications with different choices."
-                },
-                "cylinderAxis": {
-                    "default": "y",
-                    "enum": ["x", "y", "z"],
-                    "type": "string",
-                    "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
-                },
-                "sphereRadius": {
-                    "type": "number",
-                    "description": "Override default radius of bounding sphere. Requires shape:sphere. NaN by default."
-                },
                 "type": {
                     "default": "dynamic",
-                    "enum": ["dynamic", "static"],
                     "type": "string",
-                    "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
+                    "enum": ["dynamic", "static", "kinematic"],
+                    "description": "Type of the rigid body to create. Dynamic can be moved by physics, Static cannot be moved, Kinematic can be moved programmatically."
+                },
+                "mass": {
+                    "default": 1,
+                    "type": "number",
+                    "description": "Total mass of the body."
+                },
+                "angularDamping": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "If > 0, will set the rigid body's angular damping to reduce rotation over time."
+                },
+                "linearDamping": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "If > 0, will set the rigid body's linear damping to reduce movement over time."
+                },
+                "emitCollisionEvents": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If set to true, it will emit 'contactbegin' and 'contactend' events when collisions occur."
+                },
+                "highPrecision": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If set to true, the object will receive extra attention by the simulation engine (at a performance cost)."
+                },
+                "shapeOffset": {
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "$ref": "#/definitions/vector3",
+                    "description": "Offset applied to generated collision shapes."
                 }
             },
-            "title": "Physics Dynamic Body",
+            "title": "PhysX Body",
             "type": "object"
         },
+        "physx-material": {
+            "description": "Controls physics properties for individual shapes or rigid bodies. Can be set on an entity with physx-body or on shapes contained within it. Requires `scene-options: physics`.",
+            "properties": {
+                "staticFriction": {
+                    "default": 0.2,
+                    "type": "number",
+                    "description": "Static friction applied when objects are not moving relative to each other."
+                },
+                "dynamicFriction": {
+                    "default": 0.2,
+                    "type": "number",
+                    "description": "Dynamic friction applied when objects are moving relative to each other."
+                },
+                "restitution": {
+                    "default": 0.2,
+                    "type": "number",
+                    "description": "Restitution, or 'bounciness' of the material."
+                },
+                "density": {
+                    "type": "number",
+                    "description": "Density for the shape. If specified for all shapes in a rigid body, mass properties will be automatically calculated based on densities."
+                },
+                "collisionLayers": {
+                    "default": [1],
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "description": "Which collision layers this shape is present on."
+                },
+                "collidesWithLayers": {
+                    "default": [1, 2, 3, 4],
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "description": "Array containing all layers that this shape should collide with."
+                },
+                "collisionGroup": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "If greater than 0, this shape will not collide with any other shape with the same collisionGroup value."
+                },
+                "contactOffset": {
+                    "type": "string",
+                    "description": "If >= 0, sets the PhysX contact offset, indicating how far away from the shape simulation contact events should begin."
+                },
+                "restOffset": {
+                    "type": "string",
+                    "description": "If >= 0, sets the PhysX rest offset."
+                }
+            },
+            "title": "PhysX Material",
+            "type": "object"
+        },
+        "physx-joint": {
+            "description": "Creates a PhysX joint between an ancestor rigid body and a target rigid body. Position and rotation of the entity will be used to create the corresponding joint. Requires `scene-options: physics`.",
+            "properties": {
+                "type": {
+                    "default": "Spherical",
+                    "type": "string",
+                    "enum": ["Spherical", "Fixed", "Revolute", "Prismatic", "D6"],
+                    "description": "Rigid body joint type to use. Each type has different movement constraints."
+                },
+                "target": {
+                    "type": "string",
+                    "description": "Target object selector. Must be an entity having the physx-body component. If not specified, joins to the initial position in the world."
+                },
+                "breakForce": {
+                    "default": {
+                        "x": -1,
+                        "y": -1
+                    },
+                    "$ref": "#/definitions/vector2",
+                    "description": "Force needed to break the constraint. First component is linear force, second is angular force in degrees. Set both components >= 0 to enable."
+                },
+                "removeElOnBreak": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If true, removes the entity containing this component when the joint is broken."
+                },
+                "collideWithTarget": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If false, collision will be disabled between the rigid body containing the joint and the target rigid body."
+                },
+                "softFixed": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "When used with a D6 type, sets up a 'soft' fixed joint. E.g., for grabbing things."
+                },
+                "projectionTolerance": {
+                    "default": {
+                        "x": -1,
+                        "y": -1
+                    },
+                    "$ref": "#/definitions/vector2",
+                    "description": "Kinematic projection, which forces joint back into alignment when the solver fails. First component is linear tolerance in meters, second is angular tolerance in degrees."
+                }
+            },
+            "title": "PhysX Joint",
+            "type": "object"
+        },
+        "physx-joint-constraint": {
+            "description": "Adds a constraint to a physx-joint. Supported joints are D6, Revolute and Prismatic. Can only be used on an entity with the physx-joint component. Requires `scene-options: physics`.",
+            "properties": {
+                "lockedAxes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "[D6] Which axes are explicitly locked by this constraint and can't be moved at all. Should be some combination of x, y, z, twist, swing."
+                },
+                "constrainedAxes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "[D6] Which axes are constrained by this constraint. These axes can be moved within the set limits. Should be some combination of x, y, z, twist, swing."
+                },
+                "freeAxes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "[D6] Which axes are explicitly freed by this constraint. These axes will not obey any limits set here. Should be some combination of x, y, z, twist, swing."
+                },
+                "linearLimit": {
+                    "$ref": "#/definitions/vector2",
+                    "description": "[D6, Prismatic] Limit on linear movement. Only affects x, y, and z axes. First component is the minimum allowed position."
+                },
+                "angularLimit": {
+                    "$ref": "#/definitions/vector2",
+                    "description": "[Revolute] Limit on angular movement in degrees. First component is the minimum allowed angle, second is the maximum."
+                },
+                "limitCone": {
+                    "$ref": "#/definitions/vector2",
+                    "description": "[D6] Two angles in degrees specifying a cone in which the joint is allowed to swing, like a pendulum."
+                },
+                "twistLimit": {
+                    "$ref": "#/definitions/vector2",
+                    "description": "[D6] Minimum and maximum angles in degrees that the joint is allowed to twist."
+                },
+                "damping": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "[All] Spring damping for soft constraints."
+                },
+                "restitution": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "[All] Spring restitution for soft constraints."
+                },
+                "stiffness": {
+                    "default": 0,
+                    "type": "number",
+                    "description": "[All] If greater than 0, will make this joint a soft constraint, and use a spring force model."
+                }
+            },
+            "title": "PhysX Joint Constraint",
+            "type": "object"
+        },
+        "physx-joint-driver": {
+            "description": "Creates a driver which exerts force to return the joint to the initial position with the given velocity characteristics. Can only be used on an entity with a physx-joint component. Currently only supports D6 joint type. Requires `scene-options: physics`.",
+            "properties": {
+                "axes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Which axes the joint should operate on. Should be some combination of x, y, z, twist, swing."
+                },
+                "stiffness": {
+                    "default": 1,
+                    "type": "number",
+                    "description": "How stiff the drive should be."
+                },
+                "damping": {
+                    "default": 1,
+                    "type": "number",
+                    "description": "Damping to apply to the drive."
+                },
+                "forceLimit": {
+                    "default": 3.4028234663852886e38,
+                    "type": "number",
+                    "description": "Maximum amount of force used to get to the target position."
+                },
+                "useAcceleration": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "If true, will operate directly on body acceleration rather than on force."
+                },
+                "linearVelocity": {
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "$ref": "#/definitions/vector3",
+                    "description": "Target linear velocity relative to the joint."
+                },
+                "angularVelocity": {
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "$ref": "#/definitions/vector3",
+                    "description": "Target angular velocity relative to the joint."
+                },
+                "lockOtherAxes": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "If true, will automatically lock axes which are not being driven."
+                },
+                "slerpRotation": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "If true, uses SLERP rotation mode. If false, will use SWING mode."
+                }
+            },
+            "title": "PhysX Joint Driver",
+            "type": "object"
+        },
+        "physx-force-pushable": {
+            "description": "Makes a physx-body object pushable by the user. Requires `click-listener` attribute. Requires `scene-options: physics`.",
+            "title": "PhysX Pushable",
+            "type": "object",
+            "properties": {
+                "on": {
+                    "default": "mousedown",
+                    "description": "Event to listen 'on'.",
+                    "enum": ["mousedown", "mouseup"],
+                    "type": "string"
+                },
+                "force": {
+                    "default": 10,
+                    "type": "number",
+                    "description": "Force to apply to the object."
+                }
+            },
+            "required": ["force"]
+        },
+        "physx-grabbable": {
+            "description": "Makes a physx-body object grabbable by the user's hands. Requires `scene-options: physics`.",
+            "title": "PhysX Grabbable",
+            "type": "boolean",
+            "default": true
+        },
         "goto-landmark": {
-            "description": "Teleports user to the landmark with the given name. Requires click-listener.",
+            "description": "Teleports user to the landmark with the given name. Requires `click-listener` attribute.",
             "properties": {
                 "on": {
                     "default": "mousedown",
@@ -371,21 +619,23 @@
             "type": "object"
         },
         "goto-url": {
-            "description": "Load new URL when object is clicked. Requires click-listener.",
+            "description": "Load new URL when object is clicked. Requires `click-listener` attribute.",
             "properties": {
                 "dest": {
+                    "description": "Where to open the URL.",
                     "default": "sametab",
                     "enum": ["popup", "newtab", "sametab"],
                     "type": "string"
                 },
                 "on": {
+                    "description": "A case-sensitive string representing the event type to listen for. See <a href='https://developer.mozilla.org/en-US/docs/Web/Events'>Web Events</a>.",
                     "default": "mousedown",
                     "enum": ["mousedown", "mouseup"],
                     "type": "string"
                 },
                 "url": {
+                    "description": "The destination url, e.g. https://example.com.",
                     "default": "",
-                    "title": "Landmark Url",
                     "format": "uri",
                     "type": "string"
                 }
@@ -419,29 +669,10 @@
             "enum": [true]
         },
         "impulse": {
-            "description": "Apply an impulse to an object to set it in motion. This happens in conjunction with an event. Requires click-listener and physics.",
-            "properties": {
-                "force": {
-                    "description": "Impulse vector.",
-                    "default": {"x": 1, "y": 1, "z": 1},
-                    "format": "grid",
-                    "$ref": "#/definitions/vector3"
-                },
-                "on": {
-                    "description": "Event to listen 'on'.",
-                    "default": "",
-                    "enum": ["mousedown", "mouseup"],
-                    "type": "string"
-                },
-                "position": {
-                    "description": "World position.",
-                    "default": {"x": 1, "y": 1, "z": 1},
-                    "format": "grid",
-                    "$ref": "#/definitions/vector3"
-                }
-            },
-            "title": "Impulse",
-            "type": "object"
+            "title": "DEPRECATED (impulse)",
+            "description": "DEPRECATED: data.impulse is deprecated, use data.physx-force-pushable instead.",
+            "type": "object",
+            "deprecated": true
         },
         "landmark": {
             "title": "Landmark",
@@ -493,27 +724,17 @@
             "required": ["label", "randomRadiusMin", "randomRadiusMax", "lookAtLandmark"]
         },
         "material-extras": {
-            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order.\n\nThe properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>THREE.js Material</a>.",
+            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. Requires `material` attribute.\n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>THREE.js Material</a>.",
             "properties": {
                 "overrideSrc": {
                     "type": "string",
                     "default": "",
                     "description": "Overrides the material source in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
                 },
-                "encoding": {
-                    "default": "sRGBEncoding",
-                    "enum": [
-                        "LinearEncoding",
-                        "sRGBEncoding",
-                        "GammaEncoding",
-                        "RGBEEncoding",
-                        "LogLuvEncoding",
-                        "RGBM7Encoding",
-                        "RGBM16Encoding",
-                        "RGBDEncoding",
-                        "BasicDepthPacking",
-                        "RGBADepthPacking"
-                    ],
+                "colorSpace": {
+                    "description": "The material colorspace.",
+                    "default": "SRGBColorSpace",
+                    "enum": ["SRGBColorSpace", "LinearSRGBColorSpace", "DisplayP3ColorSpace", "NoColorSpace"],
                     "type": "string"
                 },
                 "colorWrite": {
@@ -541,7 +762,35 @@
             },
             "title": "Material extras",
             "type": "object",
-            "required": ["encoding", "gltfOpacity"]
+            "required": ["colorSpace", "gltfOpacity"]
+        },
+        "model-container": {
+            "description": "Overrides absolute size for a 3D model. The model can be a glTF, glb, obj, or any other supported format. The model will be rescaled to fit to the sizes specified for each axes.",
+            "properties": {
+                "x": {
+                    "default": 1,
+                    "description": "Size of the model in the x-axis.",
+                    "type": "number"
+                },
+                "y": {
+                    "default": 1,
+                    "description": "Size of the model in the y-axis.",
+                    "type": "number"
+                },
+                "z": {
+                    "default": 1,
+                    "description": "Size of the model in the z-axis.",
+                    "type": "number"
+                },
+                "uniform": {
+                    "default": true,
+                    "description": "Whether to scale the model uniformly.",
+                    "type": "boolean"
+                }
+            },
+            "required": ["x", "y", "z", "uniform"],
+            "title": "Model Container",
+            "type": "object"
         },
         "shadow": {
             "title": "Shadow",
@@ -564,7 +813,7 @@
             "required": ["cast", "receive"]
         },
         "sound": {
-            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>A-Frame Sound</a>.",
+            "description": "The sound component defines the entity as a source of sound or audio. The sound component can be positional and is thus affected by the component's position.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>A-Frame Sound</a>.",
             "properties": {
                 "autoplay": {
                     "default": false,
@@ -639,17 +888,23 @@
                     "type": "number"
                 }
             },
-            "title": "Positional Sound",
+            "title": "Sound",
             "type": "object"
+        },
+        "submodel-parent": {
+            "title": "Submodel Parent",
+            "description": "When this object is parented to a hierarchical model, it attaches to a named sub-component of that model instead of the root position. Requires `parent` attribute.",
+            "type": "string",
+            "default": ""
         },
         "textinput": {
             "title": "Text Input",
-            "description": "Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires click-listener.",
+            "description": "Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires `click-listener` attribute.",
             "type": "object",
             "properties": {
                 "on": {
                     "default": "mousedown",
-                    "description": "A case-sensitive string representing the event type to listen for, e.g. 'mousedown', 'mouseup'. See <a href='https://developer.mozilla.org/en-US/docs/Web/Events'>Web Events</a>",
+                    "description": "A case-sensitive string representing the event type to listen for. See <a href='https://developer.mozilla.org/en-US/docs/Web/Events'>Web Events</a>",
                     "enum": [
                         "mousedown",
                         "mouseup",
@@ -669,22 +924,58 @@
                     "type": "string"
                 },
                 "title": {
-                    "default": "Text Input",
-                    "description": "The prompt title.",
+                    "default": "",
+                    "description": "The prompt title (optional).",
                     "type": "string"
                 },
                 "label": {
-                    "default": "Input text below (max is 140 characters).",
-                    "description": "Text prompt label",
+                    "default": "",
+                    "description": "Label for input (max 140 characters, optional).",
                     "type": "string"
                 },
                 "placeholder": {
-                    "default": "Type here",
-                    "description": "Text input place holder.",
+                    "default": "",
+                    "description": "Text input placeholder (optional).",
                     "type": "string"
+                },
+                "inputType": {
+                    "default": "text",
+                    "description": "Type of HTML form input",
+                    "enum": [
+                        "text",
+                        "email",
+                        "password",
+                        "number",
+                        "tel",
+                        "range",
+                        "textarea",
+                        "url",
+                        "select",
+                        "radio",
+                        "checkbox",
+                        "date",
+                        "datetime-local",
+                        "time",
+                        "week",
+                        "month"
+                    ],
+                    "type": "string"
+                },
+                "inputValue": {
+                    "default": "",
+                    "description": "Input field initial value. Select type will be selected value, for checkbox will be checked state",
+                    "type": "string"
+                },
+                "inputOptions": {
+                    "default": [],
+                    "description": "Array of options for select or radio input types",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             },
-            "required": ["on", "title", "label", "placeholder"]
+            "required": ["on", "title"]
         },
         "url": {
             "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
@@ -751,56 +1042,16 @@
             "title": "Video",
             "type": "object"
         },
-        "attribution": {
-            "description": "Attribution Component. Saves attribution data in any entity.",
-            "properties": {
-                "author": {
-                    "type": "string",
-                    "default": "Unknown",
-                    "description": "Author name; e.g. 'Vaptor-Studio'."
-                },
-                "authorURL": {
-                    "type": "string",
-                    "description": "Author homepage/profile; e.g. https://sketchfab.com/VapTor."
-                },
-                "license": {
-                    "type": "string",
-                    "default": "Unknown",
-                    "description": "License summary/short name; e.g. 'CC-BY-4.0'."
-                },
-                "licenseURL": {
-                    "type": "string",
-                    "description": "License URL; e.g. http://creativecommons.org/licenses/by/4.0/."
-                },
-                "source": {
-                    "type": "string",
-                    "default": "Unknown",
-                    "description": "Model source e.g. 'Sketchfab'."
-                },
-                "sourceURL": {
-                    "type": "string",
-                    "description": "Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7."
-                },
-                "title": {
-                    "type": "string",
-                    "default": "No Title",
-                    "description": "Model title; e.g. 'Spinosaurus'."
-                },
-                "extractAssetExtras": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Extract attribution info from asset extras; will override attribution info given (default: true)."
-                }
-            },
-            "title": "Attribution",
-            "type": "object"
-        },
         "spe-particles": {
             "description": "GPU based particle systems in A-Frame.\n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>A-Frame SPE Particles</a> component.",
             "properties": {
                 "acceleration": {
                     "description": "For sphere and disc distributions, only the x axis is used.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -812,13 +1063,17 @@
                 },
                 "accelerationSpread": {
                     "description": "Spread of the particle's acceleration. for sphere and disc distributions, only the x axis is used.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "activeMultiplier": {
                     "description": "Multiply the rate of particles emission, if larger than 1 then the particles will be emitted in bursts. note, very large numbers will emit all particles at once.",
-                    "default": "1",
+                    "default": 1,
                     "type": "number"
                 },
                 "affectedByFog": {
@@ -828,7 +1083,7 @@
                 },
                 "alphaTest": {
                     "description": "Alpha values below the alphaTest threshold are considered invisible.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "angle": {
@@ -898,22 +1153,22 @@
                 },
                 "drag": {
                     "description": "Apply resistance to moving the particle, 0 is no resistance, 1 is full resistance, particle will stop moving at half of it's maxAge.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "dragSpread": {
                     "description": "Spread to apply to the drag attribute.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "duration": {
                     "description": "Duration of the emitter (seconds), if less than 0 then continuously emit particles.",
-                    "default": "-1",
+                    "default": -1,
                     "type": "number"
                 },
                 "emitterScale": {
                     "description": "Global scaling factor for all particles from the emitter.",
-                    "default": "100",
+                    "default": 100,
                     "type": "number"
                 },
                 "enableInEditor": {
@@ -938,12 +1193,12 @@
                 },
                 "maxAge": {
                     "description": "Maximum age of a particle before reusing.",
-                    "default": "1",
+                    "default": 1,
                     "type": "number"
                 },
                 "maxAgeSpread": {
                     "description": "Variance for the 'maxAge' attribute.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "opacity": {
@@ -966,7 +1221,7 @@
                 },
                 "particleCount": {
                     "description": "Maximum number of particles for this emitter.",
-                    "default": "100",
+                    "default": 100,
                     "type": "integer"
                 },
                 "positionDistribution": {
@@ -977,24 +1232,36 @@
                 },
                 "positionOffset": {
                     "description": "Fixed offset to the apply to the emitter relative to its parent entity.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "positionSpread": {
                     "description": "Particles are positioned within +- of these local bounds. for sphere and disc distributions only the x axis is used.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "radius": {
                     "description": "Radius of the disc or sphere emitter (ignored for box). note radius of 0 will prevent velocity and acceleration if they use a sphere or disc distribution.",
-                    "default": "1",
+                    "default": 1,
                     "type": "number"
                 },
                 "radiusScale": {
                     "description": "Scales the emitter for sphere and disc shapes to form oblongs and ellipses.",
-                    "default": {"x": 1, "y": 1, "z": 1},
+                    "default": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1051,24 +1318,32 @@
                 },
                 "rotation": {
                     "description": "Rotation in degrees.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "rotationAxis": {
                     "description": "Local axis when using rotation.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationAxisSpread": {
                     "description": "Variance in the axis of rotation.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationSpread": {
                     "description": "Rotation variance in degrees.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "rotationStatic": {
@@ -1102,17 +1377,20 @@
                 },
                 "textureFrameCount": {
                     "description": "Number of frames in the spritesheet, negative numbers default to textureFrames.x * textureFrames.y.",
-                    "default": "-1",
+                    "default": -1,
                     "type": "integer"
                 },
                 "textureFrameLoop": {
                     "description": "Number of times the spritesheet should be looped over the lifetime of a particle.",
-                    "default": "1",
+                    "default": 1,
                     "type": "integer"
                 },
                 "textureFrames": {
                     "description": "X and Y frames for a spritesheet. each particle will transition through every frame of the spritesheet over its lifetime (see textureFramesLoop).",
-                    "default": {"x": 1, "y": 1},
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector2"
                 },
@@ -1123,7 +1401,11 @@
                 },
                 "velocity": {
                     "description": "For sphere and disc distributions, only the x axis is used.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1135,18 +1417,22 @@
                 },
                 "velocitySpread": {
                     "description": "Variance for the velocity.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "wiggle": {
                     "description": "Extra distance the particle moves over its lifetime.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 },
                 "wiggleSpread": {
                     "description": "+- spread for the wiggle attribute.",
-                    "default": "0",
+                    "default": 0,
                     "type": "number"
                 }
             },

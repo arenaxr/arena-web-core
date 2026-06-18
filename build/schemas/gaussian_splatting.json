@@ -1,0 +1,82 @@
+{
+    "title": "Gaussian Splat",
+    "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering.\n\nRendered with <a href='https://sparkjs.dev'>Spark</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type.",
+                                    "enum": ["gaussian_splatting"]
+                                },
+                                "src": {
+                                    "description": "Url of the splat file (.ply incl. compressed, .splat, .spz, .ksplat, .sog, or a pre-built .rad level-of-detail tree). Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
+                                    "format": "uri",
+                                    "title": "Url",
+                                    "type": "string"
+                                },
+                                "lod": {
+                                    "description": "Build a level-of-detail tree at load time to improve performance on large/dense splats (processed in a background worker; no file conversion needed). For large scenes, prefer supplying a pre-built .rad source instead and leave this off.",
+                                    "type": "boolean",
+                                    "title": "Build LoD at load time",
+                                    "default": false
+                                },
+                                "paged": {
+                                    "description": "Stream a chunked, pre-built LoD tree (a .rad header plus .radc chunks). Splat data is fetched on demand as the viewer approaches rather than downloaded up front. Only meaningful with a chunked .rad src.",
+                                    "type": "boolean",
+                                    "title": "Stream chunked LoD (paged)",
+                                    "default": false
+                                },
+                                "lodScale": {
+                                    "description": "Per-object level-of-detail detail multiplier. Values above 1 render finer detail; below 1 render coarser/faster. Applies to a .rad LoD tree or a runtime LoD build; no effect otherwise.",
+                                    "type": "number",
+                                    "title": "LoD Detail Scale",
+                                    "default": 1.0
+                                },
+                                "cutoutEntity": {
+                                    "description": "Selector to a box primitive that uses scale and position to define the bounds of splat points to render.",
+                                    "type": "string",
+                                    "title": "Cutout Entity (Optional)",
+                                    "default": ""
+                                },
+                                "pixelRatio": {
+                                    "description": "Pixel ratio for rendering. Reducing the value decreases the resolution and improves performance. If a negative value is set, the device's native value will be applied.",
+                                    "type": "number",
+                                    "title": "Pixel Ratio",
+                                    "default": 1.0
+                                },
+                                "xrPixelRatio": {
+                                    "description": "Same as pixelRatio. Applied to XR devices.",
+                                    "type": "number",
+                                    "title": "XR Pixel Ratio",
+                                    "default": 0.5
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#properties"
+                        }
+                    ],
+                    "title": "Gaussian Splat",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "gaussian_splatting"
+                    },
+                    "required": ["object_type", "src", "position", "rotation", "scale"]
+                }
+            }
+        }
+    ],
+    "required": ["object_id", "action", "type", "data", "persist"]
+}

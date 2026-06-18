@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME */
-
 import { ARENAUtils } from '../../utils';
 
 AFRAME.registerComponent('webxr-device-manager', {
@@ -29,6 +27,11 @@ AFRAME.registerComponent('webxr-device-manager', {
         this.cameraSpinner = document.getElementById('cameraSpinner');
         this.lHand = document.getElementById('leftHand');
         this.rHand = document.getElementById('rightHand');
+
+        // Prevent XR select event from firing when overlay is interacted with
+        document.querySelector('#overlay').addEventListener('beforexrselect', (ev) => {
+            ev.preventDefault();
+        });
     },
 
     onWebXREnterVR() {
@@ -48,7 +51,13 @@ AFRAME.registerComponent('webxr-device-manager', {
             rHand.setAttribute('raycaster', 'enabled', true);
         }
         if (sceneEl.is('ar-mode')) {
+            // Hide some UI elements
+            const chatExpandBtn = document.getElementById('chat-button-group-expand-icon');
+            if (chatExpandBtn.classList.contains('fa-angle-left')) {
+                chatExpandBtn.click();
+            }
             document.getElementById('env').setAttribute('visible', false);
+            ARENA.addDefaultLights(true);
             const arMarkerSys = sceneEl.systems.armarker;
             arMarkerSys.webXRSessionStarted(sceneEl.xrSession);
         }

@@ -25,9 +25,9 @@ If applicable, add screenshots to help explain your problem.
 
 **Device/OS (please complete the following information):**
 
--   Device: [e.g. iPhone6, Oculus Vive]
--   OS (w/ version): [e.g. iOS 15, Windows 11]
--   Browser (w/ version): [e.g. chrome 91.0.4472.147, safari 14]
+- Device: [e.g. iPhone6, Oculus Vive]
+- OS (w/ version): [e.g. iOS 15, Windows 11]
+- Browser (w/ version): [e.g. chrome 91.0.4472.147, safari 14]
 
 **Additional context**
 Add any other context about the problem here.

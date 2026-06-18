@@ -25,7 +25,6 @@ import './renderfusion/remote-render';
 import 'aframe-environment-component'; // pretty environments
 import 'aframe-blink-controls'; // Controller teleport
 import '@c-frame/aframe-particle-system-component'; // particle system environment
-import 'aframe-gaussian-splatting-component';
 
 // NPM import overrides
 import './vendor/animation-mixer'; // Override animation mixer
@@ -38,4 +37,4 @@ import './vendor/morphTarget'; // target and control a gltf model's morphTargets
 
 // Dynamic async imports (codesplit)
 import('webxr-polyfill'); // fallback for non-webXR browsers
-import('./vendor/aframe-spe-particles-component.min'); // particle system: https://github.com/arenaxr/aframe-spe-particles-component
+import('./vendor/aframe-spe-particles-component'); // particle system: https://github.com/arenaxr/aframe-spe-particles-component

@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME */
-
 // AFRAME Monkeypatch (src/components/gltf-model.js)
 AFRAME.components['gltf-model'].Component.prototype.update = function update() {
     const self = this;

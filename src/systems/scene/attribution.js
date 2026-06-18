@@ -13,8 +13,6 @@
  * @module attribution-system
  */
 
-/* global AFRAME */
-
 AFRAME.registerSystem('attribution', {
     schema: {},
     init() {

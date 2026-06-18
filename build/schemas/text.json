@@ -3,7 +3,7 @@
     "description": "Display text.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>A-Frame Text</a>.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -62,22 +62,10 @@
                                         "sourcecodepro"
                                     ]
                                 },
-                                "fontImage": {
-                                    "description": "Font image texture path to render text. Defaults to the font's name with extension replaced to .png. Don't need to specify if using a stock font. (derived from font name).",
-                                    "type": "string"
-                                },
-                                "height": {
-                                    "description": "Height of text block. (derived from text size).",
-                                    "type": "number"
-                                },
                                 "letterSpacing": {
                                     "description": "Letter spacing in pixels.",
                                     "type": "number",
                                     "default": 0
-                                },
-                                "lineHeight": {
-                                    "description": "Line height in pixels. (derived from font file).",
-                                    "type": "number"
                                 },
                                 "opacity": {
                                     "description": "Opacity, on a scale from 0 to 1, where 0 means fully transparent and 1 means fully opaque.",
@@ -124,9 +112,10 @@
                                     "default": true
                                 },
                                 "value": {
-                                    "description": "The actual content of the text. Line breaks and tabs are supported with \\n and \\t.",
+                                    "description": "The actual content of the text. Line breaks and tabs are supported with `\\n` and `\\t`.",
                                     "title": "Value (Text)",
-                                    "type": "string"
+                                    "type": "string",
+                                    "default": "Default Text"
                                 },
                                 "whiteSpace": {
                                     "type": "string",
@@ -134,19 +123,10 @@
                                     "default": "normal",
                                     "enum": ["normal", "pre", "nowrap"]
                                 },
-                                "width": {
-                                    "description": "Width in meters. (derived from geometry if exists).",
-                                    "type": "number",
-                                    "default": 5
-                                },
                                 "wrapCount": {
                                     "description": "Number of characters before wrapping text (more or less).",
                                     "type": "number",
                                     "default": 40
-                                },
-                                "wrapPixels": {
-                                    "description": "Number of pixels before wrapping text. (derived from wrapCount).",
-                                    "type": "number"
                                 },
                                 "xOffset": {
                                     "description": "X-offset to apply to add padding.",
@@ -161,7 +141,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         }
                     ],
                     "title": "Text Data",

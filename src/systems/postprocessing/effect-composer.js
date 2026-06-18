@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
 
-/* global THREE */
-
 // import CopyShader from './shaders/CopyShader';
 // import ShaderPass from './passes/shader-pass';
 

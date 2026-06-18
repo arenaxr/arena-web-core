@@ -1,3 +1,6 @@
+/**
+ * @module ccwebxr
+ */
 /* eslint-disable no-throw-literal */
 /**
  * @fileoverview Capture passthrough camera frames using WebXR Raw Camera Access API
@@ -8,8 +11,6 @@
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
  * @date 2021
  */
-
-/* global THREE */
 
 import CVWorkerMsgs from '../worker-msgs';
 
@@ -66,6 +67,13 @@ export default class WebXRCameraCapture {
     /* worker to send images captured */
     cvWorker;
 
+    // This is offscreenCanvas, but we use same name across all pipelines
+    canvas;
+
+    offScreenImageData;
+
+    cvFlipVertical = true;
+
     /**
      * Setup camera frame capture
      * @param {object} xrSession -  WebXR Device API's XRSession
@@ -104,6 +112,7 @@ export default class WebXRCameraCapture {
         this.gl = gl;
 
         this.onXRFrame = this.onXRFrame.bind(this);
+        this.updateOffscreenCanvas = this.updateOffscreenCanvas.bind(this);
 
         const WebGlBinding = window.XRWebGLBinding;
         // check if we have webXR camera capture available
@@ -171,6 +180,29 @@ export default class WebXRCameraCapture {
             // Skew factor in pixels (nonzero for rhomboid pixels)
             gamma: (viewport.width / 2) * p[4],
         };
+    }
+
+    /**
+     * Gets or creates a new offscreenCanvas
+     */
+    getOffscreenCanvas() {
+        if (!this.canvas) {
+            this.canvas = new OffscreenCanvas(this.frameWidth, this.frameHeight);
+            this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
+        }
+        return this.canvas;
+    }
+
+    updateOffscreenCanvas() {
+        const canvas = this.getOffscreenCanvas();
+        canvas.width = this.frameWidth;
+        canvas.height = this.frameHeight;
+        if (this.offScreenImageData.width !== this.frameWidth || this.offScreenImageData.height !== this.frameHeight) {
+            this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
+        }
+        this.offScreenImageData.data.set(this.framePixels);
+        canvas.getContext('2d').putImageData(this.offScreenImageData, 0, 0);
+        return true;
     }
 
     /**

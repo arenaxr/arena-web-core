@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME, THREE */
-
 import { ARENAUtils } from '../utils';
 
 // AFRAME Monkeypatch (src/components/gltf-model.js)

@@ -1,5 +1,3 @@
-/* global THREE */
-
 import { Pass, FullScreenQuad } from './pass';
 
 class ShaderPass extends Pass {

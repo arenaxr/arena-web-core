@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Face feature detection and tracking System. Basically acts as a global
  *               object to control ARENA's face tracking feature.
@@ -7,6 +5,8 @@
  */
 
 import { FaceTracker, FaceTrackerSource } from './face-tracker.min';
+import { TOPICS } from '../../constants';
+import { ARENAUtils } from '../../utils';
 
 AFRAME.registerSystem('face-tracking', {
     schema: {
@@ -37,6 +37,14 @@ AFRAME.registerSystem('face-tracking', {
         this.faceTracker = new FaceTracker(faceTrackerSource);
 
         const _this = this;
+
+        const faceTopic = TOPICS.PUBLISH.SCENE_USER.formatStr({
+            nameSpace: ARENA.nameSpace,
+            sceneName: ARENA.sceneName,
+            userClient: ARENA.userClient,
+            userObj: ARENA.faceName,
+        });
+
         window.addEventListener('onFaceTrackerInit', (e) => {
             const video = e.detail.source;
             video.classList.add('flip-video');
@@ -91,8 +99,7 @@ AFRAME.registerSystem('face-tracking', {
 
             const faceJSON = this.createFaceJSON(valid, landmarks, bbox, pose);
             if (faceJSON !== this.prevJSON) {
-                const FACE_TOPIC = `${ARENA.outputTopic}${ARENA.camName}/face/${faceJSON.object_id}`;
-                ARENA.Mqtt.publish(FACE_TOPIC, faceJSON);
+                ARENA.Mqtt.publish(faceTopic, faceJSON);
                 this.prevJSON = faceJSON;
             }
 
@@ -125,7 +132,7 @@ AFRAME.registerSystem('face-tracking', {
 
     /**
      * Draws a bounding box on the overlay canvas
-     * @param {[]} bbox array formatted like so: [x1,y1,x2,y2]
+     * @param {Array} bbox array formatted like so: [x1,y1,x2,y2]
      */
     drawBbox(bbox) {
         const overlayCtx = this.overlayCanvas.getContext('2d');
@@ -146,7 +153,7 @@ AFRAME.registerSystem('face-tracking', {
 
     /**
      * Draws a polyline on the overlay canvas. Helper function for drawing face landmarks
-     * @param {[]} landmarks array formatted like so: [x1,y1,x2,y2,x3,x3,...]
+     * @param {Array} landmarks array formatted like so: [x1,y1,x2,y2,x3,x3,...]
      * @param {number} start start index to draw lines
      * @param {number} end end index to draw lines
      * @param {boolean} closed whether or not to connect the start and end points of polyline
@@ -200,7 +207,7 @@ AFRAME.registerSystem('face-tracking', {
 
     /**
      * Checks if landmarks are valid
-     * @param {[]} landmarks array formatted like so: [x1,y1,x2,y2,x3,x3,...]
+     * @param {Array} landmarks array formatted like so: [x1,y1,x2,y2,x3,x3,...]
      * @return {boolean} whether or not the landmarks has a valid face or not
      */
     hasFace(landmarks) {
@@ -213,15 +220,6 @@ AFRAME.registerSystem('face-tracking', {
             if (landmarks[i] === 0) numZeros++;
         }
         return numZeros <= landmarks.length / 2;
-    },
-
-    /**
-     * Rounds number to 3 decimal places
-     * @param {number} num number to round
-     * @return {number} input rounded to 3 decimal places
-     */
-    round3(num) {
-        return parseFloat(num.toFixed(3));
     },
 
     /**
@@ -256,16 +254,16 @@ AFRAME.registerSystem('face-tracking', {
         let adjustedQuat;
         const quatAdjusted = [];
 
-        adjustedQuat = hasFace ? this.round3(quat.x) : 0;
+        adjustedQuat = hasFace ? ARENAUtils.round3(quat.x) : 0;
         quatAdjusted.push(adjustedQuat);
 
-        adjustedQuat = hasFace ? this.round3(quat.y) : 0;
+        adjustedQuat = hasFace ? ARENAUtils.round3(quat.y) : 0;
         quatAdjusted.push(adjustedQuat);
 
-        adjustedQuat = hasFace ? this.round3(quat.z) : 0;
+        adjustedQuat = hasFace ? ARENAUtils.round3(quat.z) : 0;
         quatAdjusted.push(adjustedQuat);
 
-        adjustedQuat = hasFace ? this.round3(quat.w) : 0;
+        adjustedQuat = hasFace ? ARENAUtils.round3(quat.w) : 0;
         quatAdjusted.push(adjustedQuat);
 
         faceJSON.data.pose.quaternions = quatAdjusted;
@@ -273,21 +271,21 @@ AFRAME.registerSystem('face-tracking', {
         let adjustedTrans;
         const transAdjusted = [];
 
-        adjustedTrans = hasFace ? this.round3(trans.x) : 0;
+        adjustedTrans = hasFace ? ARENAUtils.round3(trans.x) : 0;
         transAdjusted.push(adjustedTrans);
 
-        adjustedTrans = hasFace ? this.round3(trans.y) : 0;
+        adjustedTrans = hasFace ? ARENAUtils.round3(trans.y) : 0;
         transAdjusted.push(adjustedTrans);
 
-        adjustedTrans = hasFace ? this.round3(trans.z) : 0;
+        adjustedTrans = hasFace ? ARENAUtils.round3(trans.z) : 0;
         transAdjusted.push(adjustedTrans);
 
         faceJSON.data.pose.translation = transAdjusted;
 
         const landmarksAdjusted = [];
         for (let i = 0; i < 68 * 2; i += 2) {
-            const adjustedX = hasFace ? this.round3((landmarksRaw[i] - this.width / 2) / this.width) : 0;
-            const adjustedY = hasFace ? this.round3((this.height / 2 - landmarksRaw[i + 1]) / this.height) : 0;
+            const adjustedX = hasFace ? ARENAUtils.round3((landmarksRaw[i] - this.width / 2) / this.width) : 0;
+            const adjustedY = hasFace ? ARENAUtils.round3((this.height / 2 - landmarksRaw[i + 1]) / this.height) : 0;
             landmarksAdjusted.push(adjustedX);
             landmarksAdjusted.push(adjustedY);
         }
@@ -297,13 +295,13 @@ AFRAME.registerSystem('face-tracking', {
         let adjustedY;
         const bboxAdjusted = [];
 
-        adjustedX = hasFace ? this.round3((bbox.left - this.width / 2) / this.width) : 0;
-        adjustedY = hasFace ? this.round3((this.height / 2 - bbox.top) / this.height) : 0;
+        adjustedX = hasFace ? ARENAUtils.round3((bbox.left - this.width / 2) / this.width) : 0;
+        adjustedY = hasFace ? ARENAUtils.round3((this.height / 2 - bbox.top) / this.height) : 0;
         bboxAdjusted.push(adjustedX);
         bboxAdjusted.push(adjustedY);
 
-        adjustedX = hasFace ? this.round3((bbox.right - this.width / 2) / this.width) : 0;
-        adjustedY = hasFace ? this.round3((this.height / 2 - bbox.bottom) / this.height) : 0;
+        adjustedX = hasFace ? ARENAUtils.round3((bbox.right - this.width / 2) / this.width) : 0;
+        adjustedY = hasFace ? ARENAUtils.round3((this.height / 2 - bbox.bottom) / this.height) : 0;
         bboxAdjusted.push(adjustedX);
         bboxAdjusted.push(adjustedY);
 
@@ -336,7 +334,7 @@ AFRAME.registerSystem('face-tracking', {
                 cameraOptions = { deviceId: { exact: perfVideoInput } };
             }
             const shapePredURL =
-                'https://arena-cdn.conix.io/store/face-tracking/shape_predictor_68_face_landmarks_compressed.dat';
+                'https://arenaxr.org/store/face-tracking/shape_predictor_68_face_landmarks_compressed.dat';
             this.faceTracker.init(shapePredURL, cameraOptions);
             this.initialized = true;
         } else {

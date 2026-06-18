@@ -3,7 +3,7 @@
     "description": "ARENAUI element which displays prompt with button actions.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -53,6 +53,39 @@
                                     "default": "light",
                                     "enum": ["light", "dark"]
                                 },
+                                "themeOverride": {
+                                    "type": "array",
+                                    "title": "Color Theme Override",
+                                    "description": "Array of color override tuples e.g. [['textBg', '#000000']]",
+                                    "items": {
+                                        "type": "array",
+                                        "items": [
+                                            {
+                                                "type": "string",
+                                                "enum": [
+                                                    "text",
+                                                    "textBg",
+                                                    "captionBg",
+                                                    "textBgOpacity",
+                                                    "bg",
+                                                    "bgOpacity",
+                                                    "buttonText",
+                                                    "buttonBg",
+                                                    "buttonBgOpacity",
+                                                    "buttonBgHover",
+                                                    "buttonBgSelected"
+                                                ]
+                                            },
+                                            {
+                                                "type": "string",
+                                                "format": "color"
+                                            }
+                                        ],
+                                        "minItems": 2,
+                                        "maxItems": 2
+                                    },
+                                    "default": []
+                                },
                                 "materialSides": {
                                     "type": "string",
                                     "title": "Material Sides",
@@ -63,10 +96,10 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-common.json#properties"
                         }
                     ],
                     "title": "Prompt Data",

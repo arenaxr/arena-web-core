@@ -6,8 +6,6 @@
  * @date 2023
  */
 
-/* global AFRAME */
-
 const warn = AFRAME.utils.debug('components:sound:warn');
 
 // AFRAME Monkeypatch (src/components/sound.js)

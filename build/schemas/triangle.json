@@ -3,7 +3,7 @@
     "description": "Triangle Geometry.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#/properties"
+            "$ref": "./schemas/definitions-arena-object.json#properties"
         },
         {
             "properties": {
@@ -20,7 +20,7 @@
                                 "vertexA": {
                                     "title": "vertex A",
                                     "format": "grid",
-                                    "$ref": "#/definitions/vector3",
+                                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
                                     "default": {
                                         "x": 0,
                                         "y": 0.5,
@@ -30,7 +30,7 @@
                                 "vertexB": {
                                     "title": "vertex B",
                                     "format": "grid",
-                                    "$ref": "#/definitions/vector3",
+                                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -40,7 +40,7 @@
                                 "vertexC": {
                                     "title": "vertex C",
                                     "format": "grid",
-                                    "$ref": "#/definitions/vector3",
+                                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
                                     "default": {
                                         "x": 0.5,
                                         "y": -0.5,
@@ -50,17 +50,16 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-common.json#properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                            "$ref": "./schemas/definitions-geometry.json#properties"
                         }
                     ],
                     "title": "Triangle Data",
-                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "triangle",
@@ -73,27 +72,5 @@
             }
         }
     ],
-    "required": ["object_id", "action", "type", "data", "persist"],
-    "definitions": {
-        "vector3": {
-            "title": "Vector3",
-            "format": "grid",
-            "properties": {
-                "x": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "y": {
-                    "default": 0,
-                    "type": "number"
-                },
-                "z": {
-                    "default": 0,
-                    "type": "number"
-                }
-            },
-            "required": ["x", "y", "z"],
-            "type": "object"
-        }
-    }
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

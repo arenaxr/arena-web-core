@@ -1,5 +1,4 @@
-/* global AFRAME, ARENA */
-
+import { TOPICS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
 /**
@@ -13,7 +12,6 @@ import { ARENAUtils } from '../../utils';
 /**
  * Keep track of mouse events and publish corresponding events
  * @module click-listener
- * @todo Consolidate event listeners (they are very similar)
  */
 AFRAME.registerComponent('click-listener', {
     schema: {
@@ -23,10 +21,24 @@ AFRAME.registerComponent('click-listener', {
     },
 
     init() {
-        this.mouseleaveHandler = this.mouseleaveHandler.bind(this);
-        this.mouseenterHandler = this.mouseenterHandler.bind(this);
-        this.mousedownHandler = this.mousedownHandler.bind(this);
-        this.mouseupHandler = this.mouseupHandler.bind(this);
+        this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
+        const { topicParams } = ARENA;
+        this.topicBase = TOPICS.PUBLISH.SCENE_USER.formatStr(topicParams);
+        this.topicBasePrivate = TOPICS.PUBLISH.SCENE_USER_PRIVATE.formatStr(topicParams);
+        this.topicBasePrivateProg = TOPICS.PUBLISH.SCENE_PROGRAM_PRIVATE.formatStr(topicParams);
+
+        this.mousedownHandler = (evt) => {
+            this.mouseEvtHandler(evt, 'mousedown');
+        };
+        this.mouseupHandler = (evt) => {
+            this.mouseEvtHandler(evt, 'mouseup');
+        };
+        this.mouseenterHandler = (evt) => {
+            this.mouseEvtHandler(evt, 'mouseenter');
+        };
+        this.mouseleaveHandler = (evt) => {
+            this.mouseEvtHandler(evt, 'mouseleave');
+        };
     },
 
     update(oldData) {
@@ -51,121 +63,34 @@ AFRAME.registerComponent('click-listener', {
         this.el.removeEventListener('mouseenter', this.mouseenterHandler);
         this.el.removeEventListener('mouseleave', this.mouseleaveHandler);
     },
-    mousedownHandler(evt) {
+    mouseEvtHandler(evt, evtType) {
+        const { el, topicBase, topicBasePrivate, topicBasePrivateProg } = this;
         if (this.data.bubble === false) {
             evt.stopPropagation();
         }
         if (this.data.enabled === false) return;
-        const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'];
 
-        const clickPos = ARENAUtils.vec3ToObject(position);
+        if (!this.cameraPos) {
+            this.cameraPos = document.getElementById('my-camera').components['arena-camera']?.position;
+        }
+        const clickPos = ARENAUtils.vec3ToObject(this.cameraPos);
         const coordsData = ARENAUtils.setClickData(evt);
 
         if ('cursorEl' in evt.detail) {
             // original click event; simply publish to MQTT
             const thisMsg = {
-                object_id: this.el.id,
+                object_id: ARENA.idTag,
                 action: 'clientEvent',
-                type: 'mousedown',
+                type: evtType,
                 data: {
-                    clickPos,
-                    position: coordsData,
-                    source: ARENA.camName,
+                    originPosition: clickPos,
+                    targetPosition: coordsData,
+                    target: this.el.id,
                 },
             };
             if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
                 // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
-            }
-        }
-    },
-
-    mouseupHandler(evt) {
-        if (this.data.bubble === false) {
-            evt.stopPropagation();
-        }
-        if (this.data.enabled === false) return;
-        const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'];
-
-        const clickPos = ARENAUtils.vec3ToObject(position);
-        const coordsData = ARENAUtils.setClickData(evt);
-
-        if ('cursorEl' in evt.detail) {
-            // original click event; simply publish to MQTT
-            const thisMsg = {
-                object_id: this.el.id,
-                action: 'clientEvent',
-                type: 'mouseup',
-                data: {
-                    clickPos,
-                    position: coordsData,
-                    source: ARENA.camName,
-                },
-            };
-            if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
-                // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
-            }
-        }
-    },
-
-    mouseenterHandler(evt) {
-        if (this.data.bubble === false) {
-            evt.stopPropagation();
-        }
-        if (this.data.enabled === false) return;
-        const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'];
-
-        const clickPos = ARENAUtils.vec3ToObject(position);
-        const coordsData = ARENAUtils.setCoordsData(evt);
-
-        if ('cursorEl' in evt.detail) {
-            // original click event; simply publish to MQTT
-            const thisMsg = {
-                object_id: this.el.id,
-                action: 'clientEvent',
-                type: 'mouseenter',
-                data: {
-                    clickPos,
-                    position: coordsData,
-                    source: ARENA.camName,
-                },
-            };
-            if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
-                // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
-            }
-        }
-    },
-    mouseleaveHandler(evt) {
-        if (this.data.bubble === false) {
-            evt.stopPropagation();
-        }
-        if (this.data.enabled === false) return;
-        const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'];
-
-        const clickPos = ARENAUtils.vec3ToObject(position);
-        const coordsData = ARENAUtils.setCoordsData(evt);
-
-        if ('cursorEl' in evt.detail) {
-            // original click event; simply publish to MQTT
-            const thisMsg = {
-                object_id: this.el.id,
-                action: 'clientEvent',
-                type: 'mouseleave',
-                data: {
-                    clickPos,
-                    position: coordsData,
-                    source: ARENA.camName,
-                },
-            };
-            if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
-                // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+                ARENAUtils.publishClientEvent(el, thisMsg, topicBase, topicBasePrivate, topicBasePrivateProg);
             }
         }
     },

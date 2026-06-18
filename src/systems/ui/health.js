@@ -22,11 +22,11 @@
  * }
  */
 
-/* global AFRAME, $ */
+/* global $ */
 
 /**
  * Render the display of errors in #error-block for troubleshooting.
- * @param {[objects]} errors Array of error Objects under errorCode key.
+ * @param {Object[]} errors Array of error Objects under errorCode key.
  */
 function drawErrorBlock(errors) {
     const errBlock = $('#error-block');
@@ -87,10 +87,12 @@ AFRAME.registerSystem('arena-health-ui', {
             );
             // update icon display once doc is ready
             const icon = document.getElementById('error-icon');
-            if (Object.keys(_this.activeErrors).length) {
-                icon.style.display = 'block';
-            } else {
-                icon.style.display = 'none';
+            if (icon) {
+                if (Object.keys(_this.activeErrors).length) {
+                    icon.style.display = 'block';
+                } else {
+                    icon.style.display = 'none';
+                }
             }
         });
     },

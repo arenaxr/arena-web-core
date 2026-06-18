@@ -93,9 +93,12 @@ window.addEventListener('onauth', async (e) => {
     if (auth.authenticated) {
         window.publicButtons.push(clonePublicSceneBtn); // add clone option for full user
         tabMyScenes.parentElement.style.display = 'block';
+        clonePublicSceneBtn.title = 'Duplicate Scene';
     } else {
         tabMyScenes.parentElement.style.display = 'none'; // anon users may not edit scenes
         userNoteSpan.textContent = 'To create or clone scenes, please login with an authenticated account.';
+        clonePublicSceneBtn.classList.add('disabled');
+        clonePublicSceneBtn.title = 'Duplicate Scene requires scene editor permissions';
     }
 
     const toggleUserSceneButtons = (toggle) => {
@@ -122,7 +125,7 @@ window.addEventListener('onauth', async (e) => {
             window.userSceneId = _e.target.value;
             updateUriBuilderCheckboxes(true);
             updateUserSceneUrlBox(`${window.location.origin}/${_e.target.value}`);
-            scenePermsLink.href = `${window.location.origin}/user/profile/scenes/${_e.target.value}`;
+            scenePermsLink.href = `${window.location.origin}/user/v2/profile/scenes/${_e.target.value}`;
             deleteUserSceneBtn.value = _e.target.value;
             toggleUserSceneButtons(true);
         } else {
@@ -137,12 +140,10 @@ window.addEventListener('onauth', async (e) => {
             window.publicSceneId = _e.target.value;
             publicSceneUrl.value = `${window.location.origin}/${_e.target.value}`;
             togglePublicSceneButtons(true);
-            console.log('valid public', _e.target.value);
         } else {
             window.publicSceneId = '';
             publicSceneUrl.value = '';
             togglePublicSceneButtons(false);
-            console.log('invalid public', _e.target.value);
         }
     }
 
@@ -158,6 +159,8 @@ window.addEventListener('onauth', async (e) => {
     });
     enterUserSceneBtn.addEventListener('click', () => (window.location = userSceneUrl.value));
     enterArUserSceneBtn.addEventListener('click', () => (window.location = `${userSceneUrl.value}?armode=1`));
+
+
 
     // set listeners for advanced links URI-builder
     advancedLinksUserBtn.addEventListener('click', () => {
@@ -199,6 +202,9 @@ window.addEventListener('onauth', async (e) => {
                     case 'noavCheck':
                         sceneUrl.searchParams.append('noav', '1');
                         break;
+                    case 'demoModeCheck':
+                        sceneUrl.searchParams.append('demoMode', '1');
+                        break;
                     default:
                     // skip
                 }
@@ -226,7 +232,7 @@ window.addEventListener('onauth', async (e) => {
     deleteUserSceneBtn.addEventListener('click', () => {
         if (confirm(`Are you sure you want to delete ${deleteUserSceneBtn.value}?`)) {
             const deletes = [
-                axios.delete(`/user/scenes/${deleteUserSceneBtn.value}`, {
+                axios.delete(`/user/v2/scenes/${deleteUserSceneBtn.value}`, {
                     withCredentials: true,
                 }),
                 axios.delete(`/persist/${deleteUserSceneBtn.value}`),
@@ -291,11 +297,17 @@ window.addEventListener('onauth', async (e) => {
     document.getElementById('doCloneSceneBtn').addEventListener('click', () => {
         const [namespace, sceneId] = sourceScene.value.split('/');
         axios
-            .post(`/persist/${window.username}/${newSceneNameInput.value}`, {
-                action: 'clone',
-                namespace,
-                sceneId,
-            })
+            .post(
+                `/persist/${window.username}/${newSceneNameInput.value}`,
+                {
+                    action: 'clone',
+                    namespace,
+                    sceneId,
+                },
+                {
+                    withCredentials: true,
+                }
+            )
             .then((res) => {
                 Swal.fire('Clone success!', `${res.data.objectsCloned} objects cloned into new scene`, 'success');
                 cloneSceneUrl.value = `${window.location.origin}/${window.username}/${newSceneNameInput.value}`;
@@ -324,7 +336,7 @@ window.addEventListener('onauth', async (e) => {
     // my_scenes may include 'public' namespaces for staff
     // my_scenes may include other editor namespaces that have been granted
     axios
-        .get('/user/my_scenes', {
+        .get('/user/v2/my_scenes', {
             withCredentials: true,
         })
         .then((res) => {

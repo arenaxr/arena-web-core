@@ -8,7 +8,7 @@
  * Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
  */
 
-/* global AFRAME, ARENA, mdb, Swal */
+/* global mdb */
 
 import createAudioMeter from './volume-meter';
 import { ARENA_EVENTS } from '../../constants';
@@ -74,32 +74,43 @@ AFRAME.registerSystem('arena-av-setup', {
         this.testAudioOutBtn = document.getElementById('playTestAudioOutBtn');
         this.testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
         this.micMeter = document.getElementById('micMeter');
+        this.presenceSelect = document.getElementById('presenceSelect');
         this.headModelPathSelect = document.getElementById('headModelPathSelect');
 
+        this.reverseRenderCanvasCheckbox = document.getElementById('reverseRenderCanvasCheckbox');
         this.reverseMouseDragCheckbox = document.getElementById('reverseMouseDragCheckbox');
         this.displayName = document.getElementById('displayName-input');
         this.enterSceneBtn = document.getElementById('enterSceneAVBtn');
         this.redetectAVBtn = document.getElementById('redetectAVBtn');
 
         // style video element
-        this.videoElement.classList.add('flip-video');
+        if (localStorage.getItem('prefPresence') !== 'Portal') {
+            this.videoElement.classList.add('flip-video');
+        } else {
+            this.videoElement.classList.add('flip-video-portal');
+        }
         this.videoElement.style.borderRadius = '10px';
 
-        let headModelPathIdx = 0;
+        // style the a-frame canvas
+        const canvas = document.querySelector('a-scene').querySelector('canvas');
+        if (localStorage.getItem('prefReverseRenderCanvas') === 'true') {
+            canvas.classList.add('a-canvas-flip');
+        } else {
+            canvas.classList.add('a-canvas-normal');
+        }
+
         if (ARENA.sceneHeadModels) {
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-            const sceneHeadModelPathIdx = sceneHist[ARENA.namespacedScene]?.headModelPathIdx;
-            if (this.sceneHeadModelPathIdx !== undefined) {
-                headModelPathIdx = sceneHeadModelPathIdx;
+            const sceneHeadModelPath = sceneHist[ARENA.namespacedScene]?.headModelPath;
+            if (sceneHeadModelPath !== undefined) {
+                this.headModelPathSelect.value = sceneHeadModelPath;
             } else if (this.headModelPathSelect.selectedIndex === 0) {
                 // if default ARENA head used, replace with default scene head
-                headModelPathIdx = this.headModelPathSelect.length;
+                this.headModelPathSelect.value = ARENA.sceneHeadModels[0].url;
             }
-        } else if (localStorage.getItem('headModelPathIdx')) {
-            headModelPathIdx = localStorage.getItem('headModelPathIdx');
+        } else if (localStorage.getItem('prefHeadModelPath')) {
+            this.headModelPathSelect.value = localStorage.getItem('prefHeadModelPath');
         }
-        this.headModelPathSelect.selectedIndex =
-            headModelPathIdx < this.headModelPathSelect.length ? headModelPathIdx : 0;
     },
 
     show(callback) {
@@ -121,6 +132,15 @@ AFRAME.registerSystem('arena-av-setup', {
         if (localStorage.getItem('display_name')) {
             this.displayName.value = localStorage.getItem('display_name');
             // this.displayName.focus();
+        }
+        if (localStorage.getItem('prefPresence')) {
+            this.presenceSelect.value = localStorage.getItem('prefPresence');
+        }
+        if (localStorage.getItem('prefReverseRenderCanvas')) {
+            this.reverseRenderCanvasCheckbox.checked = localStorage.getItem('prefReverseRenderCanvas') === 'true';
+        }
+        if (localStorage.getItem('prefReverseMouseDrag')) {
+            this.reverseMouseDragCheckbox.checked = localStorage.getItem('prefReverseMouseDrag') === 'true';
         }
         this.detectDevices(undefined, true);
     },
@@ -151,11 +171,21 @@ AFRAME.registerSystem('arena-av-setup', {
         this.testAudioOutBtn.addEventListener('ended', () => {
             this.testAudioOutIcon.setAttribute('class', 'fas fa-volume-off');
         });
+        this.presenceSelect.onchange = () => {
+            if (this.presenceSelect.value !== 'Portal') {
+                this.videoElement.classList.remove('flip-video-portal');
+                this.videoElement.classList.add('flip-video');
+            } else {
+                this.videoElement.classList.remove('flip-video');
+                this.videoElement.classList.add('flip-video-portal');
+            }
+        };
 
         this.redetectAVBtn.addEventListener('click', this.detectDevices);
         this.enterSceneBtn.addEventListener('click', () => {
-            // Stash preferred devices
             localStorage.setItem('display_name', this.displayName.value);
+            localStorage.setItem('prefPresence', this.presenceSelect.value);
+            // Stash preferred devices
             localStorage.setItem('prefAudioInput', this.audioInSelect.value);
             localStorage.setItem('prefVideoInput', this.videoSelect.value);
             localStorage.setItem('prefAudioOutput', this.audioOutSelect.value);
@@ -165,16 +195,30 @@ AFRAME.registerSystem('arena-av-setup', {
                 const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
                 sceneHist[ARENA.namespacedScene] = {
                     ...sceneHist[ARENA.namespacedScene],
-                    headModelPathIdx: this.headModelPathSelect.selectedIndex,
+                    headModelPath: this.headModelPathSelect.value,
                 };
                 localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
             } else {
-                localStorage.setItem('headModelPathIdx', this.headModelPathSelect.selectedIndex);
+                localStorage.setItem('prefHeadModelPath', this.headModelPathSelect.value);
             }
+
+            // style a-frame canvas
+            const canvas = document.querySelector('a-scene').querySelector('canvas');
+            if (this.reverseRenderCanvasCheckbox.checked) {
+                if (canvas.classList) {
+                    canvas.classList.remove('a-canvas-normal');
+                    canvas.classList.add('a-canvas-flip');
+                }
+            } else if (canvas.classList) {
+                canvas.classList.remove('a-canvas-flip');
+                canvas.classList.add('a-canvas-normal');
+            }
+            localStorage.setItem('prefReverseRenderCanvas', this.reverseRenderCanvasCheckbox.checked);
 
             // default is reverse of aframe's default - we want to "drag world to pan"
             const camera = document.getElementById('my-camera');
             camera.setAttribute('look-controls', 'reverseMouseDrag', !this.reverseMouseDragCheckbox.checked);
+            localStorage.setItem('prefReverseMouseDrag', this.reverseMouseDragCheckbox.checked);
 
             // Stop audio and video preview
             if (this.videoElement.srcObject) {
@@ -270,25 +314,28 @@ AFRAME.registerSystem('arena-av-setup', {
         if (!this.videoSelect.childElementCount) {
             this.videoSelect.appendChild(noElementOption.cloneNode(true));
         }
-        if (window.stream) {
-            const currentAudioIndex = [...this.audioInSelect.options].findIndex(
-                (option) => option.text === window.stream.getAudioTracks()[0].label
-            );
-            this.audioInSelect.selectedIndex = currentAudioIndex === -1 ? 0 : currentAudioIndex;
-
-            const currentVideoIndex = [...this.videoSelect.options].findIndex(
-                (option) => option.text === window.stream.getVideoTracks()[0].label
-            );
-            this.videoSelect.selectedIndex = currentVideoIndex === -1 ? 0 : currentVideoIndex;
-        } else {
-            this.audioInSelect.selectedIndex = 0;
-            this.videoSelect.selectedIndex = 0;
-        }
         if (!this.audioOutSelect.childElementCount) {
             noElementOption.text = 'Default Device';
             this.audioOutSelect.appendChild(noElementOption.cloneNode(true));
         }
-        this.audioOutSelect.selectedIndex = 0;
+        // Restore each dropdown's selection: prefer the user's saved deviceId, then the device
+        // backing the active preview stream (matched by track label), otherwise the first option.
+        // Restoring by saved id (not just label) preserves the user's pick - notably the speaker,
+        // which was previously always reset to the first/Default entry every time the dialog opened,
+        // silently overwriting prefAudioOutput with the default on the next Enter.
+        const preferredIndex = (selectEl, prefKey, track) => {
+            const pref = localStorage.getItem(prefKey);
+            let idx = pref ? [...selectEl.options].findIndex((option) => option.value === pref) : -1;
+            if (idx === -1 && track) {
+                idx = [...selectEl.options].findIndex((option) => option.text === track.label);
+            }
+            return idx === -1 ? 0 : idx;
+        };
+        const audioTrack = window.stream ? window.stream.getAudioTracks()[0] : null;
+        const videoTrack = window.stream ? window.stream.getVideoTracks()[0] : null;
+        this.audioInSelect.selectedIndex = preferredIndex(this.audioInSelect, 'prefAudioInput', audioTrack);
+        this.videoSelect.selectedIndex = preferredIndex(this.videoSelect, 'prefVideoInput', videoTrack);
+        this.audioOutSelect.selectedIndex = preferredIndex(this.audioOutSelect, 'prefAudioOutput', null);
     },
 
     /**
@@ -317,7 +364,13 @@ AFRAME.registerSystem('arena-av-setup', {
         this.videoElement.srcObject = stream;
 
         // Mic Test Meter via https://github.com/cwilso/volume-meter/
+        // The AudioContext is created outside a user gesture so it starts suspended; resume it or
+        // the meter's processor never runs. shutdown() nulls onaudioprocess and disconnects the
+        // node, so the meter must be recreated (not reused) each time a new stream is wired in -
+        // otherwise the green level bar stays at zero for every mic.
+        this.audioContext.resume().catch(() => {});
         this.meterProcess?.shutdown();
+        this.meterProcess = createAudioMeter(this.audioContext);
         this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
         this.mediaStreamSource.connect(this.meterProcess);
         this.micDrawLoop();

@@ -4,11 +4,10 @@ $(document).ready(() => {
     // add page header
     $('#header').load('/header.html', () => {
         // update auth state in nav bar
-        let auth = null;
-        fetch('/user/user_state')
+        fetch('/user/v2/user_state')
             .then((response) => response.json())
             .then((data) => {
-                auth = data;
+                window.auth = data;
                 const authDrop = $('#auth-dropdown');
                 authDrop.addClass('dropdown-toggle');
                 authDrop.attr('data-bs-toggle', 'dropdown');
@@ -19,9 +18,9 @@ $(document).ready(() => {
                 );
                 const dropdownMenu = $('ul .dropdown-menu');
                 dropdownMenu.append('<li><a class="dropdown-item" href="/conf/versions.html">Version</a></li>');
-                if (data.authenticated) {
-                    authDrop.html(data.username);
-                    dropdownMenu.append('<li><a class="dropdown-item" href="/user/profile">Profile</a></li>');
+                if (window.auth.authenticated) {
+                    authDrop.html(window.auth.username);
+                    dropdownMenu.append('<li><a class="dropdown-item" href="/user/v2/profile">Profile</a></li>');
                     dropdownMenu.append('<li><a class="dropdown-item" id="show_perms" href="#">Permissions</a></li>');
                     $('#show_perms').on('click', () => {
                         const frame = document.getElementsByTagName('iframe');
@@ -32,11 +31,11 @@ $(document).ready(() => {
                             window.alert('No MQTT permissions');
                         }
                     });
-                    dropdownMenu.append('<li><a class="dropdown-item" href="/user/logout">Logout</a></li>');
+                    dropdownMenu.append('<li><a class="dropdown-item" href="/user/v2/logout">Logout</a></li>');
                 } else {
                     authDrop.html('Login');
                     dropdownMenu
-                        .append('<li><a class="dropdown-item" href="/user/login">Login</a></li>')
+                        .append('<li><a class="dropdown-item" href="/user/v2/login">Login</a></li>')
                         .on('click', (e) => {
                             localStorage.setItem('request_uri', window.location.href);
                         });
@@ -49,14 +48,26 @@ $(document).ready(() => {
             .filter(function checkActiveURL() {
                 const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
                 const loc = window.location.pathname.replace(/^\/+|\/+$/g, '');
-                if (loc === 'files') {
-                    btnCopyStorePath.show();
-                } else {
-                    btnCopyStorePath.hide();
-                }
-                return link === loc;
+                const locBase = loc.split('/')[0];
+                return link === loc || link === locBase;
             })
             .addClass('active');
+
+        // Generic helper: toggle `.visible` on any control with `data-visible-on`
+        const updatePageControls = () => {
+            const loc = window.location.pathname.replace(/^\/+|\/+$/g, '');
+            const locBase = loc.split('/')[0];
+            $('[data-visible-on]').each(function eachControl() {
+                const el = $(this);
+                const cfg = (el.attr('data-visible-on') || '').toString();
+                const parts = cfg.split(',').map((s) => s.trim()).filter(Boolean);
+                if (parts.includes(loc) || parts.includes(locBase)) el.addClass('visible');
+                else el.removeClass('visible');
+            });
+        };
+
+        // initialize page controls now
+        updatePageControls();
 
         // copy the file store public path
         btnCopyStorePath.on('click', (e) => {
@@ -64,7 +75,7 @@ $(document).ready(() => {
             let storePath = getStorePath();
             if (storePath.startsWith('/storemng/files')) {
                 storePath = storePath.replace('/storemng/files', '');
-                const storeUnscopedPrefix = auth.is_staff ? '' : `/users/${auth.username}`;
+                const storeUnscopedPrefix = window.auth.is_staff ? '' : `/users/${window.auth.username}`;
                 const fullPath = `${window.location.protocol}//${window.location.host}/store${storeUnscopedPrefix}${storePath}`;
                 navigator.clipboard.writeText(fullPath);
                 Swal.fire('Copied!', fullPath, 'success');

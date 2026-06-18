@@ -2,8 +2,8 @@
 
 /* eslint-disable import/extensions */
 import * as PersistObjects from './persist-objects.js';
-import ARENAUserAccount from './arena-account.js';
-import * as MQTTPattern from './third-party/mqtt-pattern.js';
+import TOPICS from '../src/constants/topics.js';
+import * as FileStore from '../src/utils/filestore-upload.js';
 
 const Alert = Swal.mixin({
     toast: true,
@@ -17,19 +17,38 @@ const Alert = Swal.mixin({
 });
 window.Alert = Alert;
 
+window.addEventListener('load', async (e) => {
+    // always re-encode uri so that ?scene=aa/bb will not confuse downstream libs like json-editor
+    const url = new URL(window.location.href);
+    const sceneParam = url.searchParams.get('scene');
+    if (sceneParam) {
+        const encodedComponent = encodeURIComponent(sceneParam);
+        url.searchParams.set('scene', encodedComponent);
+        window.history.pushState({ path: url.href }, '', decodeURIComponent(url.href));
+    }
+});
+
 window.addEventListener('onauth', async (e) => {
     let schema;
     let jsoneditor;
     let dfts;
     let objSchemas;
     let dftSceneObjects = [];
+    let currentEditObj;
     const objTypeFilter = {};
 
     const username = e.detail.mqtt_username;
-    const mqttToken = e.detail.mqtt_token;
+    let mqttToken = e.detail.mqtt_token;
+    let userClient = e.detail.ids?.userclient;
+
+    const aceConfig = {
+        mode: 'ace/mode/json',
+        maxLines: Infinity,
+        minLines: 5,
+    };
 
     // Divs/textareas on the page
-    const output = document.getElementById('output');
+    const output = ace.edit('output', aceConfig);
     const editor = document.getElementById('editor');
     const validate = document.getElementById('validate');
     const sceneinput = document.getElementById('sceneinput');
@@ -56,6 +75,9 @@ window.addEventListener('onauth', async (e) => {
     const delButton = document.getElementById('delobj');
     const cpyButton = document.getElementById('copyobj');
     const allButton = document.getElementById('selectall');
+    // const programStopButton = document.getElementById('stoppgrm');
+    // const programStartButton = document.getElementById('startpgrm');
+    // const programRestartButton = document.getElementById('restartpgrm');
     const clearselButton = document.getElementById('clearlist');
     const refreshButton = document.getElementById('refreshlist');
     const refreshSlButton = document.getElementById('refreshscenelist');
@@ -66,18 +88,10 @@ window.addEventListener('onauth', async (e) => {
     let saved_namespace;
     let saved_scene;
 
-    const uploadFileTypes = {
-        image: 'image/*',
-        'gltf-model': '*.glb',
-        'pcd-model': '*.pcd',
-        'threejs-scene': '*.json',
-        gaussian_splatting: '*.splat',
-    };
-
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector('#copy_json'), {
         text() {
-            return output.value;
+            return output.getValue();
         },
     });
 
@@ -116,7 +130,7 @@ window.addEventListener('onauth', async (e) => {
     const updateUrl = function () {
         if (sceneinput.disabled === true) return;
         const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('scene', `${namespaceinput.value}/${sceneinput.value}`);
+        newUrl.searchParams.set('scene', `${namespaceinput.value}%2F${sceneinput.value}`);
         window.history.pushState({ path: newUrl.href }, '', decodeURIComponent(newUrl.href));
     };
 
@@ -153,7 +167,8 @@ window.addEventListener('onauth', async (e) => {
         jsoneditor.on('change', () => {
             const json = jsoneditor.getValue();
 
-            output.value = JSON.stringify(json, null, 2);
+            output.setValue(JSON.stringify(json, null, 2));
+            output.gotoLine(1, 0);
 
             const validation_errors = jsoneditor.validate();
             // Show validation errors if there are any
@@ -161,10 +176,10 @@ window.addEventListener('onauth', async (e) => {
                 validate.value = JSON.stringify(validation_errors, null, 2);
             } else {
                 validate.value = 'valid';
+                uploadFilestoreButton.style.display =
+                    FileStore.filestoreUploadSchema[json.data.object_type] === undefined ? 'none' : 'inline';
             }
-            insertEulerRotationEditor(json);
-            uploadFilestoreButton.style.display =
-                uploadFileTypes[json.data.object_type] === undefined ? 'none' : 'inline';
+            insertEulerRotationEditor();
         });
 
         const typeSel = document.getElementsByName('root[type]')[0];
@@ -174,7 +189,7 @@ window.addEventListener('onauth', async (e) => {
     };
 
     const getARENAObject = function (obj, action = 'create', persist = true) {
-        // create updateobj, where data = attributes if object comes from persist
+        // create arena object, where data = attributes if object comes from persist
         const arenaObj = {
             object_id: obj.object_id,
             action,
@@ -187,11 +202,14 @@ window.addEventListener('onauth', async (e) => {
 
     // we indicate this function as the edit handler to persist
     const editObject = async function (obj, action = 'update') {
-        // create updateobj, where data = attributes if object comes from persist
-        const updateobj = getARENAObject(obj, action);
+        // create editObj, where data = attributes if object comes from persist
+        currentEditObj = getARENAObject(obj, action);
 
-        const schemaType = updateobj.type === 'object' ? updateobj.data.object_type : updateobj.type;
-        const schemaFile = objSchemas[schemaType].file;
+        const schemaType = currentEditObj.type === 'object' ? currentEditObj.data.object_type : currentEditObj.type;
+        let schemaFile = objSchemas.entity.file; // use default in case schema type is undefined
+        if (objSchemas[schemaType]) {
+            schemaFile = objSchemas[schemaType].file;
+        }
         const data = await fetch(schemaFile);
         schema = await data.json();
         selectSchema.value = schemaFile;
@@ -199,31 +217,61 @@ window.addEventListener('onauth', async (e) => {
         if (jsoneditor) jsoneditor.destroy();
         jsoneditor = new JSONEditor(editor, {
             schema,
-            startval: updateobj,
+            startval: currentEditObj,
         });
 
         await jsoneditor.on('ready', () => {
             window.jsoneditor = jsoneditor;
-            jsoneditor.setValue(updateobj);
-            output.value = JSON.stringify(updateobj, null, 2);
+            jsoneditor.setValue(currentEditObj);
+            output.setValue(JSON.stringify(currentEditObj, null, 2));
+            output.gotoLine(1, 0);
             reload(true);
 
             window.location.hash = 'edit_section';
 
             Alert.fire({
-                icon: 'info',
-                title: 'Loaded.',
+                icon: objSchemas[schemaType] ? 'info' : 'error',
+                title: objSchemas[schemaType] ? 'Loaded.' : `Unknown "${schemaType}" loaded as "entity".`,
                 html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/> Press "<b>A</b>dd/Update Object" button when done.',
                 timer: 10000,
             });
         });
+
+        // if program, update program instances
+        if (currentEditObj.type === 'program') {
+            PersistObjects.populateProgramInstanceList();
+        }
+    };
+
+    /**
+     * The visibility edit handler to persist. Update visible property, publish, refresh list.
+     * @param {Object} refObj The object referenced in the list, used for 1 param update.
+     * @param {boolean} visible If the object should be visible.
+     */
+    const visObject = async function (refObj, visible) {
+        const obj = {
+            object_id: refObj.object_id,
+            action: 'update',
+            persist: true,
+            type: refObj.type,
+            data: { visible },
+        };
+        const scene = `${namespaceinput.value}/${sceneinput.value}`;
+        PersistObjects.performActionArgObjList('update', scene, [obj], false);
+        setTimeout(async () => {
+            await PersistObjects.populateObjectList(
+                `${namespaceinput.value}/${sceneinput.value}`,
+                objFilter.value,
+                objTypeFilter
+            );
+        }, 500);
     };
 
     /**
      * Seeks the Rotation block (if any) and inserts a user-friendly Euler degree editor.
      * @param {*} json The object returned from editor.getValue().
      */
-    let insertEulerRotationEditor = function (json) {
+    let insertEulerRotationEditor = function () {
         editor.querySelectorAll('[data-schemapath="root.data.rotation"]').forEach((rowRotation) => {
             // divide rotation attribute into 2 GUI columns
             const rowQuat = rowRotation.childNodes[3];
@@ -270,6 +318,7 @@ window.addEventListener('onauth', async (e) => {
                         THREE.MathUtils.degToRad(elEz.value)
                     )
                 );
+                const json = jsoneditor.getValue();
                 if (json) {
                     json.data.rotation.x = parseFloat(q.x.toFixed(5));
                     json.data.rotation.y = parseFloat(q.y.toFixed(5));
@@ -283,30 +332,32 @@ window.addEventListener('onauth', async (e) => {
     };
 
     // Start the output textarea empty
-    output.value = '';
+    output.setValue('');
+    output.gotoLine(1, 0);
 
     // set defaults
     JSONEditor.defaults.options.display_required_only = true;
     JSONEditor.defaults.options.required_by_default = false;
-    JSONEditor.defaults.options.theme = 'bootstrap2';
-    JSONEditor.defaults.options.iconlib = 'fontawesome4';
+    JSONEditor.defaults.options.theme = 'bootstrap5';
+    JSONEditor.defaults.options.iconlib = 'fontawesome5';
     JSONEditor.defaults.options.object_layout = 'normal';
     JSONEditor.defaults.options.show_errors = 'interaction';
     JSONEditor.defaults.options.ajax = true;
+    JSONEditor.defaults.options.case_sensitive_property_search = false;
 
     // show new scene modal
     function newSceneModal(theNewScene = undefined) {
         Swal.fire({
             title: 'Add New or Unlisted Scene',
-            html: `<div class='input-prepend'>
-                    <span class='add-on' style='width:125px'>Namespace</span>
-                    <input type='text' class='input-medium' style='width:215px' list='modalnamespacelist' placeholder='Select Namespace...' id='modalnamespaceinput'>
+            html: `<div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:125px'>Namespace</span>
+                    <input type='text' class='form-control' style='width:215px' list='modalnamespacelist' placeholder='Select Namespace...' id='modalnamespaceinput'>
                     <datalist id='modalnamespacelist'></datalist>
-                  </div>
-                  <div class='input-prepend'>
-                    <span class='add-on' style='width:125px'>Scene</span>
-                    <input type='text' style='width:215px' id='modalscenename' placeholder='New Scene Name'>
-                  </div>
+                </div>
+                <div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:125px'>Scene</span>
+                    <input type='text' class='form-control' style='width:215px' id='modalscenename' placeholder='New Scene Name'>
+                </div>
                   <p><small>You can enter an existing unlisted Scene. New Scenes will be created with default permissions.</small></p>`,
             width: 600,
             confirmButtonText: 'Add Scene',
@@ -351,9 +402,12 @@ window.addEventListener('onauth', async (e) => {
             },
         }).then(async (result) => {
             if (result.isDismissed) return;
-            // TODO: check if add new objects is check on an existing unlisted scene? Might result in adding objects to the scene...
             const namespacedScene = `${result.value.ns}/${result.value.scene}`;
-            ARENAUserAccount.refreshAuthToken('google', username, namespacedScene);
+            const newAuth = await ARENAAUTH.refreshSceneAuth(namespacedScene);
+            if (newAuth) {
+                mqttToken = newAuth.mqtt_token;
+                if (newAuth.ids) userClient = newAuth.ids.userclient;
+            }
             const exists = await PersistObjects.addNewScene(
                 result.value.ns,
                 result.value.scene,
@@ -371,169 +425,38 @@ window.addEventListener('onauth', async (e) => {
         });
     }
 
-    /**
-     * Utility function to get cookie value
-     * @param {string} name cookie name
-     * @return {string} cookie value
-     */
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === `${name}=`) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    function publishUploadedFile(newObj) {
+        if (newObj) {
+            // publish to mqtt
+            const scene = `${namespaceinput.value}/${sceneinput.value}`;
+            PersistObjects.performActionArgObjList(newObj.action, scene, [newObj], false);
+            setTimeout(async () => {
+                await PersistObjects.populateObjectList(
+                    `${namespaceinput.value}/${sceneinput.value}`,
+                    objFilter.value,
+                    objTypeFilter,
+                    newObj.object_id
+                );
+                $(`label[innerHTML='${newObj.object_id} (${newObj.data.object_type})']`).focus();
+            }, 500);
+            // push updated data to forms
+            output.setValue(JSON.stringify(newObj, null, 2));
+            output.gotoLine(1, 0);
+            jsoneditor.setValue(newObj);
         }
-        return cookieValue;
     }
 
-    async function uploadSceneFileStore(objtype) {
-        const accept = uploadFileTypes[objtype];
-        const htmlopt =
-            objtype === 'gltf-model'
-                ? `<div style="float: left;">
-            <input type="checkbox" id="cbhideinar" name="cbhideinar" >
-            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
-            </div>`
-                : '';
-        const htmlval = `${htmlopt}`;
-
-        await Swal.fire({
-            title: `Upload ${objtype} to Filestore`,
-            html: htmlval,
-            input: 'file',
-            inputAttributes: {
-                accept: `${accept}`,
-                'aria-label': `Select ${objtype}`,
-            },
-            confirmButtonText: 'Upload',
-            focusConfirm: false,
-            showCancelButton: true,
-            cancelButtonText: 'Cancel',
-            showLoaderOnConfirm: true,
-            preConfirm: (resultFileOpen) => {
-                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
-                const safeFilename = fn.replace(/(\W+)/gi, '-');
-                let hideinar = false;
-                const reader = new FileReader();
-                reader.onload = async (evt) => {
-                    const file = document.querySelector('.swal2-file');
-                    if (!file) {
-                        Swal.showValidationMessage(`${objtype} file not loaded!`);
-                        return;
-                    }
-                    if (objtype === 'gltf-model') {
-                        // allow model checkboxes hide in ar/vr (recommendations)
-                        hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
-                    }
-                    // request fs token endpoint if auth not ready or expired
-                    let token = getCookie('auth');
-                    if (!isTokenUsable(token)) {
-                        try {
-                            await ARENAUserAccount.requestStoreLogin();
-                        } catch (err) {
-                            Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
-                            return;
-                        }
-                        token = getCookie('auth');
-                    }
-                    // update user/staff scoped path
-                    const storeResPrefix = authState.is_staff ? `users/${username}/` : ``;
-                    const userFilePath = `scenes/${sceneinput.value}/${resultFileOpen.name}`;
-                    const storeResPath = `${storeResPrefix}${userFilePath}`;
-                    const storeExtPath = `store/users/${username}/${userFilePath}`;
-                    Swal.fire({
-                        title: 'Wait for Upload',
-                        imageUrl: evt.target.result,
-                        imageAlt: `The uploaded ${objtype}`,
-                        showConfirmButton: false,
-                        showCancelButton: true,
-                        cancelButtonText: 'Cancel',
-                        didOpen: () => {
-                            Swal.showLoading();
-                            // request fs file upload with fs auth
-                            return fetch(`/storemng/api/resources/${storeResPath}?override=true`, {
-                                method: 'POST',
-                                headers: {
-                                    Accept: resultFileOpen.type,
-                                    'X-Auth': `${token}`,
-                                },
-                                body: file.files[0],
-                            })
-                                .then((responsePostFS) => {
-                                    if (!responsePostFS.ok) {
-                                        throw new Error(responsePostFS.statusText);
-                                    }
-                                    let obj;
-                                    try {
-                                        obj = JSON.parse(output.value);
-                                    } catch (err) {
-                                        console.error(err);
-                                        throw err;
-                                    }
-                                    if (obj.object_id === '') {
-                                        obj.object_id = safeFilename;
-                                    }
-                                    if (objtype === 'gaussian_splatting') {
-                                        obj.data.src = `${storeExtPath}`;
-                                    } else {
-                                        obj.data.url = `${storeExtPath}`;
-                                    }
-                                    if (hideinar) {
-                                        obj.data['hide-on-enter-ar'] = true;
-                                    }
-                                    if (objtype === 'image') {
-                                        // try to preserve image aspect ratio in mesh, user can scale to resize
-                                        const img = Swal.getPopup().querySelector('.swal2-image');
-                                        if (img.width > img.height) {
-                                            const ratio = img.width / img.height;
-                                            obj.data.width = ratio;
-                                            obj.data.height = 1.0;
-                                        } else {
-                                            const ratio = img.height / img.width;
-                                            obj.data.width = 1.0;
-                                            obj.data.height = ratio;
-                                        }
-                                    }
-                                    // push updated data to forms
-                                    output.value = JSON.stringify(obj, null, 2);
-                                    jsoneditor.setValue(obj);
-                                    Alert.fire({
-                                        icon: 'info',
-                                        title: 'File Store Upload Success',
-                                        html: `File ${resultFileOpen.name} uploaded to File Store. Don't forget to publish your JSON with the new File Store URL.`,
-                                        timer: 10000,
-                                    });
-                                })
-                                .catch((error) => {
-                                    Swal.showValidationMessage(`Request failed: ${error}`);
-                                })
-                                .finally(() => {
-                                    Swal.hideLoading();
-                                });
-                        },
-                        willClose: () => {
-                            console.debug('Nothing');
-                        },
-                    }).then((resultDidOpen) => {
-                        if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
-                            console.error(`Upload ${objtype} file dialog timed out!`);
-                        }
-                    });
-                };
-                reader.readAsDataURL(resultFileOpen);
-            },
-        });
-    }
     // switch image/model
     uploadFilestoreButton.addEventListener('click', async () => {
-        const obj = JSON.parse(output.value);
-        await uploadSceneFileStore(obj.data.object_type);
+        if (uploadFilestoreButton.classList.contains('isDisabled')) return;
+        const jsonObj = JSON.parse(output.getValue());
+        await FileStore.uploadFileStoreDialog(
+            namespaceinput.value,
+            sceneinput.value,
+            jsonObj.object_id,
+            jsonObj.data.object_type,
+            publishUploadedFile
+        );
     });
 
     openAddSceneButton.addEventListener('click', async () => {
@@ -541,6 +464,7 @@ window.addEventListener('onauth', async (e) => {
     });
 
     deleteSceneButton.addEventListener('click', async () => {
+        if (deleteSceneButton.classList.contains('isDisabled')) return;
         Swal.fire({
             title: 'Delete Scene ?',
             text: "You won't be able to revert this.",
@@ -568,13 +492,14 @@ window.addEventListener('onauth', async (e) => {
                     updateLink();
                     localStorage.setItem('scene', sceneinput.value);
                     updateUrl();
-                    updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
+                    updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken, userClient);
                 }, 500); // refresh after a while, so that delete messages are processed
             }
         });
     });
 
     importSceneButton.addEventListener('click', async () => {
+        if (importSceneButton.classList.contains('isDisabled')) return;
         Swal.fire({
             title: 'Import from JSON',
             html: `<div>
@@ -667,7 +592,7 @@ window.addEventListener('onauth', async (e) => {
     setValueButton.addEventListener('click', () => {
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -690,7 +615,7 @@ window.addEventListener('onauth', async (e) => {
     genidButton.addEventListener('click', () => {
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -706,7 +631,8 @@ window.addEventListener('onauth', async (e) => {
                 (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
             );
         }
-        output.value = JSON.stringify(obj, null, 2);
+        output.setValue(JSON.stringify(obj, null, 2));
+        output.gotoLine(1, 0);
         jsoneditor.setValue(obj);
     });
 
@@ -757,14 +683,17 @@ window.addEventListener('onauth', async (e) => {
         }
         saved_scene = sceneinput.value;
         const namespacedScene = `${namespaceinput.value}/${sceneinput.value}`;
-        // TODO: trigger auth
-        ARENAUserAccount.refreshAuthToken('google', username, namespacedScene);
+        const newAuth = await ARENAAUTH.refreshSceneAuth(namespacedScene);
+        if (newAuth) {
+            mqttToken = newAuth.mqtt_token;
+            if (newAuth.ids) userClient = newAuth.ids.userclient;
+        }
         await PersistObjects.populateObjectList(namespacedScene, objFilter.value, objTypeFilter);
         reload();
         updateLink();
         localStorage.setItem('scene', sceneinput.value);
         updateUrl();
-        updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
+        updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken, userClient);
     });
 
     // Focus listener for scene
@@ -793,7 +722,7 @@ window.addEventListener('onauth', async (e) => {
     objFilterSel.addEventListener('click', async () => {
         objTypeFilter[objFilterSel.value] = !objTypeFilter[objFilterSel.value];
         const opt = objFilterSel.namedItem(`objfilter_${objFilterSel.value}`);
-        const text = (objTypeFilter[objFilterSel.value] ? 'Hide' : 'Show') + opt.textContent.substring(4);
+        const text = `${objTypeFilter[objFilterSel.value] ? 'Hide' : 'Show'}${opt.textContent.substring(4)}`;
         opt.textContent = text;
         await PersistObjects.populateObjectList(
             `${namespaceinput.value}/${sceneinput.value}`,
@@ -832,6 +761,7 @@ window.addEventListener('onauth', async (e) => {
     });
 
     delButton.addEventListener('click', async () => {
+        if (delButton.classList.contains('isDisabled')) return;
         PersistObjects.selectedObjsPerformAction('delete', `${namespaceinput.value}/${sceneinput.value}`);
         setTimeout(async () => {
             if (sceneinput.disabled === false)
@@ -848,10 +778,10 @@ window.addEventListener('onauth', async (e) => {
         Swal.fire({
             title: 'Copy selected objects',
             html: `<p>Copy to existing scene</p>
-                   <div class='input-prepend'>
-                    <span class='add-on' style='width:120px'>Destination Scene</span>
-                    <select id='modalsceneinput' style='width:215px'></select>
-                  </div>`,
+                    <div class='input-group mb-2'>
+                    <span class='input-group-text' style='width:120px'>Destination Scene</span>
+                    <select id='modalsceneinput' class='form-control' style='width:215px'></select>
+                    </div>`,
             confirmButtonText: 'Copy Objects',
             focusConfirm: false,
             showCancelButton: true,
@@ -880,12 +810,47 @@ window.addEventListener('onauth', async (e) => {
             });
         });
     });
+    /*
+    programStopButton.addEventListener('click', () => {
+        if (!currentEditObj && !currentEditObj.type === 'program') return;
 
+        if (currentEditObj.data.instantiate !== 'single' ) {
+            Alert.fire({
+                icon: 'info',
+                title: 'For now, we only support stopping "instantiate=single" programs.',
+                timer: 5000,
+            });
+            return;
+        }
+        PersistObjects.pubProgramMsg('delete', currentEditObj);
+        Alert.fire({
+            icon: 'info',
+            title: 'Module requested to stop',
+            timer: 5000,
+        });
+    });
+
+    programStartButton.addEventListener('click', () => {
+        Alert.fire({
+            icon: 'info',
+            title: 'Not implemented. <br/>(entering the scene will start programs)',
+            timer: 5000,
+        });
+    });
+
+    programRestartButton.addEventListener('click', () => {
+        Alert.fire({
+            icon: 'info',
+            title: 'Not implemented. <br/>(entering the scene will start programs)',
+            timer: 5000,
+        });
+    });
+*/
     async function setAllTypes(showHide) {
         for (const [key, value] of Object.entries(objTypeFilter)) {
             objTypeFilter[key] = showHide; // true = show
             const opt = objFilterSel.namedItem(`objfilter_${key}`);
-            const text = (showHide ? 'Hide' : 'Show') + opt.textContent.substring(4);
+            const text = `${showHide ? 'Hide' : 'Show'}${opt.textContent.substring(4)}`;
             opt.textContent = text;
         }
         await PersistObjects.populateObjectList(
@@ -914,7 +879,7 @@ window.addEventListener('onauth', async (e) => {
         }
         let obj;
         try {
-            obj = JSON.parse(output.value);
+            obj = JSON.parse(output.getValue());
         } catch (err) {
             Alert.fire({
                 icon: 'error',
@@ -927,7 +892,7 @@ window.addEventListener('onauth', async (e) => {
         // add scene if it does not exist
         if (newScene) await PersistObjects.addNewScene(namespaceinput.value, sceneinput.value, undefined);
 
-        await PersistObjects.addObject(obj, `${namespaceinput.value}/${sceneinput.value}`);
+        await PersistObjects.addObject(obj, namespaceinput.value, sceneinput.value);
         setTimeout(async () => {
             PersistObjects.populateObjectList(
                 `${namespaceinput.value}/${sceneinput.value}`,
@@ -997,7 +962,7 @@ window.addEventListener('onauth', async (e) => {
     }
 
     const hostData = mqttAndPersistURI(location.hostname);
-    const authState = await ARENAUserAccount.userAuthState();
+    const authState = await ARENAAUTH.userAuthState();
     if (!authState.authenticated) {
         Swal.fire({
             icon: 'error',
@@ -1010,6 +975,12 @@ window.addEventListener('onauth', async (e) => {
 
     arenaHostLbl.value = hostData.host;
 
+    const url = new URL(window.location.href);
+    const sp = url.searchParams.get('scene');
+    const sceneParam = sp ? decodeURIComponent(sp) : null; // safely decode %2F to /
+    const focusObjectId = url.searchParams.get('objectId');
+    const debug = Boolean(url.searchParams.get('debug')); // deterministic truthy/falsy boolean
+
     // start persist object mngr
     PersistObjects.init({
         persistUri: hostData.persist_uri,
@@ -1017,10 +988,14 @@ window.addEventListener('onauth', async (e) => {
         objList: document.getElementById('objlist'),
         addEditSection: document.getElementById('addeditsection'),
         editObjHandler: editObject,
+        visObjHandler: visObject,
+        programList: document.getElementById('proglist'),
         authState,
         mqttUsername: username,
         mqttToken,
+        userClient,
         exportSceneButton,
+        dbg: debug,
     });
 
     // load default objects, convert to mqtt wire format
@@ -1041,9 +1016,6 @@ window.addEventListener('onauth', async (e) => {
     namespaceinput.value = username; // default to user namespace
 
     // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
-    const url = new URL(window.location.href);
-    const sceneParam = url.searchParams.get('scene');
-    const focusObjectId = url.searchParams.get('objectId');
     let ns;
     let s;
     if (sceneParam) {
@@ -1051,8 +1023,11 @@ window.addEventListener('onauth', async (e) => {
         ns = sn[0];
         s = sn[1];
     } else {
-        ns = localStorage.getItem('namespace') === null ? username : localStorage.getItem('namespace');
-        s = localStorage.getItem('scene') === null ? dfts.scene : localStorage.getItem('scene');
+        ns = localStorage.getItem('namespace');
+        if (!ns || ns === 'null' || ns === 'undefined') ns = username;
+
+        s = localStorage.getItem('scene');
+        if (!s || s === 'null' || s === 'undefined') s = dfts.scene;
     }
     // do initial update
     if (ns !== namespaceinput.value) {
@@ -1076,7 +1051,13 @@ window.addEventListener('onauth', async (e) => {
     reload();
     updateLink();
     updateUrl();
-    updatePublishControlsByToken(ns, s, mqttToken);
+    const namespacedScene = `${ns}/${s}`;
+    const newAuth = await ARENAAUTH.refreshSceneAuth(namespacedScene);
+    if (newAuth) {
+        mqttToken = newAuth.mqtt_token;
+        if (newAuth.ids) userClient = newAuth.ids.userclient;
+    }
+    updatePublishControlsByToken(ns, s, mqttToken, userClient);
 
     Swal.close();
 });
@@ -1107,64 +1088,66 @@ Swal.fire({
  * @param {string} scenename
  * @param {string} mqttToken
  */
-function updatePublishControlsByToken(namespace, scenename, mqttToken) {
-    const objectsTopic = `realm/s/${namespace}/${scenename}`;
-    const editor = isUserSceneEditor(mqttToken, objectsTopic);
+function updatePublishControlsByToken(namespace, scenename, mqttToken, userClient) {
+    const objectsTopic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
+        nameSpace: namespace,
+        sceneName: scenename,
+        userClient,
+        objectId: '+',
+    });
+    const editor = ARENAAUTH.isUserSceneEditor(mqttToken, objectsTopic);
     const delButton = document.getElementById('delobj');
     const deleteSceneButton = document.getElementById('deletescene');
+    const uploadFileStore = document.getElementById('uploadfilestore');
+    const importScene = document.getElementById('importscene');
+    const exportScene = document.getElementById('exportscene');
+
     if (editor) {
         delButton.classList.remove('isDisabled');
+        delButton.title = 'Delete Selected Objects';
+
         deleteSceneButton.classList.remove('isDisabled');
+        deleteSceneButton.title = 'Delete Current Scene';
+
+        if (uploadFileStore) {
+            uploadFileStore.classList.remove('isDisabled');
+            uploadFileStore.title = 'Upload File and Publish';
+        }
+        if (importScene) {
+            importScene.classList.remove('isDisabled');
+            importScene.title = 'Import from JSON file';
+        }
     } else {
         delButton.classList.add('isDisabled');
+        delButton.title = 'Delete Object requires scene editor permissions';
+
         deleteSceneButton.classList.add('isDisabled');
+        deleteSceneButton.title = 'Delete Scene requires scene editor permissions';
+
+        if (uploadFileStore) {
+            uploadFileStore.classList.add('isDisabled');
+            uploadFileStore.title = 'Upload File requires scene editor permissions';
+        }
+        if (importScene) {
+            importScene.classList.add('isDisabled');
+            importScene.title = 'Import Scene requires scene editor permissions';
+        }
     }
+
     document.querySelectorAll('.addobj').forEach((item) => {
         item.disabled = !editor;
+        if (editor) {
+            item.title = 'Add or Update Object';
+            item.classList.remove('isDisabled');
+        } else {
+            item.title = 'Add/Update Object requires scene editor permissions';
+            item.classList.add('isDisabled');
+        }
     });
 }
 
-/**
- * Utility to match MQTT topic within permissions.
- * @param {string} topic The MQTT topic to test.
- * @param {string[]} rights The list of topic wild card permissions.
- * @return {boolean} True if the topic matches the list of topic wildcards.
- */
-function matchJWT(topic, rights) {
-    const len = rights.length;
-    let valid = false;
-    for (let i = 0; i < len; i++) {
-        if (MQTTPattern.matches(rights[i], topic)) {
-            valid = true;
-            break;
-        }
-    }
-    return valid;
-}
-
-/**
- * Checks loaded MQTT token for full scene object write permissions.
- * @param {string} mqtt_token The JWT token for the user to connect to MQTT.
- * @param {string} objectsTopic
- * @return {boolean} True if the user has permission to write in this scene.
- */
-function isUserSceneEditor(mqtt_token, objectsTopic) {
-    if (mqtt_token) {
-        const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
-        const perms = tokenObj.payloadObj;
-        if (matchJWT(objectsTopic, perms.publ)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isTokenUsable(token) {
-    if (token) {
-        const tokenObj = KJUR.jws.JWS.parse(token);
-        const exp = tokenObj.payloadObj.exp * 1000;
-        const now = new Date().getTime();
-        return now < exp;
-    }
-    return false;
-}
+// eslint-disable-next-line no-extend-native
+String.prototype.formatStr = function formatStr(...args) {
+    const params = arguments.length === 1 && typeof args[0] === 'object' ? args[0] : args;
+    return this.replace(/\{([^}]+)\}/g, (match, key) => (typeof params[key] !== 'undefined' ? params[key] : match));
+};
