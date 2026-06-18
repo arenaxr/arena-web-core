@@ -500,6 +500,19 @@ AFRAME.registerSystem('arena-jitsi', {
             });
             // console.warn('jitsi remote track mute changed', participantId, track.isMuted(), track);
         });
+
+        // Emit initial mute state for remote audio tracks so the user list shows
+        // the correct icon immediately. Remote tracks arrive after conference join,
+        // so the chat.js listener is guaranteed to be registered by this point.
+        if (track.getType() === 'audio') {
+            const participant = this.conference.getParticipantById(participantId);
+            const arenaId = participant ? participant.getProperty('arenaId') : participantId;
+            sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
+                jid: participantId,
+                id: arenaId,
+                muted: track.isMuted(),
+            });
+        }
     },
 
     /**
