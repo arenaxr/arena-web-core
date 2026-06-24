@@ -1015,21 +1015,9 @@ class LDrawParsedCache {
 						faceNormal: null,
 						vertices: [ v0, v1, v2 ],
 						normals: [ null, null, null ],
+						doubleSided: doubleSided,
 					} );
-					totalFaces ++;
-
-					if ( doubleSided === true ) {
-
-						faces.push( {
-							material: material,
-							colorCode: colorCode,
-							faceNormal: null,
-							vertices: [ v2, v1, v0 ],
-							normals: [ null, null, null ],
-						} );
-						totalFaces ++;
-
-					}
+					totalFaces += doubleSided ? 2 : 1;
 
 					break;
 
@@ -1065,21 +1053,9 @@ class LDrawParsedCache {
 						faceNormal: null,
 						vertices: [ v0, v1, v2, v3 ],
 						normals: [ null, null, null, null ],
+						doubleSided: doubleSided,
 					} );
-					totalFaces += 2;
-
-					if ( doubleSided === true ) {
-
-						faces.push( {
-							material: material,
-							colorCode: colorCode,
-							faceNormal: null,
-							vertices: [ v3, v2, v1, v0 ],
-							normals: [ null, null, null, null ],
-						} );
-						totalFaces += 2;
-
-					}
+					totalFaces += doubleSided ? 4 : 2;
 
 					break;
 
@@ -1550,13 +1526,22 @@ function createObject( loader, elements, elementSize, isConditionalSegments = fa
 
 		}
 
-		for ( let j = 0, l = vertices.length; j < l; j ++ ) {
+		const sideCount = elementSize === 3 && elem.doubleSided ? 2 : 1;
+		const sideVertCount = vertices.length;
+		const totalVertCount = sideVertCount * sideCount;
 
-			const v = vertices[ j ];
-			const index = offset + j * 3;
-			positions[ index + 0 ] = v.x;
-			positions[ index + 1 ] = v.y;
-			positions[ index + 2 ] = v.z;
+		for ( let s = 0; s < sideCount; s ++ ) {
+
+			for ( let j = 0; j < sideVertCount; j ++ ) {
+
+				// front side: original order; back side: reversed winding
+				const v = vertices[ s === 0 ? j : sideVertCount - 1 - j ];
+				const index = offset + ( s * sideVertCount + j ) * 3;
+				positions[ index + 0 ] = v.x;
+				positions[ index + 1 ] = v.y;
+				positions[ index + 2 ] = v.z;
+
+			}
 
 		}
 
@@ -1589,20 +1574,27 @@ function createObject( loader, elements, elementSize, isConditionalSegments = fa
 
 			}
 
-			for ( let j = 0, l = elemNormals.length; j < l; j ++ ) {
+			const normalCount = elemNormals.length;
+			for ( let s = 0; s < sideCount; s ++ ) {
 
-				// use face normal if a vertex normal is not provided
-				let n = elem.faceNormal;
-				if ( elemNormals[ j ] ) {
+				const sign = s === 0 ? 1 : - 1;
+				for ( let j = 0; j < normalCount; j ++ ) {
 
-					n = elemNormals[ j ].norm;
+					// back side reuses the front normals in reversed order, with negated direction
+					const idx = s === 0 ? j : normalCount - 1 - j;
+					let n = elem.faceNormal;
+					if ( elemNormals[ idx ] ) {
+
+						n = elemNormals[ idx ].norm;
+
+					}
+
+					const index = offset + ( s * normalCount + j ) * 3;
+					normals[ index + 0 ] = sign * n.x;
+					normals[ index + 1 ] = sign * n.y;
+					normals[ index + 2 ] = sign * n.z;
 
 				}
-
-				const index = offset + j * 3;
-				normals[ index + 0 ] = n.x;
-				normals[ index + 1 ] = n.y;
-				normals[ index + 2 ] = n.z;
 
 			}
 
@@ -1650,21 +1642,21 @@ function createObject( loader, elements, elementSize, isConditionalSegments = fa
 
 			prevMaterial = elem.colorCode;
 			index0 = offset / 3;
-			numGroupVerts = vertices.length;
+			numGroupVerts = totalVertCount;
 
 		} else {
 
-			numGroupVerts += vertices.length;
+			numGroupVerts += totalVertCount;
 
 		}
 
-		offset += 3 * vertices.length;
+		offset += 3 * totalVertCount;
 
 	}
 
 	if ( numGroupVerts > 0 ) {
 
-		bufferGeometry.addGroup( index0, Infinity, materials.length - 1 );
+		bufferGeometry.addGroup( index0, numGroupVerts, materials.length - 1 );
 
 	}
 
@@ -1749,7 +1741,7 @@ function createObject( loader, elements, elementSize, isConditionalSegments = fa
 /**
  * A loader for the LDraw format.
  *
- * [LDraw](https://ldraw.org/} (LEGO Draw) is an [open format specification]{@link https://ldraw.org/article/218.html)
+ * [LDraw](https://ldraw.org/} (LEGO Draw) is an [open format specification](https://ldraw.org/article/218.html)
  * for describing LEGO and other construction set 3D models.
  *
  * An LDraw asset (a text file usually with extension .ldr, .dat or .txt) can describe just a single construction
@@ -2400,7 +2392,6 @@ class LDrawLoader extends Loader {
 
 		material.color.setStyle( fillColor, COLOR_SPACE_LDRAW );
 		material.transparent = isTransparent;
-		material.premultipliedAlpha = true;
 		material.opacity = alpha;
 		material.depthWrite = ! isTransparent;
 

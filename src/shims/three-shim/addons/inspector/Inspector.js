@@ -2,13 +2,15 @@
 import { RendererInspector } from './RendererInspector.js';
 import { Profiler } from './ui/Profiler.js';
 import { Performance } from './tabs/Performance.js';
+import { Memory } from './tabs/Memory.js';
 import { Console } from './tabs/Console.js';
 import { Parameters } from './tabs/Parameters.js';
+import { Settings } from './tabs/Settings.js';
 import { Viewer } from './tabs/Viewer.js';
-import { setText, splitPath, splitCamelCase } from './ui/utils.js';
+import { Timeline } from './tabs/Timeline.js';
+import { setText } from './ui/utils.js';
 
-import { QuadMesh, NodeMaterial, CanvasTarget, setConsoleFunction, REVISION, NoToneMapping } from 'three/webgpu';
-import { renderOutput, vec3, vec4 } from 'three/tsl';
+import { setConsoleFunction, REVISION } from 'three/webgpu';
 
 class Inspector extends RendererInspector {
 
@@ -18,9 +20,13 @@ class Inspector extends RendererInspector {
 
 		// init profiler
 
-		const profiler = new Profiler();
+		const profiler = new Profiler( this );
+		profiler.addEventListener( 'resize', ( e ) => this.dispatchEvent( e ) );
 
-		const parameters = new Parameters();
+		const parameters = new Parameters( {
+			builtin: true,
+			icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M4 6l8 0" /><path d="M16 6l4 0" /><path d="M8 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M4 12l2 0" /><path d="M10 12l10 0" /><path d="M17 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M4 18l11 0" /><path d="M19 18l1 0" /></svg>'
+		} );
 		parameters.hide();
 		profiler.addTab( parameters );
 
@@ -31,21 +37,37 @@ class Inspector extends RendererInspector {
 		const performance = new Performance();
 		profiler.addTab( performance );
 
-		const console = new Console();
-		profiler.addTab( console );
+		const memory = new Memory();
+		profiler.addTab( memory );
 
-		profiler.setActiveTab( performance.id );
+		const timeline = new Timeline();
+		profiler.addTab( timeline );
 
-		//
+		const consoleTab = new Console();
+		profiler.addTab( consoleTab );
+
+		const settings = new Settings();
+		profiler.addTab( settings );
+
+		profiler.loadLayout();
+
+		if ( ! profiler.activeTabId ) {
+
+			profiler.setActiveTab( performance.id );
+
+		}
 
 		this.statsData = new Map();
-		this.canvasNodes = new Map();
 		this.profiler = profiler;
 		this.performance = performance;
-		this.console = console;
+		this.memory = memory;
+		this.console = consoleTab;
 		this.parameters = parameters;
 		this.viewer = viewer;
+		this.timeline = timeline;
+		this.settings = settings;
 		this.once = {};
+		this.extensionsData = new WeakMap();
 
 		this.displayCycle = {
 			text: {
@@ -68,6 +90,84 @@ class Inspector extends RendererInspector {
 
 	}
 
+	onExtension( name, callback ) {
+
+		const extensionAdded = ( e ) => {
+
+			if ( e.name === name ) {
+
+				callback( e.tab );
+
+				this.settings.removeEventListener( 'extensionadded', extensionAdded );
+
+			}
+
+		};
+
+		if ( this.settings.extensions[ name ] && this.settings.extensions[ name ].loaded ) {
+
+			callback( this.settings.extensions[ name ] );
+
+		} else {
+
+			this.settings.addEventListener( 'extensionadded', extensionAdded );
+
+		}
+
+		return this;
+
+	}
+
+	hide() {
+
+		this.profiler.hide();
+
+	}
+
+	show() {
+
+		this.profiler.show();
+
+	}
+
+	getSize() {
+
+		return this.profiler.getSize();
+
+	}
+
+	setActiveTab( tab ) {
+
+		this.profiler.setActiveTab( tab.id );
+
+		return this;
+
+	}
+
+	addTab( tab ) {
+
+		this.profiler.addTab( tab );
+
+		return this;
+
+	}
+
+	removeTab( tab ) {
+
+		this.profiler.removeTab( tab );
+
+		return this;
+
+	}
+
+	setActiveExtension( name, value ) {
+
+		this.settings.setActiveExtension( name, value );
+
+		return this;
+
+	}
+
 	resolveConsoleOnce( type, message ) {
 
 		const key = type + message;
@@ -81,7 +181,7 @@ class Inspector extends RendererInspector {
 
 	}
 
-	resolveConsole( type, message ) {
+	resolveConsole( type, message, stackTrace = null ) {
 
 		switch ( type ) {
 
@@ -97,7 +197,15 @@ class Inspector extends RendererInspector {
 
 				this.console.addMessage( 'warn', message );
 
-				console.warn( message );
+				if ( stackTrace && stackTrace.isStackTrace ) {
+
+					console.warn( stackTrace.getError( message ) );
+
+				} else {
+
+					console.warn( message );
+
+				}
 
 				break;
 
@@ -105,7 +213,15 @@ class Inspector extends RendererInspector {
 
 				this.console.addMessage( 'error', message );
 
-				console.error( message );
+				if ( stackTrace && stackTrace.isStackTrace ) {
+
+					console.error( stackTrace.getError( message ) );
+
+				} else {
+
+					console.error( message );
+
+				}
 
 				break;
 
@@ -153,9 +269,9 @@ class Inspector extends RendererInspector {
 
 			if ( this.isAvailable ) {
 
-				renderer.backend.trackTimestamp = true;
-
 				renderer.init().then( () => {
+
+					renderer.backend.trackTimestamp = true;
 
 					if ( renderer.hasFeature( 'timestamp-query' ) !== true ) {
 
@@ -164,6 +280,8 @@ class Inspector extends RendererInspector {
 					}
 
 				} );
+
+				this.timeline.setRenderer( renderer );
 
 			}
 
@@ -178,7 +296,6 @@ class Inspector extends RendererInspector {
 		if ( this.parameters.isVisible === false ) {
 
 			this.parameters.show();
-			this.profiler.setActiveTab( this.parameters.id );
 
 		}
 
@@ -248,78 +365,9 @@ class Inspector extends RendererInspector {
 
 	}
 
-	getCanvasDataByNode( node ) {
+	getNodes() {
 
-		let canvasData = this.canvasNodes.get( node );
-
-		if ( canvasData === undefined ) {
-
-			const renderer = this.getRenderer();
-
-			const canvas = document.createElement( 'canvas' );
-
-			const canvasTarget = new CanvasTarget( canvas );
-			canvasTarget.setPixelRatio( window.devicePixelRatio );
-			canvasTarget.setSize( 140, 140 );
-
-			const id = node.id;
-
-			const { path, name } = splitPath( splitCamelCase( node.getName() || '(unnamed)' ) );
-
-			let output = vec4( vec3( node ), 1 );
-			output = renderOutput( output, NoToneMapping, renderer.outputColorSpace );
-			output = output.context( { inspector: true } );
-
-			const material = new NodeMaterial();
-			material.outputNode = output;
-
-			const quad = new QuadMesh( material );
-			quad.name = 'Viewer - ' + name;
-
-			canvasData = {
-				id,
-				name,
-				path,
-				node,
-				quad,
-				canvasTarget,
-				material
-			};
-
-			this.canvasNodes.set( node, canvasData );
-
-		}
-
-		return canvasData;
-
-	}
-
-	resolveViewer() {
-
-		const nodes = this.currentNodes;
-		const renderer = this.getRenderer();
-
-		if ( nodes.length === 0 ) return;
-
-		if ( ! renderer.backend.isWebGPUBackend ) {
-
-			this.resolveConsoleOnce( 'warn', 'Inspector: Viewer is only available with WebGPU.' );
-
-			return;
-
-		}
-
-		//
-
-		if ( ! this.viewer.isVisible ) {
-
-			this.viewer.show();
-
-		}
-
-		const canvasDataList = nodes.map( node => this.getCanvasDataByNode( node ) );
-
-		this.viewer.update( renderer, canvasDataList );
+		return this.currentNodes;
 
 	}
 
@@ -347,6 +395,32 @@ class Inspector extends RendererInspector {
 		}
 
 		return count > 0 ? sum / count : 0;
+
+	}
+
+	updateTabs() {
+
+		// tabs
+
+		const tabs = Object.values( this.profiler.tabs );
+
+		for ( const tab of tabs ) {
+
+			let tabData = this.extensionsData.get( tab );
+
+			if ( tabData === undefined ) {
+
+				tab.init( this );
+
+				tabData = {};
+
+				this.extensionsData.set( tab, tabData );
+
+			}
+
+			tab.update( this );
+
+		}
 
 	}
 
@@ -395,12 +469,14 @@ class Inspector extends RendererInspector {
 			setText( 'fps-counter', this.fps.toFixed() );
 
 			this.performance.updateText( this, frame );
+			this.memory.updateText( this );
 
 		}
 
 		if ( this.displayCycle.graph.needsUpdate ) {
 
 			this.performance.updateGraph( this, frame );
+			this.memory.updateGraph( this );
 
 		}
 
@@ -422,6 +498,45 @@ class Inspector extends RendererInspector {
 
 	}
 
+	static getItem( id ) {
+
+		console.warn( 'Inspector.getItem is deprecated. Use getItem directly instead.' );
+		return getItem( id );
+
+	}
+
+	static setItem( id, state ) {
+
+		console.warn( 'Inspector.setItem is deprecated. Use setItem directly instead.' );
+		setItem( id, state );
+
+	}
+
 }
 
-export { Inspector };
+function getItem( id ) {
+
+	const data = JSON.parse( localStorage.getItem( 'threejs-inspector' ) || '{}' );
+	return data[ id ] || {};
+
+}
+
+function setItem( id, state ) {
+
+	const data = JSON.parse( localStorage.getItem( 'threejs-inspector' ) || '{}' );
+
+	if ( state === null ) {
+
+		delete data[ id ];
+
+	} else {
+
+		data[ id ] = state;
+
+	}
+
+	localStorage.setItem( 'threejs-inspector', JSON.stringify( data ) );
+
+}
+
+export { Inspector, getItem, setItem };

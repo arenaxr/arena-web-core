@@ -12,7 +12,7 @@ let _rendererState;
 /**
  * Post processing node for applying Ground Truth Ambient Occlusion (GTAO) to a scene.
  * ```js
- * const postProcessing = new THREE.PostProcessing( renderer );
+ * const renderPipeline = new THREE.RenderPipeline( renderer );
  *
  * const scenePass = pass( scene, camera );
  * scenePass.setMRT( mrt( {
@@ -25,11 +25,12 @@ let _rendererState;
  * const scenePassDepth = scenePass.getTextureNode( 'depth' );
  *
  * const aoPass = ao( scenePassDepth, scenePassNormal, camera );
+ * const aoPassOutput = aoPass.getTextureNode();
  *
- * postProcessing.outputNod = aoPass.getTextureNode().mul( scenePassColor );
+ * renderPipeline.outputNode = scenePassColor.mul( vec4( vec3( aoPassOutput.r ), 1 ) );
  * ```
  *
- * Reference: {@link https://www.activision.com/cdn/research/Practical_Real_Time_Strategies_for_Accurate_Indirect_Occlusion_NEW%20VERSION_COLOR.pdf}.
+ * Reference: [Practical Real-Time Strategies for Accurate Indirect Occlusion](https://www.activision.com/cdn/research/Practical_Real_Time_Strategies_for_Accurate_Indirect_Occlusion_NEW%20VERSION_COLOR.pdf).
  *
  * @augments TempNode
  * @three_import import { ao } from 'three/addons/tsl/display/GTAONode.js';
@@ -210,6 +211,7 @@ class GTAONode extends TempNode {
 		/**
 		 * Temporal direction that influences the rotation angle for each slice.
 		 *
+		 * @private
 		 * @type {UniformNode<float>}
 		 */
 		this._temporalDirection = uniform( 0 );
@@ -567,4 +569,4 @@ function generateMagicSquare( size ) {
  * @param {Camera} camera - The camera the scene is rendered with.
  * @returns {GTAONode}
  */
-export const ao = ( depthNode, normalNode, camera ) => nodeObject( new GTAONode( nodeObject( depthNode ), nodeObject( normalNode ), camera ) );
+export const ao = ( depthNode, normalNode, camera ) => new GTAONode( nodeObject( depthNode ), nodeObject( normalNode ), camera );

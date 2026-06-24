@@ -1,7 +1,7 @@
 import {
-	Clock,
 	HalfFloatType,
 	NoBlending,
+	Timer,
 	Vector2,
 	WebGLRenderTarget
 } from 'three';
@@ -39,8 +39,6 @@ import { ClearMaskPass, MaskPass } from './MaskPass.js';
  *
  * @three_import import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
  */
-const size = /* @__PURE__ */ new Vector2();
-
 class EffectComposer {
 
 	/**
@@ -64,7 +62,7 @@ class EffectComposer {
 
 		if ( renderTarget === undefined ) {
 
-			renderer.getSize( size );
+			const size = renderer.getSize( new Vector2() );
 			this._width = size.width;
 			this._height = size.height;
 
@@ -123,28 +121,12 @@ class EffectComposer {
 		this.copyPass.material.blending = NoBlending;
 
 		/**
-		 * The internal clock for managing time data.
+		 * The internal timer for managing time data.
 		 *
 		 * @private
-		 * @type {Clock}
+		 * @type {Timer}
 		 */
-		this.clock = new Clock();
-
-		this.onSessionStateChange = this.onSessionStateChange.bind( this );
-		this.renderer.xr.addEventListener( 'sessionstart', this.onSessionStateChange );
-		this.renderer.xr.addEventListener( 'sessionend', this.onSessionStateChange );
-
-	}
-
-	onSessionStateChange() {
-
-		this.renderer.getSize( size );
-		this._width = size.width;
-		this._height = size.height;
-
-		this._pixelRatio = this.renderer.xr.isPresenting ? 1 : this.renderer.getPixelRatio();
-
-		this.setSize( this._width, this._height );
+		this.timer = new Timer();
 
 	}
 
@@ -233,9 +215,11 @@ class EffectComposer {
 
 		// deltaTime value is in seconds
 
+		this.timer.update();
+
 		if ( deltaTime === undefined ) {
 
-			deltaTime = this.clock.getDelta();
+			deltaTime = this.timer.getDelta();
 
 		}
 
@@ -303,7 +287,7 @@ class EffectComposer {
 
 		if ( renderTarget === undefined ) {
 
-			this.renderer.getSize( size );
+			const size = this.renderer.getSize( new Vector2() );
 			this._pixelRatio = this.renderer.getPixelRatio();
 			this._width = size.width;
 			this._height = size.height;
@@ -373,9 +357,6 @@ class EffectComposer {
 		this.renderTarget2.dispose();
 
 		this.copyPass.dispose();
-
-		this.renderer.xr.removeEventListener( 'sessionstart', this.onSessionStateChange );
-		this.renderer.xr.removeEventListener( 'sessionend', this.onSessionStateChange );
 
 	}
 
