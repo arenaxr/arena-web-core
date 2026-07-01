@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.5.2](https://github.com/arenaxr/arena-web-core/compare/v2.5.1...v2.5.2) (2026-07-01)
+
+
+### Bug Fixes
+
+* **av-setup:** mic level meter never moved (dead processor + suspended context) ([68b2d2e](https://github.com/arenaxr/arena-web-core/commit/68b2d2eaa622df63fce65957eebd88424c42fa1f))
+* **av-setup:** restore saved mic/camera/speaker selections by deviceId ([3fc99a2](https://github.com/arenaxr/arena-web-core/commit/3fc99a29609776b01a1e62ca7d0bf7beb7a14a6f))
+* **build3d:** send create action on first publish for new Inspector entities ([3215bf8](https://github.com/arenaxr/arena-web-core/commit/3215bf8a104189869ac77e56961bac2b105bf916))
+* guard RenderFusion MQTT publish/subscribe against disconnected c… ([db2db09](https://github.com/arenaxr/arena-web-core/commit/db2db09aaeb7ce4dc96fb99a10220ef8b680145e))
+* guard RenderFusion MQTT publish/subscribe against disconnected client ([719412e](https://github.com/arenaxr/arena-web-core/commit/719412e084f91e161dd0c1e2bda7d9d38591cb83))
+* invert spark y-down coordinate ([aa9e9f6](https://github.com/arenaxr/arena-web-core/commit/aa9e9f691eafe32eca1068fb47c70e4d835e4af9))
+* **jitsi-video:** reliable videosphere render across browsers, sources, and signal loss ([#734](https://github.com/arenaxr/arena-web-core/issues/734), [#430](https://github.com/arenaxr/arena-web-core/issues/430)) ([#800](https://github.com/arenaxr/arena-web-core/issues/800)) ([1d915a8](https://github.com/arenaxr/arena-web-core/commit/1d915a87d3c7dca409d9a64cee2bb667970c48dd))
+* **jitsi,chat:** stop labeling ARENA users as "(external)" ([ee6cdd4](https://github.com/arenaxr/arena-web-core/commit/ee6cdd48aa6d4bb387aa7e2bab251b5de20af4e7))
+* **jitsi:** reliably render, scope, and restore screenshares on objects ([4f400c9](https://github.com/arenaxr/arena-web-core/commit/4f400c92e91eab4be981506fa3cb1676ee91f66e))
+* **jitsi:** validate A/V device prefs per-device, not all-or-nothing ([fa7dd44](https://github.com/arenaxr/arena-web-core/commit/fa7dd44cef0b3933451833117184c954b4528685))
+* **screenshare:** make popup teardown idempotent ([#616](https://github.com/arenaxr/arena-web-core/issues/616)) ([1166267](https://github.com/arenaxr/arena-web-core/commit/11662678fb0db1d95f1b2ac3e32733fd94b731dd))
+* **screenshare:** open capture in a sized popup window to avoid black canvas on tab-share ([95213c4](https://github.com/arenaxr/arena-web-core/commit/95213c44b7006b76d23ef93436c4a8a3917da23e))
+
 ## [2.5.1](https://github.com/arenaxr/arena-web-core/compare/v2.5.0...v2.5.1) (2026-05-13)
 
 
