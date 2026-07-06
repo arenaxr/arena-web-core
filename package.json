@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@c-frame/aframe-particle-system-component": "1.2.0",
-    "@sparkjsdev/spark": "^2.1.0",
+    "@sparkjsdev/spark": "github:arenaxr/spark#fd06edfe69d0127c4eb366c166433fc8e485d704",
     "aframe-blink-controls": "0.4.3",
     "aframe-environment-component": "1.5.0",
     "aframe-extras": "^7.7.0",
