@@ -181,3 +181,8 @@ npm run build
 | `conf/` | Config | Deployment defaults |
 
 The `arena-web-core` uses [Release Please](https://github.com/googleapis/release-please) to automate CHANGELOG generation and semantic versioning. Your PR titles *must* follow Conventional Commit standards (e.g., `feat:`, `fix:`, `chore:`).
+
+
+## CI & Dependency Management Conventions
+- **GitHub Actions Pinning**: All GitHub Action references in  must be pinned to full 40-character commit SHAs with a version comment (e.g., ).
+- **Dependabot Configuration**: Dependabot version updates are enabled via  for  and native package ecosystems.
