@@ -184,5 +184,5 @@ The `arena-web-core` uses [Release Please](https://github.com/googleapis/release
 
 
 ## CI & Dependency Management Conventions
-- **GitHub Actions Pinning**: All GitHub Action references in  must be pinned to full 40-character commit SHAs with a version comment (e.g., ).
-- **Dependabot Configuration**: Dependabot version updates are enabled via  for  and native package ecosystems.
+- **GitHub Actions Tag SHA Pinning**: All GitHub Action references in `.github/workflows/` MUST be pinned to the exact commit SHA of the official release tag (e.g., `uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0`).
+- **Inline Version Comments**: The inline comment next to the SHA MUST specify the exact tag version used. This enables Dependabot to recognize the release version, generate human-readable SemVer PR titles (`from X.Y.Z to A.B.C`), and automatically update version comments during upgrades.
