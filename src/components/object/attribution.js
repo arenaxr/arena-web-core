@@ -10,7 +10,6 @@
 
 /**
  * Attribution Component. Saves attribution data in any entity. The following properties can be saved.
- * <!-- markdown-link-check-disable-next-line -->
  * If `extractAssetExtras=true` (default), the [attribution system]{@link https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties} attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
  * @module attribution
  * @property {string} [author=Unknown] - Author name; e.g. "Vaptor-Studio"

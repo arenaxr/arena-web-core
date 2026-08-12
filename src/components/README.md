@@ -34,7 +34,6 @@ Based off <a href="https://github.com/aframevr/aframe/blob/master/src/components
 </dd>
 <dt><a href="#module_attribution">attribution</a></dt>
 <dd><p>Attribution Component. Saves attribution data in any entity. The following properties can be saved.</p>
-<!-- markdown-link-check-disable-next-line -->
 <p>If <code>extractAssetExtras=true</code> (default), the <a href="https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
 </dd>
 <dt><a href="#module_click-listener">click-listener</a></dt>
@@ -281,7 +280,6 @@ ARMarker Component. Supports ARMarkers in a scene
 
 ## attribution
 Attribution Component. Saves attribution data in any entity. The following properties can be saved.
-<!-- markdown-link-check-disable-next-line -->
 If `extractAssetExtras=true` (default), the [attribution system](https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties) attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
 
 **Properties**
