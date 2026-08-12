@@ -36,6 +36,7 @@ export const JITSI_EVENTS = Object.freeze({
     STATS_REMOTE: 'onarenajitsistatsremote',
     STATUS: 'onarenajitsistatus',
     VIDEO_MUTE_CHANGED: 'onarenajitsivideomutechanged',
+    TRACK_MUTE_CHANGED: 'onarenajitsitrackmutechanged',
     CONFERENCE_ERROR: 'onarenajitsierror',
 });
 

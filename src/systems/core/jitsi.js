@@ -230,9 +230,17 @@ AFRAME.registerSystem('arena-jitsi', {
             track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED, (audioLevel) =>
                 console.debug(`Audio Level local: ${audioLevel}`)
             );
-            track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () =>
-                console.debug('local track state changed')
-            );
+            track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, (track1) => {
+                // console.debug('local track state changed', track1.track.muted);
+                if (track.getType() !== 'audio') return;
+                const participantId = track1.getParticipantId();
+                this.el.sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
+                    jid: this.jitsiId,
+                    id: ARENA.idTag,
+                    muted: track.isMuted(),
+                });
+                // console.warn('local track mute changed', participantId, track.isMuted(), track);
+            });
             track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () =>
                 console.debug('local track stopped')
             );
@@ -480,11 +488,31 @@ AFRAME.registerSystem('arena-jitsi', {
         track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED, (deviceId) =>
             console.debug(`track audio output device was changed to ${deviceId}`)
         );
-        // track.addEventListener(
-        //     JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-        //     () => {
-        //         console.log('remote track muted')
-        //     });
+        track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () => {
+            // console.log('remote track muted')
+            if (track.getType() !== 'audio') return;
+            const participant = this.conference.getParticipantById(participantId);
+            const arenaId = participant ? participant.getProperty('arenaId') : participantId;
+            sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
+                jid: participantId,
+                id: arenaId,
+                muted: track.isMuted(),
+            });
+            // console.warn('jitsi remote track mute changed', participantId, track.isMuted(), track);
+        });
+
+        // Emit initial mute state for remote audio tracks so the user list shows
+        // the correct icon immediately. Remote tracks arrive after conference join,
+        // so the chat.js listener is guaranteed to be registered by this point.
+        if (track.getType() === 'audio') {
+            const participant = this.conference.getParticipantById(participantId);
+            const arenaId = participant ? participant.getProperty('arenaId') : participantId;
+            sceneEl.emit(JITSI_EVENTS.TRACK_MUTE_CHANGED, {
+                jid: participantId,
+                id: arenaId,
+                muted: track.isMuted(),
+            });
+        }
     },
 
     /**
