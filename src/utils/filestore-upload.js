@@ -59,7 +59,7 @@ export async function uploadFileStoreDialog(namespacedName, sceneName, objid, ob
 
     async function updateWireFormat(safeFilename, fullDestUrlAttr, storeExtPath, hideinar) {
         let objexists = false;
-        const newobjid = !objid ? safeFilename : objid;
+        const newobjid = !objid ? crypto.randomUUID() : objid;
         const persistUri = `${window.location.protocol}//${ARENADefaults.persistHost}${ARENADefaults.persistPath}`;
         try {
             const persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
