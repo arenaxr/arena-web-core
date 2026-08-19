@@ -34,6 +34,24 @@ export default class Delete {
             return;
         }
 
+        /*
+         * Arm this element's own detach before anything below can remove it. Because the two
+         * parenting mechanisms let the DOM and the THREE.js graph disagree, an element reaped
+         * below can be a DOM *ancestor* of this one: DOM `sceneRoot > X > A` with graph
+         * `Z > A > X` needs only two ordinary updates and renders normally. A `[dep=...]`
+         * element can be an ancestor too. Removing either takes this element out of the document
+         * along with it, and `child-detached` is emitted once, at that moment, so arming any
+         * later would miss it and leave object3D in the graph with nothing left to remove it.
+         */
+        try {
+            this.armDetach(entityEl);
+        } catch (e) {
+            console.error(e);
+        }
+
+        // The subtree an orphan must still belong to for its removal to be valid, see reapOrphans
+        const rootObj = entityEl.object3D;
+
         // Clean up linked dependents
         try {
             document.querySelectorAll(`[dep='${id}']`).forEach((depEl) => {
@@ -62,13 +80,22 @@ export default class Delete {
          * only oversized subtrees spill into later batches.
          */
         if (orphans.length > 0) {
-            this.reapOrphans(orphans).catch((e) => {
+            this.reapOrphans(orphans, rootObj).catch((e) => {
                 console.error(e);
             });
         }
 
-        // Remove element itself
-        this.removeAndDetach(entityEl);
+        /*
+         * Remove element itself. Guarded because blip removes the element from several different
+         * paths and can throw doing it (blip.js falls through after its no-geometry removal and
+         * can reach a second, unguarded el.remove()). This runs inside mqtt.js's messages.forEach,
+         * so an escaping exception would drop the rest of the message batch.
+         */
+        try {
+            this.blipRemove(entityEl);
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     /**
@@ -105,9 +132,19 @@ export default class Delete {
 
         while (frontier.length > 0 && !truncated) {
             if (depth >= MAX_REAP_DEPTH) {
-                console.warn(
-                    `Orphan reap of "${id}" hit the max depth bound (${MAX_REAP_DEPTH}); deeper descendants left in place`
+                /*
+                 * The frontier is at the bound but has already been collected; what the bound
+                 * costs us is its children. Stay quiet when it has none, so the warning only
+                 * fires when descendants really were left behind.
+                 */
+                const missed = frontier.some((el) =>
+                    (el.object3D?.children ?? []).some((child) => this.isUnvisitedEntity(child.el, el, visited))
                 );
+                if (missed) {
+                    console.warn(
+                        `Orphan reap of "${id}" hit the max depth bound (${MAX_REAP_DEPTH}); deeper descendants left in place`
+                    );
+                }
                 break;
             }
             const next = [];
@@ -116,11 +153,7 @@ export default class Delete {
                 const children = el.object3D?.children ?? [];
                 for (let j = 0; j < children.length && !truncated; j++) {
                     const childEl = children[j].el;
-                    /*
-                     * object3D.el also back-links objects that belong to the entity itself (meshes,
-                     * loaded models set with setObject3D), so only descend into distinct entities.
-                     */
-                    if (childEl && childEl !== el && childEl.object3D && !visited.has(childEl)) {
+                    if (this.isUnvisitedEntity(childEl, el, visited)) {
                         visited.add(childEl);
                         next.push(childEl);
                         if (!this.isCovered(childEl, covered)) {
@@ -154,6 +187,21 @@ export default class Delete {
     }
 
     /**
+     * Whether a child object3D back-links to a distinct entity that has not been walked yet.
+     *
+     * object3D.el also back-links objects belonging to the entity itself (meshes, loaded models
+     * set with setObject3D), so only distinct entities are worth descending into.
+     *
+     * @param {Element} [childEl] element behind the child object3D, if it has one
+     * @param {Element} el element whose object3D the child hangs off
+     * @param {Set<Element>} visited elements already walked
+     * @return {boolean} true if childEl is a distinct, not-yet-walked entity
+     */
+    static isUnvisitedEntity(childEl, el, visited) {
+        return !!childEl && childEl !== el && !!childEl.object3D && !visited.has(childEl);
+    }
+
+    /**
      * Whether an element's removal is already covered by a removal that is queued anyway, i.e. one
      * of its DOM ancestors is going to leave the document and will take this element with it.
      *
@@ -163,7 +211,8 @@ export default class Delete {
      */
     static isCovered(el, covered) {
         let ancestor = el.parentElement;
-        while (ancestor) {
+        // Bounded like the walk itself; nothing constrains how deep the DOM gets either
+        for (let i = 0; ancestor && i < MAX_REAP_DEPTH; i++) {
             if (covered.has(ancestor)) {
                 return true;
             }
@@ -175,22 +224,51 @@ export default class Delete {
     /**
      * Remove orphaned descendants in bounded batches, yielding to the main thread between them
      * @param {Element[]} orphans elements to remove, deepest first
+     * @param {object} rootObj object3D of the deleted element, the subtree these orphans belong to
      */
-    static async reapOrphans(orphans) {
+    static async reapOrphans(orphans, rootObj) {
         for (let i = 0; i < orphans.length; i++) {
-            // Removing an ancestor may already have taken this one out of the document
-            if (orphans[i].isConnected) {
+            /*
+             * Two things can stop an entry being ours to remove. Removing an ancestor may already
+             * have taken it out of the document; and any batch after the first runs once the
+             * message loop has resumed, so a CREATE for the same object_id may have arrived
+             * meanwhile. create-update.js looks the element up by id and reuses it rather than
+             * building a new one, so a re-created object was never disconnected and isConnected
+             * cannot tell the two apart. Where the object now hangs can: a re-created one has been
+             * reparented out of the deleted subtree, a doomed one is still inside it. The test has
+             * to be ancestry to the deleted object3D rather than reachability from the scene,
+             * because the deleted object's own detach may itself still be pending behind a blip.
+             */
+            if (orphans[i].isConnected && this.isUnder(orphans[i].object3D, rootObj)) {
                 try {
                     this.removeAndDetach(orphans[i]);
                 } catch (e) {
                     console.error(e);
                 }
             }
-            if (i > 0 && i % REAP_BATCH_SIZE === 0) {
+            if ((i + 1) % REAP_BATCH_SIZE === 0) {
                 // eslint-disable-next-line no-await-in-loop
                 await this.yieldToMain();
             }
         }
+    }
+
+    /**
+     * Whether an object3D still hangs somewhere below another object in the THREE.js graph
+     * @param {object} [object3D] object to test
+     * @param {object} [rootObj] ancestor to look for
+     * @return {boolean} true if rootObj is reached walking up from object3D
+     */
+    static isUnder(object3D, rootObj) {
+        let parent = object3D?.parent;
+        // Bounded by the depth that collectOrphans was allowed to descend to find these elements
+        for (let i = 0; parent && i <= MAX_REAP_DEPTH; i++) {
+            if (parent === rootObj) {
+                return true;
+            }
+            parent = parent.parent;
+        }
+        return false;
     }
 
     /**
@@ -204,8 +282,18 @@ export default class Delete {
     }
 
     /**
-     * Remove an element, and detach its object3D from the THREE.js graph once that removal has
+     * Remove an element, detaching its object3D from the THREE.js graph once that removal has
      * actually happened.
+     * @param el - element to remove
+     */
+    static removeAndDetach(el) {
+        this.armDetach(el);
+        this.blipRemove(el);
+    }
+
+    /**
+     * Arrange for an element's object3D to be detached from the THREE.js graph once the element
+     * has actually left the document.
      *
      * A-Frame detaches object3D by asking the element's *DOM* parent to do it: disconnectedCallback
      * calls removeFromParent(), which calls `this.parentEl.remove(this)`, and `AEntity.remove(el)`
@@ -225,24 +313,29 @@ export default class Delete {
      * `child-detached` on the DOM parent, after its own detach attempt. Listening for that leaves
      * the animation intact whether the removal is synchronous or completes hundreds of ms later.
      *
-     * @param el - element to remove
+     * A null parentEl gets no listener and deliberately has no `parentElement` fallback: parentEl
+     * is null only for an element that never attached or has already detached, and
+     * disconnectedCallback early-returns in both cases, so `child-detached` is never emitted for
+     * it and a listener on the DOM parent could only sit there unable to fire.
+     *
+     * @param el - element whose object3D must be detached once it is removed
      */
-    static removeAndDetach(el) {
+    static armDetach(el) {
         const { object3D } = el;
-        // What removeFromParent() emits on; parentEl is the DOM parent (AEntity.attachToParent)
-        const parentEl = el.parentEl ?? el.parentElement;
-        if (object3D && parentEl) {
-            const onDetached = (evt) => {
-                // child-detached bubbles, so ignore the ones belonging to other elements
-                if (evt.detail?.el !== el) {
-                    return;
-                }
-                parentEl.removeEventListener('child-detached', onDetached);
-                object3D.parent?.remove(object3D);
-            };
-            parentEl.addEventListener('child-detached', onDetached);
+        // What removeFromParent() emits on; parentEl is the DOM parent (AEntity.addToParent)
+        const { parentEl } = el;
+        if (!object3D || !parentEl) {
+            return;
         }
-        this.blipRemove(el);
+        const onDetached = (evt) => {
+            // child-detached bubbles, so ignore the ones belonging to other elements
+            if (evt.detail?.el !== el) {
+                return;
+            }
+            parentEl.removeEventListener('child-detached', onDetached);
+            object3D.parent?.remove(object3D);
+        };
+        parentEl.addEventListener('child-detached', onDetached);
     }
 
     /**
