@@ -68,7 +68,7 @@ export default class Delete {
         }
 
         // Remove element itself
-        this.blipRemove(entityEl);
+        this.removeAndDetach(entityEl);
     }
 
     /**
@@ -93,6 +93,11 @@ export default class Delete {
      */
     static collectOrphans(entityEl, id) {
         const visited = new Set([entityEl]);
+        /*
+         * Elements whose DOM subtree is already accounted for: the deleted element, plus every
+         * orphan queued so far. Removing any of them takes its whole DOM subtree with it.
+         */
+        const covered = new Set([entityEl]);
         const orphans = [];
         let frontier = [entityEl];
         let depth = 0;
@@ -118,12 +123,18 @@ export default class Delete {
                     if (childEl && childEl !== el && childEl.object3D && !visited.has(childEl)) {
                         visited.add(childEl);
                         next.push(childEl);
-                        if (!entityEl.contains(childEl)) {
+                        if (!this.isCovered(childEl, covered)) {
                             /*
-                             * Outside the deleted element's DOM subtree, i.e. reparented in the
-                             * THREE.js graph only, so DOM removal will never reach it.
+                             * No queued removal reaches this element through the DOM, i.e. it was
+                             * reparented in the THREE.js graph only. Queue it, and record that its
+                             * own DOM subtree is covered from here on: the ordinary DOM children
+                             * hanging off an orphan are disposed of by that orphan's removal, so
+                             * queuing them as well would blip each one separately instead of
+                             * animating the subtree as one effect, and would spend the node budget
+                             * on removals the DOM already performs.
                              */
                             orphans.push(childEl);
+                            covered.add(childEl);
                         }
                         if (visited.size > MAX_REAP_NODES) {
                             console.warn(
@@ -143,6 +154,25 @@ export default class Delete {
     }
 
     /**
+     * Whether an element's removal is already covered by a removal that is queued anyway, i.e. one
+     * of its DOM ancestors is going to leave the document and will take this element with it.
+     *
+     * @param {Element} el element to test
+     * @param {Set<Element>} covered elements whose DOM subtrees are already accounted for
+     * @return {boolean} true if el is removed implicitly and must not be queued
+     */
+    static isCovered(el, covered) {
+        let ancestor = el.parentElement;
+        while (ancestor) {
+            if (covered.has(ancestor)) {
+                return true;
+            }
+            ancestor = ancestor.parentElement;
+        }
+        return false;
+    }
+
+    /**
      * Remove orphaned descendants in bounded batches, yielding to the main thread between them
      * @param {Element[]} orphans elements to remove, deepest first
      */
@@ -151,7 +181,7 @@ export default class Delete {
             // Removing an ancestor may already have taken this one out of the document
             if (orphans[i].isConnected) {
                 try {
-                    this.blipRemove(orphans[i]);
+                    this.removeAndDetach(orphans[i]);
                 } catch (e) {
                     console.error(e);
                 }
@@ -171,6 +201,48 @@ export default class Delete {
         return new Promise((resolve) => {
             setTimeout(resolve, 0);
         });
+    }
+
+    /**
+     * Remove an element, and detach its object3D from the THREE.js graph once that removal has
+     * actually happened.
+     *
+     * A-Frame detaches object3D by asking the element's *DOM* parent to do it: disconnectedCallback
+     * calls removeFromParent(), which calls `this.parentEl.remove(this)`, and `AEntity.remove(el)`
+     * runs `this.object3D.remove(el.object3D)`. For anything reparented by an UPDATE message the
+     * DOM parent is not the THREE.js parent, so that call removes nothing: the element leaves the
+     * document while its object3D stays in the graph and keeps rendering, and because the element
+     * is gone a later `parent: null` update can no longer rescue it. That applies both to the
+     * orphans reaped here and to the deleted object itself, which may have been update-reparented
+     * too. Detaching explicitly is a no-op in the ordinary case, where A-Frame has already done it.
+     *
+     * The detach has to happen *after* the removal rather than before it: pulling the object3D out
+     * of the graph first would take the mesh out of the scene before its blip-out has played. The
+     * blip component signals nothing on completion and removes the element from several different
+     * paths (straight away when there is no geometry or no clippable material, from the anime.js
+     * timeline's `complete` callback, or from its own backup timeout), so the one signal covering
+     * every path is the element actually leaving the document: removeFromParent() emits
+     * `child-detached` on the DOM parent, after its own detach attempt. Listening for that leaves
+     * the animation intact whether the removal is synchronous or completes hundreds of ms later.
+     *
+     * @param el - element to remove
+     */
+    static removeAndDetach(el) {
+        const { object3D } = el;
+        // What removeFromParent() emits on; parentEl is the DOM parent (AEntity.attachToParent)
+        const parentEl = el.parentEl ?? el.parentElement;
+        if (object3D && parentEl) {
+            const onDetached = (evt) => {
+                // child-detached bubbles, so ignore the ones belonging to other elements
+                if (evt.detail?.el !== el) {
+                    return;
+                }
+                parentEl.removeEventListener('child-detached', onDetached);
+                object3D.parent?.remove(object3D);
+            };
+            parentEl.addEventListener('child-detached', onDetached);
+        }
+        this.blipRemove(el);
     }
 
     /**
