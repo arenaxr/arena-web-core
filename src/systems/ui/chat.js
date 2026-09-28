@@ -85,6 +85,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.stats = {};
         this.status = {};
 
+
         // users list
         this.liveUsers = {};
 
@@ -404,6 +405,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.onJitsiStatsLocal = this.onJitsiStatsLocal.bind(this);
         this.onJitsiStatsRemote = this.onJitsiStatsRemote.bind(this);
         this.onJitsiStatus = this.onJitsiStatus.bind(this);
+        this.onJitsiTrackMuteChanged = this.onJitsiTrackMuteChanged.bind(this);
 
         ARENA.events.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect.bind(this));
         sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, this.onNewSettings);
@@ -417,6 +419,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         sceneEl.addEventListener(JITSI_EVENTS.STATS_LOCAL, this.onJitsiStatsLocal);
         sceneEl.addEventListener(JITSI_EVENTS.STATS_REMOTE, this.onJitsiStatsRemote);
         sceneEl.addEventListener(JITSI_EVENTS.STATUS, this.onJitsiStatus);
+        sceneEl.addEventListener(JITSI_EVENTS.TRACK_MUTE_CHANGED, this.onJitsiTrackMuteChanged);
 
         this.isReady = true;
     },
@@ -705,6 +708,27 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
+     * Called when Jitsi remote and local audio tracks mute changes.
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    onJitsiTrackMuteChanged(e) {
+        const arenaId = e.detail.id;
+        const jid = e.detail.jid;
+        // Try to find user by arenaId first, then fall back to jid
+        if (this.liveUsers[arenaId]) {
+            this.liveUsers[arenaId].muted = e.detail.muted;
+        } else if (jid) {
+            // arenaId property may not be set yet on the Jitsi participant;
+            // search liveUsers by their stored jid
+            const key = Object.keys(this.liveUsers).find((k) => this.liveUsers[k].jid === jid);
+            if (key) {
+                this.liveUsers[key].muted = e.detail.muted;
+            }
+        }
+        this.populateUserList();
+    },
+
+    /**
      * Getter to return the active user list state.
      * @return {Object[]} The list of active users.
      */
@@ -796,7 +820,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             if (msg.text === 'sound:off') {
                 // console.log('muteAudio', this.jitsi.hasAudio);
                 // only mute
-                if (this.jitsi.hasAudio) {
+                if (this.jitsi.hasAudio && this.jitsi.jitsiAudioTrack && !this.jitsi.jitsiAudioTrack.isMuted()) {
                     const sideMenu = sceneEl.systems['arena-side-menu-ui'];
                     sideMenu.clickButton(sideMenu.buttons.AUDIO);
                 }
@@ -915,6 +939,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 speaker: _this.liveUsers[key].speaker,
                 stats: _this.liveUsers[key].stats,
                 status: _this.liveUsers[key].status,
+                muted: _this.liveUsers[key].muted,
             });
         });
 
@@ -946,16 +971,19 @@ AFRAME.registerSystem('arena-chat-ui', {
         meUli.appendChild(myUBtnCtnr);
 
         const usspan = document.createElement('span');
-        usspan.className = 'users-list-btn s';
+        // Use hasAudio as the source of truth for the local user's mute state.
+        // ARENA considers users muted until they click the audio button (hasAudio=true).
+        let myBtnClass = 'uk';
+        if (this.jitsi && this.jitsi.jitsiAudioTrack) {
+            myBtnClass = this.jitsi.hasAudio ? 's' : 'ns';
+        }
+        usspan.className = `users-list-btn ${myBtnClass}`;
         usspan.title = 'Mute Myself';
         myUBtnCtnr.appendChild(usspan);
-        // span click event (sound off)
+        // span click event (toggle mute/unmute)
         usspan.onclick = () => {
-            // only mute
-            if (this.jitsi.hasAudio) {
-                const sideMenu = sceneEl.systems['arena-side-menu-ui'];
-                sideMenu.clickButton(sideMenu.buttons.AUDIO);
-            }
+            const sideMenu = sceneEl.systems['arena-side-menu-ui'];
+            sideMenu.clickButton(sideMenu.buttons.AUDIO);
         };
 
         // list users
@@ -983,14 +1011,20 @@ AFRAME.registerSystem('arena-chat-ui', {
 
             if (user.type !== UserType.SCREENSHARE) {
                 const sspan = document.createElement('span');
-                sspan.className = 'users-list-btn s';
+                let btnClass = 'uk';
+                if (user.muted === true) btnClass = 'ns';
+                else if (user.muted === false) btnClass = 's';
+                
+                sspan.className = `users-list-btn ${btnClass}`;
                 sspan.title = 'Mute User';
                 uBtnCtnr.appendChild(sspan);
 
                 // span click event (send sound on/off msg to ussr)
                 sspan.onclick = function muteUserClick() {
                     // message to target user
-                    _this.ctrlMsg(user.uid, 'sound:off');
+                    if (!user.muted) {
+                        _this.ctrlMsg(user.uid, 'sound:off');
+                    }
                 };
 
                 // Remove user to be rendered for all users, allowing full moderation for all.
