@@ -66,7 +66,7 @@
                     "type": "boolean"
                 },
                 "dressingVariance": {
-                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
+                    "$ref": "definitions-common.json#/definitions/vector3",
                     "format": "grid",
                     "default": {
                         "x": 1,
@@ -142,7 +142,7 @@
                     "type": "number"
                 },
                 "groundScale": {
-                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
+                    "$ref": "definitions-common.json#/definitions/vector3",
                     "format": "grid",
                     "default": {
                         "x": 1,
@@ -187,7 +187,7 @@
                     "type": "string"
                 },
                 "lightPosition": {
-                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
+                    "$ref": "definitions-common.json#/definitions/vector3",
                     "format": "grid",
                     "default": {
                         "x": 0,
@@ -487,7 +487,7 @@
                             }
                         },
                         "gravity": {
-                            "$ref": "./schemas/definitions-common.json#definitions/vector3",
+                            "$ref": "definitions-common.json#/definitions/vector3",
                             "format": "grid",
                             "default": {
                                 "x": 0,
@@ -817,19 +817,19 @@
             "type": "string"
         },
         "timestamp": {
-            "$ref": "#definitions/timestamp"
+            "$ref": "#/definitions/timestamp"
         },
         "override": {
-            "$ref": "#definitions/override"
+            "$ref": "#/definitions/override"
         },
         "ttl": {
-            "$ref": "#definitions/ttl"
+            "$ref": "#/definitions/ttl"
         },
         "private": {
-            "$ref": "#definitions/private"
+            "$ref": "#/definitions/private"
         },
         "program_id": {
-            "$ref": "#definitions/program_id"
+            "$ref": "#/definitions/program_id"
         },
         "data": {
             "properties": {
