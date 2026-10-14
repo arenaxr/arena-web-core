@@ -13,7 +13,7 @@ This document covers **development rules and conventions** specific to `arena-we
 This enables future topic format refactoring without scattered string updates.
 
 ```javascript
-// ✅ CORRECT — Use TOPICS with formatStr
+// CORRECT — Use TOPICS with formatStr
 import TOPICS from '../../constants/topics.js';
 
 const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
@@ -23,7 +23,7 @@ const topic = TOPICS.PUBLISH.SCENE_OBJECTS.formatStr({
     objectId: objectId,
 });
 
-// ❌ WRONG — Never hardcode topic strings
+// WRONG — Never hardcode topic strings
 const topic = `realm/s/${namespace}/${sceneId}/o/${userClient}/${objectId}`;
 ```
 
@@ -40,10 +40,10 @@ The ARENA deployment uses a strict [Content Security Policy (CSP)](https://devel
 **All JavaScript must be in external `.js` files**, never inline in HTML.
 
 ```html
-<!-- ✅ CORRECT — External script file -->
+<!-- CORRECT — External script file -->
 <script src="my-page.js"></script>
 
-<!-- ❌ WRONG — Inline scripts are blocked by CSP -->
+<!-- WRONG — Inline scripts are blocked by CSP -->
 <script>
   window.addEventListener('load', () => { /* ... */ });
 </script>
@@ -58,10 +58,10 @@ Move visual styling to CSS files whenever possible. Use CSS classes instead of s
 The primary stylesheet for the 3D scene UI is [`src/style/arena.css`](src/style/arena.css).
 
 ```javascript
-// ✅ CORRECT — Use CSS classes
+// CORRECT — Use CSS classes
 btn.classList.add('disabled');
 
-// ❌ AVOID — Inline styles are harder to maintain
+// AVOID — Inline styles are harder to maintain
 btn.style.color = '#999';
 btn.style.pointerEvents = 'none';
 ```
@@ -73,13 +73,13 @@ Exceptions are acceptable for truly dynamic values (e.g., computed positions) th
 The ARENA auth system is asynchronous. Any code that requires authentication (MQTT tokens, REST API calls to `/recorder/`, `/persist/`, etc.) **must wait for the `onauth` event** before executing.
 
 ```javascript
-// ✅ CORRECT — Wait for auth
+// CORRECT — Wait for auth
 window.addEventListener('onauth', async (e) => {
     const { mqtt_username, mqtt_token } = e.detail;
     // Now safe to make authenticated requests
 });
 
-// ❌ WRONG — Token may not exist yet
+// WRONG — Token may not exist yet
 fetch('/recorder/list', { credentials: 'same-origin' }); // 401 error
 ```
 
@@ -88,12 +88,12 @@ fetch('/recorder/list', { credentials: 'same-origin' }); // 401 error
 When a feature is unavailable due to permissions (not platform constraints), **show the UI element in a disabled state** with an explanatory tooltip, rather than hiding it entirely. This helps users understand what features exist and what permissions they need.
 
 ```javascript
-// ✅ CORRECT — Visible but disabled with tooltip
+// CORRECT — Visible but disabled with tooltip
 btn.setAttribute('title', 'Recording requires scene editor permissions');
 btn.classList.add('disabled');
 btn.onclick = (e) => e.preventDefault();
 
-// ❌ AVOID — Hidden leaves users unaware the feature exists
+// AVOID — Hidden leaves users unaware the feature exists
 if (hasPermission) {
     container.appendChild(btn);
 }
@@ -106,13 +106,13 @@ Platform constraints (e.g., mobile, no Jitsi) where the feature genuinely cannot
 A-Frame systems and components initialize asynchronously. Use the event system (`ARENA_EVENTS`) rather than assuming objects exist at module load time.
 
 ```javascript
-// ✅ CORRECT — Lazy initialization / event-driven
+// CORRECT — Lazy initialization / event-driven
 ARENA.events.addMultiEventListener(
     [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.JITSI_LOADED],
     this.ready.bind(this)
 );
 
-// ❌ WRONG — May crash if dependency isn't loaded yet
+// WRONG — May crash if dependency isn't loaded yet
 const actions = Object.keys(AFRAME.components); // undefined at import time
 ```
 
@@ -133,10 +133,10 @@ When adding functionality to unbundled scripts:
 **All dependencies in `package.json` must use exact versions** (no `^`, `~`, or `*` ranges). This prevents version drift across environments and ensures reproducible builds.
 
 ```json
-// ✅ CORRECT — Exact pinned version
+// CORRECT — Exact pinned version
 "three": "0.149.0"
 
-// ❌ WRONG — Semver range allows drift
+// WRONG — Semver range allows drift
 "three": "^0.149.0"
 ```
 
@@ -188,6 +188,10 @@ The `arena-web-core` uses [Release Please](https://github.com/googleapis/release
 > [!IMPORTANT]
 > **Issue and PR References in Commit & PR Messages:**
 > Only use `#NN` notation in commit messages, PR titles, and PR descriptions if they correspond to actual GitHub issues or pull requests. Do **not** use `#NN` notation for internal enumerations of planning docs or triage items (e.g., use `Task NN` or plain text instead), as this creates erroneous links and may result in unintended automatic actions.
+
+> [!IMPORTANT]
+> **No emoji in documentation, code comments, commit messages, or GitHub issue/PR titles and descriptions.**
+> Write plain text. Emoji render inconsistently across editors, terminals, diffs, and generated release notes, and add nothing a plain word does not. This applies to all contributors, including automated/agentic coding tools. Icons in the software's own user interface are fine, but they must follow the project's existing conventions for UI icons.
 
 
 ## CI & Dependency Management Conventions
