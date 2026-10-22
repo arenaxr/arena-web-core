@@ -3,7 +3,7 @@
     "description": "Dodecahedron Geometry.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#properties"
+            "$ref": "definitions-arena-object.json"
         },
         {
             "properties": {
@@ -30,13 +30,13 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#properties"
+                            "$ref": "definitions-entity.json"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#properties"
+                            "$ref": "definitions-common.json"
                         },
                         {
-                            "$ref": "./schemas/definitions-geometry.json#properties"
+                            "$ref": "definitions-geometry.json"
                         }
                     ],
                     "title": "Dodecahedron Data",
