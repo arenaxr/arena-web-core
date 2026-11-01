@@ -25,7 +25,7 @@
     "aframe-thickline-component": "0.0.3",
     "axios": "^1.20.0",
     "comlink": "4.4.2",
-    "he": "1.2.0",
+    "he": "2.0.0",
     "linkify-html": "4.3.3",
     "linkifyjs": "4.3.3",
     "mqtt-pattern": "2.1.1",
