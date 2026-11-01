@@ -157,15 +157,30 @@ npm run format
 npm run lint
 ```
 
-## Build & Test
+## Build & Local Verification
+
+**This repository has no unit-test suite** — there is no test framework, no `npm test` script, and no workflow that runs tests. The only automated check on a pull request is the [Build workflow](.github/workflows/build.yaml), which installs dependencies and runs the Parcel bundler. Reproduce that same signal locally before you push:
 
 ```bash
-# Development watch mode
-npm run watch
+# Install exactly the locked dependencies (Node version comes from .nvmrc)
+npm ci
 
-# Production build
-npm run build
+# The exact production build CI runs, with a cold cache
+npm run build-ci
 ```
+
+Exit code 0 with output written to the git-ignored `dist/` means your change builds; a bundling error exits non-zero and is what CI reports as a failed check. On a warm `node_modules` the build takes well under a minute.
+
+For day-to-day work use the watch build, which rebuilds on save:
+
+```bash
+npm run watch
+```
+
+Verification beyond that is manual: load the built scene in a browser and exercise the feature you changed.
+
+> [!NOTE]
+> `npm run lint` and `npm run format` are **not** run by CI, and both rewrite files in place (`eslint --fix`, `prettier -w`). `master` is not currently lint-clean, so expect pre-existing errors that are not yours — check `git diff` afterwards and commit only changes to files you actually touched.
 
 ## File Structure Conventions
 
