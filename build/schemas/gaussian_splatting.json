@@ -3,7 +3,7 @@
     "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering.\n\nRendered with <a href='https://sparkjs.dev'>Spark</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#properties"
+            "$ref": "definitions-arena-object.json"
         },
         {
             "properties": {
@@ -62,10 +62,10 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#properties"
+                            "$ref": "definitions-entity.json"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#properties"
+                            "$ref": "definitions-common.json"
                         }
                     ],
                     "title": "Gaussian Splat",
