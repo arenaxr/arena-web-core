@@ -42,3 +42,55 @@ body {
         opacity: 1;
     }
 }
+
+/* keep the hidden attribute authoritative over the display rules below */
+[hidden] {
+    display: none !important;
+}
+
+.share-status {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    width: min(90vw, 520px);
+    padding: 20px 24px;
+    border-radius: 10px;
+    background-color: #f4f4f4;
+    color: #222;
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+    text-align: center;
+    z-index: 9998;
+}
+
+.share-status p {
+    margin: 0 0 12px;
+}
+
+.share-status-hint {
+    font-size: 14px;
+    color: #555;
+}
+
+.share-retry-button {
+    background-color: #1a73e8;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 10px 20px;
+}
+
+.share-retry-button:hover {
+    background-color: #1558b0;
+}
+
+.share-retry-button:disabled {
+    background-color: #9bbcf0;
+    cursor: default;
+}
