@@ -735,6 +735,11 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     });
                     return;
                 }
+                // Also hand the params over the old way. screenshare/index.js is served without cache
+                // headers, so browsers can keep running an older copy for weeks; that version reads only
+                // window.params and closes itself without it. The current page prefers this too, and on
+                // a re-navigated window (where this lands on the outgoing page) falls back to the opener.
+                screenshareWindow.params = window.arenaScreenshareParams;
                 // bring it forward: an already-open share window may be behind this one, and the
                 // browser's screen picker opens attached to it
                 screenshareWindow.focus();
