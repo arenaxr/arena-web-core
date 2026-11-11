@@ -119,15 +119,19 @@ AFRAME.registerComponent('arena-user', {
         this.jitsi = sceneEl.systems['arena-jitsi'];
         this.chat = sceneEl.systems['arena-chat-ui'];
 
-        this.idTag = el.id.replace('camera_', '');
+        // With v2 auth the avatar's object id is the user's idTag ({username}_{nonce}). v1 auth prefixed
+        // it as camera_{nonce}_{username}; strip only that exact shape, since a v2 username may itself
+        // contain "camera_".
+        const v1Id = el.id.match(/^camera_(\d{10}_.+)$/);
+        this.idTag = v1Id ? v1Id[1] : el.id;
         el.setAttribute('rotation.order', 'YXZ');
 
         const name = el.id;
 
         el.setAttribute('blip', { blipin: false, geometry: 'disk', applyDescendants: true });
 
-        const decodeName = decodeURI(name.split('_')[2]);
-        const personName = decodeName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        // the display name rides in the arena-user data (update() keeps it current); v2 ids carry no name segment
+        const personName = data.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         this.headText = document.createElement('a-text');
         this.headText.setAttribute('id', `head-text-${name}`);
         this.headText.setAttribute('value', personName);
