@@ -45,15 +45,17 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         const { position, rotation } = ARENAUtils.setClickData(evt);
 
         if ('inputSource' in evt.detail) {
-            // original hit-test event; simply publish to MQTT
+            // original hit-test event; simply publish to MQTT. clientEvent layout: the user is the
+            // object_id, the hit object (this scene) is data.target.
             const thisMsg = {
-                object_id: 'ARENA.idTag',
+                object_id: ARENA.idTag,
                 action: 'clientEvent',
                 type: 'hitstart',
                 data: {
                     originPosition: clickPos,
                     targetPosition: position,
                     targetRotation: rotation,
+                    target: this.el.id,
                 },
             };
             ARENA.Mqtt.publish(this.pubTopic, thisMsg);
@@ -70,16 +72,17 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         const { position, rotation } = ARENAUtils.setClickData(evt);
 
         if ('inputSource' in evt.detail) {
-            // original hit-test event; simply publish to MQTT
+            // original hit-test event; simply publish to MQTT. clientEvent layout: the user is the
+            // object_id, the hit object (this scene) is data.target.
             const thisMsg = {
-                object_id: this.el.id,
+                object_id: ARENA.idTag,
                 action: 'clientEvent',
                 type: 'hitend',
                 data: {
                     originPosition: clickPos,
                     targetPosition: position,
                     targetRotation: rotation,
-                    target: ARENA.idTag,
+                    target: this.el.id,
                 },
             };
             ARENA.Mqtt.publish(this.pubTopic, thisMsg);
