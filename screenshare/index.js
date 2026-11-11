@@ -1,10 +1,63 @@
 /* global $, JitsiMeetJS */
 
-if (!window.params) window.close();
+/**
+ * Read the share parameters. The ARENA tab stores them on itself (window.arenaScreenshareParams)
+ * before opening this popup, so they survive a navigation of an already-open share window, which
+ * gets a fresh Window object. window.params is the older handoff, set on the new window directly.
+ * @return {object|null} share parameters, or null when this page was not opened from ARENA
+ */
+function getShareParams() {
+    if (window.params) return window.params;
+    try {
+        return window.opener?.arenaScreenshareParams || null;
+    } catch (e) {
+        return null; // opener is not readable (e.g. navigated away to another origin)
+    }
+}
 
-const options = window.params.connectOptions;
-const { appID } = window.params;
-const token = window.params.token.mqtt_token;
+const params = getShareParams();
+
+// status panel: tells the user what is happening and offers a retry when capture fails
+const statusPanel = document.createElement('div');
+statusPanel.className = 'share-status';
+const statusText = document.createElement('p');
+const statusHint = document.createElement('p');
+statusHint.className = 'share-status-hint';
+const retryButton = document.createElement('button');
+retryButton.className = 'share-retry-button';
+retryButton.textContent = 'Choose what to share';
+statusPanel.append(statusText, statusHint, retryButton);
+document.body.appendChild(statusPanel);
+
+/**
+ * Show a status message in the popup.
+ * @param {string} text main message
+ * @param {string} [hint] secondary guidance
+ * @param {boolean} [canRetry] show the "Choose what to share" button
+ */
+function setStatus(text, hint = '', canRetry = false) {
+    statusText.textContent = text;
+    statusHint.textContent = hint;
+    statusHint.hidden = !hint;
+    retryButton.hidden = !canRetry;
+    statusPanel.hidden = false;
+}
+
+/**
+ * Hide the status panel once the share preview is showing.
+ */
+function clearStatus() {
+    statusPanel.hidden = true;
+}
+
+if (!params) {
+    setStatus('Start screen sharing from the Share Screen button in an ARENA scene.');
+    throw new Error('screenshare: opened without ARENA share parameters');
+}
+
+const options = params.connectOptions;
+const { appID } = params;
+const token = params.token.mqtt_token;
 const confOptions = {
     openBridgeChannel: true,
 };
@@ -15,6 +68,7 @@ let conference = null;
 
 let localTracks = [];
 const remoteTracks = {};
+let connectionFailed = false;
 let unloaded = false; // guard against re-entrant / repeated teardown (issue #616)
 
 /**
@@ -61,7 +115,7 @@ function onLocalTrackStopped() {
     }
 }
 
-// create exit button
+// create exit button; shown from the start so the user can always back out, even if capture fails
 const exitButton = document.createElement('button');
 exitButton.id = 'exitButton';
 exitButton.className = 'leave-button';
@@ -71,6 +125,7 @@ exitButton.onclick = () => {
     unload();
     window.close();
 };
+document.body.appendChild(exitButton);
 
 /**
  * Handles local tracks.
@@ -121,9 +176,7 @@ function onConferenceJoined() {
  * That function is called when connection is established successfully
  */
 function onConnectionSuccess() {
-    document.body.appendChild(exitButton);
-
-    conference = connection.initJitsiConference(window.params.conferenceName, confOptions);
+    conference = connection.initJitsiConference(params.conferenceName, confOptions);
     conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
         console.log(`track removed!!!${track}`);
     });
@@ -148,14 +201,22 @@ function onConnectionSuccess() {
         conference.sendEndpointStatsMessage(stats); // send to remote
     });
 
-    conference.setDisplayName(
-        `${(+new Date()).toString(36)} ${window.params.screenSharePrefix}_${window.params.idTag}`
-    );
-    conference.setLocalParticipantProperty('screenshareDispName', window.params.displayName);
-    conference.setLocalParticipantProperty('screenshareidTag', window.params.idTag);
-    conference.setLocalParticipantProperty('screenshareObjIds', window.params.objectIds);
+    conference.setDisplayName(`${(+new Date()).toString(36)} ${params.screenSharePrefix}_${params.idTag}`);
+    conference.setLocalParticipantProperty('screenshareDispName', params.displayName);
+    conference.setLocalParticipantProperty('screenshareidTag', params.idTag);
+    conference.setLocalParticipantProperty('screenshareObjIds', params.objectIds);
 
     conference.join();
+}
+
+/**
+ * Show the connection failure; it outranks any capture status since nothing can be shared without it.
+ */
+function showConnectionFailed() {
+    setStatus(
+        'Could not connect to the conference server, so your screen is not being shared.',
+        'Click Share Screen in the ARENA scene to try again.'
+    );
 }
 
 /**
@@ -163,6 +224,8 @@ function onConnectionSuccess() {
  */
 function onConnectionFailed(errType, msg, credentials, details) {
     console.error('Connection Failed!', errType, msg, credentials, details);
+    connectionFailed = true;
+    showConnectionFailed();
 }
 
 /**
@@ -183,10 +246,76 @@ function disconnect() {
     connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, disconnect);
 }
 
+/**
+ * Explain a failed screen capture and offer a retry from a real click.
+ * lib-jitsi-meet folds most getDisplayMedia failures into SCREENSHARING_USER_CANCELED: the user
+ * dismissed the picker, or the browser refused because the call had no user gesture (this popup
+ * starts capture on load, which Firefox and Safari reject). A retry from the button carries a
+ * gesture, so it works in either case. PERMISSION_DENIED means the operating system blocked
+ * screen recording for the browser, most often macOS Screen & System Audio Recording.
+ * @param {object} error JitsiTrackError
+ */
+function onCaptureError(error) {
+    console.warn('screenshare: screen capture failed', error?.name, error?.message, error);
+    if (connectionFailed) return; // the connection failure message stays up
+    const trackErrors = JitsiMeetJS.errors.track;
+    const isMac = /Mac/i.test(navigator.userAgentData?.platform || navigator.platform || '');
+    const macHint =
+        'On macOS, if the picker offers only tabs or shows a permission message, open System Settings > ' +
+        'Privacy & Security > Screen & System Audio Recording, turn on your browser, then quit and reopen it.';
+    switch (error?.name) {
+        case trackErrors.PERMISSION_DENIED:
+            setStatus(
+                'Your computer blocked this browser from recording the screen.',
+                isMac
+                    ? 'Open System Settings > Privacy & Security > Screen & System Audio Recording, turn on ' +
+                          'your browser, then quit and reopen it and try again.'
+                    : "Allow screen recording for this browser in your system's privacy settings, then try again.",
+                true
+            );
+            break;
+        case trackErrors.SCREENSHARING_NOT_SUPPORTED_ERROR:
+            setStatus(
+                'This browser does not support screen sharing.',
+                'Try a current desktop Chrome, Edge, or Firefox.'
+            );
+            break;
+        case trackErrors.SCREENSHARING_USER_CANCELED:
+            setStatus('Nothing is being shared yet.', isMac ? macHint : '', true);
+            break;
+        default:
+            setStatus(`Screen sharing failed: ${error?.message || error?.name || error}`, isMac ? macHint : '', true);
+            break;
+    }
+}
+
+/**
+ * Ask the browser for a screen, window, or tab to share. Runs once on load (no extra click when the
+ * browser allows it) and again from the retry button.
+ */
+function startCapture() {
+    if (connectionFailed) return;
+    retryButton.disabled = true;
+    setStatus('Choose a screen, window, or tab to share in the browser dialog.');
+    JitsiMeetJS.createLocalTracks({ devices: ['desktop'] })
+        .then((tracks) => {
+            if (connectionFailed) showConnectionFailed();
+            else clearStatus();
+            onLocalTracks(tracks);
+        })
+        .catch(onCaptureError)
+        .finally(() => {
+            retryButton.disabled = false;
+        });
+}
+
+retryButton.onclick = startCapture;
+
 $(window).bind('beforeunload', unload);
 $(window).bind('unload', unload);
 
-JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
+// WARN keeps lib-jitsi-meet's "getDisplayMedia error" detail (the browser's own error) in the console
+JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.WARN);
 
 const initOptions = {
     disableAudioLevels: true,
@@ -204,8 +333,4 @@ JitsiMeetJS.mediaDevices.addEventListener(JitsiMeetJS.events.mediaDevices.DEVICE
 
 connection.connect();
 
-JitsiMeetJS.createLocalTracks({ devices: ['desktop'] })
-    .then(onLocalTracks)
-    .catch((error) => {
-        throw error;
-    });
+startCapture();

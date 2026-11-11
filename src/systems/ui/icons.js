@@ -707,6 +707,21 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                 const h = Math.round(sh * 0.7);
                 const left = Math.round((sw - w) / 2);
                 const top = Math.round((sh - h) / 2);
+                // The popup reads its parameters back from this tab (window.opener). Setting them on
+                // the returned window only survives while it is still the initial about:blank: when a
+                // share window is already open, window.open() navigates it, the new page gets a fresh
+                // Window without them, and it used to close itself after ending the running share.
+                // Navigating the named window now replaces the running share with this new selection.
+                window.arenaScreenshareParams = {
+                    connectOptions: this.jitsi.connectOptions,
+                    appID: this.jitsi.data.arenaAppId,
+                    token: this.arena.mqttToken,
+                    screenSharePrefix: this.jitsi.data.screensharePrefix,
+                    conferenceName: this.jitsi.conferenceName,
+                    displayName: cameraEl.getAttribute('arena-camera').displayName,
+                    idTag: this.arena.idTag,
+                    objectIds: objectIds.join(),
+                };
                 const screenshareWindow = window.open(
                     './screenshare',
                     'ARENAScreenShare',
@@ -720,16 +735,9 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     });
                     return;
                 }
-                screenshareWindow.params = {
-                    connectOptions: this.jitsi.connectOptions,
-                    appID: this.jitsi.data.arenaAppId,
-                    token: this.arena.mqttToken,
-                    screenSharePrefix: this.jitsi.data.screensharePrefix,
-                    conferenceName: this.jitsi.conferenceName,
-                    displayName: cameraEl.getAttribute('arena-camera').displayName,
-                    idTag: this.arena.idTag,
-                    objectIds: objectIds.join(),
-                };
+                // bring it forward: an already-open share window may be behind this one, and the
+                // browser's screen picker opens attached to it
+                screenshareWindow.focus();
             });
         });
     },
