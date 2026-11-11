@@ -231,11 +231,14 @@ AFRAME.registerSystem('arena-jitsi', {
                 console.debug(`Audio Level local: ${audioLevel}`)
             );
             track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () =>
-                console.debug('local track state changed')
+                console.info(`jitsi: local ${track.getType()} track ${track.isMuted() ? 'muted' : 'unmuted'}`)
             );
-            track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () =>
-                console.debug('local track stopped')
-            );
+            track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () => {
+                // the device or browser ended the source (unplugged, OS revoked, taken by another app);
+                // nobody receives this track any more until A/V is set up again
+                if (track.disposed) return;
+                console.warn(`jitsi: local ${track.getType()} track stopped by the browser or device`);
+            });
             track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED, (deviceId) =>
                 console.debug(`track audio output device was changed to ${deviceId}`)
             );
@@ -362,6 +365,8 @@ AFRAME.registerSystem('arena-jitsi', {
 
         if (track.getType() === 'audio') {
             if (this.remoteTracks[participantId][0]) {
+                // arena-user rebinds its positional sound when it sees the new stream
+                console.info(`jitsi: remote audio track replaced for ${participantId}`);
                 this.remoteTracks[participantId][0].dispose();
             }
             this.remoteTracks[participantId][0] = track;
@@ -374,6 +379,7 @@ AFRAME.registerSystem('arena-jitsi', {
             track.attach($(`#${audioId}`)[0]);
         } else if (track.getType() === 'video') {
             if (this.remoteTracks[participantId][1]) {
+                console.info(`jitsi: remote video track replaced for ${participantId}`);
                 this.remoteTracks[participantId][1].dispose();
             }
             this.remoteTracks[participantId][1] = track;
@@ -693,7 +699,14 @@ AFRAME.registerSystem('arena-jitsi', {
 
         this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack);
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
-            console.debug(`track removed!!!${track}`);
+            if (track.isLocal()) return;
+            console.info(`jitsi: remote ${track.getType()} track removed for ${track.getParticipantId()}`);
+        });
+        this.conference.on(JitsiMeetJS.events.conference.CONNECTION_INTERRUPTED, () => {
+            console.warn('jitsi: media connection to the bridge interrupted');
+        });
+        this.conference.on(JitsiMeetJS.events.conference.CONNECTION_RESTORED, () => {
+            console.info('jitsi: media connection to the bridge restored');
         });
         this.conference.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
             // A remote source can stop/start its camera without leaving the conference, so no
@@ -731,6 +744,7 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError);
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError);
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
+            this.checkLocalAudioSending(stats);
             this.updateUserStatus();
             this.conference.sendEndpointStatsMessage(stats); // send to remote
             sceneEl.emit(JITSI_EVENTS.STATS_LOCAL, {
@@ -786,6 +800,40 @@ AFRAME.registerSystem('arena-jitsi', {
 
         this.conference.join(); // this.conference.join(password);
         this.health.removeError('connection.connectionFailed');
+    },
+
+    /**
+     * Diagnostics for "others can't hear me": warn when the mic is on in ARENA but the local audio
+     * track is muted, or when it is unmuted yet no audio has left for two stats intervals. ARENA does
+     * not enable Opus DTX, so an unmuted mic sends audio even in silence. Logs once per episode.
+     * @param {object} stats lib-jitsi-meet local connection stats
+     */
+    checkLocalAudioSending(stats) {
+        const track = this.jitsiAudioTrack;
+        let problem = null;
+        if (this.hasAudio && track) {
+            const upload = stats?.bitrate?.audio?.upload;
+            if (track.isMuted()) {
+                problem = 'microphone is on in ARENA but the local audio track is muted';
+            } else if (upload === 0) {
+                this.silentAudioIntervals = (this.silentAudioIntervals || 0) + 1;
+                if (this.silentAudioIntervals >= 2) problem = 'microphone is unmuted but no audio is being sent';
+            } else {
+                this.silentAudioIntervals = 0;
+            }
+        } else {
+            this.silentAudioIntervals = 0;
+        }
+        if (problem && problem !== this.localAudioProblem) {
+            console.warn(`jitsi: ${problem}; others cannot hear you`, {
+                trackMuted: track?.isMuted(),
+                trackState: track?.getTrack()?.readyState,
+                audioUploadKbps: stats?.bitrate?.audio?.upload,
+            });
+        } else if (!problem && this.localAudioProblem) {
+            console.info('jitsi: local audio is being sent again');
+        }
+        this.localAudioProblem = problem;
     },
 
     updateUserStatus() {
