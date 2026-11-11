@@ -13,8 +13,10 @@
  * - nameSpace - namespace of the scene
  * - sceneName - name of the scene
  * - userClient - name of the user client per arena-auth (e.g. jdoe_1448081341_web)
- * - idTag - username prefixed with a uuid (e.g. jdoe_1448081341)
- * - userObj - idTag prefixed with camera_ (e.g. camera_jdoe_1448081341)
+ * - idTag - username suffixed with a server-issued nonce (e.g. jdoe_1448081341)
+ * - userObj - id of the user-owned object a message is about: the avatar camera, whose id is the
+ *   idTag itself (e.g. jdoe_1448081341), a hand (e.g. handLeft_jdoe_1448081341), or the face
+ *   (e.g. face_jdoe_1448081341)
  */
 
 // TODO: handle this scriptImport somehow (which can't be done in parcel with a worker...)
