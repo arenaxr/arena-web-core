@@ -4,6 +4,18 @@
 - Pin GitHub Actions in CI workflows to exact release tag commit SHAs with inline tag comments for Dependabot SemVer support.
 
 
+## [2.6.1](https://github.com/arenaxr/arena-web-core/compare/v2.6.0...v2.6.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* **ar-hit-test:** send hit events with the user as object_id ([74693f2](https://github.com/arenaxr/arena-web-core/commit/74693f2a6d1aba8a9e704f1ca1004ec341b0134f))
+* **arena-user:** parse avatar ids for v2 auth ([12c095b](https://github.com/arenaxr/arena-web-core/commit/12c095b27f258a5e8d3470f7121c3a0b3c1290cf))
+* **arena-user:** rebind positional audio when a remote track changes ([87ce81d](https://github.com/arenaxr/arena-web-core/commit/87ce81d446941390fd9f25c98eecb9e8d1ce3db6))
+* **arena-user:** show network quality icon for v2 user ids ([0b027d7](https://github.com/arenaxr/arena-web-core/commit/0b027d74ead8731068e1ae61122ec7a9f90520e0))
+* **screenshare:** explain capture failures and replace a running share ([4d9ee1c](https://github.com/arenaxr/arena-web-core/commit/4d9ee1cf37155fc4fc9be3f9fe1085b7aca2c5e7))
+* **screenshare:** keep working with a cached older popup page ([d08bda3](https://github.com/arenaxr/arena-web-core/commit/d08bda3cc46521cfbf1a51362a687c386feddeb1))
+
 ## [2.6.0](https://github.com/arenaxr/arena-web-core/compare/v2.5.1...v2.6.0) (2026-09-28)
 
 
