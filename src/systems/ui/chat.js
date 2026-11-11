@@ -674,13 +674,14 @@ AFRAME.registerSystem('arena-chat-ui', {
             this.liveUsers[arenaId].jid = jid;
             this.liveUsers[arenaId].ts = new Date().getTime();
             this.populateUserList();
-            // update arena-user connection quality
-            if (stats && stats.connectionQuality) {
-                const userCamId = `camera_${arenaId}`;
-                const userCamEl = document.querySelector(`[id='${userCamId}']`);
-                if (userCamEl) {
-                    userCamEl.setAttribute('arena-user', 'jitsiQuality', stats.connectionQuality);
-                }
+        }
+        // Update the quality icon over this user's avatar. The avatar's object id is the user's
+        // idTag (v2 auth ids carry no `camera_` prefix), and 0 is a valid worst-case quality, so
+        // test for a number rather than truthiness.
+        if (typeof stats?.connectionQuality === 'number') {
+            const userCamEl = document.getElementById(arenaId);
+            if (userCamEl?.components?.['arena-user']) {
+                userCamEl.setAttribute('arena-user', 'jitsiQuality', stats.connectionQuality);
             }
         }
     },

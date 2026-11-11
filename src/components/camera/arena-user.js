@@ -191,7 +191,8 @@ AFRAME.registerComponent('arena-user', {
         const { data } = this;
 
         const name = `muted_${el.id}`;
-        let micIconEl = document.querySelector(`#${name}`);
+        // getElementById, not querySelector: user ids may contain '.' or '@', which break a CSS id selector
+        let micIconEl = document.getElementById(name);
         if (!micIconEl) {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
@@ -223,7 +224,7 @@ AFRAME.registerComponent('arena-user', {
         const { data } = this;
 
         const name = `quality_${el.id}`;
-        let qualIconEl = document.querySelector(`#${name}`);
+        let qualIconEl = document.getElementById(name);
         if (!qualIconEl) {
             qualIconEl = document.createElement('a-image');
             qualIconEl.setAttribute('id', name);
@@ -510,8 +511,11 @@ AFRAME.registerComponent('arena-user', {
             }
         }
 
-        if (data.jitsiQuality !== oldData.jitsiQuality && this.data.jitsiId) {
-            if (data.jitsiQuality < 66.7) {
+        // Re-evaluate on jitsiId too: a quality drop that arrives before the user's jitsiId is known
+        // would otherwise never draw if the value then holds steady.
+        if (data.jitsiQuality !== oldData.jitsiQuality || data.jitsiId !== oldData.jitsiId) {
+            // same threshold as getQualityIcon() and the user list color: above 66.7 is "good"
+            if (data.jitsiId && !(data.jitsiQuality > 66.7)) {
                 this.drawQuality();
             } else {
                 this.removeQuality();

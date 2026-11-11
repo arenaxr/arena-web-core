@@ -740,7 +740,8 @@ AFRAME.registerSystem('arena-jitsi', {
             });
         });
         this.conference.on(JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED, (id, stats) => {
-            const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
+            // stats can trail a participant who just left; don't throw on a missing participant
+            const arenaId = this.conference.getParticipantById(id)?.getProperty('arenaId');
             sceneEl.emit(JITSI_EVENTS.STATS_REMOTE, {
                 jid: id,
                 id: arenaId,
