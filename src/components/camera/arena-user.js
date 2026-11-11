@@ -80,6 +80,35 @@ async function enableChromeAEC(gainNode, spatialAudioOn) {
     }
 }
 
+let audioContextWatched = false;
+
+/**
+ * Watch the shared Web Audio context that carries every remote voice. If it leaves 'running'
+ * (suspended by the browser, or 'interrupted' on some platforms) all positional voices go silent at
+ * once, so log the transition and try to resume, falling back to the next user gesture.
+ * @private
+ */
+function watchAudioContext() {
+    if (audioContextWatched) return;
+    const context = THREE.AudioContext.getContext();
+    if (!context) return;
+    audioContextWatched = true;
+    const resume = () => {
+        if (context.state !== 'running' && context.state !== 'closed') context.resume().catch(() => {});
+    };
+    context.addEventListener('statechange', () => {
+        if (context.state === 'running') {
+            console.info('arena-user: audio context running');
+            return;
+        }
+        console.warn(`arena-user: audio context ${context.state}; remote voices are silent until it resumes`);
+        resume();
+        ['pointerdown', 'keydown', 'touchend'].forEach((type) => {
+            document.addEventListener(type, resume, { once: true, capture: true });
+        });
+    });
+}
+
 /**
  * Another user's camera in the ARENA. Handles Jitsi and display name updates.
  * @module arena-user
@@ -351,11 +380,38 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
+    /**
+     * Identify the remote audio the positional sound is (or would be) built from. The sound
+     * component taps the <audio> element's MediaStream once, at creation, so this is compared on
+     * every update to catch Jitsi replacing the remote track underneath it.
+     * @param {HTMLAudioElement} audioEl the jitsi audio<id> element
+     * @return {{el: HTMLAudioElement, stream: ?MediaStream, trackId: ?string}} source key
+     */
+    getAudioSourceKey(audioEl) {
+        const stream = audioEl?.srcObject || null;
+        return { el: audioEl, stream, trackId: stream?.getAudioTracks()[0]?.id || null };
+    },
+
+    /**
+     * True when the existing positional sound is bound to a different element, stream, or track than
+     * the one Jitsi is now delivering for this user, so it would play silence.
+     * @param {HTMLAudioElement} audioEl the current jitsi audio<id> element
+     * @return {boolean} whether the sound must be rebuilt
+     */
+    isSoundSourceStale(audioEl) {
+        const was = this.soundSource;
+        if (!was) return false;
+        const now = this.getAudioSourceKey(audioEl);
+        return was.el !== now.el || was.stream !== now.stream || was.trackId !== now.trackId;
+    },
+
     createAudio() {
         const { el } = this;
+        this.soundSource = this.getAudioSourceKey(document.getElementById(this.audioID));
         el.setAttribute('sound', `src: #${this.audioID}`);
 
         this.aec(el.sceneEl.audioListener);
+        watchAudioContext();
 
         // TODO: handle audio scene options
         el.setAttribute('sound', 'positional', true);
@@ -388,7 +444,15 @@ AFRAME.registerComponent('arena-user', {
 
             const jitsiAudio = document.getElementById(this.audioID);
             if (jitsiAudio) {
-                const { sound } = el.components;
+                let { sound } = el.components;
+                if (sound && this.isSoundSourceStale(jitsiAudio)) {
+                    // Jitsi re-delivered this user's audio as a new track/stream (e.g. after a
+                    // renegotiation when another participant leaves), or the jitsiId changed. The old
+                    // MediaStreamAudioSourceNode now plays silence while video carries on, so rebuild.
+                    console.info(`arena-user: rebinding positional audio for ${this.idTag}, remote audio changed`);
+                    el.removeAttribute('sound');
+                    sound = null;
+                }
                 if (!this.distReached && !sound) {
                     this.createAudio();
                 }
