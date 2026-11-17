@@ -343,6 +343,9 @@ window.addEventListener('onauth', async (e) => {
     JSONEditor.defaults.options.object_layout = 'normal';
     JSONEditor.defaults.options.show_errors = 'interaction';
     JSONEditor.defaults.options.ajax = true;
+    // Resolve schema $refs against build/schemas/ rather than the page directory, so the
+    // schemas can use plain sibling-relative refs that external validators also accept.
+    JSONEditor.defaults.options.ajaxBase = 'schemas/';
     JSONEditor.defaults.options.case_sensitive_property_search = false;
 
     // show new scene modal

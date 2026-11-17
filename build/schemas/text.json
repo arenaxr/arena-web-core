@@ -3,7 +3,7 @@
     "description": "Display text.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>A-Frame Text</a>.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#properties"
+            "$ref": "definitions-arena-object.json"
         },
         {
             "properties": {
@@ -141,7 +141,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#properties"
+                            "$ref": "definitions-entity.json"
                         }
                     ],
                     "title": "Text Data",

@@ -3,7 +3,7 @@
     "description": "Draw a line.",
     "allOf": [
         {
-            "$ref": "./schemas/definitions-arena-object.json#properties"
+            "$ref": "definitions-arena-object.json"
         },
         {
             "properties": {
@@ -28,7 +28,7 @@
                                     "title": "vertex B (end)",
                                     "description": "End coordinate.",
                                     "format": "grid",
-                                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
+                                    "$ref": "definitions-common.json#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -47,7 +47,7 @@
                                     "title": "vertex A (start)",
                                     "description": "Start point coordinate.",
                                     "format": "grid",
-                                    "$ref": "./schemas/definitions-common.json#definitions/vector3",
+                                    "$ref": "definitions-common.json#/definitions/vector3",
                                     "default": {
                                         "x": 0,
                                         "y": 0.5,
@@ -63,7 +63,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-entity.json#properties"
+                            "$ref": "definitions-entity.json"
                         }
                     ],
                     "title": "Line Data",
