@@ -9,6 +9,9 @@ Orientation for agents (and humans) working in this repo. Detailed docs live in 
 ## Conventions & development rules
 - [CONTRIBUTING.md](CONTRIBUTING.md) — mandatory rules for all contributors, **including agents**: MQTT topic construction, A-Frame component conventions, and development rules.
 
+## Verifying a change
+- **There are no unit tests in this repo.** The only automated check on a pull request is the Parcel build: [.github/workflows/build.yaml](.github/workflows/build.yaml). Reproduce it with `npm ci && npm run build-ci` — see [CONTRIBUTING.md](CONTRIBUTING.md#build--local-verification). Anything beyond a clean build has to be checked by hand in a browser.
+
 ## Release history
 - [CHANGELOG.md](CHANGELOG.md) — generated release history (release-please; Conventional Commits).
 
